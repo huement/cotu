@@ -1,0 +1,230 @@
+[gd_scene format=3 uid="uid://ci5c4s13iefpr"]
+
+[ext_resource type="Script" uid="uid://gu3lsi7vt4st" path="res://scenes/world/main.gd" id="1_wbupf"]
+[ext_resource type="PackedScene" uid="uid://fib5upfjwmcx" path="res://scenes/player/player.tscn" id="2_7tdlr"]
+[ext_resource type="Resource" uid="uid://bpsbwt82uliw4" path="res://resources/movement_config.tres" id="3_tt8nk"]
+[ext_resource type="MeshLibrary" uid="uid://bxgdx6gy414a7" path="res://resources/mesh_library/simple_mesh_library.tres" id="4_6r0uj"]
+[ext_resource type="Script" uid="uid://c7krl4pwfdtn5" path="res://scenes/overlays/minimap_overlay.gd" id="5_1h5vq"]
+[ext_resource type="Script" uid="uid://1vfbj4weoq0b" path="res://scenes/world/modules/world_overlay_module.gd" id="6_75n3u"]
+[ext_resource type="Script" uid="uid://e0fqu3puk2jv" path="res://scenes/world/modules/world_scene_initializer_module.gd" id="7_tk6wu"]
+[ext_resource type="Script" uid="uid://b8gr54moprd5" path="res://scenes/world/modules/world_grid_module.gd" id="8_aln2x"]
+[ext_resource type="Script" uid="uid://03i62ypeorjw" path="res://scenes/world/modules/world_encounter_module.gd" id="9_obv6f"]
+[ext_resource type="Script" uid="uid://cbe2icf2qc83t" path="res://scenes/world/modules/world_run_outcome_module.gd" id="10_q8k5u"]
+[ext_resource type="Script" uid="uid://jtgb5hi51epy" path="res://scenes/world/modules/world_ui_module.gd" id="11_jv3ce"]
+[ext_resource type="Script" uid="uid://cff7ym466bd6l" path="res://scenes/world/modules/world_state_orchestrator.gd" id="12_4j8kp"]
+[ext_resource type="Script" uid="uid://ctchp8tibfuv1" path="res://scenes/world/modules/world_turn_orchestrator.gd" id="13_p7vna"]
+[ext_resource type="Script" uid="uid://b30rxinare8sx" path="res://scenes/world/modules/world_composition_orchestrator.gd" id="14_wk2mb"]
+[ext_resource type="Script" uid="uid://cngjknn253s42" path="res://scenes/world/modules/world_policy_orchestrator.gd" id="15_8m9uz"]
+[ext_resource type="Script" uid="uid://b36u64mcxmwrh" path="res://scenes/world/modules/world_input_orchestrator.gd" id="16_6f2hc"]
+[ext_resource type="Script" uid="uid://dpspbqqs4t1ms" path="res://scenes/world/modules/world_movement_orchestrator.gd" id="17_4a2zs"]
+[ext_resource type="Script" uid="uid://b3wuosfy8gqph" path="res://scenes/world/modules/world_context_orchestrator.gd" id="18_9d4lw"]
+[ext_resource type="Script" uid="uid://y417gem2mn6i" path="res://scenes/world/modules/world_event_bus.gd" id="19_1n8yf"]
+[ext_resource type="Script" uid="uid://rc3uc1iyffmw" path="res://scenes/world/modules/world_event_router_orchestrator.gd" id="20_v0w2m"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/enemy.tscn" id="21_2g9jf"]
+[ext_resource type="Script" uid="uid://dns2f6u0brbej" path="res://components/world_pickup.gd" id="22_5md0q"]
+[ext_resource type="Script" uid="uid://clxxm0ljl5rnq" path="res://components/world_exit.gd" id="23_lh832"]
+
+[sub_resource type="Resource" id="27_potion_item"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_pickup_marker"]
+radius = 0.18
+height = 0.36
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pickup_marker"]
+albedo_color = Color(0.901961, 0.705882, 0.156863, 1)
+emission_enabled = true
+emission = Color(0.901961, 0.705882, 0.156863, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_exit_marker"]
+size = Vector3(0.6, 0.2, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_exit_marker"]
+albedo_color = Color(0.196078, 0.705882, 0.333333, 1)
+emission_enabled = true
+emission = Color(0.196078, 0.705882, 0.333333, 1)
+emission_energy_multiplier = 1.5
+
+[node name="Main" type="Node3D" unique_id=1276884268]
+script = ExtResource("1_wbupf")
+show_debug_panel = true
+show_grid_coordinates_overlay = true
+failure_goal_cell = Vector2i(-3, 2)
+
+[node name="Player" parent="." unique_id=1354958968 instance=ExtResource("2_7tdlr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -3)
+camera_retreat_distance = 0.4
+debug_log_input_actions = false
+movement_config = ExtResource("3_tt8nk")
+initial_cell = Vector2i(2, 1)
+
+[node name="FloorEnemy" parent="." unique_id=29647059 instance=ExtResource("21_2g9jf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -3)
+ai_enabled = false
+initial_cell = Vector2i(10, 4)
+
+[node name="PotionPickup" type="Node3D" parent="." unique_id=11595592]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -3)
+script = ExtResource("22_5md0q")
+grid_cell = Vector2i(12, 6)
+item_data = SubResource("27_potion_item")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PotionPickup" unique_id=911111264]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, 0)
+mesh = SubResource("SphereMesh_pickup_marker")
+surface_material_override/0 = SubResource("StandardMaterial3D_pickup_marker")
+
+[node name="FloorExit" type="Node3D" parent="." unique_id=577675068]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -3)
+script = ExtResource("23_lh832")
+grid_cell = Vector2i(9, 5)
+world_y = 0.05
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FloorExit" unique_id=1813182867]
+mesh = SubResource("BoxMesh_exit_marker")
+surface_material_override/0 = SubResource("StandardMaterial3D_exit_marker")
+
+[node name="GridMap" type="GridMap" parent="." unique_id=1476284130]
+mesh_library = ExtResource("4_6r0uj")
+cell_size = Vector3(1, 1, 1)
+data = {
+"cells": PackedInt32Array(0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 11, 0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 1, 7, 0, 1, 8, 0, 1, 9, 0, 1, 10, 0, 1, 11, 0, 2, 0, 0, 2, 11, 0, 3, 0, 0, 3, 2, 0, 3, 3, 0, 3, 7, 0, 3, 8, 0, 3, 9, 0, 3, 11, 0, 4, 0, 0, 4, 2, 0, 4, 3, 0, 4, 4, 0, 4, 6, 0, 4, 7, 0, 4, 8, 0, 4, 9, 0, 4, 11, 0, 5, 0, 0, 5, 4, 0, 5, 6, 0, 5, 7, 0, 5, 8, 0, 5, 9, 0, 5, 11, 0, 6, 0, 0, 6, 2, 0, 6, 9, 0, 6, 11, 0, 7, 0, 0, 7, 4, 0, 7, 6, 0, 7, 7, 0, 7, 9, 0, 7, 11, 0, 8, 0, 0, 8, 2, 0, 8, 3, 0, 8, 4, 0, 8, 6, 0, 8, 7, 0, 8, 9, 0, 8, 11, 0, 9, 0, 0, 9, 2, 0, 9, 7, 0, 9, 9, 0, 9, 11, 0, 10, 0, 0, 10, 2, 0, 10, 7, 0, 10, 9, 0, 10, 11, 0, 11, 0, 0, 11, 11, 0, 12, 0, 0, 12, 1, 0, 12, 2, 0, 12, 7, 0, 12, 8, 0, 12, 9, 0, 12, 10, 0, 12, 11, 0, 13, 0, 0, 13, 1, 0, 13, 2, 0, 13, 3, 0, 13, 4, 0, 13, 5, 0, 13, 6, 0, 13, 7, 0, 13, 8, 0, 13, 9, 0, 13, 10, 0, 13, 11, 0)
+}
+metadata/_editor_floor_ = Vector3(0, 0, 0)
+
+[node name="OverlayModule" type="Node" parent="." unique_id=2044801561]
+script = ExtResource("6_75n3u")
+
+[node name="SceneInitializerModule" type="Node" parent="." unique_id=1430462751]
+script = ExtResource("7_tk6wu")
+
+[node name="GridModule" type="Node" parent="." unique_id=1945126429]
+script = ExtResource("8_aln2x")
+
+[node name="EncounterModule" type="Node" parent="." unique_id=904532739]
+script = ExtResource("9_obv6f")
+
+[node name="RunOutcomeModule" type="Node" parent="." unique_id=1100726258]
+script = ExtResource("10_q8k5u")
+
+[node name="UIModule" type="Node" parent="." unique_id=1447534636]
+script = ExtResource("11_jv3ce")
+
+[node name="StateOrchestrator" type="Node" parent="." unique_id=1756513716]
+script = ExtResource("12_4j8kp")
+
+[node name="TurnOrchestrator" type="Node" parent="." unique_id=232148457]
+script = ExtResource("13_p7vna")
+
+[node name="CompositionOrchestrator" type="Node" parent="." unique_id=162870882]
+script = ExtResource("14_wk2mb")
+
+[node name="PolicyOrchestrator" type="Node" parent="." unique_id=1742826120]
+script = ExtResource("15_8m9uz")
+
+[node name="InputOrchestrator" type="Node" parent="." unique_id=492702643]
+script = ExtResource("16_6f2hc")
+
+[node name="MovementOrchestrator" type="Node" parent="." unique_id=1321821013]
+script = ExtResource("17_4a2zs")
+
+[node name="ContextOrchestrator" type="Node" parent="." unique_id=934108474]
+script = ExtResource("18_9d4lw")
+
+[node name="EventBus" type="Node" parent="." unique_id=1685434463]
+script = ExtResource("19_1n8yf")
+
+[node name="EventRouterOrchestrator" type="Node" parent="." unique_id=1166162658]
+script = ExtResource("20_v0w2m")
+
+[node name="AudioFootstep" type="AudioStreamPlayer" parent="." unique_id=1489583776]
+
+[node name="AudioCombatHit" type="AudioStreamPlayer" parent="." unique_id=1253202549]
+
+[node name="AudioPickup" type="AudioStreamPlayer" parent="." unique_id=749166422]
+
+[node name="AudioDeath" type="AudioStreamPlayer" parent="." unique_id=1103540765]
+
+[node name="OverlayLayer" type="CanvasLayer" parent="." unique_id=189560015]
+
+[node name="OverlayMount" type="Control" parent="OverlayLayer" unique_id=178000111]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MinimapOverlay" type="Control" parent="OverlayLayer" unique_id=211122344]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1016.0
+offset_top = 56.0
+offset_right = 1264.0
+offset_bottom = 304.0
+mouse_filter = 2
+script = ExtResource("5_1h5vq")
+
+[node name="GridCoordsLabel" type="Label" parent="OverlayLayer/MinimapOverlay" unique_id=211122343]
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 32.0
+grow_horizontal = 2
+text = "Grid X: 0  Y: 0"
+horizontal_alignment = 2
+
+[node name="DebugPanel" type="PanelContainer" parent="OverlayLayer" unique_id=176999220]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 290.0
+offset_bottom = 228.0
+
+[node name="Margin" type="MarginContainer" parent="OverlayLayer/DebugPanel" unique_id=211122334]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="OverlayLayer/DebugPanel/Margin" unique_id=211122335]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122340]
+layout_mode = 2
+text = "Scene Shell"
+
+[node name="Subtitle" type="Label" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122341]
+layout_mode = 2
+text = "Day 11 debug controls"
+
+[node name="Divider" type="HSeparator" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122342]
+layout_mode = 2
+
+[node name="OpenInventory" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122336]
+layout_mode = 2
+text = "Open Inventory"
+
+[node name="OpenCombat" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122337]
+layout_mode = 2
+text = "Open Combat"
+
+[node name="OpenTown" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122338]
+layout_mode = 2
+text = "Open Town"
+
+[node name="ToggleMinimap" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122345]
+layout_mode = 2
+text = "Toggle Minimap"
+
+[node name="CloseOverlay" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122339]
+layout_mode = 2
+disabled = true
+text = "Close Overlay"

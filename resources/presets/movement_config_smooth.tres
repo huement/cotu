@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MovementConfig" format=3]
+
+[ext_resource type="Script" uid="uid://djfta4awucv1" path="res://resources/movement_config.gd" id="1_cddi4"]
+
+[resource]
+script = ExtResource("1_cddi4")
+cell_size = 1.0
+smooth_mode = true
+step_duration = 0.16
+turn_duration = 0.08
+blocked_feedback_enabled = true
+blocked_bump_distance = 0.16
+blocked_bump_duration = 0.08
+metadata/_custom_type_script = "uid://djfta4awucv1"

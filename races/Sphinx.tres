@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CatBreed" format=3 uid="uid://bmh74gwtvcve2"]
+
+[ext_resource type="Script" uid="uid://ddc76xpk7h7l8" path="res://Scripts/Resources/CatBreed.gd" id="1_dfb1o"]
+
+[resource]
+script = ExtResource("1_dfb1o")
+breed_name = "Sphinx"
+base_strength = 25
+base_agility = 15
+base_constitution = 25
+disease_resistance = 1.0
+metadata/_custom_type_script = "uid://ddc76xpk7h7l8"

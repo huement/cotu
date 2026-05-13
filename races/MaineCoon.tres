@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CatBreed" format=3 uid="uid://bn2e4neypap4d"]
+
+[ext_resource type="Script" uid="uid://ddc76xpk7h7l8" path="res://Scripts/Resources/CatBreed.gd" id="1_5as34"]
+
+[resource]
+script = ExtResource("1_5as34")
+breed_name = "MaineCoon"
+base_strength = 30
+base_constitution = 20
+metadata/_custom_type_script = "uid://ddc76xpk7h7l8"

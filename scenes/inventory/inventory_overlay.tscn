@@ -1,0 +1,82 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/inventory/inventory_overlay.gd" id="1"]
+
+[node name="InventoryOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="InventoryDimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.58)
+
+[node name="InventoryCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InventoryPanel" type="PanelContainer" parent="InventoryCenter"]
+custom_minimum_size = Vector2(440, 300)
+layout_mode = 2
+
+[node name="InventoryMargin" type="MarginContainer" parent="InventoryCenter/InventoryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="InventoryVBox" type="VBoxContainer" parent="InventoryCenter/InventoryPanel/InventoryMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="InventoryTitleLabel" type="Label" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
+layout_mode = 2
+unique_name_in_owner = true
+text = "Inventory"
+
+[node name="InventoryPlayerHPLabel" type="Label" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
+layout_mode = 2
+unique_name_in_owner = true
+text = "Player HP: --"
+
+[node name="InventoryItemList" type="ItemList" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+unique_name_in_owner = true
+select_mode = 0
+
+[node name="InventoryStatusLabel" type="Label" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
+layout_mode = 2
+unique_name_in_owner = true
+text = "Inventory is empty"
+
+[node name="InventoryActionsRow" type="HBoxContainer" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="InventoryUseButton" type="Button" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox/InventoryActionsRow"]
+layout_mode = 2
+unique_name_in_owner = true
+size_flags_horizontal = 3
+text = "Use Selected"
+
+[node name="InventoryCloseButton" type="Button" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox/InventoryActionsRow"]
+layout_mode = 2
+unique_name_in_owner = true
+size_flags_horizontal = 3
+text = "Return To Exploration"
