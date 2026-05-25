@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://bl3o7618oph6k"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_ifj24"]
+
+[resource]
+script = ExtResource("1_ifj24")
+breed_name = "Abyssinian"
+description = "Like their distant desert ancestors, Abyssinians are fast, smart, and highly personable. They walk on their hind feet and are beautiful creatures with a full, ticked mane of hair covering their bodies. Abyssinians are also intelligent and dexterous. Throughout their evolution, they have relied on their sleek body styling and speed more than actual physical strength, moving their bodies with a grace unknown to virtually any other breed. RESISTANCES: Quick reflexes help them dodge missiles and spells."
+base_strength = 7
+base_intelligence = 10
+base_piety = 7
+base_vitality = 7
+base_dexterity = 10
+base_speed = 12
+base_personality = 10

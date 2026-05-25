@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://qpkerc4oa8vd"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_3f810"]
+
+[resource]
+script = ExtResource("1_3f810")
+breed_name = "Liger"
+description = "Very magical and mysterious in nature, the Liger's exact origins are entirely unknown. Those skilled in mythology have gone so far as to speculate the patchy-furred Liger may even be of alien origin! Ligers are extremely intelligent and strong creatures, and have a captivating personality sure to charm the likes of most they encounter. RESISTANCES: The Liger's magical nature gives it resistance to magical spells. Its unique coat provides resistance to cold."
+base_strength = 10
+base_intelligence = 10
+base_piety = 6
+base_vitality = 10
+base_dexterity = 7
+base_speed = 7
+base_personality = 9

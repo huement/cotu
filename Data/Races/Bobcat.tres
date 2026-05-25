@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://c0libfu8nousq"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_os8fp"]
+
+[resource]
+script = ExtResource("1_os8fp")
+breed_name = "Bobcat"
+description = "Coming from a long line of forest and barn-dwelling folk, Bobcats have a taste for any adventure. They are large beings, but display a remarkable amount of strength. Their hearty stance and high vitality make them a natural for combat-related professions. Also pious creatures, Bobcats make great Soulwrights. RESISTANCES: The Bobcats' robust bodies provide poison resistance, while their heredity provides for magic spell protection."
+base_strength = 11
+base_intelligence = 6
+base_piety = 10
+base_vitality = 12
+base_dexterity = 7
+base_speed = 7
+base_personality = 7

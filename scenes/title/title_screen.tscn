@@ -35,7 +35,6 @@ mouse_filter = 2
 color = Color(0.094, 0.149, 0.204, 0.78)
 
 [node name="Center" type="CenterContainer" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -105,6 +104,7 @@ theme_override_colors/font_color = Color(0.8745098, 0.13333334, 0.32156864, 1)
 text = "Quit"
 
 [node name="CatBuilder" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

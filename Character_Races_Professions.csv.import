@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://c3xxfvpo318cg"
+
+[deps]
+
+files=["res://Character_Races_Professions.Name.translation", "res://Character_Races_Professions.Based On.translation", "res://Character_Races_Professions.STR.translation", "res://Character_Races_Professions.INT.translation", "res://Character_Races_Professions.PIE.translation", "res://Character_Races_Professions.VIT.translation", "res://Character_Races_Professions.DEX.translation", "res://Character_Races_Professions.SPD.translation", "res://Character_Races_Professions.PER.translation", "res://Character_Races_Professions.Spellbook Type.translation", "res://Character_Races_Professions.Spell Level.translation", "res://Character_Races_Professions.Weaponry.translation", "res://Character_Races_Professions.Physical.translation", "res://Character_Races_Professions.Academia.translation", "res://Character_Races_Professions.Primary Features & Mechanics.translation"]
+
+source_file="res://Character_Races_Professions.csv"
+dest_files=["res://Character_Races_Professions.Name.translation", "res://Character_Races_Professions.Based On.translation", "res://Character_Races_Professions.STR.translation", "res://Character_Races_Professions.INT.translation", "res://Character_Races_Professions.PIE.translation", "res://Character_Races_Professions.VIT.translation", "res://Character_Races_Professions.DEX.translation", "res://Character_Races_Professions.SPD.translation", "res://Character_Races_Professions.PER.translation", "res://Character_Races_Professions.Spellbook Type.translation", "res://Character_Races_Professions.Spell Level.translation", "res://Character_Races_Professions.Weaponry.translation", "res://Character_Races_Professions.Physical.translation", "res://Character_Races_Professions.Academia.translation", "res://Character_Races_Professions.Primary Features & Mechanics.translation"]
+
+[params]
+
+compress=true
+delimiter=0

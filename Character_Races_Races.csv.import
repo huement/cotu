@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bmvhue01er0s2"
+
+[deps]
+
+files=["res://Character_Races_Races.Race Name.translation", "res://Character_Races_Races.Based On.translation", "res://Character_Races_Races.Description.translation", "res://Character_Races_Races.STR.translation", "res://Character_Races_Races.INT.translation", "res://Character_Races_Races.PIE.translation", "res://Character_Races_Races.VIT.translation", "res://Character_Races_Races.DEX.translation", "res://Character_Races_Races.SPD.translation", "res://Character_Races_Races.PER.translation"]
+
+source_file="res://Character_Races_Races.csv"
+dest_files=["res://Character_Races_Races.Race Name.translation", "res://Character_Races_Races.Based On.translation", "res://Character_Races_Races.Description.translation", "res://Character_Races_Races.STR.translation", "res://Character_Races_Races.INT.translation", "res://Character_Races_Races.PIE.translation", "res://Character_Races_Races.VIT.translation", "res://Character_Races_Races.DEX.translation", "res://Character_Races_Races.SPD.translation", "res://Character_Races_Races.PER.translation"]
+
+[params]
+
+compress=true
+delimiter=0

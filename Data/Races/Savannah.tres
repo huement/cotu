@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://bclpyxijvafyw"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_6gxri"]
+
+[resource]
+script = ExtResource("1_6gxri")
+breed_name = "Savannah"
+description = "A mixture of blood between domestic felines and wild servals created this wondrous breed with incredibly unique abilities. While remaining private, the Savannah occasionally ventures out and will accompany another group for reasons of its own. It is strong, dexterous, and hearty, and can make a great Ranger, Thief, or Fighter. The Savannah also has a limited ability to unleash a fierce hiss, breathing acid-like spit upon its opponents! RESISTANCES: Their exotic ancestry gives Savannahs resistance to acid and mental spells."
+base_strength = 10
+base_intelligence = 7
+base_piety = 6
+base_vitality = 12
+base_dexterity = 10
+base_personality = 6

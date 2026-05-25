@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://dxpyegtaa2qqp"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_jjtqq"]
+
+[resource]
+script = ExtResource("1_jjtqq")
+profession_name = "Voidhand"
+classic_counterpart = "Monk"
+req_strength = 13
+req_intelligence = 8
+req_piety = 13
+req_vitality = 0
+req_speed = 13
+req_personality = 8
+spellbook_type = "Psynic"
+level_spells_unlock = 3

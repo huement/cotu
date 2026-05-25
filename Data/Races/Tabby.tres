@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://ckxmj7ryqelfx"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_mimlm"]
+
+[resource]
+script = ExtResource("1_mimlm")
+breed_name = "Tabby"
+description = "Tabbies are the feline breed to which all others in Cat-Wizardry are compared. Perfectly balanced in its statistics, having no particular strengths and no decided weakness, the Tabby serves as a stable and dependable creature regardless of the profession a character eventually enters. RESISTANCES: Although a Tabby has no natural resistances, it has no particular shortcomings, either."
+base_strength = 9
+base_vitality = 9
+base_dexterity = 9

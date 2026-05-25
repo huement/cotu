@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://bg3p7fta8jbdc"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_2d0pq"]
+
+[resource]
+script = ExtResource("1_2d0pq")
+breed_name = "Ocelot"
+description = "In the underground tunnels and cozy nooks, one might just find whole groups of Ocelots in their natural habitat. Typically keeping to themselves, Ocelots are sturdy, strong, and agile creatures; their small, short-legged stance can easily fool opponents in combat. Ocelots are also extremely pious individuals whose zest for learning is virtually unequalled by any other breed. RESISTANCES: Because of their high piety and ancestry, Ocelots possess a resistance to magic spells."
+base_strength = 10
+base_intelligence = 7
+base_piety = 13
+base_vitality = 10
+base_speed = 6
+base_personality = 6
