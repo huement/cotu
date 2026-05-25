@@ -1,6 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=3 format=3 uid="uid://camp2wonylrfe"]
 
-[ext_resource type="Script" path="res://scenes/title/title_screen.gd" id="1"]
+[ext_resource type="Script" uid="uid://cpehjuqhvfw1p" path="res://scenes/title/title_screen.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c1flv17p0ydwg" path="res://ui/portrait.png" id="2_ynr0n"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -22,16 +23,19 @@ color = Color(0.055, 0.086, 0.125, 1)
 
 [node name="BackdropBand" type="ColorRect" parent="."]
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = -1
 anchor_top = 0.2
 anchor_right = 1.0
 anchor_bottom = 0.78
+offset_top = -142.0
+offset_bottom = 157.40002
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.094, 0.149, 0.204, 0.78)
 
 [node name="Center" type="CenterContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -56,28 +60,194 @@ theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.21568628, 1, 0.8117647, 1)
 theme_override_font_sizes/font_size = 44
+text = "Space Cat Wizards"
 horizontal_alignment = 1
-text = "BLOBBER TEMPLATE"
 
 [node name="Subtitle" type="Label" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(500, 30)
 layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
+text = "Create a Party To Get Started or Load Saved Game"
 horizontal_alignment = 1
 autowrap_mode = 3
-text = "Grid crawler foundation with state-driven flow."
 
 [node name="Divider" type="HSeparator" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 
 [node name="Hint" type="Label" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.99215686, 0.9882353, 0, 1)
+text = "You must add at least 1 member to begin.
+Also try not to die."
 horizontal_alignment = 1
-text = "Start a run, then trigger victory/defeat from game logic."
 
 [node name="StartButton" type="Button" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Start Game"
 
+[node name="CreateCharacter" type="Button" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "New Cat Builder"
+
+[node name="AddCharacter" type="Button" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Party Builder"
+
+[node name="LoadSave" type="Button" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Load Saved Game"
+
 [node name="QuitButton" type="Button" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8745098, 0.13333334, 0.32156864, 1)
 text = "Quit"
+
+[node name="CatBuilder" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CatBuilder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CatBuilder/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="LeftColumn_Identity" type="VBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="PortraitFrame" type="TextureRect" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity"]
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+size_flags_horizontal = 0
+texture = ExtResource("2_ynr0n")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GivenNameEdit" type="LineEdit" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.21568628, 1, 0.8117647, 1)
+placeholder_text = "ENTER GIVEN NAME..."
+
+[node name="VitalsGrid" type="GridContainer" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="HPLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/VitalsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8745098, 0.13333334, 0.32156864, 1)
+text = "HP"
+
+[node name="HPValue" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/VitalsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.21568628, 1, 0.8117647, 1)
+text = "100/100"
+
+[node name="EXPLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/VitalsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
+text = "EXP"
+
+[node name="EXPValue" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/VitalsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.21568628, 1, 0.8117647, 1)
+text = "00/400"
+
+[node name="RightColumn_Stats" type="VBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MetaVBox" type="VBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats"]
+layout_mode = 2
+
+[node name="GenderRaceLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats/MetaVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Gender - Race"
+
+[node name="ClassLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats/MetaVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
+text = "RACE"
+
+[node name="LevelLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats/MetaVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "LVL - 1"
+
+[node name="Spacer" type="Control" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StatsContainer" type="VBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SelectionPopup" type="PanelContainer" parent="CatBuilder"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 200)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="CatBuilder/SelectionPopup"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="CatBuilder/SelectionPopup/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PopupTitle" type="Label" parent="CatBuilder/SelectionPopup/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SELECT CHARACTER PROFESSION"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CatBuilder/SelectionPopup/Margin/VBox"]
+layout_mode = 2
+
+[node name="ChoicesGrid" type="GridContainer" parent="CatBuilder/SelectionPopup/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 2
+
+[connection signal="pressed" from="Center/Panel/Margin/VBox/CreateCharacter" to="." method="_on_create_character_pressed"]

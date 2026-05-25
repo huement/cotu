@@ -1,6 +1,8 @@
-[gd_scene format=3]
+[gd_scene load_steps=4 format=3 uid="uid://3bcvkxsc6b3g"]
 
-[ext_resource type="Script" path="res://scenes/inventory/inventory_overlay.gd" id="1"]
+[ext_resource type="Script" uid="uid://b2ojx7flrophx" path="res://scenes/inventory/inventory_overlay.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://17frqf3eefn7" path="res://ui/menu-bg.png" id="2_opy4j"]
+[ext_resource type="Texture2D" uid="uid://wl53i5irtv7u" path="res://ui/green-poly.png" id="3_8jiem"]
 
 [node name="InventoryOverlay" type="Control"]
 layout_mode = 3
@@ -11,15 +13,42 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="InventoryDimmer" type="ColorRect" parent="."]
+[node name="BackgroundGrid" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1281.0
+offset_bottom = 722.0
+texture = ExtResource("2_opy4j")
+stretch_mode = 1
+
+[node name="TopAccent" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -75.5
+offset_top = -9.0
+offset_right = 75.5
+offset_bottom = 31.0
 grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0.58)
+texture = ExtResource("3_8jiem")
+expand_mode = 1
+
+[node name="BottomAccent" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.97200006
+anchor_right = 0.5
+anchor_bottom = 0.97200006
+offset_left = -74.0
+offset_top = -10.840027
+offset_right = 77.0
+offset_bottom = 29.159973
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("3_8jiem")
+expand_mode = 1
+flip_v = true
 
 [node name="InventoryCenter" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -45,24 +74,23 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="InventoryTitleLabel" type="Label" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
-layout_mode = 2
 unique_name_in_owner = true
+layout_mode = 2
 text = "Inventory"
 
 [node name="InventoryPlayerHPLabel" type="Label" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
-layout_mode = 2
 unique_name_in_owner = true
+layout_mode = 2
 text = "Player HP: --"
 
 [node name="InventoryItemList" type="ItemList" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
-unique_name_in_owner = true
-select_mode = 0
 
 [node name="InventoryStatusLabel" type="Label" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
-layout_mode = 2
 unique_name_in_owner = true
+layout_mode = 2
 text = "Inventory is empty"
 
 [node name="InventoryActionsRow" type="HBoxContainer" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox"]
@@ -70,13 +98,13 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="InventoryUseButton" type="Button" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox/InventoryActionsRow"]
-layout_mode = 2
 unique_name_in_owner = true
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Use Selected"
 
 [node name="InventoryCloseButton" type="Button" parent="InventoryCenter/InventoryPanel/InventoryMargin/InventoryVBox/InventoryActionsRow"]
-layout_mode = 2
 unique_name_in_owner = true
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Return To Exploration"

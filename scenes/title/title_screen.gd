@@ -38,3 +38,7 @@ func _start_game() -> void:
 	if gameplay_scene_path.is_empty():
 		return
 	get_tree().change_scene_to_file(gameplay_scene_path)
+
+
+func _on_create_character_pressed() -> void:
+	pass # Replace with function body.
