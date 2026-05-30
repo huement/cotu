@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://dg40wtx21a5ja"]
+
+[ext_resource type="Texture2D" uid="uid://dvypeqcw5lflm" path="res://ui/cat_icon.svg" id="1_q646x"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_32ojy"]
+content_margin_left = 5.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.39215687, 0.39607844, 0.9647059, 1)
+border_width_bottom = 4
+border_color = Color(0.21565193, 0.1453444, 0.6914356, 1)
+border_blend = true
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+
+[node name="PopupButton" type="Button"]
+offset_right = 64.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(0.21568628, 1, 0.8117647, 1)
+theme_override_colors/font_pressed_color = Color(0, 0.83333325, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.99215686, 0.9882353, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_32ojy")
+icon = ExtResource("1_q646x")

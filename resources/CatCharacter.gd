@@ -7,6 +7,7 @@ class_name CatCharacter
 @export var breed: CatBreed
 @export var profession: ProfessionData
 @export var level: int = 1
+@export var portrait_path: String = ""
 
 @export_group("Core Attributes")
 @export var strength: int = 8

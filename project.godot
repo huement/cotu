@@ -25,6 +25,10 @@ window/stretch/mode="viewport"
 
 enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
+[gui]
+
+theme/custom_font="uid://c6x5nfgwo0gbi"
+
 [input]
 
 move_forward={

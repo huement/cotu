@@ -1,0 +1,6 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://bcnlquab5m0b7"]
+
+[ext_resource type="FontFile" uid="uid://c6x5nfgwo0gbi" path="res://ui/fonts/AvenirNextLTPro-Regular.otf" id="1_kncyg"]
+
+[resource]
+default_font = ExtResource("1_kncyg")

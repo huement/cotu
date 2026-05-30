@@ -1,15 +1,35 @@
 extends Control
 
+# Preload your breed row template scene
+const BREED_ITEM_SCENE = preload("res://scenes/title/BreedItem.tscn")
+const PROFESSION_ITEM_SCENE = preload("res://scenes/title/ProfessionItem.tscn")
+
+# Info boxes
+@onready var breed_popup: PanelContainer = %BreedInfoPopup
+@onready var list_container: VBoxContainer = %BreedListContainer
+@onready var profession_popup: PanelContainer = %ProfessionInfoPopup
+@onready var profession_list_container: VBoxContainer = %ProfessionListContainer
+
 # Screen Component Groupings
 @onready var center_menu: CenterContainer = $Center
 @onready var cat_builder: Control = $CatBuilder
+@onready var builder_sheet: MarginContainer = $CatBuilder/MarginContainer
 
 # UI Scene Unique Node Links
 @onready var selection_popup: PanelContainer = %SelectionPopup
 @onready var popup_title: Label = %PopupTitle
 @onready var choices_grid: GridContainer = %ChoicesGrid
+@export var breed_button_scene: PackedScene
+@export var profession_button_scene: PackedScene
 
 # Left & Right Character Sheet View Nodes
+@onready var portrait_frame: TextureRect = $CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/PortraitVBox/PortraitFrame
+@onready var prev_portrait_btn: Button = $CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/PortraitVBox/PortraitNavHBox/PrevPortrait
+@onready var next_portrait_btn: Button = $CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/PortraitVBox/PortraitNavHBox/NextPortrait
+@onready var builder_back_button: Button = $CatBuilder/BuilderBackButton
+@onready var breed_info_button: Button = $CatBuilder/BuilderBreedInfoButton
+@onready var profession_info_button: Button = $CatBuilder/ProfessionInfoButton
+
 @onready var given_name_edit: LineEdit = %GivenNameEdit
 @onready var hp_value: Label = %HPValue
 @onready var exp_value: Label = %EXPValue
@@ -17,22 +37,29 @@ extends Control
 @onready var class_label: Label = %ClassLabel
 @onready var level_label: Label = %LevelLabel
 @onready var stats_container: VBoxContainer = %StatsContainer
+@onready var hint_label: Label = $Center/Panel/Margin/VBox/Hint
 
 # Target the Party Builder button from your scene tree layout
 @onready var party_builder_button: Button = $Center/Panel/Margin/VBox/AddCharacter
 
+# LFG
+@onready var start_button: Button = $Center/Panel/Margin/VBox/StartButton
+
 # Configuration Paths
 const CLASSES_DIR: String = "res://Data/Classes/"
 const BREEDS_DIR: String = "res://Data/Races/"
+const PORTRAITS_DIR: String = "res://Data/Portraits/"
 
 # In-Memory Storage Arrays
 var available_classes: Array[ProfessionData] = []
 var available_breeds: Array[CatBreed] = []
+var available_portraits: Array[String] = []
 
 # Character Builder Temporary Allocation State
 var current_building_cat: CatCharacter = null
 var selected_breed: CatBreed = null
 var selected_class: ProfessionData = null
+var current_portrait_index: int = 0
 
 var bonus_pool: int = 0
 var allocated_stats: Dictionary = {
@@ -53,16 +80,33 @@ func _ready() -> void:
 	cat_builder.hide()
 	selection_popup.hide()
 	
-	# Connect your party builder button programmatically to avoid scene corruption
 	if party_builder_button:
 		party_builder_button.pressed.connect(_on_party_builder_pressed)
 		
+	if prev_portrait_btn:
+		prev_portrait_btn.pressed.connect(_on_prev_portrait_pressed)
+	if next_portrait_btn:
+		next_portrait_btn.pressed.connect(_on_next_portrait_pressed)
+		
+	if builder_back_button:
+		builder_back_button.pressed.connect(_on_builder_back_pressed)
+		
+	if breed_info_button:
+		breed_info_button.pressed.connect(_on_builder_breed_info_pressed)
+		
+	if profession_info_button:
+		profession_info_button.pressed.connect(_on_builder_profession_info_pressed)
+	
+	if start_button:
+		start_button.pressed.connect(_on_start_game_pressed)
+		
 	_load_resources_from_disk()
 
-## Scans your filesystem for compiled .tres spreadsheet data files
+## Scans your filesystem for compiled .tres spreadsheet data files and portrait PNGs
 func _load_resources_from_disk() -> void:
 	available_classes.clear()
 	available_breeds.clear()
+	available_portraits.clear()
 
 	# Load Professions
 	if DirAccess.dir_exists_absolute(CLASSES_DIR):
@@ -86,21 +130,67 @@ func _load_resources_from_disk() -> void:
 				if res: available_breeds.append(res)
 			file_name = dir.get_next()
 
+	# Load Portraits (Supports both local assets and production builds)
+	if DirAccess.dir_exists_absolute(PORTRAITS_DIR):
+		var dir := DirAccess.open(PORTRAITS_DIR)
+		dir.list_dir_begin()
+		var file_name := dir.get_next()
+		while file_name != "":
+			if not dir.current_is_dir() and (file_name.ends_with(".png") or file_name.ends_with(".png.remap")):
+				var base_file: String = file_name.replace(".remap", "")
+				var full_path: String = PORTRAITS_DIR + base_file
+				if not available_portraits.has(full_path):
+					available_portraits.append(full_path)
+			file_name = dir.get_next()
+			
+	print("Asset Loading Complete: Found ", available_breeds.size(), " Breeds, ", available_classes.size(), " Classes, and ", available_portraits.size(), " Custom Portraits.")
+
 func _on_create_character_pressed() -> void:
 	center_menu.hide()
 	cat_builder.show()
+	builder_sheet.show()
+	
+	# Forcefully restore visibility to all builder side-controls 
+	# so they are never accidentally left invisible by the error checker!
+	if builder_back_button: builder_back_button.show()
+	if breed_info_button: breed_info_button.show()
+	if profession_info_button: profession_info_button.show()
+	
 	start_character_generation()
+
+# =============================================================================
+# 🖼️ PORTRAIT VIEWER CYCLE NAVIGATION
+# =============================================================================
+
+func _on_prev_portrait_pressed() -> void:
+	if available_portraits.size() == 0: return
+	current_portrait_index = (current_portrait_index - 1 + available_portraits.size()) % available_portraits.size()
+	_update_portrait_display()
+
+func _on_next_portrait_pressed() -> void:
+	if available_portraits.size() == 0: return
+	current_portrait_index = (current_portrait_index + 1) % available_portraits.size()
+	_update_portrait_display()
+
+func _update_portrait_display() -> void:
+	if available_portraits.size() > 0 and current_portrait_index < available_portraits.size():
+		var texture_resource = load(available_portraits[current_portrait_index])
+		if texture_resource:
+			portrait_frame.texture = texture_resource
 
 # =============================================================================
 # ⚔️ PARTY BUILDER ROSTER SELECTION LOOP
 # =============================================================================
 
 func _on_party_builder_pressed() -> void:
-	# Load every legitimate cat saved inside user:// persistently
 	var saved_pool: Array[CatCharacter] = RosterSaveSystem.load_all_characters_from_pool()
 	
+	center_menu.hide()
+	cat_builder.show()
+	builder_sheet.hide()
+	builder_back_button.hide() # Hide floating cancel button while building party
+	
 	if saved_pool.size() == 0:
-		# Fallback indicator if the user clicks party builder with zero generated cats
 		popup_title.text = "ERROR: POOL EMPTY"
 		_clear_options_container()
 		var warning_label := Label.new()
@@ -110,21 +200,16 @@ func _on_party_builder_pressed() -> void:
 		selection_popup.show()
 		return
 		
-	# Present selection screen overlay
 	render_party_builder_screen(saved_pool)
 
-## Draws selectable toggle buttons for all characters existing in your user database
 func render_party_builder_screen(saved_pool: Array[CatCharacter]) -> void:
 	_clear_options_container()
-	
-	# Dynamic title configuration tracking squad limits (Up to 6)
 	popup_title.text = "ASSEMBLE PARTY (" + str(current_party.size()) + "/6)"
 	
 	for cat in saved_pool:
 		var btn := Button.new()
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		
-		# Validate active state configuration presence to display text selection decorators
 		var is_selected: bool = false
 		for member in current_party:
 			if member.name == cat.name:
@@ -138,17 +223,27 @@ func render_party_builder_screen(saved_pool: Array[CatCharacter]) -> void:
 		else:
 			btn.text = " [ ] " + cat.name + " (" + prof_name + ")"
 			
-		# Connect selection event toggle logic programmatically via inline lambdas
 		btn.pressed.connect(func(): _toggle_party_member(cat, saved_pool))
 		choices_grid.add_child(btn)
 		
-	# Dynamically append a continuous full-width confirm button beneath the 2-column grid layout
-	var confirm_btn := Button.new()
+	var parent_vbox = choices_grid.get_parent()
+	
+	# Since names are scrubbed above, this will reliably build a fresh button every frame
+	var confirm_btn = Button.new()
 	confirm_btn.text = "CONFIRM ACTIVE ROSTER"
 	confirm_btn.name = "DynamicConfirmButton"
-	confirm_btn.disabled = current_party.size() == 0
 	confirm_btn.pressed.connect(func(): _finalize_party_selection())
-	choices_grid.get_parent().add_child(confirm_btn)
+	parent_vbox.add_child(confirm_btn)
+		
+	# FIXED LOGIC: Button stays visible, but is grayed out until at least 1 cat is ready
+	confirm_btn.disabled = (current_party.size() == 0)
+	
+	var back_btn = Button.new()
+	back_btn.text = "BACK TO MAIN MENU"
+	back_btn.name = "DynamicBackButton"
+	back_btn.add_theme_color_override("font_color", Color(0.87, 0.13, 0.32))
+	back_btn.pressed.connect(func(): _on_party_builder_back_pressed())
+	parent_vbox.add_child(back_btn)
 	
 	selection_popup.show()
 
@@ -164,35 +259,291 @@ func _toggle_party_member(cat: CatCharacter, saved_pool: Array[CatCharacter]) ->
 	elif current_party.size() < 6:
 		current_party.append(cat)
 		
-	# Redraw the system rows immediately to show real-time dynamic UI checkbox state updates
 	render_party_builder_screen(saved_pool)
+
+func _on_party_builder_back_pressed() -> void:
+	selection_popup.hide()
+	cat_builder.hide()
+	
+	var parent_vbox = choices_grid.get_parent()
+	if parent_vbox:
+		var confirm_btn = parent_vbox.get_node_or_null("DynamicConfirmButton")
+		if confirm_btn: confirm_btn.queue_free()
+		var back_btn = parent_vbox.get_node_or_null("DynamicBackButton")
+		if back_btn: back_btn.queue_free()
+			
+	_clear_options_container()
+	center_menu.show()
 
 func _finalize_party_selection() -> void:
 	selection_popup.hide()
+	cat_builder.hide()
+	
+	var parent_vbox = choices_grid.get_parent()
+	if parent_vbox:
+		var confirm_btn = parent_vbox.get_node_or_null("DynamicConfirmButton")
+		if confirm_btn: confirm_btn.queue_free()
+		var back_btn = parent_vbox.get_node_or_null("DynamicBackButton")
+		if back_btn: back_btn.queue_free()
+			
 	_clear_options_container()
+	center_menu.show()
+	
+	# --- FIXED: DYNAMIC HINT TEXT UPDATER ---
+	if hint_label:
+		if current_party.size() > 0:
+			# Format the string with the current array size
+			hint_label.text = "Party Active | %d / 6 Cats Ready" % current_party.size()
+			
+			# Change color to matching UI neon teal/cyan to show success state
+			hint_label.add_theme_color_override("font_color", Color(0.215, 1.0, 0.811, 1))
+		else:
+			# Fallback default if they remove all members from their party roster
+			hint_label.text = "You must add at least 1 member to begin.\nAlso try not to die."
+			
+			# Revert color back to the initial warn yellow
+			hint_label.add_theme_color_override("font_color", Color(0.992, 0.988, 0, 1))
 	
 	print("--- ACTIVE ADVENTURING PARTY LOCKED IN ---")
 	for i in range(current_party.size()):
-		# Classic row allocation reporting logic (Front vs Back distribution metrics)
 		var row_side: String = "FRONT ROW" if i < 3 else "BACK ROW"
 		print("Slot ", i, " [", row_side, "]: ", current_party[i].name, " (", current_party[i].profession.profession_name, ")")
 		
-	# Next architectural phase: Pass current_party into GameState.gd array pool and switch scenes!
-
+# =============================================================================
+# ⚔️ START GAME / LOAD GAME
+# =============================================================================
+# Triggered when players click the "Start Game" button
+func _on_start_game_pressed() -> void:
+	# Check if the party array contains zero members
+	if current_party.is_empty():
+		# 1. Canvas Visibility Setup
+		center_menu.hide()
+		cat_builder.show()
+		builder_sheet.hide() 
+		
+		# 2. FIXED: Explicitly hide the loose side buttons so they don't leak onto the screen
+		if builder_back_button: builder_back_button.hide()
+		if breed_info_button: breed_info_button.hide()
+		if profession_info_button: profession_info_button.hide()
+		
+		popup_title.text = "ROSTER UNASSEMBLED"
+		_clear_options_container()
+		
+		# Get the parent VBox container of the popup layout
+		var parent_vbox = choices_grid.get_parent()
+		
+		# 3. FIXED: Add the label directly to the VBox instead of the 2-column ChoicesGrid
+		var error_label := Label.new()
+		error_label.name = "DynamicErrorLabel" # Named so we can clean it up safely later
+		error_label.text = "Your party is empty! You must deploy at least 1 Space Cat Wizard using the Party Builder before launching your campaign."
+		error_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		error_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		error_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		
+		# Insert it right into the main vertical layout stack
+		parent_vbox.add_child(error_label)
+		
+		# 4. Inject a temporary Dismiss button into the popup structure
+		var dismiss_btn: Button = parent_vbox.get_node_or_null("DynamicDismissButton") as Button
+		if not dismiss_btn:
+			dismiss_btn = Button.new()
+			dismiss_btn.text = "UNDERSTOOD"
+			dismiss_btn.name = "DynamicDismissButton"
+			
+			# Clean up visibility states and remove dynamic elements when returning to the main menu
+			dismiss_btn.pressed.connect(func():
+				selection_popup.hide()
+				cat_builder.hide()  
+				center_menu.show()  
+				_clear_options_container()
+				
+				# Garbage collection: delete the dynamic error label and button from memory
+				if parent_vbox.has_node("DynamicErrorLabel"):
+					parent_vbox.get_node("DynamicErrorLabel").queue_free()
+				if parent_vbox.has_node("DynamicDismissButton"):
+					parent_vbox.get_node("DynamicDismissButton").queue_free()
+			)
+			parent_vbox.add_child(dismiss_btn)
+			
+		selection_popup.show()
+		print("Launch aborted: Player attempted to deploy with an empty party.")
+		
+	else:
+		# Success branch: Transition to your primary gameplay canvas
+		print("Launch successful! Transitioning with a deployment of ", current_party.size(), " cats.")
+		# get_tree().change_scene_to_file("res://scenes/main_gameplay.tscn")
+		
 # =============================================================================
 # 🧬 CHARACTER GENERATION WIZARD PIPELINE
 # =============================================================================
 
 func start_character_generation() -> void:
 	current_building_cat = CatCharacter.new()
+	current_portrait_index = 0
+	_update_portrait_display()
 	show_breed_selection()
+
+func _on_builder_profession_info_pressed() -> void:
+	# 1. Clear any old entries out of the container so they don't stack up
+	if profession_list_container:
+		for child in profession_list_container.get_children():
+			child.queue_free()
+	else:
+		print("❌ Error: profession_list_container is null!")
+		return
+
+	# 2. Open the CSV file and read data
+	var file = FileAccess.open("res://Character_Races_Professions.csv", FileAccess.READ)
+	if not file:
+		print("⚠️ Error: Could not find or open 'res://Character_Races_Professions.csv'")
+		return
+
+	# Skip the CSV header row
+	if not file.eof_reached():
+		file.get_csv_line()
+
+	# Define the scene path for your Profession items
+	var profession_item_scene_path = "res://scenes/title/ProfessionItem.tscn"
+	
+	if not ResourceLoader.exists(profession_item_scene_path):
+		print("❌ Error: Cannot find ProfessionItem.tscn at path: ", profession_item_scene_path)
+		if profession_popup: profession_popup.show()
+		return
+
+	var row_scene = load(profession_item_scene_path)
+
+	# 3. Loop through rows and parse data
+	while not file.eof_reached():
+		var line = file.get_csv_line()
+		# Make sure row is complete (The professions file contains 16 total metadata columns)
+		if line.size() < 16:
+			continue 
+
+		# Correct Column Mappings based on your CSV structure
+		var prof_name = line[1]
+		var based_on = line[2]
+		
+		# Stats map to indices 3 through 9
+		var stats_string = "REQ -> STR: %s | INT: %s | PIE: %s | VIT: %s | DEX: %s | SPD: %s | PER: %s" % [
+			line[3], line[4], line[5], line[6], line[7], line[8], line[9]
+		]
+		
+		# Build an informative multi-line block using the mechanics and combat columns
+		var description_text = "FEATURES: %s\n\nWEAPONRY: %s" % [line[15], line[12]]
+		
+		# If the class features custom magic systems, include them at the bottom
+		if line[10] != "None":
+			description_text += "\n\nMAGIC TYPE: %s (%s)" % [line[10], line[11]]
+
+		# Instantiate a new card row into the CORRECT container
+		var item = row_scene.instantiate()
+		profession_list_container.add_child(item)
+		
+		# Populate text labels matching your ProfessionItem structure
+		item.get_node("HBoxContainer/VBoxContainer/ProfessionName").text = prof_name + " (Class Archetype: " + based_on + ")"
+		item.get_node("HBoxContainer/VBoxContainer/Description").text = description_text
+		item.get_node("HBoxContainer/VBoxContainer/Stats").text = stats_string
+		
+		# Layout Adjustment: Force expansion so formatting doesn't squeeze up
+		item.get_node("HBoxContainer/VBoxContainer").size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		
+		# Asset / Image Location resolution
+		var img_path = "res://ui/" + prof_name.to_lower().replace(" ", "_") + ".png"
+		var texture_rect = item.get_node("HBoxContainer/BreedImage")
+		
+		if texture_rect:
+			texture_rect.custom_minimum_size = Vector2(96, 96)
+			texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			
+			if ResourceLoader.exists(img_path):
+				texture_rect.texture = load(img_path)
+			else:
+				texture_rect.texture = load("res://ui/portrait.png") # Standard placeholder fallback
+
+	# 4. Finally, reveal the popup view
+	if profession_popup:
+		profession_popup.show()
+		
+# Triggered when the BREED INFO button is pressed
+func _on_builder_breed_info_pressed() -> void:
+	# 1. Clear any old entries out of the container so they don't stack up
+	if list_container:
+		for child in list_container.get_children():
+			child.queue_free()
+	else:
+		print("Error: list_container is null!")
+		return
+
+	# 2. Open the CSV file and read data
+	var file = FileAccess.open("res://Character_Races_Races.csv", FileAccess.READ)
+	if not file:
+		print("Error: Could not open Character_Races_Races.csv")
+		return
+
+	# Skip the CSV header row
+	if not file.eof_reached():
+		file.get_csv_line()
+
+	# Loop through the rows
+	while not file.eof_reached():
+		var line = file.get_csv_line()
+		if line.size() < 11:
+			continue # Skip empty or malformed rows
+
+		var race_name = line[1]
+		var based_on = line[2]
+		var description = line[3]
+		var stats_string = "STR: %s | INT: %s | PIE: %s | VIT: %s | DEX: %s | SPD: %s | PER: %s" % [
+			line[4], line[5], line[6], line[7], line[8], line[9], line[10]
+		]
+
+		# Only build rows if you have created BreedItem.tscn
+		if ResourceLoader.exists("res://scenes/title/BreedItem.tscn"):
+			var row_scene = load("res://scenes/title/BreedItem.tscn")
+			var item = row_scene.instantiate()
+			list_container.add_child(item)
+			
+			# Populate text nodes (Make sure these paths match BreedItem.tscn layout)
+			item.get_node("HBoxContainer/VBoxContainer/RaceName").text = race_name + " (Based on: " + based_on + ")"
+			item.get_node("HBoxContainer/VBoxContainer/Description").text = description
+			item.get_node("HBoxContainer/VBoxContainer/Stats").text = stats_string
+			
+			# Image Fallback handling
+			var img_path = "res://ui/" + race_name.to_lower().replace(" ", "_") + ".png"
+			var texture_rect = item.get_node("HBoxContainer/BreedImage")
+			if ResourceLoader.exists(img_path):
+				texture_rect.texture = load(img_path)
+			else:
+				texture_rect.texture = load("res://ui/portrait.png") # Fallback to your default cat frame
+
+	# 3. Finally, show the popup window overlay
+	if breed_popup:
+		breed_popup.show()
+
+# Triggered when the CLOSE LORE BOOK button is pressed
+func _on_breed_info_close_button_pressed() -> void:
+	if breed_popup:
+		breed_popup.hide()
+
+func _on_builder_back_pressed() -> void:
+	selection_popup.hide()
+	cat_builder.hide()
+	_clear_options_container()
+	
+	for child in stats_container.get_children():
+		child.queue_free()
+		
+	current_building_cat = null
+	center_menu.show()
+	print("Character creation cancelled by player.")
 
 func show_breed_selection() -> void:
 	popup_title.text = "SELECT CAT BREED"
 	_clear_options_container()
 
 	for breed in available_breeds:
-		var btn := Button.new()
+		var btn = breed_button_scene.instantiate() as Button
 		btn.text = breed.breed_name
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.pressed.connect(func(): _on_breed_chosen(breed))
@@ -218,6 +569,10 @@ func show_profession_selection() -> void:
 
 	selection_popup.show()
 
+func _on_profession_info_close_button_pressed() -> void:
+	if profession_popup:
+		profession_popup.hide()
+		
 func _on_profession_chosen(prof: ProfessionData) -> void:
 	selected_class = prof
 	current_building_cat.profession = prof
@@ -240,9 +595,9 @@ func setup_stat_allocation_phase() -> void:
 	var base_roll: int = randi_range(12, 24)
 	bonus_pool = max(base_roll - entry_cost, randi_range(6, 12))
 	
-	gender_race_label.text = "Space Cat - " + selected_breed.breed_name
+	gender_race_label.text = "M - " + selected_breed.breed_name
 	class_label.text = selected_class.profession_name.to_upper()
-	level_label.text = "LVL - 1"
+	level_label.text = "LEVEL | 1"
 	exp_value.text = "00/400"
 	given_name_edit.text = ""
 	
@@ -338,6 +693,9 @@ func _on_finalize_registration_pressed() -> void:
 	current_building_cat.breed = selected_breed
 	current_building_cat.profession = selected_class
 	
+	if available_portraits.size() > 0:
+		current_building_cat.portrait_path = available_portraits[current_portrait_index]
+	
 	var finalized_stats := {
 		"strength": _get_base_stat_requirement("strength") + allocated_stats["strength"],
 		"intelligence": _get_base_stat_requirement("intelligence") + allocated_stats["intelligence"],
@@ -365,9 +723,15 @@ func _clear_options_container() -> void:
 		for child in choices_grid.get_children():
 			child.queue_free()
 			
-		# Clean up any lingering dynamic confirmation buttons inside the parent VBox Container
 		var parent_vbox = choices_grid.get_parent()
 		if parent_vbox:
+			# Change names to prevent 'get_node' from seeing them while they die
 			var dynamic_btn = parent_vbox.get_node_or_null("DynamicConfirmButton")
 			if dynamic_btn:
+				dynamic_btn.name = "DELETING_CONFIRM"
 				dynamic_btn.queue_free()
+				
+			var dynamic_back = parent_vbox.get_node_or_null("DynamicBackButton")
+			if dynamic_back:
+				dynamic_back.name = "DELETING_BACK"
+				dynamic_back.queue_free()

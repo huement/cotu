@@ -1,7 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://camp2wonylrfe"]
+[gd_scene load_steps=12 format=3 uid="uid://camp2wonylrfe"]
 
 [ext_resource type="Script" uid="uid://cpehjuqhvfw1p" path="res://scenes/title/title_screen.gd" id="1"]
+[ext_resource type="Theme" uid="uid://bcnlquab5m0b7" path="res://main_ui_theme.tres" id="1_o70nc"]
+[ext_resource type="PackedScene" uid="uid://dg40wtx21a5ja" path="res://scenes/title/popup_button.tscn" id="2_8xedo"]
+[ext_resource type="Texture2D" uid="uid://wl53i5irtv7u" path="res://ui/green-poly.png" id="2_iowo3"]
 [ext_resource type="Texture2D" uid="uid://c1flv17p0ydwg" path="res://ui/portrait.png" id="2_ynr0n"]
+[ext_resource type="Texture2D" uid="uid://by605fu6kim5b" path="res://ui/patterns/bluetile.jpg" id="3_8xedo"]
+[ext_resource type="FontFile" uid="uid://j242c172xr8i" path="res://ui/fonts/Vampire Wars.otf" id="5_iy4b5"]
+[ext_resource type="FontFile" uid="uid://bd3a7wq74gn8e" path="res://ui/fonts/AvenirNextLTPro-Bold.otf" id="6_o70nc"]
+[ext_resource type="StyleBox" uid="uid://bks432rcth5r7" path="res://scenes/title/main_button_pressed_style.tres" id="8_1h35s"]
+[ext_resource type="StyleBox" uid="uid://bmn8u823k6on0" path="res://scenes/title/main_button_hover_style.tres" id="8_7lh0t"]
+[ext_resource type="StyleBox" uid="uid://bclxd2pqju45c" path="res://scenes/title/main_button_style.tres" id="8_7mtuq"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -10,7 +19,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_o70nc")
 script = ExtResource("1")
+breed_button_scene = ExtResource("2_8xedo")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -21,7 +32,8 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.055, 0.086, 0.125, 1)
 
-[node name="BackdropBand" type="ColorRect" parent="."]
+[node name="BackdropBand" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0.47058824)
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.2
@@ -32,9 +44,35 @@ offset_bottom = 157.40002
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.094, 0.149, 0.204, 0.78)
+texture = ExtResource("3_8xedo")
+stretch_mode = 1
+
+[node name="ColorRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -85.756775
+offset_top = -14.0
+offset_right = 85.756775
+offset_bottom = 24.0
+grow_horizontal = 2
+texture = ExtResource("2_iowo3")
+expand_mode = 1
+
+[node name="ColorRect" type="TextureRect" parent="ColorRect"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 719.0
+offset_right = 211.51355
+offset_bottom = 757.0
+rotation = -3.141677
+pivot_offset = Vector2(83.3988, 14.806946)
+texture = ExtResource("2_iowo3")
+expand_mode = 1
 
 [node name="Center" type="CenterContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -60,6 +98,7 @@ theme_override_constants/separation = 14
 [node name="Title" type="Label" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.21568628, 1, 0.8117647, 1)
+theme_override_fonts/font = ExtResource("5_iy4b5")
 theme_override_font_sizes/font_size = 44
 text = "Space Cat Wizards"
 horizontal_alignment = 1
@@ -68,7 +107,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(500, 30)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
-text = "Create a Party To Get Started or Load Saved Game"
+theme_override_fonts/font = ExtResource("6_o70nc")
+text = "Questing For Glory. Killing for Fun."
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -78,12 +118,17 @@ layout_mode = 2
 [node name="Hint" type="Label" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.99215686, 0.9882353, 0, 1)
-text = "You must add at least 1 member to begin.
-Also try not to die."
+text = "Good Luck. Try not to die."
 horizontal_alignment = 1
 
 [node name="StartButton" type="Button" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.10747973, 0.10747976, 0.107479624, 1)
+theme_override_colors/font_pressed_color = Color(0.99215686, 0.9882353, 0, 1)
+theme_override_colors/font_hover_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_styles/normal = ExtResource("8_7mtuq")
+theme_override_styles/pressed = ExtResource("8_1h35s")
+theme_override_styles/hover = ExtResource("8_7lh0t")
 text = "Start Game"
 
 [node name="CreateCharacter" type="Button" parent="Center/Panel/Margin/VBox"]
@@ -133,7 +178,15 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
-[node name="PortraitFrame" type="TextureRect" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity"]
+[node name="PortraitMetaHBox" type="HBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PortraitVBox" type="VBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PortraitFrame" type="TextureRect" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/PortraitVBox"]
 custom_minimum_size = Vector2(160, 160)
 layout_mode = 2
 size_flags_horizontal = 0
@@ -141,9 +194,44 @@ texture = ExtResource("2_ynr0n")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="GivenNameEdit" type="LineEdit" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity"]
+[node name="PortraitNavHBox" type="HBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/PortraitVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="PrevPortrait" type="Button" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/PortraitVBox/PortraitNavHBox"]
+layout_mode = 2
+text = " < "
+
+[node name="NextPortrait" type="Button" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/PortraitVBox/PortraitNavHBox"]
+layout_mode = 2
+text = " > "
+
+[node name="MetaVBox" type="VBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 4
+
+[node name="GenderRaceLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/MetaVBox"]
 unique_name_in_owner = true
 layout_mode = 2
+text = "[M or F] - Race"
+
+[node name="ClassLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/MetaVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
+text = "PROFESSION"
+
+[node name="LevelLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity/PortraitMetaHBox/MetaVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "LEVEL | 1"
+
+[node name="GivenNameEdit" type="LineEdit" parent="CatBuilder/MarginContainer/HBoxContainer/LeftColumn_Identity"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0.21568628, 1, 0.8117647, 1)
 placeholder_text = "ENTER GIVEN NAME..."
 
@@ -179,25 +267,6 @@ text = "00/400"
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MetaVBox" type="VBoxContainer" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats"]
-layout_mode = 2
-
-[node name="GenderRaceLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats/MetaVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Gender - Race"
-
-[node name="ClassLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats/MetaVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
-text = "RACE"
-
-[node name="LevelLabel" type="Label" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats/MetaVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "LVL - 1"
-
 [node name="Spacer" type="Control" parent="CatBuilder/MarginContainer/HBoxContainer/RightColumn_Stats"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -206,6 +275,45 @@ size_flags_vertical = 3
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 6
+
+[node name="BuilderBackButton" type="Button" parent="CatBuilder"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 410.0
+offset_top = 30.0
+offset_right = 610.0
+offset_bottom = 61.000004
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.8745098, 0.13333334, 0.32156864, 1)
+text = "CANCEL & RETURN"
+
+[node name="BuilderBreedInfoButton" type="Button" parent="CatBuilder"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 410.0
+offset_top = 90.0
+offset_right = 610.0
+offset_bottom = 121.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
+text = "BREED INFO"
+
+[node name="ProfessionInfoButton" type="Button" parent="CatBuilder"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 410.0
+offset_top = 150.0
+offset_right = 610.0
+offset_bottom = 181.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0.83333325, 1, 1)
+text = "PROFESSION INFO"
 
 [node name="SelectionPopup" type="PanelContainer" parent="CatBuilder"]
 unique_name_in_owner = true
@@ -250,4 +358,122 @@ theme_override_constants/h_separation = 12
 theme_override_constants/v_separation = 12
 columns = 2
 
+[node name="BreedInfoPopup" type="PanelContainer" parent="CatBuilder"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(750, 550)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -375.0
+offset_top = -275.0
+offset_right = 375.0
+offset_bottom = 275.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="CatBuilder/BreedInfoPopup"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CatBuilder/BreedInfoPopup/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PopupTitle" type="Label" parent="CatBuilder/BreedInfoPopup/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.833333, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "CAT BREED COMPENDIUM"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CatBuilder/BreedInfoPopup/Margin/VBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CatBuilder/BreedInfoPopup/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="BreedListContainer" type="VBoxContainer" parent="CatBuilder/BreedInfoPopup/Margin/VBox/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="HSeparator2" type="HSeparator" parent="CatBuilder/BreedInfoPopup/Margin/VBox"]
+layout_mode = 2
+
+[node name="BreedInfoCloseButton" type="Button" parent="CatBuilder/BreedInfoPopup/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.87451, 0.133333, 0.321569, 1)
+text = "CLOSE LORE BOOK"
+
+[node name="ProfessionInfoPopup" type="PanelContainer" parent="CatBuilder"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(750, 550)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -375.0
+offset_top = -275.0
+offset_right = 375.0
+offset_bottom = 275.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="CatBuilder/ProfessionInfoPopup"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CatBuilder/ProfessionInfoPopup/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PopupTitle" type="Label" parent="CatBuilder/ProfessionInfoPopup/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.833333, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "CAT BREED COMPENDIUM"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CatBuilder/ProfessionInfoPopup/Margin/VBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CatBuilder/ProfessionInfoPopup/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ProfessionListContainer" type="VBoxContainer" parent="CatBuilder/ProfessionInfoPopup/Margin/VBox/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="HSeparator2" type="HSeparator" parent="CatBuilder/ProfessionInfoPopup/Margin/VBox"]
+layout_mode = 2
+
+[node name="ProfessionInfoCloseButton" type="Button" parent="CatBuilder/ProfessionInfoPopup/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.87451, 0.133333, 0.321569, 1)
+text = "CLOSE LORE BOOK"
+
 [connection signal="pressed" from="Center/Panel/Margin/VBox/CreateCharacter" to="." method="_on_create_character_pressed"]
+[connection signal="pressed" from="CatBuilder/BuilderBreedInfoButton" to="." method="_on_builder_breed_info_pressed"]
+[connection signal="pressed" from="CatBuilder/ProfessionInfoButton" to="." method="_on_builder_profession_info_pressed"]
+[connection signal="pressed" from="CatBuilder/BreedInfoPopup/Margin/VBox/BreedInfoCloseButton" to="." method="_on_breed_info_close_button_pressed"]
+[connection signal="pressed" from="CatBuilder/ProfessionInfoPopup/Margin/VBox/ProfessionInfoCloseButton" to="." method="_on_profession_info_close_button_pressed"]
