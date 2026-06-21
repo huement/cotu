@@ -1,6 +1,5 @@
 extends Control
 
-@onready var _player_hp_label: Label = $Center/Panel/Margin/VBox/PlayerHP
 @onready var _enemy_hp_label: Label = $Center/Panel/Margin/VBox/EnemyHP
 @onready var _status_label: Label = $Center/Panel/Margin/VBox/Status
 @onready var _btn_attack: Button = $Center/Panel/Margin/VBox/Actions/Attack
@@ -40,11 +39,6 @@ func _refresh_view() -> void:
 	var player_stats: CharacterStats = null
 	if _world.has_method("get_player_stats"):
 		player_stats = _world.call("get_player_stats") as CharacterStats
-
-	if player_stats != null:
-		_player_hp_label.text = "Player HP: %d/%d" % [player_stats.health, player_stats.max_health]
-	else:
-		_player_hp_label.text = "Player HP: --"
 
 	var enemy_count := 0
 	var first_enemy_hp := "--"

@@ -9,7 +9,6 @@ var _btn_open_inventory: Button
 var _btn_open_combat: Button
 var _btn_open_town: Button
 var _btn_close_overlay: Button
-var _hp_bar: ProgressBar
 var _show_minimap := false
 
 
@@ -30,39 +29,6 @@ func configure(
 	_btn_open_combat = btn_combat
 	_btn_open_town = btn_town
 	_btn_close_overlay = btn_close
-
-
-func setup_hp_bar(overlay_layer: CanvasLayer) -> void:
-	if _player == null or _player.stats == null or overlay_layer == null:
-		return
-
-	var panel := PanelContainer.new()
-	panel.name = "HPBarPanel"
-	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	panel.position = Vector2(8.0, -8.0)
-	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 6)
-	panel.add_child(hbox)
-
-	var label := Label.new()
-	label.text = "HP"
-	hbox.add_child(label)
-
-	var bar := ProgressBar.new()
-	bar.name = "HPBar"
-	bar.custom_minimum_size = Vector2(120.0, 16.0)
-	bar.min_value = 0.0
-	bar.max_value = float(_player.stats.max_health)
-	bar.value = float(_player.stats.health)
-	bar.show_percentage = false
-	hbox.add_child(bar)
-	_hp_bar = bar
-
-	overlay_layer.add_child(panel)
-	_player.stats.damaged.connect(_on_player_damaged)
-	_player.stats.healed.connect(_on_player_healed)
 
 
 func apply_debug_panel_visibility(show: bool) -> void:
@@ -124,15 +90,3 @@ func refresh_debug_buttons(overlay_open: bool) -> void:
 		_btn_open_town.disabled = overlay_open
 	if _btn_close_overlay != null:
 		_btn_close_overlay.disabled = not overlay_open
-
-
-func _on_player_damaged(_amount: int, _old_health: int, new_health: int) -> void:
-	if _hp_bar == null:
-		return
-	_hp_bar.value = float(new_health)
-
-
-func _on_player_healed(_amount: int, _old_health: int, new_health: int) -> void:
-	if _hp_bar == null:
-		return
-	_hp_bar.value = float(new_health)

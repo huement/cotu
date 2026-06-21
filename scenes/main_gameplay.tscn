@@ -1,0 +1,160 @@
+[gd_scene load_steps=4 format=3 uid="uid://bque64h7tb8aq"]
+
+[ext_resource type="Script" uid="uid://ggecbunflpgb" path="res://scenes/main_gameplay.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://fib5upfjwmcx" path="res://scenes/player/player.tscn" id="2_fib5u"]
+[ext_resource type="Script" path="res://scenes/overlays/minimap_overlay.gd" id="3_minimap_script"]
+
+[node name="MainGameplay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="HUDCanvas" type="CanvasLayer" parent="."]
+
+[node name="HUDBorder" type="TextureRect" parent="HUDCanvas"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+
+[node name="MainWorkspace" type="HBoxContainer" parent="HUDCanvas"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants_separation = 16
+
+[node name="LeftColumn_ViewAndParty" type="VBoxContainer" parent="HUDCanvas/MainWorkspace"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants_separation = 12
+
+[node name="GameplayCutout" type="Control" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ViewportFrame" type="SubViewportContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/GameplayCutout"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="DungeonViewport" type="SubViewport" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/GameplayCutout/ViewportFrame"]
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="WorldSpace" type="Node3D" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/GameplayCutout/ViewportFrame/DungeonViewport"]
+unique_name_in_owner = true
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/GameplayCutout/ViewportFrame/DungeonViewport/WorldSpace"]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 5, 0)
+
+[node name="GridPlayer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/GameplayCutout/ViewportFrame/DungeonViewport" instance=ExtResource("2_fib5u")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="Camera3D" type="Camera3D" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/GameplayCutout/ViewportFrame/DungeonViewport/GridPlayer"]
+fov = 70.0
+
+[node name="WallCheck" type="RayCast3D" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/GameplayCutout/ViewportFrame/DungeonViewport/GridPlayer"]
+unique_name_in_owner = true
+target_position = Vector3(0, 0, -3)
+
+[node name="UILayoutContainer" type="MarginContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty"]
+layout_mode = 2
+theme_override_constants_margin_left = 12
+theme_override_constants_margin_right = 12
+theme_override_constants_margin_bottom = 12
+
+[node name="PartyHUD" type="HBoxContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/UILayoutContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants_separation = 8
+alignment = 1
+
+[node name="Slot0" type="PanelContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/UILayoutContainer/PartyHUD"]
+custom_minimum_size = Vector2(120, 85)
+layout_mode = 2
+
+[node name="Slot1" type="PanelContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/UILayoutContainer/PartyHUD"]
+custom_minimum_size = Vector2(120, 85)
+layout_mode = 2
+
+[node name="Slot2" type="PanelContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/UILayoutContainer/PartyHUD"]
+custom_minimum_size = Vector2(120, 85)
+layout_mode = 2
+
+[node name="Slot3" type="PanelContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/UILayoutContainer/PartyHUD"]
+custom_minimum_size = Vector2(120, 85)
+layout_mode = 2
+
+[node name="Slot4" type="PanelContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/UILayoutContainer/PartyHUD"]
+custom_minimum_size = Vector2(120, 85)
+layout_mode = 2
+
+[node name="Slot5" type="PanelContainer" parent="HUDCanvas/MainWorkspace/LeftColumn_ViewAndParty/UILayoutContainer/PartyHUD"]
+custom_minimum_size = Vector2(120, 85)
+layout_mode = 2
+
+[node name="RightColumn_TerminalHUD" type="VBoxContainer" parent="HUDCanvas/MainWorkspace"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants_separation = 12
+
+[node name="CompassPanel" type="PanelContainer" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD/CompassPanel"]
+layout_mode = 2
+theme_override_constants_margin_left = 6
+theme_override_constants_margin_top = 6
+theme_override_constants_margin_right = 6
+theme_override_constants_margin_bottom = 6
+
+[node name="CompassLabel" type="Label" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD/CompassPanel/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HEADING: NORTH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MinimapPanel" type="PanelContainer" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MinimapOverlay" type="Control" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD/MinimapPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("3_minimap_script")
+
+[node name="LogPanel" type="PanelContainer" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD/LogPanel"]
+layout_mode = 2
+theme_override_constants_margin_left = 12
+theme_override_constants_margin_top = 12
+theme_override_constants_margin_right = 12
+theme_override_constants_margin_bottom = 12
+
+[node name="GameLog" type="RichTextLabel" parent="HUDCanvas/MainWorkspace/RightColumn_TerminalHUD/LogPanel/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+text = "[color=#555555]Initializing terminal logs...[/color]"
+scroll_following = true

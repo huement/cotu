@@ -371,7 +371,33 @@ func _on_start_game_pressed() -> void:
 	else:
 		# Success branch: Transition to your primary gameplay canvas
 		print("Launch successful! Transitioning with a deployment of ", current_party.size(), " cats.")
-		# get_tree().change_scene_to_file("res://scenes/main_gameplay.tscn")
+		
+		# 1. Map chosen cats directly into the global persistent 6-slot party setup
+		for i in range(6):
+			if i < current_party.size():
+				var character: CatCharacter = current_party[i]
+				# Initialize resource statistics (HP/MP calculations from breed) if not done yet
+				if character.has_method("initialize_stats"):
+					character.initialize_stats()
+				
+				GameState.set_party_slot(i, character)
+			else:
+				# Ensure remaining slots are explicitly cleared out if running a partial party
+				GameState.set_party_slot(i, null)
+		
+		# 2. Perform a type-safe scene change transition with strict string conversion
+		var scene_path: String = "res://scenes/main_gameplay.tscn"
+		
+		# Verify file existence before even trying to load it
+		if not FileAccess.file_exists(scene_path):
+			print("❌ CRITICAL: The file path '" + scene_path + "' does not exist! Check your folder capitalization (e.g., 'Scenes' vs 'scenes').")
+			return
+			
+		var change_err: Error = get_tree().change_scene_to_file(scene_path)
+		
+		if change_err != OK:
+			print("❌ SCENE TRANSITION FAILED: ", error_string(change_err))
+			push_error("Critical Core Engine failure: Could not load gameplay scene. Error Code: %d" % change_err)
 		
 # =============================================================================
 # 🧬 CHARACTER GENERATION WIZARD PIPELINE

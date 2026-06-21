@@ -55,7 +55,13 @@ var _context_orchestrator: WorldContextOrchestrator
 var _event_bus: WorldEventBus
 var _event_router_orchestrator: WorldEventRouterOrchestrator
 
+func set_external_player(p_player: Player) -> void:
+	_player = p_player
+
 func _ready() -> void:
+	call_deferred("_deferred_init")
+
+func _deferred_init() -> void:
 	_context_orchestrator = get_node_or_null(NODE_CONTEXT_ORCHESTRATOR) as WorldContextOrchestrator
 	if _context_orchestrator == null:
 		push_error("Missing required node: %s" % NODE_CONTEXT_ORCHESTRATOR)
@@ -97,7 +103,7 @@ func _ready() -> void:
 	_refresh_grid_coordinates_overlay()
 	_refresh_minimap_overlay()
 	_refresh_debug_buttons()
-	_add_hp_bar.call_deferred()
+	#_add_hp_bar.call_deferred()
 
 func _add_world_environment() -> void:
 	_scene_initializer_module.add_environment(self)
@@ -345,9 +351,18 @@ func _is_player_cell_passable(cell: Vector2i) -> bool:
 	return _grid_module.is_player_cell_passable(cell, get_enemies())
 
 
-func _add_hp_bar() -> void:
-	_ui_module.setup_hp_bar(get_node_or_null("OverlayLayer") as CanvasLayer)
+# func _add_hp_bar() -> void:
+# 	_ui_module.setup_hp_bar(get_node_or_null("OverlayLayer") as CanvasLayer)
 
+## Safely retrieves the layout grid occupancy data with strict static typing
+func get_grid_occupancy() -> GridOccupancyMap:
+	# 2. Add a defensive guard clause to prevent Nil crashes
+	if not _grid_module:
+		push_error("CRITICAL: _grid_module is null! Check your node paths inside the world main.tscn script.")
+		return null
+		
+	# 3. Safe to call function execution now
+	return _grid_module.occupancy()
 
 func _wire_occupancy() -> void:
 	var gm := get_node_or_null("GridMap") as GridMap

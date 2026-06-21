@@ -1,8 +1,7 @@
-[gd_scene format=3 uid="uid://ci5c4s13iefpr"]
+[gd_scene load_steps=28 format=3 uid="uid://ci5c4s13iefpr"]
 
 [ext_resource type="Script" uid="uid://gu3lsi7vt4st" path="res://scenes/world/main.gd" id="1_wbupf"]
 [ext_resource type="PackedScene" uid="uid://fib5upfjwmcx" path="res://scenes/player/player.tscn" id="2_7tdlr"]
-[ext_resource type="Resource" uid="uid://bpsbwt82uliw4" path="res://resources/movement_config.tres" id="3_tt8nk"]
 [ext_resource type="MeshLibrary" uid="uid://bxgdx6gy414a7" path="res://resources/mesh_library/simple_mesh_library.tres" id="4_6r0uj"]
 [ext_resource type="Script" uid="uid://c7krl4pwfdtn5" path="res://scenes/overlays/minimap_overlay.gd" id="5_1h5vq"]
 [ext_resource type="Script" uid="uid://1vfbj4weoq0b" path="res://scenes/world/modules/world_overlay_module.gd" id="6_75n3u"]
@@ -45,46 +44,43 @@ emission_enabled = true
 emission = Color(0.196078, 0.705882, 0.333333, 1)
 emission_energy_multiplier = 1.5
 
-[node name="Main" type="Node3D" unique_id=1276884268]
+[node name="Main" type="Node3D"]
 script = ExtResource("1_wbupf")
 show_debug_panel = true
 show_grid_coordinates_overlay = true
 failure_goal_cell = Vector2i(-3, 2)
 
-[node name="Player" parent="." unique_id=1354958968 instance=ExtResource("2_7tdlr")]
+[node name="Player" parent="." instance=ExtResource("2_7tdlr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -3)
-camera_retreat_distance = 0.4
 debug_log_input_actions = false
-movement_config = ExtResource("3_tt8nk")
-initial_cell = Vector2i(2, 1)
 
-[node name="FloorEnemy" parent="." unique_id=29647059 instance=ExtResource("21_2g9jf")]
+[node name="FloorEnemy" parent="." instance=ExtResource("21_2g9jf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -3)
 ai_enabled = false
 initial_cell = Vector2i(10, 4)
 
-[node name="PotionPickup" type="Node3D" parent="." unique_id=11595592]
+[node name="PotionPickup" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -3)
 script = ExtResource("22_5md0q")
 grid_cell = Vector2i(12, 6)
 item_data = SubResource("27_potion_item")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="PotionPickup" unique_id=911111264]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PotionPickup"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, 0)
 mesh = SubResource("SphereMesh_pickup_marker")
 surface_material_override/0 = SubResource("StandardMaterial3D_pickup_marker")
 
-[node name="FloorExit" type="Node3D" parent="." unique_id=577675068]
+[node name="FloorExit" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -3)
 script = ExtResource("23_lh832")
 grid_cell = Vector2i(9, 5)
 world_y = 0.05
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="FloorExit" unique_id=1813182867]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FloorExit"]
 mesh = SubResource("BoxMesh_exit_marker")
 surface_material_override/0 = SubResource("StandardMaterial3D_exit_marker")
 
-[node name="GridMap" type="GridMap" parent="." unique_id=1476284130]
+[node name="GridMap" type="GridMap" parent="."]
 mesh_library = ExtResource("4_6r0uj")
 cell_size = Vector3(1, 1, 1)
 data = {
@@ -92,62 +88,62 @@ data = {
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
-[node name="OverlayModule" type="Node" parent="." unique_id=2044801561]
+[node name="OverlayModule" type="Node" parent="."]
 script = ExtResource("6_75n3u")
 
-[node name="SceneInitializerModule" type="Node" parent="." unique_id=1430462751]
+[node name="SceneInitializerModule" type="Node" parent="."]
 script = ExtResource("7_tk6wu")
 
-[node name="GridModule" type="Node" parent="." unique_id=1945126429]
+[node name="GridModule" type="Node" parent="."]
 script = ExtResource("8_aln2x")
 
-[node name="EncounterModule" type="Node" parent="." unique_id=904532739]
+[node name="EncounterModule" type="Node" parent="."]
 script = ExtResource("9_obv6f")
 
-[node name="RunOutcomeModule" type="Node" parent="." unique_id=1100726258]
+[node name="RunOutcomeModule" type="Node" parent="."]
 script = ExtResource("10_q8k5u")
 
-[node name="UIModule" type="Node" parent="." unique_id=1447534636]
+[node name="UIModule" type="Node" parent="."]
 script = ExtResource("11_jv3ce")
 
-[node name="StateOrchestrator" type="Node" parent="." unique_id=1756513716]
+[node name="StateOrchestrator" type="Node" parent="."]
 script = ExtResource("12_4j8kp")
 
-[node name="TurnOrchestrator" type="Node" parent="." unique_id=232148457]
+[node name="TurnOrchestrator" type="Node" parent="."]
 script = ExtResource("13_p7vna")
 
-[node name="CompositionOrchestrator" type="Node" parent="." unique_id=162870882]
+[node name="CompositionOrchestrator" type="Node" parent="."]
 script = ExtResource("14_wk2mb")
 
-[node name="PolicyOrchestrator" type="Node" parent="." unique_id=1742826120]
+[node name="PolicyOrchestrator" type="Node" parent="."]
 script = ExtResource("15_8m9uz")
 
-[node name="InputOrchestrator" type="Node" parent="." unique_id=492702643]
+[node name="InputOrchestrator" type="Node" parent="."]
 script = ExtResource("16_6f2hc")
 
-[node name="MovementOrchestrator" type="Node" parent="." unique_id=1321821013]
+[node name="MovementOrchestrator" type="Node" parent="."]
 script = ExtResource("17_4a2zs")
 
-[node name="ContextOrchestrator" type="Node" parent="." unique_id=934108474]
+[node name="ContextOrchestrator" type="Node" parent="."]
 script = ExtResource("18_9d4lw")
 
-[node name="EventBus" type="Node" parent="." unique_id=1685434463]
+[node name="EventBus" type="Node" parent="."]
 script = ExtResource("19_1n8yf")
 
-[node name="EventRouterOrchestrator" type="Node" parent="." unique_id=1166162658]
+[node name="EventRouterOrchestrator" type="Node" parent="."]
 script = ExtResource("20_v0w2m")
 
-[node name="AudioFootstep" type="AudioStreamPlayer" parent="." unique_id=1489583776]
+[node name="AudioFootstep" type="AudioStreamPlayer" parent="."]
 
-[node name="AudioCombatHit" type="AudioStreamPlayer" parent="." unique_id=1253202549]
+[node name="AudioCombatHit" type="AudioStreamPlayer" parent="."]
 
-[node name="AudioPickup" type="AudioStreamPlayer" parent="." unique_id=749166422]
+[node name="AudioPickup" type="AudioStreamPlayer" parent="."]
 
-[node name="AudioDeath" type="AudioStreamPlayer" parent="." unique_id=1103540765]
+[node name="AudioDeath" type="AudioStreamPlayer" parent="."]
 
-[node name="OverlayLayer" type="CanvasLayer" parent="." unique_id=189560015]
+[node name="OverlayLayer" type="CanvasLayer" parent="."]
 
-[node name="OverlayMount" type="Control" parent="OverlayLayer" unique_id=178000111]
+[node name="OverlayMount" type="Control" parent="OverlayLayer"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -156,7 +152,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="MinimapOverlay" type="Control" parent="OverlayLayer" unique_id=211122344]
+[node name="MinimapOverlay" type="Control" parent="OverlayLayer"]
 visible = false
 layout_mode = 3
 anchors_preset = 0
@@ -167,7 +163,7 @@ offset_bottom = 304.0
 mouse_filter = 2
 script = ExtResource("5_1h5vq")
 
-[node name="GridCoordsLabel" type="Label" parent="OverlayLayer/MinimapOverlay" unique_id=211122343]
+[node name="GridCoordsLabel" type="Label" parent="OverlayLayer/MinimapOverlay"]
 visible = false
 layout_mode = 1
 anchors_preset = 10
@@ -179,52 +175,3 @@ offset_bottom = 32.0
 grow_horizontal = 2
 text = "Grid X: 0  Y: 0"
 horizontal_alignment = 2
-
-[node name="DebugPanel" type="PanelContainer" parent="OverlayLayer" unique_id=176999220]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 290.0
-offset_bottom = 228.0
-
-[node name="Margin" type="MarginContainer" parent="OverlayLayer/DebugPanel" unique_id=211122334]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
-
-[node name="VBox" type="VBoxContainer" parent="OverlayLayer/DebugPanel/Margin" unique_id=211122335]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Title" type="Label" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122340]
-layout_mode = 2
-text = "Scene Shell"
-
-[node name="Subtitle" type="Label" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122341]
-layout_mode = 2
-text = "Day 11 debug controls"
-
-[node name="Divider" type="HSeparator" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122342]
-layout_mode = 2
-
-[node name="OpenInventory" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122336]
-layout_mode = 2
-text = "Open Inventory"
-
-[node name="OpenCombat" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122337]
-layout_mode = 2
-text = "Open Combat"
-
-[node name="OpenTown" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122338]
-layout_mode = 2
-text = "Open Town"
-
-[node name="ToggleMinimap" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122345]
-layout_mode = 2
-text = "Toggle Minimap"
-
-[node name="CloseOverlay" type="Button" parent="OverlayLayer/DebugPanel/Margin/VBox" unique_id=211122339]
-layout_mode = 2
-disabled = true
-text = "Close Overlay"
