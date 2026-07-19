@@ -18,7 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 SignalBus="*res://Core/SignalBus.gd"
-GameState="*res://GameState.gd"
+GameState="*res://Core/GameState.gd"
 
 [editor_plugins]
 
