@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://c0p1teytx1hr7"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_qma63"]
+
+[resource]
+script = ExtResource("1_qma63")
+breed_name = "Sphynx"
+description = "The tiniest and most agile breed, Sphynx are delicate and beautiful beings. Their small size and lightning speed give them a naturally low armor class. The Sphynx is also one of the smartest and friendliest creatures. Although not much of a heavy fighter, the Sphynx can make an excellent magic user or thief. RESISTANCES: The Sphynx's long kinship with nature provides resistance to magic spells."
+base_strength = 5
+base_intelligence = 11
+base_piety = 6
+base_vitality = 6
+base_dexterity = 10
+base_speed = 14
+base_personality = 12

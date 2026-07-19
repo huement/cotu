@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://dk88mg6q6cgnd"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_dntqf"]
+
+[resource]
+script = ExtResource("1_dntqf")
+profession_name = "Archanist"
+classic_counterpart = "Mage"
+req_strength = 0
+req_intelligence = 12
+req_piety = 0
+req_vitality = 0
+req_dexterity = 0
+req_speed = 0
+req_personality = 0
+spellbook_type = "Archanist"
+level_spells_unlock = 1

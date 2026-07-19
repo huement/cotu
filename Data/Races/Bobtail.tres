@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://bbfc124kmib1x"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_kcyru"]
+
+[resource]
+script = ExtResource("1_kcyru")
+breed_name = "Bobtail"
+description = "A sleek and tiny breed, the Japanese Bobtail is a dexterous and busy type able to maneuver its body (and especially its quick paws) into and out of the tightest situations. The Bobtail is also well known as a charming conversationalist and for its amazing friendliness and hospitality. Bobtails with lesser inclinations frequently use their sweet meows and quick claws to help themselves to goods and information. RESISTANCES: The Japanese Bobtail has resistance to Magic-realm spells."
+base_intelligence = 7
+base_piety = 6
+base_vitality = 9
+base_dexterity = 10
+base_speed = 7
+base_personality = 13

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://dyqq1npebhkdm"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_rs4eb"]
+
+[resource]
+script = ExtResource("1_rs4eb")
+breed_name = "Bengal"
+description = "The Bengal is a wild, serpentine-patterned feline whose origins are close to the jungle. Although it is human-like in its ability to talk and walk upright, the Bengal is not easily reasoned with or personable (actually, others tend to avoid his fierce glare). Its strengths lie in its natural ability to fight... and win. Strong, fast, and hearty, with a mind that thinks \"pounce, hunt, kill,\" the Bengal can be the perfect combatant. RESISTANCES: A wild lack of standard intelligence provides resistance to mental spells, while its thick pelt resists acid."
+base_strength = 12
+base_intelligence = 5
+base_piety = 5
+base_vitality = 14
+base_speed = 10
+base_personality = 3

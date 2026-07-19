@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://bnpjqmg4b4xr1"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_67qt2"]
+
+[resource]
+script = ExtResource("1_67qt2")
+profession_name = "Shade"
+classic_counterpart = "Thief"
+req_strength = 0
+req_intelligence = 0
+req_piety = 0
+req_vitality = 0
+req_dexterity = 12
+req_speed = 8
+req_personality = 0
+level_spells_unlock = 5

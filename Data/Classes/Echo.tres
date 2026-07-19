@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://7gbk65xmeqew"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_ursfr"]
+
+[resource]
+script = ExtResource("1_ursfr")
+profession_name = "Echo"
+classic_counterpart = "Bard"
+req_strength = 0
+req_piety = 0
+req_vitality = 0
+req_dexterity = 12
+req_speed = 8
+req_personality = 12
+spellbook_type = "Archanist"
+level_spells_unlock = 3

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://drhb8vtyo4lfs"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_vlv0b"]
+
+[resource]
+script = ExtResource("1_vlv0b")
+profession_name = "Ronin"
+classic_counterpart = "Samurai"
+req_strength = 12
+req_intelligence = 11
+req_piety = 0
+req_vitality = 9
+req_dexterity = 12
+req_speed = 14
+req_personality = 8
+spellbook_type = "Archanist"
+level_spells_unlock = 3

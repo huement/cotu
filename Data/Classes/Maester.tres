@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://1usiusfgotnq"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_5jjcn"]
+
+[resource]
+script = ExtResource("1_5jjcn")
+profession_name = "Maester"
+classic_counterpart = "Alchemist"
+req_strength = 0
+req_intelligence = 13
+req_piety = 0
+req_vitality = 0
+req_dexterity = 13
+req_speed = 0
+req_personality = 0
+spellbook_type = "Maester"
+level_spells_unlock = 1

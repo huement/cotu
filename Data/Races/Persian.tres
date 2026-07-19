@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://cfo0kitl1l8fn"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_nursd"]
+
+[resource]
+script = ExtResource("1_nursd")
+breed_name = "Persian"
+description = "Persians are devoted and hearty creatures. Descending from a lineage of intelligent, bipedal longhairs, they share their ancestors' caring personality and thick coat as well as an indication of their speed, strength, and dexterity. The Persian's desire to learn, coupled with high piety, also helps it to become an excellent Soulwright. RESISTANCES: The Persian's thick, luxurious hair provides great cold protection."
+base_intelligence = 6
+base_piety = 12
+base_vitality = 10
+base_personality = 10

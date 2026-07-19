@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://jg2kerwxuwfw"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_j03jp"]
+
+[resource]
+script = ExtResource("1_j03jp")
+profession_name = "Psynic"
+classic_counterpart = "Psynic"
+req_intelligence = 14
+req_piety = 0
+req_vitality = 14
+req_dexterity = 0
+req_speed = 0
+spellbook_type = "Psynic"
+level_spells_unlock = 1

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://cvna7oy557yt1"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_xafdl"]
+
+[resource]
+script = ExtResource("1_xafdl")
+profession_name = "Wizard"
+classic_counterpart = "Bishop"
+req_strength = 0
+req_intelligence = 15
+req_piety = 15
+req_vitality = 0
+req_dexterity = 0
+req_speed = 0
+req_personality = 8
+spellbook_type = "Soulwright, Archanist"
+level_spells_unlock = 1

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://8xxgk00t4bhl"]
+
+[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_ue6fs"]
+
+[resource]
+script = ExtResource("1_ue6fs")
+breed_name = "Siamese"
+description = "Siamese are smallish creatures, with pointed ears and a broad purr. They excel at intellectual pursuits, loving not only what they learn but the study that comes with it as well. Armed with these smarts, Siamese make excellent magic users. Siamese are also nimble creatures, moving their sleek bodies with an above-average ease and speed. RESISTANCES: Siamese, because of their high intelligence, have a natural resistance to hypnosis and sleep spells."
+base_strength = 7
+base_intelligence = 10
+base_piety = 10
+base_vitality = 7
+base_dexterity = 9
+base_speed = 9

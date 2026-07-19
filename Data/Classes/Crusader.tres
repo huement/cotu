@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://cci0edvjecyyt"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_meymv"]
+
+[resource]
+script = ExtResource("1_meymv")
+profession_name = "Crusader"
+classic_counterpart = "Lord"
+req_strength = 12
+req_intelligence = 9
+req_piety = 12
+req_vitality = 12
+req_dexterity = 9
+req_speed = 9
+req_personality = 14
+spellbook_type = "Soulwright"
+level_spells_unlock = 3

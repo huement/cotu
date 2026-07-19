@@ -1,0 +1,82 @@
+[gd_scene load_steps=7 format=3 uid="uid://gt84ebbsoeyg"]
+
+[ext_resource type="Script" uid="uid://dgmar6r51wlgc" path="res://Scripts/universal_popup.gd" id="1_00won"]
+[ext_resource type="Shader" uid="uid://x0mchy8dkqk4" path="res://Shaders/frosted_glass.gdshader" id="2_hjxi7"]
+[ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="3_xopd3"]
+[ext_resource type="Texture2D" uid="uid://bypiwpfa35pmo" path="res://ui/buttons/button_rectangle_flat.png" id="4_3pqrk"]
+[ext_resource type="Texture2D" uid="uid://dppucpbb2lr0t" path="res://ui/buttons/button_rectangle_border.png" id="5_k17y6"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tt43e"]
+shader = ExtResource("2_hjxi7")
+shader_parameter/blur_amount = 2.5
+shader_parameter/background_tint = Color(0.15, 0.15, 0.2, 0.4)
+shader_parameter/vibrancy = 1.3
+
+[node name="Popup" type="Node2D"]
+
+[node name="UniversalPopup" type="CanvasLayer" parent="."]
+script = ExtResource("1_00won")
+
+[node name="PanelContainer" type="PanelContainer" parent="UniversalPopup"]
+material = SubResource("ShaderMaterial_tt43e")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UniversalPopup/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UniversalPopup/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="TitleLabel" type="Label" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_xopd3")
+theme_override_font_sizes/font_size = 18
+
+[node name="ContentArea" type="VBoxContainer" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ConfirmButton" type="TextureButton" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+texture_normal = ExtResource("4_3pqrk")
+texture_pressed = ExtResource("5_k17y6")
+texture_hover = ExtResource("5_k17y6")
+
+[node name="ButtonLabel" type="Label" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer/ConfirmButton"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0.95686275, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.3647059)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_xopd3")
+text = "OK"
+horizontal_alignment = 1
+vertical_alignment = 1

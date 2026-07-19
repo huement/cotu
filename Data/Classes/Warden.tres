@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://r4d0g73wwigm"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_i3bn1"]
+
+[resource]
+script = ExtResource("1_i3bn1")
+profession_name = "Warden"
+classic_counterpart = "Ranger"
+req_intelligence = 8
+req_piety = 8
+req_vitality = 11
+req_speed = 8
+req_personality = 8
+spellbook_type = "Maester"
+level_spells_unlock = 3

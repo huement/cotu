@@ -1,0 +1,262 @@
+[gd_scene load_steps=23 format=3 uid="uid://ddug86d1wuau7"]
+
+[ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
+[ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
+[ext_resource type="Script" uid="uid://ckoiskavvtx6f" path="res://Scripts/minimap_camera.gd" id="2_5a7ea"]
+[ext_resource type="Texture2D" uid="uid://dn0f5ac8pbppq" path="res://ui/HUD/sidebar.png" id="2_ikia7"]
+[ext_resource type="Texture2D" uid="uid://ccjl04lnxg00i" path="res://ui/HUD/topbar.png" id="3_7yui6"]
+[ext_resource type="Texture2D" uid="uid://btil8atds3nsj" path="res://ui/minimap-indicator.png" id="3_o06y3"]
+[ext_resource type="Texture2D" uid="uid://6q4bmnpuwq3m" path="res://ui/HUD/minimap_bg_sm.png" id="4_ikia7"]
+[ext_resource type="Texture2D" uid="uid://dte7juxkf8grr" path="res://ui/HUD/search-btn.png" id="4_t2t4p"]
+[ext_resource type="Script" uid="uid://b0jehqupuhf2c" path="res://Scripts/slot_portrait.gd" id="4_yq1aw"]
+[ext_resource type="Texture2D" uid="uid://dfx0p2jk0ynh3" path="res://ui/HUD/search-hover.png" id="5_0pcbe"]
+[ext_resource type="PackedScene" uid="uid://day7k6mxl84p1" path="res://Scenes/dungeon_map.tscn" id="5_5ukr8"]
+[ext_resource type="Script" uid="uid://cbry5h6ur7nue" path="res://Scripts/MapManager.gd" id="5_fo5ed"]
+[ext_resource type="Script" uid="uid://bismjgexijch3" path="res://Scripts/search_button.gd" id="6_0pcbe"]
+[ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="6_5ukr8"]
+[ext_resource type="Texture2D" uid="uid://bb878wlm1bg45" path="res://ui/HUD/item-btn.png" id="6_axeuq"]
+[ext_resource type="Texture2D" uid="uid://cvbiq0j3bvkjh" path="res://ui/HUD/item-hover.png" id="7_1cojt"]
+[ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="7_e0ngr"]
+[ext_resource type="Texture2D" uid="uid://cl03o04pwuvpk" path="res://ui/HUD/rest-btn.png" id="8_yq1aw"]
+[ext_resource type="Script" uid="uid://b8ywsg7wbn4ln" path="res://Scripts/item_button.gd" id="9_axeuq"]
+[ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="9_pyn1s"]
+[ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="12_1cojt"]
+[ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
+
+[node name="World" type="Node3D"]
+metadata/_edit_horizontal_guides_ = [481.0]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("1_go701")
+
+[node name="MainHUDLayout" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CockpitBackground" type="TextureRect" parent="HUD/MainHUDLayout"]
+layout_mode = 0
+offset_left = 1114.0
+offset_top = 95.0
+offset_right = 1186.0
+offset_bottom = 998.0
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("2_ikia7")
+
+[node name="TopBar" type="TextureRect" parent="HUD/MainHUDLayout"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -352.0
+offset_top = 5.0
+offset_right = 242.0
+offset_bottom = 45.0
+grow_horizontal = 0
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("3_7yui6")
+
+[node name="RightSidebarAnchor" type="Control" parent="HUD/MainHUDLayout"]
+anchors_preset = 0
+offset_left = 1096.0
+offset_top = 130.0
+offset_right = 1146.0
+offset_bottom = 486.0
+
+[node name="PartyContainer" type="VBoxContainer" parent="HUD/MainHUDLayout/RightSidebarAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 50.0
+offset_bottom = 333.0
+theme_override_constants/separation = 10
+
+[node name="Slot0_Portrait" type="TextureRect" parent="HUD/MainHUDLayout/RightSidebarAnchor/PartyContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_yq1aw")
+
+[node name="Slot1_Portrait" type="TextureRect" parent="HUD/MainHUDLayout/RightSidebarAnchor/PartyContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_yq1aw")
+
+[node name="Slot2_Portrait" type="TextureRect" parent="HUD/MainHUDLayout/RightSidebarAnchor/PartyContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_yq1aw")
+
+[node name="Slot3_Portrait" type="TextureRect" parent="HUD/MainHUDLayout/RightSidebarAnchor/PartyContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_yq1aw")
+
+[node name="Slot4_Portrait" type="TextureRect" parent="HUD/MainHUDLayout/RightSidebarAnchor/PartyContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_yq1aw")
+
+[node name="Slot5_Portrait" type="TextureRect" parent="HUD/MainHUDLayout/RightSidebarAnchor/PartyContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_yq1aw")
+
+[node name="ActionBarAnchor" type="Control" parent="HUD/MainHUDLayout"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -66.0
+offset_right = 193.0
+offset_bottom = -12.0
+grow_vertical = 0
+
+[node name="ActionButtons" type="HBoxContainer" parent="HUD/MainHUDLayout/ActionBarAnchor"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = 12
+
+[node name="SearchButton" type="TextureButton" parent="HUD/MainHUDLayout/ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("4_t2t4p")
+texture_pressed = ExtResource("5_0pcbe")
+texture_hover = ExtResource("5_0pcbe")
+script = ExtResource("6_0pcbe")
+
+[node name="ItemButton" type="TextureButton" parent="HUD/MainHUDLayout/ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("6_axeuq")
+texture_pressed = ExtResource("7_1cojt")
+texture_hover = ExtResource("7_1cojt")
+script = ExtResource("9_axeuq")
+
+[node name="RestButton" type="TextureButton" parent="HUD/MainHUDLayout/ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("8_yq1aw")
+texture_pressed = ExtResource("9_pyn1s")
+texture_hover = ExtResource("9_pyn1s")
+script = ExtResource("12_1cojt")
+
+[node name="MinimapAnchor" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HUD/MinimapAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 27.0
+offset_top = 25.0
+offset_right = 177.0
+offset_bottom = 175.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="HUD/MinimapAnchor/SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(150, 150)
+render_target_update_mode = 4
+
+[node name="MinimapCamera" type="Camera3D" parent="HUD/MinimapAnchor/SubViewportContainer/SubViewport" node_paths=PackedStringArray("player_target")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 15, 0)
+cull_mask = 1048573
+projection = 1
+size = 15.0
+script = ExtResource("2_5a7ea")
+player_target = NodePath("../../../../../Player")
+
+[node name="MinimapIndicator" type="TextureRect" parent="HUD/MinimapAnchor"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 68.0
+offset_top = 58.0
+offset_right = 101.0
+offset_bottom = 91.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(16.5, 16.5)
+texture = ExtResource("3_o06y3")
+
+[node name="MinimapBackground" type="TextureRect" parent="HUD/MinimapAnchor"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 12.0
+offset_right = 205.0
+offset_bottom = 206.0
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("4_ikia7")
+
+[node name="CompassLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+offset_left = 968.0
+offset_top = 18.0
+offset_right = 1088.0
+offset_bottom = 41.0
+theme_override_fonts/font = ExtResource("7_e0ngr")
+theme_override_font_sizes/font_size = 14
+text = "NORTH"
+horizontal_alignment = 1
+clip_text = true
+text_overrun_behavior = 1
+
+[node name="Player" type="Node3D" parent="."]
+script = ExtResource("1_a02cp")
+eye_height = 0.8
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+current = true
+
+[node name="CollisionRayCast" type="RayCast3D" parent="Player/Camera3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
+
+[node name="MapManager" type="Node3D" parent="." node_paths=PackedStringArray("dungeon_grid")]
+script = ExtResource("5_fo5ed")
+dungeon_grid = NodePath("../GridMap")
+
+[node name="GridMap" parent="." instance=ExtResource("5_5ukr8")]
+data = {
+"cells": PackedInt32Array(5, 11, 0, 6, 0, 0, 6, 11, 0, 7, 0, 0, 7, 11, 0, 8, 0, 0, 8, 11, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 12, 1, 0, 12, 2, 0, 12, 7, 0, 12, 8, 0, 12, 9, 0, 13, 0, 0, 13, 1, 0, 13, 2, 0, 13, 3, 0, 13, 4, 0, 13, 5, 0, 13, 6, 0, 13, 7, 0, 13, 8, 0, 13, 9, 0, 5, 0, 1, 4, 0, 1, 3, 0, 1, 2, 0, 1, 11, 9, 1, 10, 9, 1, 9, 9, 1, 9, 8, 1, 8, 8, 1, 4, 11, 1, 3, 10, 1, 2, 10, 1, 2, 9, 1, 1, 9, 1, 1, 8, 1, 0, 8, 1, 65535, 8, 1, 65535, 7, 1, 65535, 6, 1, 65534, 6, 1, 65534, 5, 1, 65533, 5, 1, 65533, 4, 1, 65533, 3, 1, 65533, 2, 1, 65533, 1, 1, 65533, 0, 1, 65533, 65535, 1, 65533, 65534, 1, 65533, 65533, 1, 65534, 65533, 1, 65534, 65532, 1, 65535, 65532, 1, 0, 65532, 1, 1, 65532, 1, 2, 65532, 1, 2, 65533, 1, 2, 65534, 1, 2, 65535, 1, 9, 11, 1, 9, 10, 1, 4, 4, 1, 5, 4, 1, 6, 4, 1, 7, 4, 1, 4, 5, 1, 4, 3, 1, 3, 4, 1, 3, 5, 1)
+}
+
+[node name="SceneInitializerModule" type="Node" parent="."]
+script = ExtResource("6_5ukr8")
+
+[node name="Popup" parent="." instance=ExtResource("22_pyn1s")]

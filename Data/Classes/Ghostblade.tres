@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://c4nb1fgg5vbjp"]
+
+[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_ji8yr"]
+
+[resource]
+script = ExtResource("1_ji8yr")
+profession_name = "Ghostblade"
+classic_counterpart = "Ninja"
+req_strength = 12
+req_vitality = 12
+req_dexterity = 12
+req_speed = 12
+req_personality = 0
+spellbook_type = "Maester"
+level_spells_unlock = 5
