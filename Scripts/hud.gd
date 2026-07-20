@@ -29,6 +29,8 @@ func _ready() -> void:
 		signal_bus.party_moved.connect(_on_party_coordinates_changed)
 		# LINK: Listen to the global event router for roster updates
 		signal_bus.party_roster_updated.connect(_update_party_portraits)
+	
+	_setup_portrait_click_listeners()
 		
 	# Connect to the global singleton instance directly
 	GameState.core_state_changed.connect(_on_game_state_changed)
@@ -38,6 +40,33 @@ func _ready() -> void:
 	if GameState.current_party:
 		_update_party_portraits(GameState.current_party.slots)
 
+## Binds GUI input events directly to each portrait slot using Callable binding
+func _setup_portrait_click_listeners() -> void:
+	for i in range(portrait_slots.size()):
+		var slot_rect: TextureRect = portrait_slots[i]
+		
+		if slot_rect:
+			# Ensure the TextureRect catches mouse clicks
+			slot_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+			
+			# Cleanly bind the slot index `i` to our handler method
+			var click_callable: Callable = _on_portrait_gui_input.bind(i)
+			
+			if not slot_rect.gui_input.is_connected(click_callable):
+				slot_rect.gui_input.connect(click_callable)
+
+func _on_portrait_gui_input(event: InputEvent, slot_index: int) -> void:
+	# Detect left mouse button press
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		print("HUD: Portrait clicked for party slot: ", slot_index)
+		
+		# Verify a valid character exists in this slot before broadcasting
+		if GameState.current_party and slot_index < GameState.current_party.slots.size():
+			if GameState.current_party.slots[slot_index] != null:
+				if get_tree().root.has_node("SignalBus"):
+					var signal_bus: Node = get_tree().root.get_node("SignalBus")
+					signal_bus.portrait_clicked.emit(slot_index)
+					
 func _on_party_coordinates_changed(_grid_pos: Vector3i, facing_direction: String) -> void:
 	_update_compass_text(facing_direction)
 	_update_minimap_pointer(facing_direction)

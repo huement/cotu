@@ -1,0 +1,300 @@
+[gd_scene load_steps=3 format=3 uid="uid://b4n0j4k1s2w7x"]
+
+[ext_resource type="Script" uid="uid://c8n8vyy031c3n" path="res://Scripts/UI/character_loadout_panel.gd" id="1_abcde"]
+[ext_resource type="FontFile" uid="uid://c285s3b4w38p1" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="2_qfyrq"]
+
+[node name="CharacterLoadoutPanel" type="VBoxContainer"]
+custom_minimum_size = Vector2(390, 200)
+offset_right = 390.0
+offset_bottom = 200.0
+script = ExtResource("1_abcde")
+
+[node name="HeaderLabel" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 18
+text = "━━━ LOAD OUT ━━━"
+alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="SlotBody" type="Button" parent="GridContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(185, 46)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotBody"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/SlotBody/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="GridContainer/SlotBody/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GridContainer/SlotBody/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ItemName" type="Label" parent="GridContainer/SlotBody/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 12
+text = "BODY ARMOR"
+
+[node name="StatusVal" type="Label" parent="GridContainer/SlotBody/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 10
+text = "100%"
+
+[node name="SlotArms" type="Button" parent="GridContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(185, 46)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotArms"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/SlotArms/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="GridContainer/SlotArms/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GridContainer/SlotArms/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ItemName" type="Label" parent="GridContainer/SlotArms/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 12
+text = "ARM GUARDS"
+
+[node name="StatusVal" type="Label" parent="GridContainer/SlotArms/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 10
+text = "80%"
+
+[node name="SlotLegs" type="Button" parent="GridContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(185, 46)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotLegs"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/SlotLegs/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="GridContainer/SlotLegs/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GridContainer/SlotLegs/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ItemName" type="Label" parent="GridContainer/SlotLegs/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 12
+text = "LEG ARMOR"
+
+[node name="StatusVal" type="Label" parent="GridContainer/SlotLegs/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 10
+text = "40%"
+
+[node name="SlotFeet" type="Button" parent="GridContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(185, 46)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotFeet"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/SlotFeet/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="GridContainer/SlotFeet/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GridContainer/SlotFeet/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ItemName" type="Label" parent="GridContainer/SlotFeet/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 12
+text = "MAG BOOTS"
+
+[node name="StatusVal" type="Label" parent="GridContainer/SlotFeet/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 10
+text = "80%"
+
+[node name="SlotLeftHand" type="Button" parent="GridContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(185, 46)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotLeftHand"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/SlotLeftHand/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="GridContainer/SlotLeftHand/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GridContainer/SlotLeftHand/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ItemName" type="Label" parent="GridContainer/SlotLeftHand/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 12
+text = "LEFT HAND"
+
+[node name="StatusVal" type="Label" parent="GridContainer/SlotLeftHand/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 10
+text = "40%"
+
+[node name="SlotRightHand" type="Button" parent="GridContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(185, 46)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotRightHand"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/SlotRightHand/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="GridContainer/SlotRightHand/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GridContainer/SlotRightHand/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ItemName" type="Label" parent="GridContainer/SlotRightHand/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 12
+text = "RIGHT HAND"
+
+[node name="StatusVal" type="Label" parent="GridContainer/SlotRightHand/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_fonts/font = ExtResource("2_qfyrq")
+theme_override_font_sizes/font_size = 10
+text = "80%"

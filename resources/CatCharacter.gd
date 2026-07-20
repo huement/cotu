@@ -8,8 +8,13 @@ const CharacterStats = preload("res://Models/character_stats.gd")
 @export var name: String = "New Recruit"
 @export var breed: CatBreed
 @export var profession: ProfessionData
-@export var level: int = 1
 @export var portrait_path: String = ""
+@export var portrait: Texture2D
+
+@export_group("Level & Progression")
+@export var level: int = 1
+@export var current_xp: int = 0
+@export var max_xp: int = 1000
 
 @export_group("Core Attributes")
 @export var strength: int = 8
@@ -24,6 +29,44 @@ const CharacterStats = preload("res://Models/character_stats.gd")
 var stats: CharacterStats = CharacterStats.new()
 var current_energy: int = 10
 var max_energy: int = 10
+
+@export_group("Equipment")
+@export var inventory: Inventory
+@export var equipment: Dictionary = {
+	"BODY": null,
+	"ARMS": null,
+	"LEGS": null,
+	"FEET": null,
+	"LEFT_HAND": null,
+	"RIGHT_HAND": null
+}
+
+func equip_item(slot_name: String, item: Resource) -> bool:
+	if equipment.has(slot_name):
+		equipment[slot_name] = item
+		_recalculate_equipment_stats()
+		return true
+	return false
+
+func unequip_item(slot_name: String) -> Resource:
+	if equipment.has(slot_name):
+		var item: Resource = equipment[slot_name]
+		equipment[slot_name] = null
+		_recalculate_equipment_stats()
+		return item
+	return null
+
+func get_equipped_item(slot_name: String) -> Resource:
+	return equipment.get(slot_name, null)
+
+func _recalculate_equipment_stats() -> void:
+	# This is a placeholder for the logic that will iterate through
+	# all non-null items in the equipment dictionary and apply their stat
+	# modifiers to the character.
+	# For now, we'll just print a message.
+	print("Recalculating stats based on equipment...")
+
+
 
 # =============================================================================
 # 🏢 UI & SYSTEM WRAPPER PROPERTIES (Bridges requests to CharacterStats)

@@ -1,24 +1,25 @@
+@warning_ignore("unused_signal")
 extends Node
-# Core/SignalBus.gd - Must be added as an Autoload in Project Settings
+# Core/SignalBus.gd - Autoloaded Event Bus
+
+# Tip: Use enums for fixed states like directions or combat phases to prevent typo bugs
+enum Direction { NORTH, EAST, SOUTH, WEST }
+enum CombatPhase { SELECTION, EXECUTION, RESOLUTION }
 
 ## Emitted whenever the party moves positions or alters cardinal headings
-@warning_ignore("unused_signal")
-signal party_moved(new_grid_pos: Vector3i, facing_direction: String)
+signal party_moved(new_grid_pos: Vector3i, facing: Direction)
 
 # Dispatched whenever the tactical roster initializes or warps
-@warning_ignore("unused_signal")
 signal party_roster_updated(roster_slots: Array)
 
 ## Emitted during phased selection loops to alert the action manager
-@warning_ignore("unused_signal")
-signal party_action_selected(slot_index: int, action_type: String)
+signal party_action_selected(slot_index: int, action_type: StringName)
 
-## Dispatched when combat shifts phase states (e.g., SELECTION to EXECUTION)
-@warning_ignore("unused_signal")
-signal combat_phase_changed(new_phase: int)
+## Dispatched when combat shifts phase states
+signal combat_phase_changed(new_phase: CombatPhase)
 
-# 🎯 POPUP SYSTEM SIGNALS: Dispatched to open/close the modal window
-@warning_ignore("unused_signal")
-signal popup_requested(action_type: String)
-@warning_ignore("unused_signal")
-signal popup_confirmed(action_type: String, extra_data: Dictionary)
+# 🎯 POPUP SYSTEM SIGNALS
+signal popup_requested(action_type: StringName, data: Dictionary)
+signal popup_confirmed(action_type: StringName, extra_data: Dictionary)
+
+signal portrait_clicked(slot_index: int)

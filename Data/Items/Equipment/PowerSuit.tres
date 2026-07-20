@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://byyo4wkfwjvn4"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_48v5n"]
+
+[resource]
+script = ExtResource("1_48v5n")
+item_id = "armor_power_suit"
+item_name = "Exo Power Suit"
+item_type = 1
+defense_bonus = 6

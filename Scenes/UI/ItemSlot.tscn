@@ -1,0 +1,6 @@
+[gd_scene load_steps=0 format=3 uid="uid://cws7x0f6y2w7x"]
+
+[node name="ItemSlot" type="TextureButton"]
+custom_minimum_size = Vector2(48, 48)
+ignore_texture_size = true
+stretch_mode = 0

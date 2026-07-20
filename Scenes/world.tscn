@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=24 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="9_pyn1s"]
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="12_1cojt"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
+[ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
 
 [node name="World" type="Node3D"]
 metadata/_edit_horizontal_guides_ = [481.0]
@@ -236,6 +237,7 @@ clip_text = true
 text_overrun_behavior = 1
 
 [node name="Player" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
 script = ExtResource("1_a02cp")
 eye_height = 0.8
 
@@ -260,3 +262,5 @@ data = {
 script = ExtResource("6_5ukr8")
 
 [node name="Popup" parent="." instance=ExtResource("22_pyn1s")]
+
+[node name="CharacterSheetMenu" parent="." instance=ExtResource("23_no8kt")]

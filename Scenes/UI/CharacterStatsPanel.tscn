@@ -1,0 +1,230 @@
+[gd_scene load_steps=3 format=3 uid="uid://cmwr8bojorjvt"]
+
+[ext_resource type="Script" uid="uid://b3cwdwigdxmpr" path="res://Scripts/UI/character_stats_panel.gd" id="1_c482o"]
+[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="2_7uo88"]
+
+[node name="CharacterStatsPanel" type="PanelContainer"]
+custom_minimum_size = Vector2(320, 260)
+offset_right = 320.0
+offset_bottom = 260.0
+script = ExtResource("1_c482o")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="StatColumn" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatHeader" type="Label" parent="HBoxContainer/StatColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+theme_override_font_sizes/font_size = 20
+text = "STAT"
+
+[node name="StatGrid" type="GridContainer" parent="HBoxContainer/StatColumn"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 4
+columns = 2
+
+[node name="Label_Str" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "STR:"
+
+[node name="StatStr" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="Label_Int" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "INT:"
+
+[node name="StatInt" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="Label_Pie" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "PIE:"
+
+[node name="StatPie" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="Label_Vit" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "VIT:"
+
+[node name="StatVit" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="Label_Dex" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "DEX:"
+
+[node name="StatDex" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="Label_Spd" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "SPD:"
+
+[node name="StatSpd" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="Label_Per" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "PER:"
+
+[node name="StatPer" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="Label_Kar" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "KAR:"
+
+[node name="StatKar" type="Label" parent="HBoxContainer/StatColumn/StatGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"
+
+[node name="FightColumn" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FightHeader" type="Label" parent="HBoxContainer/FightColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+theme_override_font_sizes/font_size = 20
+text = "FIGHT"
+
+[node name="FightGrid" type="GridContainer" parent="HBoxContainer/FightColumn"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 4
+columns = 2
+
+[node name="Label_Acc" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "ACC:"
+
+[node name="FightAcc" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0%"
+
+[node name="Label_LH" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "LH:"
+
+[node name="FightLH" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "1d0"
+
+[node name="Label_RH" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "RH:"
+
+[node name="FightRH" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "1d0"
+
+[node name="Label_Crt" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "CRT:"
+
+[node name="FightCrt" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0%"
+
+[node name="Label_Dmg" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "DMG:"
+
+[node name="FightDmg" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "+0"
+
+[node name="Label_Arm" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "ARM:"
+
+[node name="FightArm" type="Label" parent="HBoxContainer/FightColumn/FightGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("2_7uo88")
+text = "0"

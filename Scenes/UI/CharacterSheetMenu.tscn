@@ -1,0 +1,238 @@
+[gd_scene load_steps=9 format=3 uid="uid://b3w7x0f6y2w7x"]
+
+[ext_resource type="Script" uid="uid://dc51atgdj7ays" path="res://Scripts/UI/character_sheet_menu.gd" id="1_vlp1k"]
+[ext_resource type="Texture2D" uid="uid://dh25qbke4twje" path="res://ui/blue-poly.png" id="2_7h3lb"]
+[ext_resource type="PackedScene" uid="uid://cmwr8bojorjvt" path="res://Scenes/UI/CharacterStatsPanel.tscn" id="2_d4y6v"]
+[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="3_qfyrq"]
+[ext_resource type="PackedScene" uid="uid://b4n0j4k1s2w7x" path="res://Scenes/UI/CharacterLoadoutPanel.tscn" id="4_3bdbs"]
+[ext_resource type="PackedScene" uid="uid://c7l6c37lu33s4" path="res://Scenes/UI/CharacterInventoryGrid.tscn" id="5_n6ey3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7h3lb"]
+bg_color = Color(0.03137255, 0.0627451, 0.078431375, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.33333334, 0.26666668, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v1s0b"]
+bg_color = Color(0, 1, 0.78431374, 1)
+
+[node name="CharacterSheetMenu" type="CanvasLayer"]
+script = ExtResource("1_vlp1k")
+
+[node name="OverlayPanel" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="OverlayPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.04, 0.06, 0.92)
+
+[node name="PolyBtm" type="TextureRect" parent="OverlayPanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -81.0
+offset_top = -28.0
+offset_right = 253.0
+offset_bottom = 46.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_7h3lb")
+flip_v = true
+
+[node name="PolyTop" type="TextureRect" parent="OverlayPanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -83.0
+offset_top = -10.0
+offset_right = 251.0
+offset_bottom = 64.0
+grow_horizontal = 2
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_7h3lb")
+
+[node name="MarginContainer" type="MarginContainer" parent="OverlayPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="MainHBox" type="HBoxContainer" parent="OverlayPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="LeftColumn" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderHbox" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PortraitTexture" type="TextureRect" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InfoVBox" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameBreedVbox" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CharNameLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/NameBreedVbox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.75, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+theme_override_font_sizes/font_size = 22
+text = "CHARACTER NAME"
+
+[node name="BreedLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/NameBreedVbox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 0.75, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+theme_override_font_sizes/font_size = 16
+text = "RACE / BREED"
+
+[node name="LevelBlock" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox"]
+layout_mode = 2
+
+[node name="LevelTextHBox" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock"]
+layout_mode = 2
+
+[node name="LevelTag" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock/LevelTextHBox"]
+layout_mode = 2
+text = "LVL"
+
+[node name="LevelValLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock/LevelTextHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+text = "99"
+
+[node name="XPProgressBar" type="ProgressBar" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 8)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_7h3lb")
+theme_override_styles/fill = SubResource("StyleBoxFlat_v1s0b")
+show_percentage = false
+
+[node name="VitalsVBox" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox"]
+layout_mode = 2
+
+[node name="Row1_HPMana" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="HPContainer" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row1_HPMana"]
+layout_mode = 2
+
+[node name="HPLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row1_HPMana/HPContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+text = "HEALTH "
+
+[node name="HPValLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row1_HPMana/HPContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+text = "99/99"
+
+[node name="EnergyContainer" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row1_HPMana"]
+layout_mode = 2
+
+[node name="EnergyLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row1_HPMana/EnergyContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.2, 1, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+text = "MANA "
+
+[node name="EnergyValLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row1_HPMana/EnergyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.2, 1, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+text = "0/0"
+
+[node name="Row2_Stamina" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="StaminaGroup" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row2_Stamina"]
+layout_mode = 2
+
+[node name="StaminaLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row2_Stamina/StaminaGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9931863, 0.40165225, 0.26637855, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+text = "STAMINA"
+
+[node name="StaminaValLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/VitalsVBox/Row2_Stamina/StaminaGroup"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9931863, 0.40165225, 0.26637855, 1)
+theme_override_fonts/font = ExtResource("3_qfyrq")
+text = "136/140"
+
+[node name="HSeparator" type="HSeparator" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn"]
+layout_mode = 2
+
+[node name="CharacterLoadoutPanel" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn" instance=ExtResource("4_3bdbs")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RightColumn" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="CharacterStatsPanel" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn" instance=ExtResource("2_d4y6v")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CharacterInventoryGrid" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn" instance=ExtResource("5_n6ey3")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("3_qfyrq")
+theme_override_font_sizes/font_size = 18
+text = "[ CLOSE ]"
