@@ -49,6 +49,18 @@ func _initialize_active_session() -> void:
 	if is_instance_valid(catnip_potion):
 		inventory.add_item(catnip_potion)
 
+	# 3a. Preload and assign starting spells & skills
+	var plasma_dart: SpellData = preload("res://Data/Spells/PlasmaDart.tres") as SpellData
+	var purr_healing: SpellData = preload("res://Data/Spells/PurrHealing.tres") as SpellData
+	var lockpicking: SkillData = preload("res://Data/Skills/Lockpicking.tres") as SkillData
+	var laser_claw_prof: SkillData = preload("res://Data/Skills/LaserClawProficiency.tres") as SkillData
+
+	if is_instance_valid(commander):
+		commander.known_spells.append(plasma_dart)
+		commander.known_spells.append(purr_healing)
+		commander.known_skills.append(lockpicking)
+		commander.known_skills.append(laser_claw_prof)
+
 	# 4. Link all party members to share the central party inventory
 	for slot in current_party.slots:
 		if is_instance_valid(slot):

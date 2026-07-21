@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/SpellData.gd" id="1_abcde"]
+
+[resource]
+script = ExtResource("1_abcde")
+spell_id = "plasma_dart"
+spell_name = "Plasma Dart"
+spell_title = "A focused bolt of energy."
+description = "Hurls a small, unstable plasma bolt at a single target."
+spell_level = 1
+energy_cost = 2
+spell_type = 0 # OFFENSIVE
+element = 1 # FIRE
+target_type = 2 # SINGLE_ENEMY
+dice_count = 1
+dice_sides = 6
+base_bonus = 2
+scaling_stat = 1 # INTELLIGENCE
+stat_multiplier = 0.5

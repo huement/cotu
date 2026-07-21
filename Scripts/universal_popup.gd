@@ -4,7 +4,7 @@ class_name UniversalPopup
 
 @onready var panel_container: PanelContainer = $PanelContainer as PanelContainer
 @onready var background_dimmer: ColorRect = $BackgroundDimmer as ColorRect
-@onready var title_label: Label = $PanelContainer/MarginContainer/VBoxContainer/TitleLabel as Label
+@onready var title_label: Label = %TitleLabel as Label
 @onready var content_area: VBoxContainer = %ContentArea as VBoxContainer
 @onready var confirm_button: TextureButton = %ConfirmButton as TextureButton
 

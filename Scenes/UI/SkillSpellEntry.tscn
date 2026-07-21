@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://by87yax3qol3f"]
+
+[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="1_qfyrq"]
+
+[node name="SkillSpellEntry" type="Button"]
+custom_minimum_size = Vector2(0, 80)
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="MarginContainer/HBox"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="Name" type="Label" parent="MarginContainer/HBox/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_qfyrq")
+theme_override_font_sizes/font_size = 13
+text = "Skill/Spell Name"
+
+[node name="Desc" type="Label" parent="MarginContainer/HBox/VBox"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_qfyrq")
+theme_override_font_sizes/font_size = 11
+text = "A short description of the ability."
+autowrap_mode = 2

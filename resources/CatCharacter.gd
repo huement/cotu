@@ -41,6 +41,10 @@ var max_energy: int = 10
 	"RIGHT_HAND": null
 }
 
+@export_group("Abilities")
+@export var known_spells: Array[SpellData] = []
+@export var known_skills: Array[SkillData] = []
+
 func equip_item(slot_name: String, item: Resource) -> bool:
 	if equipment.has(slot_name):
 		equipment[slot_name] = item

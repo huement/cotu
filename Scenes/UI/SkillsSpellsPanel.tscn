@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://c40d51j6bj8e0"]
+
+[ext_resource type="Script" uid="uid://dwo24n4mbahsu" path="res://Scripts/UI/SkillsSpellsPanel.gd" id="1_abcde"]
+[ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="2_kvkl8"]
+
+[node name="SkillsSpellsPanel" type="VBoxContainer"]
+script = ExtResource("1_abcde")
+
+[node name="TabContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SkillsButton" type="Button" parent="TabContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_kvkl8")
+theme_override_font_sizes/font_size = 18
+text = "SKILLS"
+
+[node name="SpellsButton" type="Button" parent="TabContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_kvkl8")
+theme_override_font_sizes/font_size = 18
+text = "SPELLS"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ListContainer" type="VBoxContainer" parent="ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

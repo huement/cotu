@@ -92,7 +92,9 @@ func _create_slot_button(item: ItemData, slot_idx: int) -> void:
 ## Generates a retro sci-fi dark cyan slot frame
 func _create_styled_button() -> Button:
 	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(48, 48)
+	# Set minimum height (Y), but let X expand to fill column width
+	btn.custom_minimum_size = Vector2(0, 48)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.focus_mode = Control.FOCUS_NONE
 	
 	var style_normal := StyleBoxFlat.new()

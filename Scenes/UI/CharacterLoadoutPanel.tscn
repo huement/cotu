@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://b4n0j4k1s2w7x"]
+[gd_scene load_steps=4 format=3 uid="uid://b4n0j4k1s2w7x"]
 
-[ext_resource type="Script" uid="uid://c8n8vyy031c3n" path="res://Scripts/UI/character_loadout_panel.gd" id="1_abcde"]
-[ext_resource type="FontFile" uid="uid://c285s3b4w38p1" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="2_qfyrq"]
+[ext_resource type="Script" uid="uid://d14gxjgaqmnhs" path="res://Scripts/UI/character_loadout_panel.gd" id="1_abcde"]
+[ext_resource type="Texture2D" uid="uid://bml5kv0skinh3" path="res://ui/HUD/gear-title.png" id="2_3slxo"]
+[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="2_qfyrq"]
 
 [node name="CharacterLoadoutPanel" type="VBoxContainer"]
 custom_minimum_size = Vector2(390, 200)
@@ -9,17 +10,19 @@ offset_right = 390.0
 offset_bottom = 200.0
 script = ExtResource("1_abcde")
 
-[node name="HeaderLabel" type="Label" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 0.75, 1)
-theme_override_fonts/font = ExtResource("2_qfyrq")
-theme_override_font_sizes/font_size = 18
-text = "━━━ LOAD OUT ━━━"
-alignment = 1
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer"]
+layout_mode = 2
+texture = ExtResource("2_3slxo")
+stretch_mode = 5
 
 [node name="GridContainer" type="GridContainer" parent="."]
 layout_mode = 2
-theme_override_constants/h_separation = 10
+theme_override_constants/h_separation = 18
 theme_override_constants/v_separation = 8
 columns = 2
 

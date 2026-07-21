@@ -49,16 +49,23 @@ theme_override_constants/margin_bottom = 15
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UniversalPopup/PanelContainer/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 20
 
 [node name="TitleLabel" type="Label" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_xopd3")
 theme_override_font_sizes/font_size = 18
 
-[node name="ContentArea" type="VBoxContainer" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="ContentArea" type="VBoxContainer" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_constants/separation = 20
 
 [node name="ConfirmButton" type="TextureButton" parent="UniversalPopup/PanelContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true

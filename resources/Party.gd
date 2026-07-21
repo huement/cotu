@@ -11,6 +11,11 @@ func _init() -> void:
 	_generate_fixed_starter_party()
 
 func _generate_fixed_starter_party() -> void:
+	# 📜 Load ProfessionData Resources from Data/Classes/
+	var spartan_prof: ProfessionData = load("res://Data/Classes/Spartan.tres") as ProfessionData
+	var warden_prof: ProfessionData = load("res://Data/Classes/Warden.tres") as ProfessionData
+	var wizard_prof: ProfessionData = load("res://Data/Classes/Wizard.tres") as ProfessionData
+
 	# --- PROFILE 1: FRONT ROW TANK ---
 	var mc_breed := CatBreed.new()
 	mc_breed.breed_name = "Maine Coon"
@@ -20,6 +25,7 @@ func _generate_fixed_starter_party() -> void:
 	var cat1 := CatCharacter.new()
 	cat1.name = "Commander Whiskers" # Fixed: Maps to your CatCharacter.gd identity field
 	cat1.breed = mc_breed
+	cat1.profession = spartan_prof
 	cat1.portrait_path = "res://Data/Portraits/Spartan.png" # 🎯 Map Spartan asset
 	cat1.initialize_stats() # Combined Lifecycle: Automatically generates and sets up HP, Energy, and Stats!
 	slots[0] = cat1 # Placed in Front Row Left
@@ -33,6 +39,7 @@ func _generate_fixed_starter_party() -> void:
 	var cat2 := CatCharacter.new()
 	cat2.name = "Baron Von Hiss"
 	cat2.breed = siamese_breed
+	cat2.profession = warden_prof
 	cat2.portrait_path = "res://Data/Portraits/Warden.png"
 	cat2.initialize_stats()
 	slots[1] = cat2 # Placed in Front Row Center
@@ -46,6 +53,7 @@ func _generate_fixed_starter_party() -> void:
 	var cat4 := CatCharacter.new()
 	cat4.name = "Sage Psych-Meow"
 	cat4.breed = sphinx_breed
+	cat4.profession = wizard_prof
 	cat4.portrait_path = "res://Data/Portraits/Wizard.png"
 	cat4.initialize_stats()
 	slots[3] = cat4 # Placed in Back Row Left
