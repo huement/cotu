@@ -70,10 +70,8 @@ func _recalculate_equipment_stats() -> void:
 	# For now, we'll just print a message.
 	print("Recalculating stats based on equipment...")
 
-
-
 # =============================================================================
-# 🏢 UI & SYSTEM WRAPPER PROPERTIES (Bridges requests to CharacterStats)
+# 🏢 UI & SYSTEM WRAPPER PROPERTIES
 # =============================================================================
 
 var current_hp: int:
@@ -89,6 +87,23 @@ var max_hp: int:
 	set(value):
 		if stats:
 			stats.max_health = value
+
+# 🎯 ALIAS BRIDGES: Redirects health/mana queries safely to current_hp / energy
+var current_health: int:
+	get: return current_hp
+	set(value): current_hp = value
+
+var max_health: int:
+	get: return max_hp
+	set(value): max_hp = value
+
+var current_mana: int:
+	get: return current_energy
+	set(value): current_energy = value
+
+var max_mana: int:
+	get: return max_energy
+	set(value): max_energy = value
 
 # =============================================================================
 # ⚙️ LIFECYCLE INITIALIZATION METHODS

@@ -23,13 +23,13 @@ extends CanvasLayer
 @onready var player: Node3D = get_node("../Player") as Node3D
 
 # 🎯 PORTRAIT MATRIX MAP: 6-Slot Exploration Party Portraits
-@onready var portrait_slots: Array[TextureRect] = [
-	%Slot0_Portrait as TextureRect,
-	%Slot1_Portrait as TextureRect,
-	%Slot2_Portrait as TextureRect,
-	%Slot3_Portrait as TextureRect,
-	%Slot4_Portrait as TextureRect,
-	%Slot5_Portrait as TextureRect
+@onready var portrait_slots: Array[PartySlotPortrait] = [
+	%Slot0_Portrait as PartySlotPortrait,
+	%Slot1_Portrait as PartySlotPortrait,
+	%Slot2_Portrait as PartySlotPortrait,
+	%Slot3_Portrait as PartySlotPortrait,
+	%Slot4_Portrait as PartySlotPortrait,
+	%Slot5_Portrait as PartySlotPortrait
 ]
 
 
@@ -136,14 +136,21 @@ func _update_minimap_pointer(direction: String) -> void:
 # ==============================================================================
 # 5. PARTY ROSTER & PORTRAIT MANAGEMENT
 # ==============================================================================
+## Binds GUI input events directly to each PartySlotPortrait component
 func _setup_portrait_click_listeners() -> void:
 	for i in range(portrait_slots.size()):
-		var slot_rect: TextureRect = portrait_slots[i]
-		if slot_rect:
-			slot_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+		# Updated type from TextureRect to PartySlotPortrait (Control)
+		var slot_component: PartySlotPortrait = portrait_slots[i]
+		
+		if slot_component:
+			# Ensure the slot container catches mouse clicks
+			slot_component.mouse_filter = Control.MOUSE_FILTER_STOP
+			
+			# Cleanly bind the slot index `i` to our handler method
 			var click_callable: Callable = _on_portrait_gui_input.bind(i)
-			if not slot_rect.gui_input.is_connected(click_callable):
-				slot_rect.gui_input.connect(click_callable)
+			
+			if not slot_component.gui_input.is_connected(click_callable):
+				slot_component.gui_input.connect(click_callable)
 
 func _on_portrait_gui_input(event: InputEvent, slot_index: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -153,23 +160,21 @@ func _on_portrait_gui_input(event: InputEvent, slot_index: int) -> void:
 				if sb and sb.has_signal("portrait_clicked"):
 					sb.portrait_clicked.emit(slot_index)
 
+## Reads incoming roster resources and delegates rendering directly to component slots
 func _update_party_portraits(active_slots: Array) -> void:
-	var fallback_image_path: String = "res://ui/portrait.png"
-	
 	for i in range(6):
-		if i >= active_slots.size() or active_slots[i] == null:
-			if portrait_slots[i]: portrait_slots[i].texture = null
+		# 1. Null Guard: Verify the UI slot component exists in the scene tree
+		if i >= portrait_slots.size() or portrait_slots[i] == null:
 			continue
 			
-		var cat: CatCharacter = active_slots[i] as CatCharacter
-		if cat:
-			if "portrait_path" in cat and not cat.portrait_path.is_empty() and ResourceLoader.exists(cat.portrait_path):
-				portrait_slots[i].texture = load(cat.portrait_path) as Texture
-			elif "portrait_texture" in cat and cat.portrait_texture:
-				portrait_slots[i].texture = cat.portrait_texture
-			elif ResourceLoader.exists(fallback_image_path):
-				portrait_slots[i].texture = load(fallback_image_path) as Texture
-
+		# 2. Safely resolve the CatCharacter resource
+		var cat: CatCharacter = null
+		if i < active_slots.size() and active_slots[i] is CatCharacter:
+			cat = active_slots[i] as CatCharacter
+			
+		# 3. Delegate to the PartySlotPortrait component
+		if portrait_slots[i].has_method("setup_slot"):
+			portrait_slots[i].setup_slot(cat)
 
 # ==============================================================================
 # 6. HELPER & DEBUG TESTING

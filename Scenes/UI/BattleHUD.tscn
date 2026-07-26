@@ -139,15 +139,24 @@ grow_vertical = 2
 theme_override_constants/separation = 10
 
 [node name="Party0" parent="PartyLeft" instance=ExtResource("7_s15b2")]
+custom_minimum_size = Vector2(78, 102)
 layout_mode = 2
+portrait_size = Vector2(78, 78)
+bar_height = 8.0
 
 [node name="Party1" parent="PartyLeft" instance=ExtResource("7_s15b2")]
+custom_minimum_size = Vector2(78, 102)
 layout_mode = 2
 slot_index = 1
+portrait_size = Vector2(78, 78)
+bar_height = 8.0
 
 [node name="Party2" parent="PartyLeft" instance=ExtResource("7_s15b2")]
+custom_minimum_size = Vector2(78, 102)
 layout_mode = 2
 slot_index = 2
+portrait_size = Vector2(78, 78)
+bar_height = 8.0
 
 [node name="PartyRight" type="VBoxContainer" parent="."]
 unique_name_in_owner = true
@@ -165,16 +174,25 @@ grow_vertical = 2
 theme_override_constants/separation = 10
 
 [node name="Party3" parent="PartyRight" instance=ExtResource("7_s15b2")]
+custom_minimum_size = Vector2(78, 102)
 layout_mode = 2
 slot_index = 3
+portrait_size = Vector2(78, 78)
+bar_height = 8.0
 
 [node name="Party4" parent="PartyRight" instance=ExtResource("7_s15b2")]
+custom_minimum_size = Vector2(78, 102)
 layout_mode = 2
 slot_index = 4
+portrait_size = Vector2(78, 78)
+bar_height = 8.0
 
 [node name="Party5" parent="PartyRight" instance=ExtResource("7_s15b2")]
+custom_minimum_size = Vector2(78, 102)
 layout_mode = 2
 slot_index = 5
+portrait_size = Vector2(78, 78)
+bar_height = 8.0
 
 [node name="ActionBar" type="HBoxContainer" parent="."]
 layout_mode = 1
