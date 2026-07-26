@@ -36,7 +36,7 @@ func get_items() -> Array[ItemData]:
 func size() -> int:
 	return _items.size()
 
-func use_item(index: int, target_character: CatCharacter) -> bool:
+func use_item(index: int, target_character: Resource) -> bool:
 	if not is_instance_valid(target_character) or index < 0 or index >= _items.size():
 		return false
 

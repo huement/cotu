@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://ci4b8iodvo08n"]
+[gd_scene load_steps=19 format=3 uid="uid://ci4b8iodvo08n"]
 
 [ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
 [ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://yo001sb3lbfp" path="res://Scenes/UI/PartySlotPortrait.tscn" id="7_s15b2"]
 [ext_resource type="Texture2D" uid="uid://xd4qyeikfchx" path="res://ui/BATTLE/cmd_attack.png" id="8_faao3"]
 [ext_resource type="Texture2D" uid="uid://dedwywthvhbrg" path="res://ui/BATTLE/cmd_defense.png" id="9_55foo"]
+[ext_resource type="Script" uid="uid://baloa5l37brhf" path="res://Scripts/UI/BattleActionBar.gd" id="9_lrf55"]
 [ext_resource type="FontFile" uid="uid://c1112jnjnfk4y" path="res://ui/fonts/RedditMono-Regular.ttf" id="9_qdnyl"]
 [ext_resource type="Texture2D" uid="uid://bpmd16bustmsp" path="res://ui/BATTLE/playerCounterBG.png" id="10_55foo"]
 [ext_resource type="Texture2D" uid="uid://wxg36hnmjey4" path="res://ui/BATTLE/cmd_magic.png" id="10_gv3jx"]
@@ -195,6 +196,7 @@ portrait_size = Vector2(78, 78)
 bar_height = 8.0
 
 [node name="ActionBar" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -206,6 +208,7 @@ offset_top = -40.0
 offset_right = 20.0
 grow_horizontal = 2
 grow_vertical = 0
+script = ExtResource("9_lrf55")
 
 [node name="AttackButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
 unique_name_in_owner = true

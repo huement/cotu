@@ -198,27 +198,3 @@ func _on_game_state_changed(new_state: int) -> void:
 			if battle_hud: battle_hud.show()
 		GameState.Mode.MANAGEMENT:
 			_set_exploration_ui_visible(false)
-
-# Debug hotkeys: 'B' toggles Battle Mode, 'H' triggers Chevron Flash FX
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_B:
-			var sb: Node = get_tree().root.get_node_or_null("SignalBus")
-			if battle_hud and battle_hud.visible:
-				if sb and sb.has_signal("combat_ended"):
-					sb.combat_ended.emit(true)
-				else:
-					_on_combat_ended(true)
-			else:
-				var mock_enemy: EnemyData = load("res://Data/Enemies/ZombieCat_Base.tres") as EnemyData
-				var active_party: Array = GameState.current_party.slots if (Engine.has_singleton("GameState") or get_tree().root.has_node("GameState")) and GameState.current_party else []
-				
-				if sb and sb.has_signal("combat_started"):
-					sb.combat_started.emit(mock_enemy, active_party)
-				else:
-					_on_combat_started(mock_enemy, active_party)
-		
-		elif event.keycode == KEY_H and battle_hud and battle_hud.visible:
-			var sb: Node = get_tree().root.get_node_or_null("SignalBus")
-			if sb and sb.has_signal("chevron_flash_requested"):
-				sb.chevron_flash_requested.emit(true)

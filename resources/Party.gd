@@ -1,74 +1,101 @@
+# res://resources/Party.gd
 extends Resource
 class_name DungeonParty
 
-## The absolute 6-slot structural matrix array constraint
-## Slots 0, 1, 2 = Front Row (Exposed to melee)
-## Slots 3, 4, 5 = Back Row  (Safe from melee, supports range/magic)
-@export var slots: Array[CatCharacter] = [null, null, null, null, null, null]
+## The 6-Slot Structural Matrix for Wizardry-style Party:
+## Slots 0, 1, 2 = Front Row (Exposed to Melee)
+## Slots 3, 4, 5 = Back Row  (Protected from Melee, Supports Ranged/Magic)
+## 
+## NOTE: Typed as Array[Resource] to avoid cyclic compiler deadlocks in Godot 4
+@export var slots: Array[Resource] = [null, null, null, null, null, null]
 
-## Programmatic Constructor: Instantly hardcodes your core test squad on execution
+
+# ==============================================================================
+# 1. INITIALIZATION
+# ==============================================================================
 func _init() -> void:
-	_generate_fixed_starter_party()
+	# Ensure the 6 slots are initialized without overwriting existing data
+	if slots.is_empty() or slots.size() != 6:
+		slots = [null, null, null, null, null, null]
 
-func _generate_fixed_starter_party() -> void:
-	# 📜 Load ProfessionData Resources from Data/Classes/
-	var spartan_prof: ProfessionData = load("res://Data/Classes/Spartan.tres") as ProfessionData
-	var warden_prof: ProfessionData = load("res://Data/Classes/Warden.tres") as ProfessionData
-	var wizard_prof: ProfessionData = load("res://Data/Classes/Wizard.tres") as ProfessionData
 
-	# --- PROFILE 1: FRONT ROW TANK ---
-	var mc_breed := CatBreed.new()
-	mc_breed.breed_name = "Maine Coon"
-	mc_breed.base_vitality = 25 # Fixed: Scales out to 50 HP via your _calculate_vitals() rule
-	mc_breed.base_speed = 8     # Fixed: Maps cleanly to breed base attributes
-	
-	var cat1 := CatCharacter.new()
-	cat1.name = "Commander Whiskers" # Fixed: Maps to your CatCharacter.gd identity field
-	cat1.breed = mc_breed
-	cat1.profession = spartan_prof
-	cat1.portrait_path = "res://Data/Portraits/Spartan.png" # 🎯 Map Spartan asset
-	cat1.initialize_stats() # Combined Lifecycle: Automatically generates and sets up HP, Energy, and Stats!
-	slots[0] = cat1 # Placed in Front Row Left
-	
-	# --- PROFILE 2: FRONT ROW MELEE ---
-	var siamese_breed := CatBreed.new()
-	siamese_breed.breed_name = "Siamese"
-	siamese_breed.base_vitality = 20 # Scales out to 40 HP
-	siamese_breed.base_speed = 14
-	
-	var cat2 := CatCharacter.new()
-	cat2.name = "Baron Von Hiss"
-	cat2.breed = siamese_breed
-	cat2.profession = warden_prof
-	cat2.portrait_path = "res://Data/Portraits/Warden.png"
-	cat2.initialize_stats()
-	slots[1] = cat2 # Placed in Front Row Center
-	
-	# --- PROFILE 3: BACK ROW CASTER ---
-	var sphinx_breed := CatBreed.new()
-	sphinx_breed.breed_name = "Sphinx"
-	sphinx_breed.base_vitality = 15 # Scales out to 30 HP
-	sphinx_breed.base_speed = 11
-	
-	var cat4 := CatCharacter.new()
-	cat4.name = "Sage Psych-Meow"
-	cat4.breed = sphinx_breed
-	cat4.profession = wizard_prof
-	cat4.portrait_path = "res://Data/Portraits/Wizard.png"
-	cat4.initialize_stats()
-	slots[3] = cat4 # Placed in Back Row Left
-
-## Row Position Query Utilities
-func is_front_row(slot_index: int) -> bool:
+# ==============================================================================
+# 2. ROW & POSITION UTILITIES
+# ==============================================================================
+static func is_front_row(slot_index: int) -> bool:
 	return slot_index >= 0 and slot_index <= 2
 
-func is_back_row(slot_index: int) -> bool:
+static func is_back_row(slot_index: int) -> bool:
 	return slot_index >= 3 and slot_index <= 5
 
+## Swaps two party members in the matrix (e.g., moving a cat to the Back Row)
+func swap_slots(from_idx: int, to_idx: int) -> void:
+	if from_idx >= 0 and from_idx < 6 and to_idx >= 0 and to_idx < 6:
+		var temp: Resource = slots[from_idx]
+		slots[from_idx] = slots[to_idx]
+		slots[to_idx] = temp
+
 ## Returns an array filtered down strictly to living combatants
-func get_viable_combatants() -> Array[CatCharacter]:
-	var active_units: Array[CatCharacter] = []
-	for cat in slots:
-		if cat != null and not cat.stats.health <= 0: # Checks component framework safety boundaries
-			active_units.append(cat)
+func get_viable_combatants() -> Array[Resource]:
+	var active_units: Array[Resource] = []
+	for cat_res in slots:
+		if is_instance_valid(cat_res):
+			var hp: int = cat_res.get("current_hp") if "current_hp" in cat_res else (cat_res.get("current_health") if "current_health" in cat_res else 0)
+			if hp > 0:
+				active_units.append(cat_res)
 	return active_units
+
+
+# ==============================================================================
+# 3. STARTER PARTY GENERATOR
+# ==============================================================================
+## Called explicitly when starting a New Game session
+func setup_starter_party() -> void:
+	var spartan_prof: Resource = load("res://Data/Classes/Spartan.tres")
+	var warden_prof: Resource = load("res://Data/Classes/Warden.tres")
+	var wizard_prof: Resource = load("res://Data/Classes/Wizard.tres")
+
+	# --- PROFILE 1: FRONT ROW TANK (Slot 0) ---
+	slots[0] = _create_starter_cat(
+		"Commander Whiskers", 
+		"Maine Coon", 
+		25, 
+		8, 
+		spartan_prof, 
+		"res://Data/Portraits/Spartan.png"
+	)
+
+	# --- PROFILE 2: FRONT ROW MELEE (Slot 1) ---
+	slots[1] = _create_starter_cat(
+		"Baron Von Hiss", 
+		"Siamese", 
+		20, 
+		14, 
+		warden_prof, 
+		"res://Data/Portraits/Warden.png"
+	)
+
+	# --- PROFILE 3: BACK ROW CASTER (Slot 3) ---
+	slots[3] = _create_starter_cat(
+		"Sage Psych-Meow", 
+		"Sphinx", 
+		15, 
+		11, 
+		wizard_prof, 
+		"res://Data/Portraits/Wizard.png"
+	)
+
+func _create_starter_cat(cat_name: String, breed_name: String, vit: int, spd: int, prof: Resource, portrait: String) -> Resource:
+	var breed := CatBreed.new()
+	breed.breed_name = breed_name
+	breed.base_vitality = vit
+	breed.base_speed = spd
+	
+	var cat := CatCharacter.new()
+	cat.name = cat_name
+	cat.breed = breed
+	cat.profession = prof
+	cat.portrait_path = portrait
+	if cat.has_method("initialize_stats"):
+		cat.initialize_stats()
+	return cat

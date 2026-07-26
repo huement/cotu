@@ -26,7 +26,8 @@ enum ScalingStat { STRENGTH, INTELLIGENCE, PIETY, DEXTERITY }
 @export var stat_multiplier: float = 1.0
 
 ## Calculates the final effect value based on caster stats and a power level.
-func calculate_effect_value(caster: CatCharacter, power_level: int = 1) -> int:
+## Typed as `Resource` to prevent circular class dependencies with CatCharacter
+func calculate_effect_value(caster: Resource, power_level: int = 1) -> int:
 	var final_value: int = 0
 	for _i in range(dice_count):
 		final_value += randi_range(1, dice_sides)
@@ -38,13 +39,13 @@ func calculate_effect_value(caster: CatCharacter, power_level: int = 1) -> int:
 		var caster_stat_value: int = 0
 		match scaling_stat:
 			ScalingStat.STRENGTH:
-				caster_stat_value = caster.strength
+				caster_stat_value = caster.get("strength") if "strength" in caster else 0
 			ScalingStat.INTELLIGENCE:
-				caster_stat_value = caster.intelligence
+				caster_stat_value = caster.get("intelligence") if "intelligence" in caster else 0
 			ScalingStat.PIETY:
-				caster_stat_value = caster.piety
+				caster_stat_value = caster.get("piety") if "piety" in caster else 0
 			ScalingStat.DEXTERITY:
-				caster_stat_value = caster.dexterity
+				caster_stat_value = caster.get("dexterity") if "dexterity" in caster else 0
 		
 		scaling_bonus = int(caster_stat_value * stat_multiplier)
 
