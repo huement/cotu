@@ -23,3 +23,18 @@ signal popup_requested(action_type: StringName, data: Dictionary)
 signal popup_confirmed(action_type: StringName, extra_data: Dictionary)
 
 signal portrait_clicked(slot_index: int)
+
+## Combat Triggers
+signal combat_started(enemy_group: EnemyGroupData)
+signal combat_ended(victory: bool)
+
+## Active Time Battle Signals
+signal turn_meter_updated(combatant_id: String, percent: float)
+signal combatant_turn_ready(combatant_id: String, is_player: bool)
+
+## Visual FX Signals
+signal chevron_flash_requested(is_player_hit: bool)
+signal enemy_health_changed(current_hp: int, max_hp: int)
+
+## Active Time Battle & Party UI Signals
+signal character_health_changed(target_slot: int, current_hp: int)

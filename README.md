@@ -1,17 +1,13 @@
+![_extra/logo-text.png](_extra/logo-text.png)
+
 ```text
 ■◤◢◤◢◤◢◤◢◤◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■◣◥◣◥◣◥◣◥◣◥■
 ▉▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▉
 ▉  .        *           .           *            .           *   ▉
 ▉ *         .              .                 .          .      * ▉
-▉■■■■■■■■■■■■■■■▶ LORDS OF THE ETERNAL ORDER ◀■■■■■■■■■■■■■■■■■■■▉
-▉  .                                                             ▉
-▉        ░█░░░█▀█░█▀▄░█▀▄░█▀▀░░░█▀█░█▀▀░░░▀█▀░█░█░█▀▀   *    .   ▉
-▉ *      ░█░░░█░█░█▀▄░█░█░▀▀█░░░█░█░█▀▀░░░░█░░█▀█░█▀▀        *   ▉
-▉  *     ░▀▀▀░▀▀▀░▀░▀░▀▀░░▀▀▀░░░▀▀▀░▀░░░░░░▀░░▀░▀░▀▀▀  .         ▉
-▉     ░█▀▀░▀█▀░█▀▀░█▀▄░█▀█░█▀█░█░░░░░█▀█░█▀▄░█▀▄░█▀▀░█▀▄         ▉
-▉   . ░█▀▀░░█░░█▀▀░█▀▄░█░█░█▀█░█░░░░░█░█░█▀▄░█░█░█▀▀░█▀▄   *     ▉
-▉     ░▀▀▀░░▀░░▀▀▀░▀░▀░▀░▀░▀░▀░▀▀▀░░░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀         ▉
-▉  .                   .                         *               ▉
+▉■■■■■■■■■■▶ SHARDS OF THE ARCANUM ◀■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▉
+▉  .         .            *.          .     *      .   .         ▉
+▉       .         *          .           *               *       ▉
 ▉■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▉
 ▉                                                                ▉
 ▉   :: GODOT BASED ::                                            ▉
@@ -35,3 +31,7 @@ It aims to provide a Blobber Style RPG set in a far off world, using a turn base
 The combat is turn based, but it can also be "automated", where the party members will automatically attack enemies using a set of parameters (such as no using items). If the enemy is a "Boss" it will not use automatic fighting unless prompted to. I plan to draw a little bit from how "RAID" works for the combat system, simple and effective, working well on mobile devices.
 
 The art style is pixel art, with a cyberpunk theme.
+
+## MORE DETAILS
+
+There is a markdown file [WORLD.md](_extra/WORLD.md) that contains a rough outline of the world and the characters that will be a part of the game.

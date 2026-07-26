@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://b8fmdf3b7jc8n"]
+
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="1_k5ssf"]
+[ext_resource type="PackedScene" uid="uid://ds6mkgkahu71e" path="res://resources/Enemies/Kenny/character-l.glb" id="1_wiw8o"]
+
+[resource]
+script = ExtResource("1_k5ssf")
+model_scene = ExtResource("1_wiw8o")
+metadata/_custom_type_script = "uid://cidbs10ca08v4"

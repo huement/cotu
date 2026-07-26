@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dhtc6lewgwtaa"
+
+[deps]
+
+files=["res://Data/Character_Classes.Name.translation", "res://Data/Character_Classes.Based On.translation", "res://Data/Character_Classes.STR.translation", "res://Data/Character_Classes.INT.translation", "res://Data/Character_Classes.PIE.translation", "res://Data/Character_Classes.VIT.translation", "res://Data/Character_Classes.DEX.translation", "res://Data/Character_Classes.SPD.translation", "res://Data/Character_Classes.PER.translation", "res://Data/Character_Classes.Spellbook Type.translation", "res://Data/Character_Classes.Spell Level.translation", "res://Data/Character_Classes.Weaponry.translation", "res://Data/Character_Classes.Physical.translation", "res://Data/Character_Classes.Academia.translation", "res://Data/Character_Classes.Primary Features & Mechanics.translation"]
+
+source_file="res://Data/Character_Classes.csv"
+dest_files=["res://Data/Character_Classes.Name.translation", "res://Data/Character_Classes.Based On.translation", "res://Data/Character_Classes.STR.translation", "res://Data/Character_Classes.INT.translation", "res://Data/Character_Classes.PIE.translation", "res://Data/Character_Classes.VIT.translation", "res://Data/Character_Classes.DEX.translation", "res://Data/Character_Classes.SPD.translation", "res://Data/Character_Classes.PER.translation", "res://Data/Character_Classes.Spellbook Type.translation", "res://Data/Character_Classes.Spell Level.translation", "res://Data/Character_Classes.Weaponry.translation", "res://Data/Character_Classes.Physical.translation", "res://Data/Character_Classes.Academia.translation", "res://Data/Character_Classes.Primary Features & Mechanics.translation"]
+
+[params]
+
+compress=true
+delimiter=0

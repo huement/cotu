@@ -58,6 +58,12 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 		&"ITEM_ACTIONS":
 			title_label.text = "ITEM ACTION PROTOCOL"
 			_build_item_actions_ui(data)
+		&"ALL_SKILLS":
+			title_label.text = "ALL KNOWN SKILLS PROTOCOL"
+			_build_all_skills_popup_ui(data)
+		&"ALL_SPELLS":
+			title_label.text = "SPELLBOOK DIRECTORY"
+			_build_all_spells_popup_ui(data)
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
@@ -286,6 +292,80 @@ func _reset_items_preview() -> void:
 	if _items_use_btn: _items_use_btn.disabled = true
 	if _items_drop_btn: _items_drop_btn.disabled = true
 
+## 5. ALL SKILLS POPUP VIEW
+func _build_all_skills_popup_ui(data: Dictionary) -> void:
+	var cat: CatCharacter = data.get("character", null) as CatCharacter
+	
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(360, 200)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(vbox)
+
+	if is_instance_valid(cat) and "known_skills" in cat and not cat.known_skills.is_empty():
+		for skill in cat.known_skills:
+			if skill is SkillData:
+				var lbl := Label.new()
+				lbl.text = "• %s (Proficiency: %d%%)\n  %s" % [skill.skill_name.to_upper(), skill.base_percentage, skill.description]
+				lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
+				vbox.add_child(lbl)
+	else:
+		var empty_lbl := Label.new()
+		empty_lbl.text = "No skills registered for this character."
+		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(empty_lbl)
+
+	content_area.add_child(scroll)
+
+	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
+	close_btn.pressed.connect(_close_modal)
+
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_child(close_btn)
+	content_area.add_child(btn_hbox)
+
+## 6. ALL SPELLS POPUP VIEW
+func _build_all_spells_popup_ui(data: Dictionary) -> void:
+	var cat: CatCharacter = data.get("character", null) as CatCharacter
+	
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(360, 200)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(vbox)
+
+	if is_instance_valid(cat) and "known_spells" in cat and not cat.known_spells.is_empty():
+		for spell in cat.known_spells:
+			if spell is SpellData:
+				var lbl := Label.new()
+				lbl.text = "• %s [%s] - Cost: %d EN\n  %s" % [spell.spell_name.to_upper(), spell.spell_title, spell.energy_cost, spell.description]
+				lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
+				vbox.add_child(lbl)
+	else:
+		var empty_lbl := Label.new()
+		empty_lbl.text = "No spells registered in this spellbook."
+		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(empty_lbl)
+
+	content_area.add_child(scroll)
+
+	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
+	close_btn.pressed.connect(_close_modal)
+
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_child(close_btn)
+	content_area.add_child(btn_hbox)
+	
 ## 4. INDIVIDUAL ITEM ACTIONS MODAL (From Character Sheet)
 func _build_item_actions_ui(data: Dictionary) -> void:
 	var item: ItemData = data.get("item", null) as ItemData

@@ -1,0 +1,58 @@
+[gd_scene load_steps=5 format=3 uid="uid://yo001sb3lbfp"]
+
+[ext_resource type="Script" uid="uid://cjuypfilihv7d" path="res://Scripts/UI/party_slot_portrait.gd" id="1_ux4tg"]
+[ext_resource type="Texture2D" uid="uid://ckuqgesrygqgq" path="res://ui/BATTLE/portraitFrame.png" id="2_eysv2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ux4tg"]
+bg_color = Color(0.15487596, 0.154876, 0.15487596, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eysv2"]
+bg_color = Color(0.2754111, 0.9034853, 0.53732586, 1)
+
+[node name="PartySlotPortrait" type="PanelContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(76, 90)
+script = ExtResource("1_ux4tg")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="PortraitFrame" type="TextureRect" parent="VBoxContainer"]
+layout_mode = 2
+texture = ExtResource("2_eysv2")
+
+[node name="PortraitTexture" type="TextureRect" parent="VBoxContainer/PortraitFrame"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HPBar" type="ProgressBar" parent="VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/background = SubResource("StyleBoxFlat_ux4tg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_eysv2")
+show_percentage = false
+
+[node name="MPBar" type="ProgressBar" parent="VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/background = SubResource("StyleBoxFlat_ux4tg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_eysv2")
+show_percentage = false
+
+[node name="ATBBar" type="ProgressBar" parent="VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/background = SubResource("StyleBoxFlat_ux4tg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_eysv2")
+show_percentage = false

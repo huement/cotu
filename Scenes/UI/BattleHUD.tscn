@@ -1,0 +1,257 @@
+[gd_scene load_steps=18 format=3 uid="uid://ci4b8iodvo08n"]
+
+[ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
+[ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
+[ext_resource type="Texture2D" uid="uid://b6ktcekweqdqm" path="res://ui/BATTLE/top-bar.png" id="2_tbwvx"]
+[ext_resource type="Texture2D" uid="uid://jjfq430a2taa" path="res://ui/BATTLE/btm-bar.png" id="3_83cdx"]
+[ext_resource type="FontFile" uid="uid://cx1vfygfe1ymt" path="res://ui/fonts/RedditMono-Bold.ttf" id="4_tbwvx"]
+[ext_resource type="Texture2D" uid="uid://diadoybl8i4b7" path="res://ui/BATTLE/chevronLeft.png" id="4_wmss7"]
+[ext_resource type="Texture2D" uid="uid://tvnvxa0bjlc6" path="res://ui/BATTLE/chevronRight.png" id="5_l7j8j"]
+[ext_resource type="PackedScene" uid="uid://j53noahp8p12" path="res://Scenes/UI/ActionButton.tscn" id="7_5m5hv"]
+[ext_resource type="PackedScene" uid="uid://yo001sb3lbfp" path="res://Scenes/UI/PartySlotPortrait.tscn" id="7_s15b2"]
+[ext_resource type="Texture2D" uid="uid://xd4qyeikfchx" path="res://ui/BATTLE/cmd_attack.png" id="8_faao3"]
+[ext_resource type="Texture2D" uid="uid://dedwywthvhbrg" path="res://ui/BATTLE/cmd_defense.png" id="9_55foo"]
+[ext_resource type="FontFile" uid="uid://c1112jnjnfk4y" path="res://ui/fonts/RedditMono-Regular.ttf" id="9_qdnyl"]
+[ext_resource type="Texture2D" uid="uid://bpmd16bustmsp" path="res://ui/BATTLE/playerCounterBG.png" id="10_55foo"]
+[ext_resource type="Texture2D" uid="uid://wxg36hnmjey4" path="res://ui/BATTLE/cmd_magic.png" id="10_gv3jx"]
+[ext_resource type="Texture2D" uid="uid://f7h57ejroclo" path="res://ui/BATTLE/cmd_item.png" id="11_gv3jx"]
+[ext_resource type="Texture2D" uid="uid://cpl5l6wc3l6q1" path="res://ui/BATTLE/cmd_run.png" id="12_s15b2"]
+[ext_resource type="Texture2D" uid="uid://dyek5vtk5dj0r" path="res://ui/BATTLE/cmd_auto.png" id="15_lrf55"]
+
+[node name="BattleHud" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_rj0sa")
+
+[node name="HUDBackground" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_hcak5")
+
+[node name="ActionBarBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -533.0
+offset_top = -54.0
+offset_right = 533.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("3_83cdx")
+
+[node name="TopHeader" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -499.0
+offset_top = 2.0
+offset_right = 499.0
+offset_bottom = 70.0
+grow_horizontal = 2
+
+[node name="TopbarBackground" type="TextureRect" parent="TopHeader"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -282.0
+offset_top = 1.0
+offset_right = 282.0
+offset_bottom = 67.0
+grow_horizontal = 2
+texture = ExtResource("2_tbwvx")
+
+[node name="LeftChevrons" type="TextureRect" parent="TopHeader"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
+grow_vertical = 2
+texture = ExtResource("4_wmss7")
+
+[node name="RightChevrons" type="TextureRect" parent="TopHeader"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+texture = ExtResource("5_l7j8j")
+
+[node name="EnemyNameLabel" type="Label" parent="TopHeader"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 263.0
+offset_top = 20.0
+offset_right = 601.0
+offset_bottom = 49.0
+theme_override_fonts/font = ExtResource("4_tbwvx")
+theme_override_font_sizes/font_size = 21
+text = "Enemy Name"
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="EnemyHPLabel" type="Label" parent="TopHeader"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 611.0
+offset_top = 20.0
+offset_right = 739.0
+offset_bottom = 49.0
+theme_override_fonts/font = ExtResource("4_tbwvx")
+theme_override_font_sizes/font_size = 21
+text = "1000/1000"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="PartyLeft" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Party0" parent="PartyLeft" instance=ExtResource("7_s15b2")]
+layout_mode = 2
+
+[node name="Party1" parent="PartyLeft" instance=ExtResource("7_s15b2")]
+layout_mode = 2
+slot_index = 1
+
+[node name="Party2" parent="PartyLeft" instance=ExtResource("7_s15b2")]
+layout_mode = 2
+slot_index = 2
+
+[node name="PartyRight" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Party3" parent="PartyRight" instance=ExtResource("7_s15b2")]
+layout_mode = 2
+slot_index = 3
+
+[node name="Party4" parent="PartyRight" instance=ExtResource("7_s15b2")]
+layout_mode = 2
+slot_index = 4
+
+[node name="Party5" parent="PartyRight" instance=ExtResource("7_s15b2")]
+layout_mode = 2
+slot_index = 5
+
+[node name="ActionBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -40.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="AttackButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
+unique_name_in_owner = true
+layout_mode = 2
+icon_texture = ExtResource("8_faao3")
+
+[node name="DefendButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
+unique_name_in_owner = true
+layout_mode = 2
+icon_texture = ExtResource("9_55foo")
+
+[node name="MagicButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
+unique_name_in_owner = true
+layout_mode = 2
+icon_texture = ExtResource("10_gv3jx")
+
+[node name="ItemButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
+unique_name_in_owner = true
+layout_mode = 2
+icon_texture = ExtResource("11_gv3jx")
+
+[node name="RunButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
+unique_name_in_owner = true
+layout_mode = 2
+icon_texture = ExtResource("12_s15b2")
+
+[node name="AutoButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
+unique_name_in_owner = true
+layout_mode = 2
+icon_texture = ExtResource("15_lrf55")
+
+[node name="TurnCounter" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -77.0
+offset_right = 188.0
+grow_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="TurnCounter"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("10_55foo")
+
+[node name="TurnInfo" type="Label" parent="TurnCounter"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 28.0
+offset_top = 14.0
+offset_right = 159.0
+offset_bottom = 34.0
+theme_override_fonts/font = ExtResource("9_qdnyl")
+theme_override_font_sizes/font_size = 14
+text = "ACTIVE"
+
+[node name="TurnCharacter" type="Label" parent="TurnCounter"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 20.0
+offset_top = 32.0
+offset_right = 172.0
+offset_bottom = 55.0
+theme_override_colors/font_color = Color(0.15487596, 0.154876, 0.15487596, 1)
+theme_override_fonts/font = ExtResource("4_tbwvx")
+text = "CHARACTER NAME"

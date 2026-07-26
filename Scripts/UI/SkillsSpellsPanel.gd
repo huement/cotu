@@ -4,6 +4,7 @@ class_name SkillsSpellsPanel
 
 @onready var skills_button: Button = %SkillsButton as Button
 @onready var spells_button: Button = %SpellsButton as Button
+@onready var toolbar_container: HBoxContainer = %ToolbarContainer as HBoxContainer
 @onready var list_container: VBoxContainer = %ListContainer as VBoxContainer
 
 @export var entry_scene: PackedScene = preload("res://Scenes/UI/SkillSpellEntry.tscn")
@@ -36,7 +37,7 @@ func _on_spells_tab_pressed() -> void:
 	_render_list()
 
 func _update_tab_ui() -> void:
-	# Active tab visual feedback (Neon cyan for active, dimmed gray for inactive)
+	# Active tab visual feedback
 	if skills_button:
 		skills_button.text = "[ SKILLS ]" if current_mode == Mode.SKILLS else "  SKILLS  "
 		skills_button.modulate = Color(0.0, 1.0, 0.8, 1.0) if current_mode == Mode.SKILLS else Color(0.5, 0.6, 0.7, 0.5)
@@ -45,11 +46,62 @@ func _update_tab_ui() -> void:
 		spells_button.text = "[ SPELLS ]" if current_mode == Mode.SPELLS else "  SPELLS  "
 		spells_button.modulate = Color(0.0, 1.0, 0.8, 1.0) if current_mode == Mode.SPELLS else Color(0.5, 0.6, 0.7, 0.5)
 
+	_update_toolbar()
+
+## 🛠️ DYNAMIC TOOLBAR BUILDER
+func _update_toolbar() -> void:
+	if not toolbar_container:
+		return
+
+	# Wipe previous toolbar buttons
+	for child in toolbar_container.get_children():
+		child.queue_free()
+
+	if current_mode == Mode.SKILLS:
+		# --- SKILLS TOOLBAR BUTTONS ---
+		var config_skills_btn := _create_toolbar_button("[ ALL SKILLS ]", Color(0.0, 0.9, 0.8, 1.0))
+		config_skills_btn.pressed.connect(func() -> void:
+			if get_tree().root.has_node("SignalBus"):
+				var bus: Node = get_tree().root.get_node("SignalBus")
+				bus.popup_requested.emit(&"ALL_SKILLS", {"character": current_cat})
+		)
+		toolbar_container.add_child(config_skills_btn)
+	else:
+		# --- SPELLS TOOLBAR BUTTONS ---
+		var config_spells_btn := _create_toolbar_button("[ ALL SPELLS ]", Color(0.0, 0.9, 0.8, 1.0))
+		config_spells_btn.pressed.connect(func() -> void:
+			if get_tree().root.has_node("SignalBus"):
+				var bus: Node = get_tree().root.get_node("SignalBus")
+				bus.popup_requested.emit(&"ALL_SPELLS", {"character": current_cat})
+		)
+		toolbar_container.add_child(config_spells_btn)
+
+func _create_toolbar_button(label_text: String, color_val: Color) -> Button:
+	var btn := Button.new()
+	btn.text = label_text
+	btn.custom_minimum_size = Vector2(0, 28)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.focus_mode = Control.FOCUS_NONE
+	
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.1, 0.12, 0.9)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.border_color = color_val * 0.7
+	style.corner_radius_top_left = 2
+	style.corner_radius_bottom_right = 2
+	
+	btn.add_theme_stylebox_override("normal", style)
+	btn.add_theme_color_override("font_color", color_val)
+	btn.add_theme_font_size_override("font_size", 11)
+	return btn
+
 func _render_list() -> void:
 	if not list_container:
 		return
 
-	# Wipe previous slot entry nodes
 	for child in list_container.get_children():
 		child.queue_free()
 
@@ -83,7 +135,6 @@ func _render_list() -> void:
 					var sub_info: String = "%s | Cost: %d EN | %s" % [title, cost, desc]
 					_create_entry(item.spell_name, sub_info, icon_tex, item)
 
-## Property name fallbacks for CatCharacter
 func _get_cat_skills(cat: CatCharacter) -> Array:
 	if "known_skills" in cat and cat.known_skills is Array:
 		return cat.known_skills
@@ -105,7 +156,6 @@ func _create_entry(title_text: String, desc_text: String, icon_tex: Texture2D, d
 	var entry_node: Control = entry_scene.instantiate() as Control
 	entry_node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	# Flexible node lookup (handles with or without MarginContainer wrapper)
 	var name_label := entry_node.get_node_or_null("MarginContainer/HBox/VBox/Name") as Label
 	if not name_label:
 		name_label = entry_node.get_node_or_null("HBox/VBox/Name") as Label
@@ -126,7 +176,7 @@ func _create_entry(title_text: String, desc_text: String, icon_tex: Texture2D, d
 		entry_node.pressed.connect(func() -> void:
 			if get_tree().root.has_node("SignalBus"):
 				var bus: Node = get_tree().root.get_node("SignalBus")
-				bus.popup_requested.emit("ABILITY_INFO", {"resource": data_resource})
+				bus.popup_requested.emit(&"ABILITY_INFO", {"resource": data_resource})
 		)
 
 	list_container.add_child(entry_node)

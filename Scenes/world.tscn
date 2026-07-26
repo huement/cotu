@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=26 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
@@ -21,6 +21,8 @@
 [ext_resource type="Script" uid="uid://b8ywsg7wbn4ln" path="res://Scripts/item_button.gd" id="9_axeuq"]
 [ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="9_pyn1s"]
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="12_1cojt"]
+[ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_i4fjy"]
+[ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="21_xbk3s"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
 
@@ -31,6 +33,7 @@ metadata/_edit_horizontal_guides_ = [481.0]
 script = ExtResource("1_go701")
 
 [node name="MainHUDLayout" type="Control" parent="HUD"]
+unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,6 +42,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="CockpitBackground" type="TextureRect" parent="HUD/MainHUDLayout"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 1114.0
 offset_top = 95.0
@@ -61,6 +65,7 @@ scale = Vector2(0.6, 0.6)
 texture = ExtResource("3_7yui6")
 
 [node name="RightSidebarAnchor" type="Control" parent="HUD/MainHUDLayout"]
+unique_name_in_owner = true
 anchors_preset = 0
 offset_left = 1096.0
 offset_top = 130.0
@@ -129,6 +134,7 @@ stretch_mode = 5
 script = ExtResource("4_yq1aw")
 
 [node name="ActionBarAnchor" type="Control" parent="HUD/MainHUDLayout"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -169,7 +175,13 @@ texture_pressed = ExtResource("9_pyn1s")
 texture_hover = ExtResource("9_pyn1s")
 script = ExtResource("12_1cojt")
 
+[node name="BattleHUD" parent="HUD/MainHUDLayout" instance=ExtResource("14_i4fjy")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
 [node name="MinimapAnchor" type="Control" parent="HUD"]
+unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -257,6 +269,11 @@ dungeon_grid = NodePath("../GridMap")
 data = {
 "cells": PackedInt32Array(5, 11, 0, 6, 0, 0, 6, 11, 0, 7, 0, 0, 7, 11, 0, 8, 0, 0, 8, 11, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 12, 1, 0, 12, 2, 0, 12, 7, 0, 12, 8, 0, 12, 9, 0, 13, 0, 0, 13, 1, 0, 13, 2, 0, 13, 3, 0, 13, 4, 0, 13, 5, 0, 13, 6, 0, 13, 7, 0, 13, 8, 0, 13, 9, 0, 5, 0, 1, 4, 0, 1, 3, 0, 1, 2, 0, 1, 11, 9, 1, 10, 9, 1, 9, 9, 1, 9, 8, 1, 8, 8, 1, 4, 11, 1, 3, 10, 1, 2, 10, 1, 2, 9, 1, 1, 9, 1, 1, 8, 1, 0, 8, 1, 65535, 8, 1, 65535, 7, 1, 65535, 6, 1, 65534, 6, 1, 65534, 5, 1, 65533, 5, 1, 65533, 4, 1, 65533, 3, 1, 65533, 2, 1, 65533, 1, 1, 65533, 0, 1, 65533, 65535, 1, 65533, 65534, 1, 65533, 65533, 1, 65534, 65533, 1, 65534, 65532, 1, 65535, 65532, 1, 0, 65532, 1, 1, 65532, 1, 2, 65532, 1, 2, 65533, 1, 2, 65534, 1, 2, 65535, 1, 9, 11, 1, 9, 10, 1, 4, 4, 1, 5, 4, 1, 6, 4, 1, 7, 4, 1, 4, 5, 1, 4, 3, 1, 3, 4, 1, 3, 5, 1)
 }
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy" parent="Enemies" instance=ExtResource("21_xbk3s")]
+initial_cell = Vector2i(3, 0)
 
 [node name="SceneInitializerModule" type="Node" parent="."]
 script = ExtResource("6_5ukr8")
