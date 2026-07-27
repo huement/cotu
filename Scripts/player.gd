@@ -12,6 +12,7 @@ var map_manager: MapManager
 var current_grid_pos: Vector2i = Vector2i.ZERO
 var current_facing: Facing = Facing.NORTH
 var is_moving: bool = false
+var _is_in_combat: bool = false
 
 @export var initial_cell: Vector2i = Vector2i(2, 1)
 @export var use_editor_spawn: bool = false
@@ -21,6 +22,15 @@ var is_moving: bool = false
 
 func _ready() -> void:
 	call_deferred("_initialize_player")
+	_connect_to_signal_bus()
+
+func _connect_to_signal_bus() -> void:
+	var sb: Node = SignalBus
+	if is_instance_valid(sb):
+		if not sb.combat_started.is_connected(_on_combat_started):
+			sb.combat_started.connect(_on_combat_started)
+		if not sb.combat_ended.is_connected(_on_combat_ended):
+			sb.combat_ended.connect(_on_combat_ended)
 
 func _initialize_player() -> void:
 	var world_root: Node3D = get_parent() as Node3D
@@ -57,7 +67,8 @@ func _physics_process(_delta: float) -> void:
 		_apply_canonical_transform()
 
 func _input(event: InputEvent) -> void:
-	if is_moving or not grid_map:
+	# 🛑 LOCKOUT GUARD: Block forward, strafe, backward, and turning while in combat
+	if _is_in_combat or is_moving or not grid_map:
 		return
 
 	if event.is_action_pressed("move_forward"):
@@ -73,6 +84,18 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("turn_right"):
 		_execute_grid_rotation(-90.0)
 
+# ==============================================================================
+# COMBAT SIGNAL CALLBACKS
+# ==============================================================================
+func _on_combat_started(_enemy_data: Resource, _player_party: Array) -> void:
+	_is_in_combat = true
+
+func _on_combat_ended(_victory: bool) -> void:
+	_is_in_combat = false
+
+# ==============================================================================
+# MOVEMENT HELPERS
+# ==============================================================================
 func _get_movement_offset(input_direction: Vector3) -> Vector2i:
 	var forward_vector: Vector2i = Vector2i.ZERO
 	var right_vector: Vector2i = Vector2i.ZERO

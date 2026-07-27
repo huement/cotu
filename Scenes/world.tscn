@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=28 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="9_pyn1s"]
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="12_1cojt"]
 [ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_i4fjy"]
+[ext_resource type="Script" uid="uid://dtnit1pwpe0ox" path="res://Scripts/3D/EnemyVisualManager.gd" id="20_hmc15"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="21_xbk3s"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
@@ -265,6 +266,10 @@ current = true
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
+
+[node name="EnemyVisualManager" type="Node3D" parent="."]
+script = ExtResource("20_hmc15")
+forward_distance = 1.0
 
 [node name="MapManager" type="Node3D" parent="." node_paths=PackedStringArray("dungeon_grid")]
 script = ExtResource("5_fo5ed")

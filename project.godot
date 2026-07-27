@@ -19,6 +19,8 @@ config/icon="res://icon.svg"
 
 SignalBus="*res://Core/SignalBus.gd"
 GameState="*res://Core/GameState.gd"
+CombatManager="*res://Scripts/Managers/CombatManager.gd"
+GameLogger="*res://Core/GameLogger.gd"
 
 [editor_plugins]
 

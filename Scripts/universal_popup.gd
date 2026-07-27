@@ -30,6 +30,7 @@ func _ready() -> void:
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
 		bus.popup_requested.connect(_on_popup_requested)
+		bus.battle_victory_popup_requested.connect(_on_popup_requested.bind(&"BATTLE_VICTORY"))
 		
 	if confirm_button:
 		confirm_button.pressed.connect(_on_confirm_pressed)
@@ -46,6 +47,9 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 	_clear_content_area()
 	
 	match action_type:
+		&"BATTLE_VICTORY":
+			title_label.text = "VICTORY ACHIEVED"
+			_build_battle_victory_ui(data)
 		&"SEARCH":
 			title_label.text = "SCANNING SYSTEM CORRIDORS"
 			_build_search_ui()
@@ -477,3 +481,29 @@ func _create_modal_button(text_val: String, color_val: Color) -> Button:
 	btn.add_theme_color_override("font_color", Color.BLACK)
 	btn.add_theme_font_size_override("font_size", 14)
 	return btn
+
+
+## 7. BATTLE VICTORY SCREEN
+func _build_battle_victory_ui(data: Dictionary) -> void:
+	var enemies_killed: int = data.get("enemies_killed", 0)
+	var total_xp: int = data.get("total_xp", 0)
+	var living_members: int = data.get("living_members", 1)
+	var xp_per_member: int = int(float(total_xp) / living_members) if living_members > 0 else 0
+
+	var summary_label := Label.new()
+	summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	summary_label.text = "You defeated %d enemies!" % enemies_killed
+	content_area.add_child(summary_label)
+
+	var xp_label := Label.new()
+	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	xp_label.text = "EXP Earned: %d / %d = %d XP each" % [total_xp, living_members, xp_per_member]
+	content_area.add_child(xp_label)
+
+	var confirm_btn := _create_modal_button("CONFIRM", Color(0.0, 0.9, 0.8, 1.0))
+	confirm_btn.pressed.connect(_close_modal)
+
+	var btn_center := HBoxContainer.new()
+	btn_center.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_center.add_child(confirm_btn)
+	content_area.add_child(btn_center)

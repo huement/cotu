@@ -1,9 +1,9 @@
 extends Node
-#class_name WorldSceneInitializerModule
+class_name WorldSceneInitializerModule
 
 const GRID_PLANE_SUBDIVISIONS: int = 9
 const GRID_PLANE_SIZE: Vector2 = Vector2(64, 64)
-const CEILING_HEIGHT: float = 2.0 
+const CEILING_HEIGHT: float = 2.0
 
 func _ready() -> void:
 	var world_root: Node3D = get_parent() as Node3D
@@ -13,9 +13,22 @@ func _ready() -> void:
 		_add_ceiling(world_root)
 		# 🎯 AUTOMATION HOOK: Run ambient calibration on bootup
 		_setup_retro_environment(world_root)
+		_verify_scene_dependencies()
 	else:
 		push_error("SceneInitializerModule: Parent must be a Node3D root!")
 
+## Verifies that critical manager nodes are present in the main scene tree
+func _verify_scene_dependencies() -> void:
+	var scene_root: Node = get_tree().current_scene
+	if not is_instance_valid(scene_root):
+		scene_root = get_parent() # Fallback if running node directly
+
+	var visual_manager: Node = scene_root.find_child("EnemyVisualManager", true, false)
+	if not is_instance_valid(visual_manager):
+		push_warning("[SceneInitializerModule] CRITICAL WARNING: EnemyVisualManager node not found in scene tree! 3D enemies will not render.")
+	else:
+		print("[SceneInitializerModule] EnemyVisualManager found and verified.")
+		
 func _align_gridmap_to_player_grid(root: Node3D) -> void:
 	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
 	if gm == null:

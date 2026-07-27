@@ -5,6 +5,7 @@ extends Resource
 @export var max_health: int = 30
 @export var initiative_speed: int = 12
 @export var attack_damage: int = 6
+@export var xp_value: int = 10
 
 ## Controls the 3D model visual scale in the world
 @export var model_scale: Vector3 = Vector3(0.5, 0.5, 0.5)
