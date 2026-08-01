@@ -9,7 +9,7 @@ signal party_moved(new_grid_pos: Vector3i, facing: Direction)
 signal party_roster_updated(roster_slots: Array)
 
 # Combat Triggers
-signal combat_started(enemy_data: Resource, player_party: Array)
+signal combat_started(enemy_data_or_group: Variant, player_party: Array)
 signal combat_ended(victory: bool)
 signal combat_phase_changed(new_phase: CombatPhase)
 
@@ -24,7 +24,7 @@ signal enemy_damaged_visual(enemy_id: String, damage: int)
 
 # Vitals & Visual FX
 signal character_health_changed(target_slot: int, current_hp: int)
-signal enemy_health_changed(current_hp: int, max_hp: int)
+signal enemy_health_changed(enemy_id: String, current_hp: int, max_hp: int)
 signal chevron_flash_requested(is_player_hit: bool)
 
 # Popups & UI

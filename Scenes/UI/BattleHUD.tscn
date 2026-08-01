@@ -251,8 +251,8 @@ grow_vertical = 0
 
 [node name="TextureRect" type="TextureRect" parent="TurnCounter"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 219.0
+offset_bottom = 85.0
 texture = ExtResource("10_55foo")
 
 [node name="TurnInfo" type="Label" parent="TurnCounter"]

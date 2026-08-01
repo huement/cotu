@@ -34,16 +34,22 @@ func grid_to_world(grid_position: Vector3i) -> Vector3:
 func is_tile_blocked(grid_position: Vector3i) -> bool:
 	if not dungeon_grid:
 		return true
-		
+
+	# Check for static wall geometry first
 	var item_index: int = dungeon_grid.get_cell_item(grid_position)
+	if item_index != GridMap.INVALID_CELL_ITEM:
+		return true # Tile is blocked by a wall
+
+	# Now, check for any dynamic enemies at that position
+	var enemies_node: Node = get_tree().root.find_child("Enemies", true, false)
+	if is_instance_valid(enemies_node):
+		for enemy in enemies_node.get_children():
+			if enemy is Node3D and enemy.has_method("get_grid_pos"):
+				if enemy.get_grid_pos() == Vector2i(grid_position.x, grid_position.z):
+					return true # Tile is blocked by an enemy
 	
-	# In Godot GridMaps, -1 means the cell is empty/air (walkable path)
-	if item_index == GridMap.INVALID_CELL_ITEM:
-		return false
-		
-	# TODO: Expand this later to look up your data Resource files 
-	# to check if the tile is a destructible wall, a closed door, or an interaction.
-	return true
+	return false
+
 
 ## Convenience helper to check if the space cat party can step forward based on direction.
 func can_party_move(current_world_pos: Vector3, facing_direction: String) -> bool:

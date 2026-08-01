@@ -17,7 +17,7 @@ extends Node3D
 @export var preset_snap_path := "res://resources/presets/movement_config_snap.tres"
 @export var preset_smooth_path := "res://resources/presets/movement_config_smooth.tres"
 @export_file("*.tscn") var overlay_inventory_scene_path := "res://scenes/inventory/inventory_overlay.tscn"
-@export_file("*.tscn") var overlay_combat_scene_path := "res://scenes/combat/combat_placeholder.tscn"
+@export_file("*.tscn") var overlay_combat_scene_path := "res://Scenes/UI/BattleHUD.tscn"
 @export_file("*.tscn") var overlay_town_scene_path := "res://scenes/town/town_overlay.tscn"
 @export_file("*.tscn") var overlay_victory_scene_path := "res://scenes/overlays/victory_overlay.tscn"
 @export_file("*.tscn") var overlay_defeat_scene_path := "res://scenes/overlays/defeat_overlay.tscn"
@@ -180,19 +180,45 @@ func is_gameplay_state_active() -> bool:
 func is_combat_state_active() -> bool:
 	return _state_orchestrator.is_combat_state_active()
 
-
 func start_combat(encountered_enemies: Array = []) -> void:
+	GameLogger.combat("start_combat called")
 	_state_orchestrator.start_combat()
-	_policy_orchestrator.open_overlay(OVERLAY_COMBAT, true, true)
+
+	# 1. Resolve Primary Enemy Resource
+	var enemy_res: Resource = null
 	if encountered_enemies.is_empty():
 		encountered_enemies = get_enemies()
-	_turn_orchestrator.start_combat_round(encountered_enemies)
+
+	if not encountered_enemies.is_empty():
+		var first_enemy: Node = encountered_enemies[0]
+		if "group_data" in first_enemy and first_enemy.get("group_data") != null:
+			var group: Resource = first_enemy.get("group_data") as Resource
+			if "members" in group and not (group.get("members") as Array).is_empty():
+				enemy_res = (group.get("members") as Array)[0] as Resource
+		elif "enemy_data" in first_enemy and first_enemy.get("enemy_data") != null:
+			enemy_res = first_enemy.get("enemy_data") as Resource
+		elif "stats" in first_enemy and first_enemy.get("stats") != null:
+			enemy_res = first_enemy.get("stats") as Resource
+
+	# 2. Resolve Active Party
+	var active_party: Array = []
+	var gs: Node = get_tree().root.get_node_or_null("GameState")
+	if is_instance_valid(gs) and "current_party" in gs and gs.get("current_party") != null:
+		var party_res: Resource = gs.get("current_party") as Resource
+		if "slots" in party_res:
+			active_party = party_res.get("slots") as Array
+
+	# 3. Fire Central SignalBus to wake up CombatManager, BattleHUD, and EnemyVisualManager
+	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
+	if is_instance_valid(sb) and sb.has_signal("combat_started"):
+		sb.combat_started.emit(enemy_res, active_party)
 
 
 func end_combat() -> void:
 	_state_orchestrator.end_combat()
-	if active_overlay_kind() == OVERLAY_COMBAT:
-		_overlay_module.close_overlay()
+	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
+	if is_instance_valid(sb) and sb.has_signal("combat_ended"):
+		sb.combat_ended.emit(true)
 
 
 func go_to_menu() -> void:

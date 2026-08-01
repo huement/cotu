@@ -1,6 +1,6 @@
 extends Node
 
-class_name WorldSceneInitializerModule
+# class_name WorldSceneInitializerModule
 
 const GRID_PLANE_SUBDIVISIONS := 9
 const GRID_PLANE_SIZE := Vector2(64, 64)

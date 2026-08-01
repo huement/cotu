@@ -2,20 +2,19 @@ extends Node
 class_name WorldSceneInitializerModule
 
 const GRID_PLANE_SUBDIVISIONS: int = 9
-const GRID_PLANE_SIZE: Vector2 = Vector2(64, 64)
+const GRID_PLANE_SIZE: Vector2 = Vector2(64.0, 64.0)
 const CEILING_HEIGHT: float = 2.0
 
 func _ready() -> void:
 	var world_root: Node3D = get_parent() as Node3D
-	if world_root:
+	if world_root != null:
 		_align_gridmap_to_player_grid(world_root)
 		_add_floor(world_root)
 		_add_ceiling(world_root)
-		# 🎯 AUTOMATION HOOK: Run ambient calibration on bootup
 		_setup_retro_environment(world_root)
 		_verify_scene_dependencies()
 	else:
-		push_error("SceneInitializerModule: Parent must be a Node3D root!")
+		push_error("[SceneInitializerModule]: Parent must be a Node3D root!")
 
 ## Verifies that critical manager nodes are present in the main scene tree
 func _verify_scene_dependencies() -> void:

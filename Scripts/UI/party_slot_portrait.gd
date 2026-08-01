@@ -40,7 +40,7 @@ func _ready() -> void:
 	_apply_layout_settings()
 	if is_instance_valid(highlight_rect):
 		highlight_rect.hide()
-	
+
 	if not Engine.is_editor_hint():
 		_connect_signal_listeners()
 
@@ -97,21 +97,23 @@ func setup_slot(character: CatCharacter) -> void:
 	if character == null:
 		hide()
 		return
-		
+
 	show()
 	_update_portrait_image(character)
 	_refresh_stats(character)
-	
-	# Preset ATB Bar to 100% on combat setup
+
+	# Configure ATB ProgressBar bounds and reset to 0% for turn accumulation
 	var a_bar: ProgressBar = atb_bar if atb_bar else get_node_or_null("%ATBBar") as ProgressBar
 	if is_instance_valid(a_bar):
-		a_bar.value = a_bar.max_value
+		a_bar.min_value = 0.0
+		a_bar.max_value = 100.0
+		a_bar.value = 0.0
 
 func _update_portrait_image(character: CatCharacter) -> void:
 	var p_rect: TextureRect = portrait_texture if portrait_texture else get_node_or_null("%PortraitTexture") as TextureRect
 	if p_rect == null:
 		return
-		
+
 	if "portrait" in character and character.portrait:
 		p_rect.texture = character.portrait
 	elif "portrait_texture" in character and character.portrait_texture:
@@ -144,8 +146,9 @@ func _refresh_stats(character: CatCharacter) -> void:
 		m_bar.value = energy_val
 
 func set_active(is_active: bool) -> void:
-	if is_instance_valid(highlight_rect):
-		highlight_rect.visible = is_active
+	var h_rect: Control = highlight_rect if is_instance_valid(highlight_rect) else get_node_or_null("%Highlight") as Control
+	if is_instance_valid(h_rect):
+		h_rect.visible = is_active
 
 func _on_character_health_changed(target_slot: int, current_hp: int) -> void:
 	var h_bar: ProgressBar = hp_bar if hp_bar else get_node_or_null("%HPBar") as ProgressBar

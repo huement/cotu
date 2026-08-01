@@ -13,11 +13,11 @@ extends CanvasLayer
 @onready var main_hud_layout: Control = %MainHUDLayout as Control
 @onready var cockpit_background: TextureRect = %CockpitBackground as TextureRect
 @onready var top_bar: TextureRect = $MainHUDLayout/TopBar as TextureRect
-@onready var action_bar_anchor: Control = %ActionBarAnchor as Control
 @onready var right_sidebar_anchor: Control = %RightSidebarAnchor as Control
 
 # Battle HUD Overlay Reference
 @onready var battle_hud: Control = %BattleHUD as Control
+@onready var action_bar_anchor: Control = %ActionBarAnchor as Control
 
 # Strongly-typed reference to the player grid-walker
 @onready var player: Node3D = get_node("../Player") as Node3D
@@ -38,10 +38,10 @@ extends CanvasLayer
 # ==============================================================================
 func _ready() -> void:
 	_verify_ui_nodes()
-	
+
 	if battle_hud:
 		battle_hud.hide()
-		
+
 	# Connect to Autoload SignalBus events
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 	if sb:
@@ -53,14 +53,15 @@ func _ready() -> void:
 			sb.combat_started.connect(_on_combat_started)
 		if sb.has_signal("combat_ended"):
 			sb.combat_ended.connect(_on_combat_ended)
-	
+
 	_setup_portrait_click_listeners()
-		
+	_connect_to_signal_bus()
+
 	# Connect to global GameState manager
 	if Engine.has_singleton("GameState") or get_tree().root.has_node("GameState"):
 		GameState.core_state_changed.connect(_on_game_state_changed)
 		_on_game_state_changed(GameState.current_mode)
-		
+
 		if GameState.current_party:
 			_update_party_portraits(GameState.current_party.slots)
 
@@ -68,10 +69,17 @@ func _ready() -> void:
 # ==============================================================================
 # 3. HUD STATE & VISIBILITY TOGGLING
 # ==============================================================================
-func _on_combat_started(enemy_data: EnemyData = null, player_party: Array = []) -> void:
+func _connect_to_signal_bus() -> void:
+	var sb: Node = SignalBus
+	if is_instance_valid(sb):
+		if not sb.combat_started.is_connected(_on_combat_started):
+			sb.combat_started.connect(_on_combat_started)
+		if not sb.combat_ended.is_connected(_on_combat_ended):
+			sb.combat_ended.connect(_on_combat_ended)
+
+func _on_combat_started(enemy_data_or_group: Variant = null, player_party: Array = []) -> void:
 	_set_exploration_ui_visible(false)
-	
-	# Fetch live party from GameState if an empty array was provided
+
 	var active_party: Array = player_party
 	if active_party.is_empty() and (Engine.has_singleton("GameState") or get_tree().root.has_node("GameState")):
 		if GameState.current_party:
@@ -79,9 +87,8 @@ func _on_combat_started(enemy_data: EnemyData = null, player_party: Array = []) 
 
 	if battle_hud:
 		battle_hud.show()
-		# Direct data push to BattleHUD
 		if battle_hud.has_method("_on_combat_started"):
-			battle_hud._on_combat_started(enemy_data, active_party)
+			battle_hud._on_combat_started(enemy_data_or_group, active_party)
 
 func _on_combat_ended(_victory: bool) -> void:
 	if battle_hud:
@@ -108,28 +115,28 @@ func _on_party_coordinates_changed(_grid_pos: Vector3i, facing_direction: String
 func _update_compass_text(direction: String) -> void:
 	if not compass_label:
 		return
-		
+
 	match direction.to_upper():
 		"NORTH": compass_label.text = "NORTH"
-		"WEST":  compass_label.text = "WEST"
+		"WEST": compass_label.text = "WEST"
 		"SOUTH": compass_label.text = "SOUTH"
-		"EAST":  compass_label.text = "EAST"
-		_:       compass_label.text = "UNKWN"
+		"EAST": compass_label.text = "EAST"
+		_: compass_label.text = "UNKWN"
 
 func _update_minimap_pointer(direction: String) -> void:
 	if not minimap_indicator:
 		return
-		
+
 	var target_2d_angle: float = 0.0
 	match direction.to_upper():
 		"NORTH": target_2d_angle = 0.0
-		"WEST":  target_2d_angle = -90.0
+		"WEST": target_2d_angle = -90.0
 		"SOUTH": target_2d_angle = 180.0
-		"EAST":  target_2d_angle = 90.0
-		
+		"EAST": target_2d_angle = 90.0
+
 	var tween: Tween = create_tween()
-	tween.tween_property(minimap_indicator, "rotation_degrees", target_2d_angle, 0.15)\
-		.set_trans(Tween.TRANS_SINE)\
+	tween.tween_property(minimap_indicator, "rotation_degrees", target_2d_angle, 0.15) \
+		.set_trans(Tween.TRANS_SINE) \
 		.set_ease(Tween.EASE_IN_OUT)
 
 
@@ -141,14 +148,14 @@ func _setup_portrait_click_listeners() -> void:
 	for i in range(portrait_slots.size()):
 		# Updated type from TextureRect to PartySlotPortrait (Control)
 		var slot_component: PartySlotPortrait = portrait_slots[i]
-		
+
 		if slot_component:
 			# Ensure the slot container catches mouse clicks
 			slot_component.mouse_filter = Control.MOUSE_FILTER_STOP
-			
+
 			# Cleanly bind the slot index `i` to our handler method
 			var click_callable: Callable = _on_portrait_gui_input.bind(i)
-			
+
 			if not slot_component.gui_input.is_connected(click_callable):
 				slot_component.gui_input.connect(click_callable)
 
@@ -166,12 +173,12 @@ func _update_party_portraits(active_slots: Array) -> void:
 		# 1. Null Guard: Verify the UI slot component exists in the scene tree
 		if i >= portrait_slots.size() or portrait_slots[i] == null:
 			continue
-			
+
 		# 2. Safely resolve the CatCharacter resource
 		var cat: CatCharacter = null
 		if i < active_slots.size() and active_slots[i] is CatCharacter:
 			cat = active_slots[i] as CatCharacter
-			
+
 		# 3. Delegate to the PartySlotPortrait component
 		if portrait_slots[i].has_method("setup_slot"):
 			portrait_slots[i].setup_slot(cat)

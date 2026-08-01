@@ -10,17 +10,17 @@ extends Node3D
 # ==============================================================================
 @export var camera_node: Camera3D
 
-## Distance in front of camera (-Z vector).
-@export var forward_distance: float = 2.5
+## Distance in front of camera (-Z vector). Set to 2.8 to fit multi-enemy groups cleanly.
+@export var forward_distance: float = 2.8
 
 ## Vertical offset (-Y vector). Lower to ground feet onto the floor plane.
 @export var vertical_offset: float = -0.85
 
 ## Uniform scale multiplier for 3D enemy models.
-@export var model_scale: Vector3 = Vector3(0.4, 0.4, 0.4)
+@export var model_scale: Vector3 = Vector3(0.5, 0.5, 0.5)
 
-## Horizontal spacing when multiple enemies are spawned.
-@export var horizontal_spacing: float = 2.0
+## Horizontal spacing between enemies (0.9 keeps 2-3 enemies framed in viewport center).
+@export var horizontal_spacing: float = 0.9
 
 # ==============================================================================
 # 2. RUNTIME STATE
@@ -31,7 +31,7 @@ var _spawned_enemies: Dictionary = {}
 # 3. LIFECYCLE & INITIALIZATION
 # ==============================================================================
 func _ready() -> void:
-	visible = false 
+	visible = false
 	_connect_to_signal_bus()
 
 func _connect_to_signal_bus() -> void:
@@ -39,7 +39,7 @@ func _connect_to_signal_bus() -> void:
 	if not is_instance_valid(sb):
 		push_error("EnemyVisualManager requires the SignalBus singleton.")
 		return
-	
+
 	if not sb.combat_started.is_connected(_on_combat_started):
 		sb.combat_started.connect(_on_combat_started)
 	if not sb.combat_ended.is_connected(_on_combat_ended):
@@ -55,7 +55,7 @@ func _connect_to_signal_bus() -> void:
 # 4. SPAWNING & POSITIONING
 # ==============================================================================
 
-func _on_combat_started(enemy_data: Resource, _player_party: Array) -> void:
+func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
 		if not is_instance_valid(camera_node):
@@ -65,12 +65,16 @@ func _on_combat_started(enemy_data: Resource, _player_party: Array) -> void:
 	_clear_all_enemies()
 	visible = true
 
-	var enemy_group: Array = [enemy_data]
-	
+	var enemy_group: Array = []
+	if enemy_data_or_group is Array:
+		enemy_group = enemy_data_or_group as Array
+	elif enemy_data_or_group is Resource:
+		enemy_group.append(enemy_data_or_group as Resource)
+
 	for i in range(enemy_group.size()):
-		var e_data: Resource = enemy_group[i]
+		var e_data: Resource = enemy_group[i] as Resource
 		var model_scene: PackedScene = null
-		
+
 		if is_instance_valid(e_data) and "model_scene" in e_data:
 			model_scene = e_data.get("model_scene") as PackedScene
 
@@ -83,20 +87,21 @@ func _on_combat_started(enemy_data: Resource, _player_party: Array) -> void:
 		var enemy_id: String = "enemy_%d" % i
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
-		
+
 		_position_enemy(enemy_node, i, enemy_group.size())
 		play_animation(enemy_node, &"idle", true)
 
 func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void:
 	if not is_instance_valid(camera_node): return
 
+	# Centered offset calculation for multi-enemy framing
 	var horizontal_offset: float = 0.0
 	if total_enemies > 1:
 		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * horizontal_spacing
 
 	var cam_transform: Transform3D = camera_node.global_transform
 
-	# 1. Compute 3D spawn position relative to camera
+	# Compute 3D position relative to camera lens
 	var spawn_pos: Vector3 = cam_transform.origin \
 		- (cam_transform.basis.z * forward_distance) \
 		+ (cam_transform.basis.x * horizontal_offset) \
@@ -105,11 +110,10 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 	enemy_node.global_position = spawn_pos
 	enemy_node.scale = model_scale
 
-	# 2. 🎯 FLAT HORIZONTAL YAW ROTATION (Fixes backward pitch tilt)
-	# Project look-at target onto the exact same Y-plane as the enemy
+	# Flat Yaw rotation facing player camera
 	var target_look_at: Vector3 = Vector3(cam_transform.origin.x, enemy_node.global_position.y, cam_transform.origin.z)
 	enemy_node.look_at(target_look_at, Vector3.UP)
-	enemy_node.rotate_object_local(Vector3.UP, PI) # Rotate 180 deg to face player camera
+	enemy_node.rotate_object_local(Vector3.UP, PI)
 
 # ==============================================================================
 # 5. ANIMATION & DEBUG HELPERS
@@ -151,8 +155,7 @@ func _on_enemy_damaged(enemy_id: String, _damage: int) -> void:
 	if _spawned_enemies.has(enemy_id):
 		play_animation(_spawned_enemies[enemy_id], &"interact-left", false)
 
-func _on_enemy_health_changed(current_hp: int, _max_hp: int) -> void:
-	var enemy_id: String = "enemy_0"
+func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -> void:
 	if current_hp <= 0 and _spawned_enemies.has(enemy_id):
 		var enemy_node: Node3D = _spawned_enemies[enemy_id]
 		play_animation(enemy_node, &"die", false)

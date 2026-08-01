@@ -153,6 +153,7 @@ func _on_chevron_flash(is_player_hit: bool) -> void:
 		right_chevrons.modulate = flash_color
 		tween.tween_property(right_chevrons, "modulate", Color.WHITE, 0.4)
 
+# res://Scripts/UI/BattleHUD.gd
 func _initialize_portrait_slots() -> void:
 	portrait_slots.clear()
 	portrait_slots.resize(6)
@@ -161,30 +162,20 @@ func _initialize_portrait_slots() -> void:
 	if is_instance_valid(party_left): all_portraits.append_array(party_left.get_children())
 	if is_instance_valid(party_right): all_portraits.append_array(party_right.get_children())
 
-	for portrait: Node in all_portraits:
+	for i: int in range(all_portraits.size()):
+		var portrait: Node = all_portraits[i]
+		if not is_instance_valid(portrait): continue
+
+		# Force explicit slot_index mapping (0..5)
+		var idx: int = i
 		if "slot_index" in portrait:
-			var idx: int = portrait.get("slot_index")
-			if idx >= 0 and idx < 6:
-				portrait_slots[idx] = portrait
+			var set_idx: Variant = portrait.get("slot_index")
+			if typeof(set_idx) == TYPE_INT and set_idx >= 0 and set_idx < 6:
+				idx = int(set_idx)
 
-func _on_combat_started(enemy_data: Resource, player_party: Array) -> void:
-	show()
-	_reset_state()
-	_bind_action_buttons()
-	setup_party_display(player_party)
-	
-	if is_instance_valid(enemy_data):
-		var raw_name = enemy_data.get("enemy_name")
-		var e_name: String = str(raw_name) if raw_name != null else "CYBER-ZOMBIE CAT"
-		var raw_hp = enemy_data.get("max_health")
-		var max_hp: int = int(raw_hp) if raw_hp != null else 30
-		
-		if is_instance_valid(enemy_name_label): enemy_name_label.text = e_name.to_upper()
-		if is_instance_valid(enemy_hp_label): enemy_hp_label.text = "%d / %d" % [max_hp, max_hp]
-
-func _on_combat_ended(_victory: bool) -> void:
-	hide()
-	_reset_state()
+		portrait.set("slot_index", idx)
+		if idx < 6:
+			portrait_slots[idx] = portrait
 
 func setup_party_display(party_members: Array) -> void:
 	if portrait_slots.is_empty(): _initialize_portrait_slots()
@@ -193,9 +184,51 @@ func setup_party_display(party_members: Array) -> void:
 		var slot_node: Node = portrait_slots[i]
 		if not is_instance_valid(slot_node): continue
 
+		# Guarantee slot index alignment
+		if "slot_index" in slot_node:
+			slot_node.set("slot_index", i)
+
 		if i < party_members.size() and is_instance_valid(party_members[i]):
 			if slot_node.has_method("setup_slot"):
 				slot_node.call("setup_slot", party_members[i])
 		else:
 			if slot_node.has_method("setup_slot"):
 				slot_node.call("setup_slot", null)
+
+## support both single resources and enemy arrays
+func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> void:
+	# 1. Normalize incoming parameter to an Array[Resource]
+	var enemy_group: Array[Resource] = []
+	if enemy_data_or_group is Array:
+		enemy_group = enemy_data_or_group as Array[Resource]
+	elif enemy_data_or_group is Resource:
+		enemy_group.append(enemy_data_or_group as Resource)
+
+	if enemy_group.is_empty():
+		return
+
+	# 2. Get the lead enemy resource to display stats in top banner
+	var primary_enemy: Resource = enemy_group[0]
+	if is_instance_valid(primary_enemy):
+		_update_enemy_banner_ui(primary_enemy)
+
+	# 🎯 3. RESTORED: Populate the 6 party slot portraits!
+	setup_party_display(player_party)
+
+	show()
+
+## Updates the top UI banner with enemy stats
+func _update_enemy_banner_ui(enemy_resource: Resource) -> void:
+	var e_name: String = str(enemy_resource.get("enemy_name")) if enemy_resource.get("enemy_name") != null else "CYBER-ZOMBIE CAT"
+	var e_max_hp: int = int(enemy_resource.get("max_health")) if "max_health" in enemy_resource else 30
+	var e_hp: int = int(enemy_resource.get("current_health")) if "current_health" in enemy_resource else e_max_hp
+
+	if is_instance_valid(enemy_name_label):
+		enemy_name_label.text = e_name.to_upper()
+		
+	if is_instance_valid(enemy_hp_label):
+		enemy_hp_label.text = "%d / %d" % [e_hp, e_max_hp]
+		
+func _on_combat_ended(_victory: bool) -> void:
+	hide()
+	_reset_state()

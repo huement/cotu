@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=29 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
@@ -27,6 +27,9 @@
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
 [ext_resource type="Script" uid="uid://716h0rosm8ii" path="res://Scripts/Testing/BattleTest.gd" id="26_pt3ps"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pl8yv"]
+height = 1.8
 
 [node name="World" type="Node3D"]
 metadata/_edit_horizontal_guides_ = [481.0]
@@ -254,15 +257,19 @@ horizontal_alignment = 1
 clip_text = true
 text_overrun_behavior = 1
 
-[node name="Player" type="Node3D" parent="."]
+[node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
+collision_mask = 2
 script = ExtResource("1_a02cp")
 eye_height = 0.8
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
-current = true
 
 [node name="CollisionRayCast" type="RayCast3D" parent="Player/Camera3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_pl8yv")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
@@ -283,7 +290,6 @@ data = {
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="Enemy" parent="Enemies" instance=ExtResource("21_xbk3s")]
-initial_cell = Vector2i(3, 0)
 
 [node name="SceneInitializerModule" type="Node" parent="."]
 script = ExtResource("6_5ukr8")

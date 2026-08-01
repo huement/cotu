@@ -2,7 +2,7 @@ extends Node3D
 class_name DungeonPlayer
 
 ## Cardinal direction state tracking for retro grid exploration.
-enum Facing { NORTH, WEST, SOUTH, EAST }
+enum Facing {NORTH, WEST, SOUTH, EAST}
 
 @onready var camera: Camera3D = $Camera3D as Camera3D
 
@@ -53,7 +53,7 @@ func _initialize_player() -> void:
 
 	camera.position = Vector3(0.0, eye_height, 0.0)
 	camera.rotation_degrees = Vector3.ZERO
-	
+
 	# FORCE Godot to display this camera view on the main screen on launch!
 	camera.make_current()
 
@@ -87,7 +87,8 @@ func _input(event: InputEvent) -> void:
 # ==============================================================================
 # COMBAT SIGNAL CALLBACKS
 # ==============================================================================
-func _on_combat_started(_enemy_data: Resource, _player_party: Array) -> void:
+## 🎯 Updated parameter to Variant to accept both single resources and enemy arrays
+func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array) -> void:
 	_is_in_combat = true
 
 func _on_combat_ended(_victory: bool) -> void:
@@ -137,8 +138,8 @@ func _execute_grid_step(input_direction: Vector3) -> void:
 
 	var target_world_pos: Vector3 = _cell_to_world(target_grid_pos)
 	var tween: Tween = create_tween()
-	tween.tween_property(self, "global_position", target_world_pos, movement_duration)\
-		.set_trans(Tween.TRANS_SINE)\
+	tween.tween_property(self, "global_position", target_world_pos, movement_duration) \
+		.set_trans(Tween.TRANS_SINE) \
 		.set_ease(Tween.EASE_IN_OUT)
 
 	await tween.finished
@@ -158,8 +159,8 @@ func _execute_grid_rotation(angle_offset: float) -> void:
 
 	var target_rotation: float = rotation_degrees.y + angle_offset
 	var tween: Tween = create_tween()
-	tween.tween_property(self, "rotation_degrees:y", target_rotation, rotation_duration)\
-		.set_trans(Tween.TRANS_SINE)\
+	tween.tween_property(self, "rotation_degrees:y", target_rotation, rotation_duration) \
+		.set_trans(Tween.TRANS_SINE) \
 		.set_ease(Tween.EASE_IN_OUT)
 
 	await tween.finished
@@ -186,7 +187,6 @@ func _apply_canonical_transform() -> void:
 
 func _cell_to_world(cell: Vector2i) -> Vector3:
 	var local_pos: Vector3 = grid_map.map_to_local(Vector3i(cell.x, 0, cell.y))
-	# FORCE local Y down to the floor baseline of the 3D grid cell cube
 	local_pos.y = 0.0
 	return grid_map.to_global(local_pos)
 
