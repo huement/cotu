@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://chik5u213islj"]
+
+[ext_resource type="Texture2D" uid="uid://dqfp0hkseyw66" path="res://Data/Items/claws.png" id="1_s780m"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_40a3e"]
+
+[resource]
+script = ExtResource("2_40a3e")
+item_id = "weap_laser_claw"
+item_name = "Laser Claw"
+description = "A high-frequency energy claw standard among L.E.O. hazard cleaners."
+icon_path = "res://Data/Items/claws.png"
+icon = ExtResource("1_s780m")
+item_type = 1
+equipment_slot = 6
+weapon_type = 1
+attack_bonus = 8
+speed_bonus = 2
+credit_value = 150

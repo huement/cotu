@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bfci54g41vmt3"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_w77bk"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_l1leh"]
+
+[resource]
+script = ExtResource("2_l1leh")
+item_id = "armor_psynic_regular_feet"
+item_name = "Mind-Silk Feet Garb"
+description = "Regular robe armor for the Psynic class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_w77bk")
+item_type = 2
+equipment_slot = 4
+defense_bonus = 2
+speed_bonus = 1
+credit_value = 50
+effects = "+5 defense against MAGIC"
+effect_amount = 5.0
+effect_element = 1
+effect_stat = "defense"

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dk57al6u52tpb"]
+
+[ext_resource type="Texture2D" uid="uid://bjis2vjryj0tq" path="res://Data/Items/health.png" id="1_7ltni"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_s5p6m"]
+
+[resource]
+script = ExtResource("2_s5p6m")
+item_id = "pot_revive"
+item_name = "Revive Potion"
+description = "Revive Downed Ally"
+icon_path = "res://Data/Items/health.png"
+icon = ExtResource("1_7ltni")
+item_type = 3
+credit_value = 1000
+is_consumable = true
+effects = "Revive Downed Ally"
+effect_amount = 1.0
+effect_element = 4
+effect_stat = "life"

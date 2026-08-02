@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://c2fr83wjpcn3a"]
+
+[ext_resource type="Texture2D" uid="uid://bjis2vjryj0tq" path="res://Data/Items/health.png" id="1_6illc"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_s77et"]
+
+[resource]
+script = ExtResource("2_s77et")
+item_id = "pot_mana_full"
+item_name = "Mana Potion (Full)"
+description = "FULL MANA RESTORE"
+icon_path = "res://Data/Items/health.png"
+icon = ExtResource("1_6illc")
+item_type = 3
+credit_value = 500
+is_consumable = true
+energy_restore = 100000
+stat_effect = {
+"energy": 100000
+}

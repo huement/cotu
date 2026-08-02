@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://byk2ydp7lym88"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_f648x"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_k1bpk"]
+
+[resource]
+script = ExtResource("2_k1bpk")
+item_id = "armor_ghostblade_advanced_arms"
+item_name = "Cyber-Ninja Arms Armor"
+description = "Advanced leather armor for the Ghostblade class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_f648x")
+item_type = 2
+equipment_slot = 2
+defense_bonus = 7
+speed_bonus = 1
+credit_value = 200
+effects = "+3 defense against BLADE"
+effect_amount = 3.0
+effect_element = 2
+effect_stat = "defense"

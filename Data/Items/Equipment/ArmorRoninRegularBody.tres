@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://da1xw86jvhsgt"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_bvw1j"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_cwonp"]
+
+[resource]
+script = ExtResource("2_cwonp")
+item_id = "armor_ronin_regular_body"
+item_name = "Lamellar Body Armor"
+description = "Regular heavy armor for the Ronin class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_bvw1j")
+item_type = 2
+equipment_slot = 1
+defense_bonus = 9
+speed_bonus = -1
+credit_value = 50
+effects = "+5 defense against RANGED"
+effect_amount = 5.0
+effect_element = 3
+effect_stat = "defense"

@@ -26,7 +26,7 @@ const CharacterStats = preload("res://Models/character_stats.gd")
 @export var personality: int = 8
 
 @export_group("Dynamic Vitals Component")
-var stats: CharacterStats
+@export var stats: CharacterStats
 
 @export var current_energy: int = 10
 @export var max_energy: int = 10

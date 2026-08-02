@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://pqkn87ecv77q"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_j74ld"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_74faq"]
+
+[resource]
+script = ExtResource("2_74faq")
+item_id = "armor_maester_regular_head"
+item_name = "Treated Head Armor"
+description = "Regular leather armor for the Maester class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_j74ld")
+item_type = 2
+equipment_slot = 7
+defense_bonus = 4
+credit_value = 50
+effects = "+3 defense against MAGIC"
+effect_amount = 3.0
+effect_element = 1
+effect_stat = "defense"

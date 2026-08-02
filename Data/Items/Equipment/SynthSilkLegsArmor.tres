@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dwc8v4yo3rf0w"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_7byk7"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_ba5dr"]
+
+[resource]
+script = ExtResource("2_ba5dr")
+item_id = "armor_echo_advanced_legs"
+item_name = "Synth-Silk Legs Armor"
+description = "Advanced leather armor for the Echo class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_7byk7")
+item_type = 2
+equipment_slot = 3
+defense_bonus = 7
+speed_bonus = 1
+credit_value = 200
+effects = "+2 defense against MAGIC"
+effect_amount = 2.0
+effect_element = 1
+effect_stat = "defense"

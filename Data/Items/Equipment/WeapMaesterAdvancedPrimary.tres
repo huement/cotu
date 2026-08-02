@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://vncaeperu36p"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_kjwts"]
+
+[resource]
+script = ExtResource("1_kjwts")
+item_id = "weap_maester_advanced_primary"
+item_name = "Plasma Caster"
+description = "Advanced primary weapon for the Maester."
+icon_path = "res://Data/Items/weapon.png"
+item_type = 1
+equipment_slot = 6
+weapon_type = 3
+attack_bonus = 18
+credit_value = 350

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://5defxq3u6fk7"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_v4evg"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_ertlr"]
+
+[resource]
+script = ExtResource("2_ertlr")
+item_id = "armor_spartan_advanced_body"
+item_name = "Aegis Body Armor"
+description = "Advanced heavy armor for the Spartan class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_v4evg")
+item_type = 2
+equipment_slot = 1
+defense_bonus = 14
+credit_value = 200
+effects = "+1 defense against MAGIC"
+effect_amount = 1.0
+effect_element = 1
+effect_stat = "defense"

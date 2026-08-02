@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://b3vvlnjt325fr"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_044i4"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_mxv05"]
+
+[resource]
+script = ExtResource("2_mxv05")
+item_id = "armor_ghostblade_regular_head"
+item_name = "Shinobi Head Armor"
+description = "Regular leather armor for the Ghostblade class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_044i4")
+item_type = 2
+equipment_slot = 7
+defense_bonus = 4
+credit_value = 50
+effects = "+4 defense against BLADE"
+effect_amount = 4.0
+effect_element = 2
+effect_stat = "defense"

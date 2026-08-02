@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bswlae1qybcwi"
+
+[deps]
+
+files=["res://Data/basic_items.item.translation", "res://Data/basic_items.item.translation", "res://Data/basic_items.equip.translation", "res://Data/basic_items.attack.translation", "res://Data/basic_items.defense.translation", "res://Data/basic_items.speed.translation", "res://Data/basic_items.heal.translation", "res://Data/basic_items.energy.translation", "res://Data/basic_items.credit.translation", "res://Data/basic_items.description.translation", "res://Data/basic_items.icon.translation", "res://Data/basic_items.effects.translation", "res://Data/basic_items.effect.translation", "res://Data/basic_items.effect.translation", "res://Data/basic_items.effect.translation", "res://Data/basic_items.weapon.translation", "res://Data/basic_items.is.translation"]
+
+source_file="res://Data/basic_items.csv"
+dest_files=["res://Data/basic_items.item.translation", "res://Data/basic_items.item.translation", "res://Data/basic_items.equip.translation", "res://Data/basic_items.attack.translation", "res://Data/basic_items.defense.translation", "res://Data/basic_items.speed.translation", "res://Data/basic_items.heal.translation", "res://Data/basic_items.energy.translation", "res://Data/basic_items.credit.translation", "res://Data/basic_items.description.translation", "res://Data/basic_items.icon.translation", "res://Data/basic_items.effects.translation", "res://Data/basic_items.effect.translation", "res://Data/basic_items.effect.translation", "res://Data/basic_items.effect.translation", "res://Data/basic_items.weapon.translation", "res://Data/basic_items.is.translation"]
+
+[params]
+
+compress=true
+delimiter=0

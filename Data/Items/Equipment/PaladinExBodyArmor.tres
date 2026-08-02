@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dn1dgwe1lv7gu"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_rd0xs"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_nm7h0"]
+
+[resource]
+script = ExtResource("2_nm7h0")
+item_id = "armor_crusader_advanced_body"
+item_name = "Paladin EX Body Armor"
+description = "Advanced heavy armor for the Crusader class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_rd0xs")
+item_type = 2
+equipment_slot = 1
+defense_bonus = 14
+credit_value = 200
+effects = "+3 defense against MAGIC"
+effect_amount = 3.0
+effect_element = 1
+effect_stat = "defense"

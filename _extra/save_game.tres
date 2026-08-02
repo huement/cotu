@@ -1,0 +1,112 @@
+[gd_resource type="Resource" script_class="SaveGame" load_steps=25 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_6gwku"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/CatnipPotion.tres" id="2_ap364"]
+[ext_resource type="Script" path="res://Scripts/Resources/inventory.gd" id="3_5mic3"]
+[ext_resource type="Script" path="res://resources/Party.gd" id="4_18h0r"]
+[ext_resource type="Script" path="res://resources/CatBreed.gd" id="5_6n3m6"]
+[ext_resource type="Resource" path="res://Data/Items/Equipment/PowerSuit.tres" id="6_04uj3"]
+[ext_resource type="Resource" path="res://Data/Items/Equipment/LaserClaw.tres" id="7_snqql"]
+[ext_resource type="Resource" path="res://Data/Classes/Spartan.tres" id="8_yvt8j"]
+[ext_resource type="Script" path="res://resources/CatCharacter.gd" id="9_cdn5r"]
+[ext_resource type="Script" path="res://Models/character_stats.gd" id="10_2bx37"]
+[ext_resource type="Resource" path="res://Data/Classes/Warden.tres" id="11_s6x8u"]
+[ext_resource type="Resource" path="res://Data/Classes/Wizard.tres" id="12_a2mgc"]
+[ext_resource type="Script" path="res://Scripts/Resources/SaveGame.gd" id="13_gbtiq"]
+
+[sub_resource type="Resource" id="Resource_acu36"]
+script = ExtResource("3_5mic3")
+_items = Array[ExtResource("1_6gwku")]([ExtResource("2_ap364")])
+
+[sub_resource type="Resource" id="Resource_n14ce"]
+script = ExtResource("5_6n3m6")
+breed_name = "Maine Coon"
+base_vitality = 25
+
+[sub_resource type="Resource" id="Resource_yirk2"]
+script = ExtResource("10_2bx37")
+max_health = 75
+health = 75
+
+[sub_resource type="Resource" id="Resource_tj1v2"]
+script = ExtResource("9_cdn5r")
+name = "Commander Whiskers"
+breed = SubResource("Resource_n14ce")
+profession = ExtResource("8_yvt8j")
+portrait_path = "res://Data/Portraits/Spartan.png"
+strength = 12
+vitality = 25
+stats = SubResource("Resource_yirk2")
+current_energy = 16
+max_energy = 16
+inventory = SubResource("Resource_acu36")
+equipment = {
+"ARMS": null,
+"BODY": ExtResource("6_04uj3"),
+"FEET": null,
+"LEFT_HAND": null,
+"LEGS": null,
+"RIGHT_HAND": ExtResource("7_snqql")
+}
+
+[sub_resource type="Resource" id="Resource_b40j7"]
+script = ExtResource("5_6n3m6")
+breed_name = "Siamese"
+base_vitality = 20
+base_speed = 14
+
+[sub_resource type="Resource" id="Resource_4d0o0"]
+script = ExtResource("10_2bx37")
+max_health = 40
+health = 40
+
+[sub_resource type="Resource" id="Resource_s4xc2"]
+script = ExtResource("9_cdn5r")
+name = "Baron Von Hiss"
+breed = SubResource("Resource_b40j7")
+profession = ExtResource("11_s6x8u")
+portrait_path = "res://Data/Portraits/Warden.png"
+strength = 10
+vitality = 20
+dexterity = 10
+speed = 14
+stats = SubResource("Resource_4d0o0")
+current_energy = 16
+max_energy = 16
+inventory = SubResource("Resource_acu36")
+
+[sub_resource type="Resource" id="Resource_s2r1a"]
+script = ExtResource("5_6n3m6")
+breed_name = "Sphinx"
+base_vitality = 15
+base_speed = 11
+
+[sub_resource type="Resource" id="Resource_c68mw"]
+script = ExtResource("10_2bx37")
+max_health = 30
+health = 30
+
+[sub_resource type="Resource" id="Resource_e3ckm"]
+script = ExtResource("9_cdn5r")
+name = "Sage Psych-Meow"
+breed = SubResource("Resource_s2r1a")
+profession = ExtResource("12_a2mgc")
+portrait_path = "res://Data/Portraits/Wizard.png"
+intelligence = 15
+piety = 15
+vitality = 15
+speed = 11
+stats = SubResource("Resource_c68mw")
+current_energy = 30
+max_energy = 30
+inventory = SubResource("Resource_acu36")
+
+[sub_resource type="Resource" id="Resource_kewtv"]
+script = ExtResource("4_18h0r")
+slots = Array[Resource]([SubResource("Resource_tj1v2"), SubResource("Resource_s4xc2"), null, SubResource("Resource_e3ckm"), null, null])
+
+[resource]
+script = ExtResource("13_gbtiq")
+party = SubResource("Resource_kewtv")
+inventory = SubResource("Resource_acu36")
+save_timestamp = "2026-08-01T21:18:04"

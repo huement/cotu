@@ -1,0 +1,199 @@
+item_id,item_name,item_type,equip_slot,attack_bonus,defense_bonus,speed_bonus,heal_amount,energy_restore,credit_value,description,icon_path,effects,effect_amount,effect_element,effect_stat,weapon_type,is_consumable
+weap_laser_claw,Laser Claw,WEAPON,RIGHT_HAND,8,0,2,0,0,150,A high-frequency energy claw standard among L.E.O. hazard cleaners.,res://Data/Items/claws.png,,,,,BLADE,FALSE
+weap_mono_katana,Mono-Katana,WEAPON,RIGHT_HAND,14,0,0,0,0,320,Molecularly sharpened blade capable of slicing rogue server racks.,res://Data/Items/katana.png,,,,,BLADE,FALSE
+armor_power_suit,Exo Power Suit,ARMOR,BODY,0,6,-1,0,0,250,Heavy-duty hazard protection plating.,res://Data/Items/gauntlet.png,+4 defense against RANGED,4,RANGED,defense,,FALSE
+misc_arcane_battery,Arcane Battery,MISC,NONE,0,0,0,0,0,80,Scavenged energy cell filled with raw magic data.,res://Data/Items/orb.png,,,,,,FALSE
+armor_spartan_regular_head,Iron Head Armor,ARMOR,HEAD,0,7,-1,0,0,50,Regular heavy armor for the Spartan class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_spartan_regular_body,Iron Body Armor,ARMOR,BODY,0,9,-1,0,0,50,Regular heavy armor for the Spartan class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_spartan_regular_arms,Iron Arms Armor,ARMOR,ARMS,0,7,-1,0,0,50,Regular heavy armor for the Spartan class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_spartan_regular_legs,Iron Legs Armor,ARMOR,LEGS,0,7,-1,0,0,50,Regular heavy armor for the Spartan class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_spartan_regular_feet,Iron Feet Armor,ARMOR,FEET,0,7,-1,0,0,50,Regular heavy armor for the Spartan class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+weap_spartan_regular_primary,Broadsword,WEAPON,BOTH_HANDS,8,0,0,0,0,80,Regular primary weapon for the Spartan.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_spartan_advanced_head,Aegis Head Armor,ARMOR,HEAD,0,12,0,0,0,200,Advanced heavy armor for the Spartan class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_spartan_advanced_body,Aegis Body Armor,ARMOR,BODY,0,14,0,0,0,200,Advanced heavy armor for the Spartan class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_spartan_advanced_arms,Aegis Arms Armor,ARMOR,ARMS,0,12,0,0,0,200,Advanced heavy armor for the Spartan class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_spartan_advanced_legs,Aegis Legs Armor,ARMOR,LEGS,0,12,0,0,0,200,Advanced heavy armor for the Spartan class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_spartan_advanced_feet,Aegis Feet Armor,ARMOR,FEET,0,12,0,0,0,200,Advanced heavy armor for the Spartan class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+weap_spartan_advanced_primary,Fusion Broadsword,WEAPON,BOTH_HANDS,18,0,0,0,0,350,Advanced primary weapon for the Spartan.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_archanist_regular_head,Apprentice Head Garb,ARMOR,HEAD,0,2,1,0,0,50,Regular robe armor for the Archanist class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_archanist_regular_body,Apprentice Body Garb,ARMOR,BODY,0,4,1,0,0,50,Regular robe armor for the Archanist class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_archanist_regular_arms,Apprentice Arms Garb,ARMOR,ARMS,0,2,1,0,0,50,Regular robe armor for the Archanist class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_archanist_regular_legs,Apprentice Legs Garb,ARMOR,LEGS,0,2,1,0,0,50,Regular robe armor for the Archanist class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_archanist_regular_feet,Apprentice Feet Garb,ARMOR,FEET,0,2,1,0,0,50,Regular robe armor for the Archanist class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+weap_archanist_regular_primary,Wooden Staff,WEAPON,BOTH_HANDS,8,0,0,0,0,80,Regular primary weapon for the Archanist.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_archanist_advanced_head,Nanoweave Head Garb,ARMOR,HEAD,0,4,2,0,0,200,Advanced robe armor for the Archanist class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_archanist_advanced_body,Nanoweave Body Garb,ARMOR,BODY,0,6,2,0,0,200,Advanced robe armor for the Archanist class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_archanist_advanced_arms,Nanoweave Arms Garb,ARMOR,ARMS,0,4,2,0,0,200,Advanced robe armor for the Archanist class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_archanist_advanced_legs,Nanoweave Legs Garb,ARMOR,LEGS,0,4,2,0,0,200,Advanced robe armor for the Archanist class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_archanist_advanced_feet,Nanoweave Feet Garb,ARMOR,FEET,0,4,2,0,0,200,Advanced robe armor for the Archanist class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+weap_archanist_advanced_primary,Holo-Staff,WEAPON,BOTH_HANDS,18,0,0,0,0,350,Advanced primary weapon for the Archanist.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_soulwright_regular_head,Cleric Head Garb,ARMOR,HEAD,0,2,1,0,0,50,Regular robe armor for the Soulwright class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_soulwright_regular_body,Cleric Body Garb,ARMOR,BODY,0,4,1,0,0,50,Regular robe armor for the Soulwright class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_soulwright_regular_arms,Cleric Arms Garb,ARMOR,ARMS,0,2,1,0,0,50,Regular robe armor for the Soulwright class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_soulwright_regular_legs,Cleric Legs Garb,ARMOR,LEGS,0,2,1,0,0,50,Regular robe armor for the Soulwright class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_soulwright_regular_feet,Cleric Feet Garb,ARMOR,FEET,0,2,1,0,0,50,Regular robe armor for the Soulwright class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+weap_soulwright_regular_primary,Iron Mace,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Soulwright.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_soulwright_regular_shield,Steel Kite Shield,ARMOR,LEFT_HAND,0,5,-1,0,0,60,A sturdy shield for the Soulwright.,res://Data/Items/shield.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_soulwright_advanced_head,Holo-Vestment Head Garb,ARMOR,HEAD,0,4,2,0,0,200,Advanced robe armor for the Soulwright class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_soulwright_advanced_body,Holo-Vestment Body Garb,ARMOR,BODY,0,6,2,0,0,200,Advanced robe armor for the Soulwright class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_soulwright_advanced_arms,Holo-Vestment Arms Garb,ARMOR,ARMS,0,4,2,0,0,200,Advanced robe armor for the Soulwright class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_soulwright_advanced_legs,Holo-Vestment Legs Garb,ARMOR,LEGS,0,4,2,0,0,200,Advanced robe armor for the Soulwright class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_soulwright_advanced_feet,Holo-Vestment Feet Garb,ARMOR,FEET,0,4,2,0,0,200,Advanced robe armor for the Soulwright class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+weap_soulwright_advanced_primary,Plasma Mace,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Soulwright.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_soulwright_advanced_shield,Energy Shield,ARMOR,LEFT_HAND,0,10,-1,0,0,330,A sturdy shield for the Soulwright.,res://Data/Items/shield.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_shade_regular_head,Shadow Head Armor,ARMOR,HEAD,0,4,0,0,0,50,Regular leather armor for the Shade class.,res://Data/Items/armor.png,+4 defense against BLADE,4,BLADE,defense,,FALSE
+armor_shade_regular_body,Shadow Body Armor,ARMOR,BODY,0,6,0,0,0,50,Regular leather armor for the Shade class.,res://Data/Items/armor.png,+2 defense against BLADE,2,BLADE,defense,,FALSE
+armor_shade_regular_arms,Shadow Arms Armor,ARMOR,ARMS,0,4,0,0,0,50,Regular leather armor for the Shade class.,res://Data/Items/armor.png,+5 defense against BLADE,5,BLADE,defense,,FALSE
+armor_shade_regular_legs,Shadow Legs Armor,ARMOR,LEGS,0,4,0,0,0,50,Regular leather armor for the Shade class.,res://Data/Items/armor.png,+1 defense against BLADE,1,BLADE,defense,,FALSE
+armor_shade_regular_feet,Shadow Feet Armor,ARMOR,FEET,0,4,0,0,0,50,Regular leather armor for the Shade class.,res://Data/Items/armor.png,+2 defense against BLADE,2,BLADE,defense,,FALSE
+weap_shade_regular_primary,Steel Dagger,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Shade.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+weap_shade_regular_offhand,Steel Parrying Dagger,WEAPON,LEFT_HAND,6,1,1,0,0,60,Offhand weapon for the Shade.,res://Data/Items/dagger.png,,,,,BLADE,FALSE
+armor_shade_advanced_head,Stealth Head Armor,ARMOR,HEAD,0,7,1,0,0,200,Advanced leather armor for the Shade class.,res://Data/Items/armor.png,+2 defense against BLADE,2,BLADE,defense,,FALSE
+armor_shade_advanced_body,Stealth Body Armor,ARMOR,BODY,0,9,1,0,0,200,Advanced leather armor for the Shade class.,res://Data/Items/armor.png,+5 defense against BLADE,5,BLADE,defense,,FALSE
+armor_shade_advanced_arms,Stealth Arms Armor,ARMOR,ARMS,0,7,1,0,0,200,Advanced leather armor for the Shade class.,res://Data/Items/armor.png,+4 defense against BLADE,4,BLADE,defense,,FALSE
+armor_shade_advanced_legs,Stealth Legs Armor,ARMOR,LEGS,0,7,1,0,0,200,Advanced leather armor for the Shade class.,res://Data/Items/armor.png,+3 defense against BLADE,3,BLADE,defense,,FALSE
+armor_shade_advanced_feet,Stealth Feet Armor,ARMOR,FEET,0,7,1,0,0,200,Advanced leather armor for the Shade class.,res://Data/Items/armor.png,+3 defense against BLADE,3,BLADE,defense,,FALSE
+weap_shade_advanced_primary,Vibro-Dagger,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Shade.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+weap_shade_advanced_offhand,Vibro-Wakizashi,WEAPON,LEFT_HAND,16,1,1,0,0,330,Offhand weapon for the Shade.,res://Data/Items/dagger.png,,,,,BLADE,FALSE
+armor_warden_regular_head,Hunter Head Armor,ARMOR,HEAD,0,4,0,0,0,50,Regular leather armor for the Warden class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_warden_regular_body,Hunter Body Armor,ARMOR,BODY,0,6,0,0,0,50,Regular leather armor for the Warden class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_warden_regular_arms,Hunter Arms Armor,ARMOR,ARMS,0,4,0,0,0,50,Regular leather armor for the Warden class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_warden_regular_legs,Hunter Legs Armor,ARMOR,LEGS,0,4,0,0,0,50,Regular leather armor for the Warden class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_warden_regular_feet,Hunter Feet Armor,ARMOR,FEET,0,4,0,0,0,50,Regular leather armor for the Warden class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+weap_warden_regular_primary,Crossbow,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Warden.,res://Data/Items/weapon.png,,,,,RANGED,FALSE
+weap_warden_regular_ammo,Iron Arrows,WEAPON,LEFT_HAND,4,0,0,0,0,8,Ammunition for the Warden.,res://Data/Items/ammo.png,,,,,RANGED,TRUE
+weap_warden_regular_backup,Iron Dagger,WEAPON,RIGHT_HAND,5,0,1,0,0,40,Backup melee weapon for the Warden.,res://Data/Items/dagger.png,,,,,BLADE,FALSE
+armor_warden_advanced_head,Recon Head Armor,ARMOR,HEAD,0,7,1,0,0,200,Advanced leather armor for the Warden class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_warden_advanced_body,Recon Body Armor,ARMOR,BODY,0,9,1,0,0,200,Advanced leather armor for the Warden class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_warden_advanced_arms,Recon Arms Armor,ARMOR,ARMS,0,7,1,0,0,200,Advanced leather armor for the Warden class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_warden_advanced_legs,Recon Legs Armor,ARMOR,LEGS,0,7,1,0,0,200,Advanced leather armor for the Warden class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_warden_advanced_feet,Recon Feet Armor,ARMOR,FEET,0,7,1,0,0,200,Advanced leather armor for the Warden class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+weap_warden_advanced_primary,Laser Bow,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Warden.,res://Data/Items/weapon.png,,,,,RANGED,FALSE
+weap_warden_advanced_ammo,Plasma Bolts,WEAPON,LEFT_HAND,9,0,0,0,0,35,Ammunition for the Warden.,res://Data/Items/ammo.png,,,,,RANGED,TRUE
+weap_warden_advanced_backup,Laser Dagger,WEAPON,RIGHT_HAND,12,0,1,0,0,175,Backup melee weapon for the Warden.,res://Data/Items/dagger.png,,,,,BLADE,FALSE
+armor_maester_regular_head,Treated Head Armor,ARMOR,HEAD,0,4,0,0,0,50,Regular leather armor for the Maester class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_maester_regular_body,Treated Body Armor,ARMOR,BODY,0,6,0,0,0,50,Regular leather armor for the Maester class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_maester_regular_arms,Treated Arms Armor,ARMOR,ARMS,0,4,0,0,0,50,Regular leather armor for the Maester class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_maester_regular_legs,Treated Legs Armor,ARMOR,LEGS,0,4,0,0,0,50,Regular leather armor for the Maester class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_maester_regular_feet,Treated Feet Armor,ARMOR,FEET,0,4,0,0,0,50,Regular leather armor for the Maester class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+weap_maester_regular_primary,Alchemy Flasks,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Maester.,res://Data/Items/weapon.png,,,,,RANGED,FALSE
+armor_maester_advanced_head,Chem-Guard Head Armor,ARMOR,HEAD,0,7,1,0,0,200,Advanced leather armor for the Maester class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_maester_advanced_body,Chem-Guard Body Armor,ARMOR,BODY,0,9,1,0,0,200,Advanced leather armor for the Maester class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_maester_advanced_arms,Chem-Guard Arms Armor,ARMOR,ARMS,0,7,1,0,0,200,Advanced leather armor for the Maester class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_maester_advanced_legs,Chem-Guard Legs Armor,ARMOR,LEGS,0,7,1,0,0,200,Advanced leather armor for the Maester class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_maester_advanced_feet,Chem-Guard Feet Armor,ARMOR,FEET,0,7,1,0,0,200,Advanced leather armor for the Maester class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+weap_maester_advanced_primary,Plasma Caster,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Maester.,res://Data/Items/weapon.png,,,,,RANGED,FALSE
+armor_echo_regular_head,Minstrel Head Armor,ARMOR,HEAD,0,4,0,0,0,50,Regular leather armor for the Echo class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_echo_regular_body,Minstrel Body Armor,ARMOR,BODY,0,6,0,0,0,50,Regular leather armor for the Echo class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_echo_regular_arms,Minstrel Arms Armor,ARMOR,ARMS,0,4,0,0,0,50,Regular leather armor for the Echo class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_echo_regular_legs,Minstrel Legs Armor,ARMOR,LEGS,0,4,0,0,0,50,Regular leather armor for the Echo class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_echo_regular_feet,Minstrel Feet Armor,ARMOR,FEET,0,4,0,0,0,50,Regular leather armor for the Echo class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+weap_echo_regular_primary,Lute,WEAPON,BOTH_HANDS,8,0,0,0,0,80,Regular primary weapon for the Echo.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_echo_advanced_head,Synth-Silk Head Armor,ARMOR,HEAD,0,7,1,0,0,200,Advanced leather armor for the Echo class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_echo_advanced_body,Synth-Silk Body Armor,ARMOR,BODY,0,9,1,0,0,200,Advanced leather armor for the Echo class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_echo_advanced_arms,Synth-Silk Arms Armor,ARMOR,ARMS,0,7,1,0,0,200,Advanced leather armor for the Echo class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_echo_advanced_legs,Synth-Silk Legs Armor,ARMOR,LEGS,0,7,1,0,0,200,Advanced leather armor for the Echo class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_echo_advanced_feet,Synth-Silk Feet Armor,ARMOR,FEET,0,7,1,0,0,200,Advanced leather armor for the Echo class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+weap_echo_advanced_primary,Sonic Synth,WEAPON,BOTH_HANDS,18,0,0,0,0,350,Advanced primary weapon for the Echo.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_psynic_regular_head,Mind-Silk Head Garb,ARMOR,HEAD,0,2,1,0,0,50,Regular robe armor for the Psynic class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_psynic_regular_body,Mind-Silk Body Garb,ARMOR,BODY,0,4,1,0,0,50,Regular robe armor for the Psynic class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_psynic_regular_arms,Mind-Silk Arms Garb,ARMOR,ARMS,0,2,1,0,0,50,Regular robe armor for the Psynic class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_psynic_regular_legs,Mind-Silk Legs Garb,ARMOR,LEGS,0,2,1,0,0,50,Regular robe armor for the Psynic class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_psynic_regular_feet,Mind-Silk Feet Garb,ARMOR,FEET,0,2,1,0,0,50,Regular robe armor for the Psynic class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+weap_psynic_regular_primary,Focus Crystal,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Psynic.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_psynic_advanced_head,Neural-Weave Head Garb,ARMOR,HEAD,0,4,2,0,0,200,Advanced robe armor for the Psynic class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_psynic_advanced_body,Neural-Weave Body Garb,ARMOR,BODY,0,6,2,0,0,200,Advanced robe armor for the Psynic class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_psynic_advanced_arms,Neural-Weave Arms Garb,ARMOR,ARMS,0,4,2,0,0,200,Advanced robe armor for the Psynic class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_psynic_advanced_legs,Neural-Weave Legs Garb,ARMOR,LEGS,0,4,2,0,0,200,Advanced robe armor for the Psynic class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_psynic_advanced_feet,Neural-Weave Feet Garb,ARMOR,FEET,0,4,2,0,0,200,Advanced robe armor for the Psynic class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+weap_psynic_advanced_primary,Psi-Amplifier,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Psynic.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_amazon_regular_head,Bronze Head Armor,ARMOR,HEAD,0,7,-1,0,0,50,Regular heavy armor for the Amazon class.,res://Data/Items/armor.png,+1 defense against RANGED,1,RANGED,defense,,FALSE
+armor_amazon_regular_body,Bronze Body Armor,ARMOR,BODY,0,9,-1,0,0,50,Regular heavy armor for the Amazon class.,res://Data/Items/armor.png,+5 defense against RANGED,5,RANGED,defense,,FALSE
+armor_amazon_regular_arms,Bronze Arms Armor,ARMOR,ARMS,0,7,-1,0,0,50,Regular heavy armor for the Amazon class.,res://Data/Items/armor.png,+3 defense against RANGED,3,RANGED,defense,,FALSE
+armor_amazon_regular_legs,Bronze Legs Armor,ARMOR,LEGS,0,7,-1,0,0,50,Regular heavy armor for the Amazon class.,res://Data/Items/armor.png,+3 defense against RANGED,3,RANGED,defense,,FALSE
+armor_amazon_regular_feet,Bronze Feet Armor,ARMOR,FEET,0,7,-1,0,0,50,Regular heavy armor for the Amazon class.,res://Data/Items/armor.png,+1 defense against RANGED,1,RANGED,defense,,FALSE
+weap_amazon_regular_primary,Steel Lance,WEAPON,BOTH_HANDS,8,0,0,0,0,80,Regular primary weapon for the Amazon.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_amazon_advanced_head,Valkyrie EX Head Armor,ARMOR,HEAD,0,12,0,0,0,200,Advanced heavy armor for the Amazon class.,res://Data/Items/armor.png,+5 defense against RANGED,5,RANGED,defense,,FALSE
+armor_amazon_advanced_body,Valkyrie EX Body Armor,ARMOR,BODY,0,14,0,0,0,200,Advanced heavy armor for the Amazon class.,res://Data/Items/armor.png,+3 defense against RANGED,3,RANGED,defense,,FALSE
+armor_amazon_advanced_arms,Valkyrie EX Arms Armor,ARMOR,ARMS,0,12,0,0,0,200,Advanced heavy armor for the Amazon class.,res://Data/Items/armor.png,+5 defense against RANGED,5,RANGED,defense,,FALSE
+armor_amazon_advanced_legs,Valkyrie EX Legs Armor,ARMOR,LEGS,0,12,0,0,0,200,Advanced heavy armor for the Amazon class.,res://Data/Items/armor.png,+4 defense against RANGED,4,RANGED,defense,,FALSE
+armor_amazon_advanced_feet,Valkyrie EX Feet Armor,ARMOR,FEET,0,12,0,0,0,200,Advanced heavy armor for the Amazon class.,res://Data/Items/armor.png,+2 defense against RANGED,2,RANGED,defense,,FALSE
+weap_amazon_advanced_primary,Turbo Lance,WEAPON,BOTH_HANDS,18,0,0,0,0,350,Advanced primary weapon for the Amazon.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_wizard_regular_head,Mystic Head Garb,ARMOR,HEAD,0,2,1,0,0,50,Regular robe armor for the Wizard class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_wizard_regular_body,Mystic Body Garb,ARMOR,BODY,0,4,1,0,0,50,Regular robe armor for the Wizard class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_wizard_regular_arms,Mystic Arms Garb,ARMOR,ARMS,0,2,1,0,0,50,Regular robe armor for the Wizard class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_wizard_regular_legs,Mystic Legs Garb,ARMOR,LEGS,0,2,1,0,0,50,Regular robe armor for the Wizard class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_wizard_regular_feet,Mystic Feet Garb,ARMOR,FEET,0,2,1,0,0,50,Regular robe armor for the Wizard class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+weap_wizard_regular_primary,Elder Staff,WEAPON,BOTH_HANDS,8,0,0,0,0,80,Regular primary weapon for the Wizard.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_wizard_advanced_head,Void-Loomed Head Garb,ARMOR,HEAD,0,4,2,0,0,200,Advanced robe armor for the Wizard class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_wizard_advanced_body,Void-Loomed Body Garb,ARMOR,BODY,0,6,2,0,0,200,Advanced robe armor for the Wizard class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_wizard_advanced_arms,Void-Loomed Arms Garb,ARMOR,ARMS,0,4,2,0,0,200,Advanced robe armor for the Wizard class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_wizard_advanced_legs,Void-Loomed Legs Garb,ARMOR,LEGS,0,4,2,0,0,200,Advanced robe armor for the Wizard class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_wizard_advanced_feet,Void-Loomed Feet Garb,ARMOR,FEET,0,4,2,0,0,200,Advanced robe armor for the Wizard class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+weap_wizard_advanced_primary,Quantum Staff,WEAPON,BOTH_HANDS,18,0,0,0,0,350,Advanced primary weapon for the Wizard.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_crusader_regular_head,Knight Head Armor,ARMOR,HEAD,0,7,-1,0,0,50,Regular heavy armor for the Crusader class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_crusader_regular_body,Knight Body Armor,ARMOR,BODY,0,9,-1,0,0,50,Regular heavy armor for the Crusader class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_crusader_regular_arms,Knight Arms Armor,ARMOR,ARMS,0,7,-1,0,0,50,Regular heavy armor for the Crusader class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_crusader_regular_legs,Knight Legs Armor,ARMOR,LEGS,0,7,-1,0,0,50,Regular heavy armor for the Crusader class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_crusader_regular_feet,Knight Feet Armor,ARMOR,FEET,0,7,-1,0,0,50,Regular heavy armor for the Crusader class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+weap_crusader_regular_primary,Longsword,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Crusader.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_crusader_regular_shield,Steel Kite Shield,ARMOR,LEFT_HAND,0,5,-1,0,0,60,A sturdy shield for the Crusader.,res://Data/Items/shield.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_crusader_advanced_head,Paladin EX Head Armor,ARMOR,HEAD,0,12,0,0,0,200,Advanced heavy armor for the Crusader class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_crusader_advanced_body,Paladin EX Body Armor,ARMOR,BODY,0,14,0,0,0,200,Advanced heavy armor for the Crusader class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_crusader_advanced_arms,Paladin EX Arms Armor,ARMOR,ARMS,0,12,0,0,0,200,Advanced heavy armor for the Crusader class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_crusader_advanced_legs,Paladin EX Legs Armor,ARMOR,LEGS,0,12,0,0,0,200,Advanced heavy armor for the Crusader class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_crusader_advanced_feet,Paladin EX Feet Armor,ARMOR,FEET,0,12,0,0,0,200,Advanced heavy armor for the Crusader class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+weap_crusader_advanced_primary,Power Sword,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Crusader.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_crusader_advanced_shield,Energy Shield,ARMOR,LEFT_HAND,0,10,-1,0,0,330,A sturdy shield for the Crusader.,res://Data/Items/shield.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_ronin_regular_head,Lamellar Head Armor,ARMOR,HEAD,0,7,-1,0,0,50,Regular heavy armor for the Ronin class.,res://Data/Items/armor.png,+3 defense against RANGED,3,RANGED,defense,,FALSE
+armor_ronin_regular_body,Lamellar Body Armor,ARMOR,BODY,0,9,-1,0,0,50,Regular heavy armor for the Ronin class.,res://Data/Items/armor.png,+5 defense against RANGED,5,RANGED,defense,,FALSE
+armor_ronin_regular_arms,Lamellar Arms Armor,ARMOR,ARMS,0,7,-1,0,0,50,Regular heavy armor for the Ronin class.,res://Data/Items/armor.png,+1 defense against RANGED,1,RANGED,defense,,FALSE
+armor_ronin_regular_legs,Lamellar Legs Armor,ARMOR,LEGS,0,7,-1,0,0,50,Regular heavy armor for the Ronin class.,res://Data/Items/armor.png,+2 defense against RANGED,2,RANGED,defense,,FALSE
+armor_ronin_regular_feet,Lamellar Feet Armor,ARMOR,FEET,0,7,-1,0,0,50,Regular heavy armor for the Ronin class.,res://Data/Items/armor.png,+5 defense against RANGED,5,RANGED,defense,,FALSE
+weap_ronin_regular_primary,Uchigatana,WEAPON,BOTH_HANDS,8,0,0,0,0,80,Regular primary weapon for the Ronin.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_ronin_advanced_head,Neo-Samurai Head Armor,ARMOR,HEAD,0,12,0,0,0,200,Advanced heavy armor for the Ronin class.,res://Data/Items/armor.png,+1 defense against RANGED,1,RANGED,defense,,FALSE
+armor_ronin_advanced_body,Neo-Samurai Body Armor,ARMOR,BODY,0,14,0,0,0,200,Advanced heavy armor for the Ronin class.,res://Data/Items/armor.png,+2 defense against RANGED,2,RANGED,defense,,FALSE
+armor_ronin_advanced_arms,Neo-Samurai Arms Armor,ARMOR,ARMS,0,12,0,0,0,200,Advanced heavy armor for the Ronin class.,res://Data/Items/armor.png,+4 defense against RANGED,4,RANGED,defense,,FALSE
+armor_ronin_advanced_legs,Neo-Samurai Legs Armor,ARMOR,LEGS,0,12,0,0,0,200,Advanced heavy armor for the Ronin class.,res://Data/Items/armor.png,+4 defense against RANGED,4,RANGED,defense,,FALSE
+armor_ronin_advanced_feet,Neo-Samurai Feet Armor,ARMOR,FEET,0,12,0,0,0,200,Advanced heavy armor for the Ronin class.,res://Data/Items/armor.png,+2 defense against RANGED,2,RANGED,defense,,FALSE
+weap_ronin_advanced_primary,Mono-Katana,WEAPON,BOTH_HANDS,18,0,0,0,0,350,Advanced primary weapon for the Ronin.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+armor_voidhand_regular_head,Monk Head Garb,ARMOR,HEAD,0,2,1,0,0,50,Regular robe armor for the Voidhand class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_voidhand_regular_body,Monk Body Garb,ARMOR,BODY,0,4,1,0,0,50,Regular robe armor for the Voidhand class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_voidhand_regular_arms,Monk Arms Garb,ARMOR,ARMS,0,2,1,0,0,50,Regular robe armor for the Voidhand class.,res://Data/Items/armor.png,+2 defense against MAGIC,2,MAGIC,defense,,FALSE
+armor_voidhand_regular_legs,Monk Legs Garb,ARMOR,LEGS,0,2,1,0,0,50,Regular robe armor for the Voidhand class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_voidhand_regular_feet,Monk Feet Garb,ARMOR,FEET,0,2,1,0,0,50,Regular robe armor for the Voidhand class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+weap_voidhand_regular_primary,Iron Knuckles,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Voidhand.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_voidhand_advanced_head,Kinetic Mesh Head Garb,ARMOR,HEAD,0,4,2,0,0,200,Advanced robe armor for the Voidhand class.,res://Data/Items/armor.png,+5 defense against MAGIC,5,MAGIC,defense,,FALSE
+armor_voidhand_advanced_body,Kinetic Mesh Body Garb,ARMOR,BODY,0,6,2,0,0,200,Advanced robe armor for the Voidhand class.,res://Data/Items/armor.png,+1 defense against MAGIC,1,MAGIC,defense,,FALSE
+armor_voidhand_advanced_arms,Kinetic Mesh Arms Garb,ARMOR,ARMS,0,4,2,0,0,200,Advanced robe armor for the Voidhand class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+armor_voidhand_advanced_legs,Kinetic Mesh Legs Garb,ARMOR,LEGS,0,4,2,0,0,200,Advanced robe armor for the Voidhand class.,res://Data/Items/armor.png,+4 defense against MAGIC,4,MAGIC,defense,,FALSE
+armor_voidhand_advanced_feet,Kinetic Mesh Feet Garb,ARMOR,FEET,0,4,2,0,0,200,Advanced robe armor for the Voidhand class.,res://Data/Items/armor.png,+3 defense against MAGIC,3,MAGIC,defense,,FALSE
+weap_voidhand_advanced_primary,Power Gauntlets,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Voidhand.,res://Data/Items/weapon.png,,,,,BASH,FALSE
+armor_ghostblade_regular_head,Shinobi Head Armor,ARMOR,HEAD,0,4,0,0,0,50,Regular leather armor for the Ghostblade class.,res://Data/Items/armor.png,+4 defense against BLADE,4,BLADE,defense,,FALSE
+armor_ghostblade_regular_body,Shinobi Body Armor,ARMOR,BODY,0,6,0,0,0,50,Regular leather armor for the Ghostblade class.,res://Data/Items/armor.png,+4 defense against BLADE,4,BLADE,defense,,FALSE
+armor_ghostblade_regular_arms,Shinobi Arms Armor,ARMOR,ARMS,0,4,0,0,0,50,Regular leather armor for the Ghostblade class.,res://Data/Items/armor.png,+1 defense against BLADE,1,BLADE,defense,,FALSE
+armor_ghostblade_regular_legs,Shinobi Legs Armor,ARMOR,LEGS,0,4,0,0,0,50,Regular leather armor for the Ghostblade class.,res://Data/Items/armor.png,+2 defense against BLADE,2,BLADE,defense,,FALSE
+armor_ghostblade_regular_feet,Shinobi Feet Armor,ARMOR,FEET,0,4,0,0,0,50,Regular leather armor for the Ghostblade class.,res://Data/Items/armor.png,+3 defense against BLADE,3,BLADE,defense,,FALSE
+weap_ghostblade_regular_primary,Ninjato,WEAPON,RIGHT_HAND,8,0,0,0,0,80,Regular primary weapon for the Ghostblade.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+weap_ghostblade_regular_ammo,Steel Shuriken,WEAPON,NONE,4,0,0,0,0,8,Ammunition for the Ghostblade.,res://Data/Items/ammo.png,,,,,RANGED,TRUE
+weap_ghostblade_regular_backup,Iron Dagger,WEAPON,RIGHT_HAND,5,0,1,0,0,40,Backup melee weapon for the Ghostblade.,res://Data/Items/dagger.png,,,,,BLADE,FALSE
+armor_ghostblade_advanced_head,Cyber-Ninja Head Armor,ARMOR,HEAD,0,7,1,0,0,200,Advanced leather armor for the Ghostblade class.,res://Data/Items/armor.png,+2 defense against BLADE,2,BLADE,defense,,FALSE
+armor_ghostblade_advanced_body,Cyber-Ninja Body Armor,ARMOR,BODY,0,9,1,0,0,200,Advanced leather armor for the Ghostblade class.,res://Data/Items/armor.png,+2 defense against BLADE,2,BLADE,defense,,FALSE
+armor_ghostblade_advanced_arms,Cyber-Ninja Arms Armor,ARMOR,ARMS,0,7,1,0,0,200,Advanced leather armor for the Ghostblade class.,res://Data/Items/armor.png,+3 defense against BLADE,3,BLADE,defense,,FALSE
+armor_ghostblade_advanced_legs,Cyber-Ninja Legs Armor,ARMOR,LEGS,0,7,1,0,0,200,Advanced leather armor for the Ghostblade class.,res://Data/Items/armor.png,+5 defense against BLADE,5,BLADE,defense,,FALSE
+armor_ghostblade_advanced_feet,Cyber-Ninja Feet Armor,ARMOR,FEET,0,7,1,0,0,200,Advanced leather armor for the Ghostblade class.,res://Data/Items/armor.png,+3 defense against BLADE,3,BLADE,defense,,FALSE
+weap_ghostblade_advanced_primary,High-Frequency Blade,WEAPON,RIGHT_HAND,18,0,0,0,0,350,Advanced primary weapon for the Ghostblade.,res://Data/Items/weapon.png,,,,,BLADE,FALSE
+weap_ghostblade_advanced_ammo,Holo-Shuriken,WEAPON,NONE,9,0,0,0,0,35,Ammunition for the Ghostblade.,res://Data/Items/ammo.png,,,,,RANGED,TRUE
+weap_ghostblade_advanced_backup,Laser Dagger,WEAPON,RIGHT_HAND,12,0,1,0,0,175,Backup melee weapon for the Ghostblade.,res://Data/Items/dagger.png,,,,,BLADE,FALSE
+pot_catnip,Catnip Potion,POTION,NONE,0,0,0,15,5,40,Concentrated liquid catnip. Restores 15 HP and 5 Energy.,res://Data/Items/health.png,,,,,,TRUE
+pot_hp_5,Health Potion (+5),POTION,NONE,0,0,0,5,0,10,+5 HP RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_hp_25,Health Potion (+25),POTION,NONE,0,0,0,25,0,50,+25 HP RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_hp_50,Health Potion (+50),POTION,NONE,0,0,0,50,0,100,+50 HP RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_hp_100,Health Potion (+100),POTION,NONE,0,0,0,100,0,200,+100 HP RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_hp_full,Health Potion (Full),POTION,NONE,0,0,0,100000,0,500,FULL HP RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_mana_5,Mana Potion (+5),POTION,NONE,0,0,0,0,5,10,+5 MANA RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_mana_25,Mana Potion (+25),POTION,NONE,0,0,0,0,25,50,+25 MANA RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_mana_50,Mana Potion (+50),POTION,NONE,0,0,0,0,50,100,+50 MANA RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_mana_100,Mana Potion (+100),POTION,NONE,0,0,0,0,100,200,+100 MANA RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_mana_full,Mana Potion (Full),POTION,NONE,0,0,0,0,100000,500,FULL MANA RESTORE,res://Data/Items/health.png,,,,,,TRUE
+pot_revive,Revive Potion,POTION,NONE,0,0,0,0,0,1000,Revive Downed Ally,res://Data/Items/health.png,Revive Downed Ally,1,LIFE,life,,TRUE

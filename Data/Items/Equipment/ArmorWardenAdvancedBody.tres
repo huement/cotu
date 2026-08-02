@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://kwblmtjbi6u8"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_34ja5"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_a72vn"]
+
+[resource]
+script = ExtResource("2_a72vn")
+item_id = "armor_warden_advanced_body"
+item_name = "Recon Body Armor"
+description = "Advanced leather armor for the Warden class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_34ja5")
+item_type = 2
+equipment_slot = 1
+defense_bonus = 9
+speed_bonus = 1
+credit_value = 200
+effects = "+5 defense against MAGIC"
+effect_amount = 5.0
+effect_element = 1
+effect_stat = "defense"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bxl3tqriaoydn"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_r6858"]
+
+[resource]
+script = ExtResource("1_r6858")
+item_id = "weap_psynic_advanced_primary"
+item_name = "Psi-Amplifier"
+description = "Advanced primary weapon for the Psynic."
+icon_path = "res://Data/Items/weapon.png"
+item_type = 1
+equipment_slot = 6
+weapon_type = 2
+attack_bonus = 18
+credit_value = 350

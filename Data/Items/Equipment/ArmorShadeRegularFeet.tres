@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://1w4kfmqpp48u"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_nffy6"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_qhta2"]
+
+[resource]
+script = ExtResource("2_qhta2")
+item_id = "armor_shade_regular_feet"
+item_name = "Shadow Feet Armor"
+description = "Regular leather armor for the Shade class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_nffy6")
+item_type = 2
+equipment_slot = 4
+defense_bonus = 4
+credit_value = 50
+effects = "+2 defense against BLADE"
+effect_amount = 2.0
+effect_element = 2
+effect_stat = "defense"

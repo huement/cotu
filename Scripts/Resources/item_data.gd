@@ -3,9 +3,13 @@ class_name ItemData
 extends Resource
 
 enum ItemType {
+	MISC,
+	WEAPON,
+	ARMOR,
+	POTION,
 	CONSUMABLE,
 	EQUIPMENT,
-	QUEST,
+	QUEST
 }
 
 enum EquipmentSlot {
@@ -15,29 +19,57 @@ enum EquipmentSlot {
 	LEGS,
 	FEET,
 	LEFT_HAND,
-	RIGHT_HAND
+	RIGHT_HAND,
+	HEAD,
+	BOTH_HANDS,
+	ACCESSORY
+}
+
+enum WeaponType {
+	NONE,
+	BLADE,
+	BASH,
+	RANGED
+}
+
+enum EffectElement {
+	NONE,
+	MAGIC,
+	BLADE,
+	RANGED,
+	LIFE,
+	BASH
 }
 
 @export_group("Item Core Identity")
 @export var item_id: String = ""
 @export var item_name: String = "New Item"
 @export_multiline var description: String = ""
+@export var icon_path: String = ""
 @export var icon: Texture2D
-@export var item_type: ItemType = ItemType.CONSUMABLE
+@export var item_type: ItemType = ItemType.MISC
 
-@export_group("Equipment Specifications")
-## Target slot when equipping this item
+@export_group("Equipment & Combat Specifications")
 @export var equipment_slot: EquipmentSlot = EquipmentSlot.NONE
+@export var weapon_type: WeaponType = WeaponType.NONE
 @export var attack_bonus: int = 0
 @export var defense_bonus: int = 0
-@export var max_durability: int = 100
-@export var current_durability: int = 100
+@export var speed_bonus: int = 0
+@export var credit_value: int = 0
 
-@export_group("Consumable Effects")
-## Example: {"heal": 25, "energy": 10}
+@export_group("Consumables & Potions")
+@export var is_consumable: bool = false
+@export var heal_amount: int = 0
+@export var energy_restore: int = 0
 @export var stat_effect: Dictionary = {}
 
-## Returns string key matching CharacterLoadoutPanel slot keys
+@export_group("Magic & Special Effects")
+@export var effects: String = ""
+@export var effect_amount: float = 0.0
+@export var effect_element: EffectElement = EffectElement.NONE
+@export var effect_stat: String = ""
+
+## Returns string key matching CharacterLoadoutPanel slot keys ("BODY", "LEFT_HAND", "RIGHT_HAND", etc.)
 func get_slot_string() -> String:
 	match equipment_slot:
 		EquipmentSlot.BODY: return "BODY"
@@ -45,5 +77,6 @@ func get_slot_string() -> String:
 		EquipmentSlot.LEGS: return "LEGS"
 		EquipmentSlot.FEET: return "FEET"
 		EquipmentSlot.LEFT_HAND: return "LEFT_HAND"
-		EquipmentSlot.RIGHT_HAND: return "RIGHT_HAND"
+		EquipmentSlot.RIGHT_HAND, EquipmentSlot.BOTH_HANDS: return "RIGHT_HAND"
+		EquipmentSlot.HEAD: return "HEAD"
 		_: return ""

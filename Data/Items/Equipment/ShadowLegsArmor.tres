@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dogaqu5yf7din"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_3au7w"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_xiuu4"]
+
+[resource]
+script = ExtResource("2_xiuu4")
+item_id = "armor_shade_regular_legs"
+item_name = "Shadow Legs Armor"
+description = "Regular leather armor for the Shade class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_3au7w")
+item_type = 2
+equipment_slot = 3
+defense_bonus = 4
+credit_value = 50
+effects = "+1 defense against BLADE"
+effect_amount = 1.0
+effect_element = 2
+effect_stat = "defense"

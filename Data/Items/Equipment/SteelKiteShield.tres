@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dic3pymubbtm8"]
+
+[ext_resource type="Texture2D" uid="uid://dxn2utn68va15" path="res://Data/Items/shield.png" id="1_k77lh"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_jia1s"]
+
+[resource]
+script = ExtResource("2_jia1s")
+item_id = "armor_crusader_regular_shield"
+item_name = "Steel Kite Shield"
+description = "A sturdy shield for the Crusader."
+icon_path = "res://Data/Items/shield.png"
+icon = ExtResource("1_k77lh")
+item_type = 2
+equipment_slot = 5
+defense_bonus = 5
+speed_bonus = -1
+credit_value = 60
+effects = "+5 defense against MAGIC"
+effect_amount = 5.0
+effect_element = 1
+effect_stat = "defense"

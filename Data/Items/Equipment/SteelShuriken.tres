@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://cnj51alwo3ef5"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_4ym3r"]
+
+[resource]
+script = ExtResource("1_4ym3r")
+item_id = "weap_ghostblade_regular_ammo"
+item_name = "Steel Shuriken"
+description = "Ammunition for the Ghostblade."
+icon_path = "res://Data/Items/ammo.png"
+item_type = 1
+weapon_type = 3
+attack_bonus = 4
+credit_value = 8
+is_consumable = true

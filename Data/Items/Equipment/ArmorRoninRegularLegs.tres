@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bm1nbt1kbxwka"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_6upeu"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_ucyom"]
+
+[resource]
+script = ExtResource("2_ucyom")
+item_id = "armor_ronin_regular_legs"
+item_name = "Lamellar Legs Armor"
+description = "Regular heavy armor for the Ronin class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_6upeu")
+item_type = 2
+equipment_slot = 3
+defense_bonus = 7
+speed_bonus = -1
+credit_value = 50
+effects = "+2 defense against RANGED"
+effect_amount = 2.0
+effect_element = 3
+effect_stat = "defense"

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dgwb7csssoo7r"]
+
+[ext_resource type="Texture2D" uid="uid://njdqqeq4ia4l" path="res://Data/Items/orb.png" id="1_kbmeb"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_4gvyi"]
+
+[resource]
+script = ExtResource("2_4gvyi")
+item_id = "misc_arcane_battery"
+item_name = "Arcane Battery"
+description = "Scavenged energy cell filled with raw magic data."
+icon_path = "res://Data/Items/orb.png"
+icon = ExtResource("1_kbmeb")
+credit_value = 80

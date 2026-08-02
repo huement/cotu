@@ -1,0 +1,150 @@
+[gd_resource type="Resource" script_class="SaveGame" load_steps=44 format=3 uid="uid://bsvjkdtwiu4tu"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_item_data"]
+[ext_resource type="Resource" uid="uid://dpvixjinmu0jg" path="res://Data/Items/Consumables/CatnipPotion.tres" id="2_catnip"]
+[ext_resource type="Resource" uid="uid://ldbq21goisj4" path="res://Data/Items/Consumables/HealthPotion(+50).tres" id="3_hp50"]
+[ext_resource type="Resource" uid="uid://bslodwktqvses" path="res://Data/Items/Consumables/ManaPotion(+25).tres" id="4_mp25"]
+[ext_resource type="Script" uid="uid://77aud25st0ns" path="res://Scripts/Resources/inventory.gd" id="5_inventory"]
+[ext_resource type="Script" uid="uid://buux6heqdb0c5" path="res://resources/Party.gd" id="6_party"]
+[ext_resource type="Script" uid="uid://b0ku5fa2jk50e" path="res://resources/CatBreed.gd" id="7_breed"]
+[ext_resource type="Resource" uid="uid://bmtkivovsqjst" path="res://Data/Classes/Spartan.tres" id="8_spartan_class"]
+[ext_resource type="Resource" uid="uid://d4a17rcxei32s" path="res://Data/Items/Equipment/IronHeadArmor.tres" id="9_spartan_head"]
+[ext_resource type="Resource" uid="uid://dd0kq8jfegu61" path="res://Data/Items/Equipment/IronBodyArmor.tres" id="10_spartan_body"]
+[ext_resource type="Resource" uid="uid://cm0hc8tghucyi" path="res://Data/Items/Equipment/IronArmsArmor.tres" id="11_spartan_arms"]
+[ext_resource type="Resource" uid="uid://4u21bjb8cufi" path="res://Data/Items/Equipment/IronLegsArmor.tres" id="12_spartan_legs"]
+[ext_resource type="Resource" uid="uid://bwr338w0t4jff" path="res://Data/Items/Equipment/IronFeetArmor.tres" id="13_spartan_feet"]
+[ext_resource type="Resource" uid="uid://dm3i1looxrihu" path="res://Data/Items/Equipment/Broadsword.tres" id="14_spartan_weapon"]
+[ext_resource type="Script" uid="uid://debcfhwr4572" path="res://resources/CatCharacter.gd" id="15_cat_character"]
+[ext_resource type="Script" uid="uid://cop7l6hmr6ccu" path="res://Models/character_stats.gd" id="16_character_stats"]
+[ext_resource type="Resource" uid="uid://r4d0g73wwigm" path="res://Data/Classes/Warden.tres" id="17_warden_class"]
+[ext_resource type="Resource" uid="uid://cxsni0mco56fs" path="res://Data/Items/Equipment/HunterHeadArmor.tres" id="18_warden_head"]
+[ext_resource type="Resource" uid="uid://tafrroy3bio6" path="res://Data/Items/Equipment/HunterBodyArmor.tres" id="19_warden_body"]
+[ext_resource type="Resource" uid="uid://ca86jun4xbslu" path="res://Data/Items/Equipment/HunterArmsArmor.tres" id="20_warden_arms"]
+[ext_resource type="Resource" uid="uid://b00r5kjuxdycp" path="res://Data/Items/Equipment/HunterLegsArmor.tres" id="21_warden_legs"]
+[ext_resource type="Resource" uid="uid://cujbwsh6uu3xx" path="res://Data/Items/Equipment/HunterFeetArmor.tres" id="22_warden_feet"]
+[ext_resource type="Resource" uid="uid://p53evliwchu3" path="res://Data/Items/Equipment/Crossbow.tres" id="23_warden_weapon"]
+[ext_resource type="Resource" uid="uid://b7k0bvraiaoax" path="res://Data/Items/Equipment/IronArrows.tres" id="24_warden_ammo"]
+[ext_resource type="Resource" uid="uid://cvna7oy557yt1" path="res://Data/Classes/Wizard.tres" id="25_wizard_class"]
+[ext_resource type="Resource" uid="uid://cjpdg35siqtq1" path="res://Data/Items/Equipment/MysticHeadGarb.tres" id="26_wizard_head"]
+[ext_resource type="Resource" uid="uid://cnxkptby68cpd" path="res://Data/Items/Equipment/MysticBodyGarb.tres" id="27_wizard_body"]
+[ext_resource type="Resource" uid="uid://kldu0gmt4rnx" path="res://Data/Items/Equipment/MysticArmsGarb.tres" id="28_wizard_arms"]
+[ext_resource type="Resource" uid="uid://eqm6opfobmc0" path="res://Data/Items/Equipment/MysticLegsGarb.tres" id="29_wizard_legs"]
+[ext_resource type="Resource" uid="uid://cmw6bethkuhgd" path="res://Data/Items/Equipment/MysticFeetGarb.tres" id="30_wizard_feet"]
+[ext_resource type="Resource" uid="uid://bs77hhk6itw7l" path="res://Data/Items/Equipment/ElderStaff.tres" id="31_wizard_weapon"]
+[ext_resource type="Script" uid="uid://bosiyyomuewec" path="res://Scripts/Resources/SaveGame.gd" id="32_save_game"]
+
+[sub_resource type="Resource" id="Resource_inv"]
+script = ExtResource("5_inventory")
+_items = Array[ExtResource("1_item_data")]([ExtResource("2_catnip"), ExtResource("3_hp50"), ExtResource("4_mp25")])
+
+[sub_resource type="Resource" id="Resource_breed_whiskers"]
+script = ExtResource("7_breed")
+breed_name = "Maine Coon"
+base_vitality = 25
+
+[sub_resource type="Resource" id="Resource_stats_whiskers"]
+script = ExtResource("16_character_stats")
+max_health = 75
+health = 75
+
+[sub_resource type="Resource" id="Resource_cat_whiskers"]
+script = ExtResource("15_cat_character")
+name = "Commander Whiskers"
+breed = SubResource("Resource_breed_whiskers")
+profession = ExtResource("8_spartan_class")
+portrait_path = "res://Data/Portraits/Spartan.png"
+strength = 12
+vitality = 25
+stats = SubResource("Resource_stats_whiskers")
+current_energy = 16
+max_energy = 16
+inventory = SubResource("Resource_inv")
+equipment = {
+"ARMS": ExtResource("11_spartan_arms"),
+"BODY": ExtResource("10_spartan_body"),
+"FEET": ExtResource("13_spartan_feet"),
+"HEAD": ExtResource("9_spartan_head"),
+"LEFT_HAND": null,
+"LEGS": ExtResource("12_spartan_legs"),
+"RIGHT_HAND": ExtResource("14_spartan_weapon")
+}
+
+[sub_resource type="Resource" id="Resource_breed_baron"]
+script = ExtResource("7_breed")
+breed_name = "Siamese"
+base_vitality = 20
+base_speed = 14
+
+[sub_resource type="Resource" id="Resource_stats_baron"]
+script = ExtResource("16_character_stats")
+max_health = 40
+health = 40
+
+[sub_resource type="Resource" id="Resource_cat_baron"]
+script = ExtResource("15_cat_character")
+name = "Baron Von Hiss"
+breed = SubResource("Resource_breed_baron")
+profession = ExtResource("17_warden_class")
+portrait_path = "res://Data/Portraits/Warden.png"
+strength = 10
+vitality = 20
+dexterity = 10
+speed = 14
+stats = SubResource("Resource_stats_baron")
+current_energy = 16
+max_energy = 16
+inventory = SubResource("Resource_inv")
+equipment = {
+"ARMS": ExtResource("20_warden_arms"),
+"BODY": ExtResource("19_warden_body"),
+"FEET": ExtResource("22_warden_feet"),
+"HEAD": ExtResource("18_warden_head"),
+"LEFT_HAND": ExtResource("24_warden_ammo"),
+"LEGS": ExtResource("21_warden_legs"),
+"RIGHT_HAND": ExtResource("23_warden_weapon")
+}
+
+[sub_resource type="Resource" id="Resource_breed_sage"]
+script = ExtResource("7_breed")
+breed_name = "Sphinx"
+base_vitality = 15
+base_speed = 11
+
+[sub_resource type="Resource" id="Resource_stats_sage"]
+script = ExtResource("16_character_stats")
+max_health = 30
+health = 30
+
+[sub_resource type="Resource" id="Resource_cat_sage"]
+script = ExtResource("15_cat_character")
+name = "Sage Psych-Meow"
+breed = SubResource("Resource_breed_sage")
+profession = ExtResource("25_wizard_class")
+portrait_path = "res://Data/Portraits/Wizard.png"
+intelligence = 15
+piety = 15
+vitality = 15
+speed = 11
+stats = SubResource("Resource_stats_sage")
+current_energy = 30
+max_energy = 30
+inventory = SubResource("Resource_inv")
+equipment = {
+"ARMS": ExtResource("28_wizard_arms"),
+"BODY": ExtResource("27_wizard_body"),
+"FEET": ExtResource("30_wizard_feet"),
+"HEAD": ExtResource("26_wizard_head"),
+"LEFT_HAND": null,
+"LEGS": ExtResource("29_wizard_legs"),
+"RIGHT_HAND": ExtResource("31_wizard_weapon")
+}
+
+[sub_resource type="Resource" id="Resource_party_matrix"]
+script = ExtResource("6_party")
+slots = Array[Resource]([SubResource("Resource_cat_whiskers"), SubResource("Resource_cat_baron"), null, SubResource("Resource_cat_sage"), null, null])
+
+[resource]
+script = ExtResource("32_save_game")
+party = SubResource("Resource_party_matrix")
+inventory = SubResource("Resource_inv")
+save_timestamp = "2026-08-01T21:30:00"

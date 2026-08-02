@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b3qryfscsj4fl"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_pkohk"]
+
+[resource]
+script = ExtResource("1_pkohk")
+item_id = "weap_spartan_regular_primary"
+item_name = "Broadsword"
+description = "Regular primary weapon for the Spartan."
+icon_path = "res://Data/Items/weapon.png"
+item_type = 1
+equipment_slot = 8
+weapon_type = 1
+attack_bonus = 8
+credit_value = 80

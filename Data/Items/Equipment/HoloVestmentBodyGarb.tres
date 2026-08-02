@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://t1gjieeroqgv"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_xqspd"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_h5ixo"]
+
+[resource]
+script = ExtResource("2_h5ixo")
+item_id = "armor_soulwright_advanced_body"
+item_name = "Holo-Vestment Body Garb"
+description = "Advanced robe armor for the Soulwright class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_xqspd")
+item_type = 2
+equipment_slot = 1
+defense_bonus = 6
+speed_bonus = 2
+credit_value = 200
+effects = "+5 defense against MAGIC"
+effect_amount = 5.0
+effect_element = 1
+effect_stat = "defense"

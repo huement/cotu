@@ -7,11 +7,9 @@ signal healed(amount: int, old_health: int, new_health: int)
 const MAX_INT := 2147483647
 
 @export var max_health: int = 10
+@export var health: int = 10
 @export var attack: int = 2
 @export var defence: int = 0
-
-var health: int = 0
-
 
 func _init(p_max_health: int = 10, p_attack: int = 2, p_defence: int = 0) -> void:
 	max_health = p_max_health

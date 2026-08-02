@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://3l2lc0gutvba"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_tnjjf"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_wvdg4"]
+
+[resource]
+script = ExtResource("2_wvdg4")
+item_id = "armor_maester_advanced_legs"
+item_name = "Chem-Guard Legs Armor"
+description = "Advanced leather armor for the Maester class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_tnjjf")
+item_type = 2
+equipment_slot = 3
+defense_bonus = 7
+speed_bonus = 1
+credit_value = 200
+effects = "+1 defense against MAGIC"
+effect_amount = 1.0
+effect_element = 1
+effect_stat = "defense"

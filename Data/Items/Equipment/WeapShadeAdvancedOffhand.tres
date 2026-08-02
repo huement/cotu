@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://4ibslsi8sgp8"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_lhe74"]
+
+[resource]
+script = ExtResource("1_lhe74")
+item_id = "weap_shade_advanced_offhand"
+item_name = "Vibro-Wakizashi"
+description = "Offhand weapon for the Shade."
+icon_path = "res://Data/Items/dagger.png"
+item_type = 1
+equipment_slot = 5
+weapon_type = 1
+attack_bonus = 16
+defense_bonus = 1
+speed_bonus = 1
+credit_value = 330

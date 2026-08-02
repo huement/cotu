@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://cy8ymqywk27xp"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_k6u08"]
+
+[resource]
+script = ExtResource("1_k6u08")
+item_id = "weap_warden_regular_backup"
+item_name = "Iron Dagger"
+description = "Backup melee weapon for the Warden."
+icon_path = "res://Data/Items/dagger.png"
+item_type = 1
+equipment_slot = 6
+weapon_type = 1
+attack_bonus = 5
+speed_bonus = 1
+credit_value = 40

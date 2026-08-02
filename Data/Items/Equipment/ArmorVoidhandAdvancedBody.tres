@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://boebbqjbgwcbq"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_dg0cg"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_w3k0s"]
+
+[resource]
+script = ExtResource("2_w3k0s")
+item_id = "armor_voidhand_advanced_body"
+item_name = "Kinetic Mesh Body Garb"
+description = "Advanced robe armor for the Voidhand class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_dg0cg")
+item_type = 2
+equipment_slot = 1
+defense_bonus = 6
+speed_bonus = 2
+credit_value = 200
+effects = "+1 defense against MAGIC"
+effect_amount = 1.0
+effect_element = 1
+effect_stat = "defense"

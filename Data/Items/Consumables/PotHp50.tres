@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://17ikk27f56us"]
+
+[ext_resource type="Texture2D" uid="uid://bjis2vjryj0tq" path="res://Data/Items/health.png" id="1_vsbrs"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_x4djq"]
+
+[resource]
+script = ExtResource("2_x4djq")
+item_id = "pot_hp_50"
+item_name = "Health Potion (+50)"
+description = "+50 HP RESTORE"
+icon_path = "res://Data/Items/health.png"
+icon = ExtResource("1_vsbrs")
+item_type = 3
+credit_value = 100
+is_consumable = true
+heal_amount = 50
+stat_effect = {
+"heal": 50
+}

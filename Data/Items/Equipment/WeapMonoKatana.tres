@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://d2n0qmt1tif1v"]
+
+[ext_resource type="Texture2D" uid="uid://ct4vgdmq8fyt5" path="res://Data/Items/katana.png" id="1_ad7ne"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_gyrx0"]
+
+[resource]
+script = ExtResource("2_gyrx0")
+item_id = "weap_mono_katana"
+item_name = "Mono-Katana"
+description = "Molecularly sharpened blade capable of slicing rogue server racks."
+icon_path = "res://Data/Items/katana.png"
+icon = ExtResource("1_ad7ne")
+item_type = 1
+equipment_slot = 6
+weapon_type = 1
+attack_bonus = 14
+credit_value = 320

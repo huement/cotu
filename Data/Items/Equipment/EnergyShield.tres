@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://1p6n5jnusc4j"]
+
+[ext_resource type="Texture2D" uid="uid://dxn2utn68va15" path="res://Data/Items/shield.png" id="1_qj2h2"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_m8yb6"]
+
+[resource]
+script = ExtResource("2_m8yb6")
+item_id = "armor_crusader_advanced_shield"
+item_name = "Energy Shield"
+description = "A sturdy shield for the Crusader."
+icon_path = "res://Data/Items/shield.png"
+icon = ExtResource("1_qj2h2")
+item_type = 2
+equipment_slot = 5
+defense_bonus = 10
+speed_bonus = -1
+credit_value = 330
+effects = "+1 defense against MAGIC"
+effect_amount = 1.0
+effect_element = 1
+effect_stat = "defense"

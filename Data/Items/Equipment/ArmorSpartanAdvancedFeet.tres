@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dt40u22wv0pvv"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_yuycw"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_2soye"]
+
+[resource]
+script = ExtResource("2_2soye")
+item_id = "armor_spartan_advanced_feet"
+item_name = "Aegis Feet Armor"
+description = "Advanced heavy armor for the Spartan class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_yuycw")
+item_type = 2
+equipment_slot = 4
+defense_bonus = 12
+credit_value = 200
+effects = "+5 defense against MAGIC"
+effect_amount = 5.0
+effect_element = 1
+effect_stat = "defense"

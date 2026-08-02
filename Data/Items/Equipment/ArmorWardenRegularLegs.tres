@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://byu4wt1gq1u75"]
+
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_jkj30"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_okv1s"]
+
+[resource]
+script = ExtResource("2_okv1s")
+item_id = "armor_warden_regular_legs"
+item_name = "Hunter Legs Armor"
+description = "Regular leather armor for the Warden class."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_jkj30")
+item_type = 2
+equipment_slot = 3
+defense_bonus = 4
+credit_value = 50
+effects = "+3 defense against MAGIC"
+effect_amount = 3.0
+effect_element = 1
+effect_stat = "defense"

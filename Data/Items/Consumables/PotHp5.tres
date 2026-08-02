@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dj60bsvhg274u"]
+
+[ext_resource type="Texture2D" uid="uid://bjis2vjryj0tq" path="res://Data/Items/health.png" id="1_sthf5"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_dckx1"]
+
+[resource]
+script = ExtResource("2_dckx1")
+item_id = "pot_hp_5"
+item_name = "Health Potion (+5)"
+description = "+5 HP RESTORE"
+icon_path = "res://Data/Items/health.png"
+icon = ExtResource("1_sthf5")
+item_type = 3
+credit_value = 10
+is_consumable = true
+heal_amount = 5
+stat_effect = {
+"heal": 5
+}
