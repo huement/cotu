@@ -8,7 +8,7 @@ enum CombatPhase { SELECTION, EXECUTION, RESOLUTION }
 signal party_moved(new_grid_pos: Vector3i, facing: Direction)
 signal party_roster_updated(roster_slots: Array)
 
-# Combat Triggers (Accepts single Resource or Array[Resource])
+# Combat Triggers
 signal combat_started(enemy_data_or_group: Variant, player_party: Array)
 signal combat_ended(victory: bool)
 signal combat_phase_changed(new_phase: CombatPhase)
@@ -24,10 +24,12 @@ signal enemy_damaged_visual(enemy_id: String, damage: int)
 
 # Vitals & Visual FX
 signal character_health_changed(target_slot: int, current_hp: int)
-
-## 🎯 Updated: 3 arguments (enemy_id, current_hp, max_hp) for multi-mob support
 signal enemy_health_changed(enemy_id: String, current_hp: int, max_hp: int)
 signal chevron_flash_requested(is_player_hit: bool)
+
+# 🎯 Progression & XP Signals
+signal character_xp_changed(slot_index: int, current_xp: int, max_xp: int)
+signal character_leveled_up(slot_index: int, new_level: int)
 
 # Popups & UI
 signal popup_requested(action_type: StringName, data: Dictionary)

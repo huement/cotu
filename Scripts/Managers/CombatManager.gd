@@ -55,29 +55,17 @@ func _process(delta: float) -> void:
 	_tick_turn_meters(delta)
 
 
-## Accepts a single EnemyData Resource, an Array[Resource] of enemies, or an EnemyGroupData resource
 func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> void:
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
 
-	# 1. Resolve Player Party Combatants
-	var valid_party: Array = []
-	for slot in player_party:
-		if is_instance_valid(slot):
-			valid_party.append(slot)
-
-	if valid_party.is_empty():
-		var gs: Node = get_tree().root.get_node_or_null("GameState")
-		if is_instance_valid(gs) and "current_party" in gs and gs.get("current_party") != null:
-			var party_res: Resource = gs.get("current_party") as Resource
-			if "slots" in party_res:
-				for slot in (party_res.get("slots") as Array):
-					if is_instance_valid(slot): valid_party.append(slot)
-
-	for i: int in range(valid_party.size()):
-		var cat: Resource = valid_party[i] as Resource
-		if cat != null:
+	# 1. 🎯 Register Player Party Combatants using their true slot index in player_party (0..5)
+	var registered_cats: int = 0
+	for i in range(player_party.size()):
+		var cat: Resource = player_party[i] as Resource
+		if is_instance_valid(cat):
+			registered_cats += 1
 			var c_id: String = "party_slot_%d" % i
 			var c_speed: float = float(cat.get("speed")) if "speed" in cat else 12.0
 			var c_name: String = str(cat.get("name")) if cat.get("name") != null else "Space Cat %d" % (i + 1)
@@ -90,7 +78,7 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			combatant.meter = 0.0
 			combatants.append(combatant)
 
-	# 2. Unpack Enemy Roster (Handles Single Enemy, Array of Enemies, or EnemyGroupData)
+	# 2. Unpack Enemy Roster
 	var enemy_resources: Array[Resource] = []
 	if enemy_data_or_group is Array:
 		for item in (enemy_data_or_group as Array):
@@ -104,7 +92,7 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 		elif enemy_data_or_group is Resource:
 			enemy_resources.append(enemy_data_or_group as Resource)
 
-	GameLogger.combat("Starting Combat w/ %d party members vs %d hostiles" % [valid_party.size(), enemy_resources.size()])
+	GameLogger.combat("Starting Combat w/ %d party members vs %d hostiles" % [registered_cats, enemy_resources.size()])
 
 	for e_idx in range(enemy_resources.size()):
 		var e_data: Resource = enemy_resources[e_idx]
@@ -116,9 +104,8 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			var e_def: int = int(e_data.get("defense")) if "defense" in e_data else 2
 			var e_name: String = str(e_data.get("enemy_name")) if e_data.get("enemy_name") != null else "Cyber-Zombie Cat"
 
-			# Give unique names if multiple enemies share the same name
 			if enemy_resources.size() > 1:
-				e_name = "%s %c" % [e_name, 65 + e_idx] # e.g. Cyber-Zombie Cat A, B, C
+				e_name = "%s %c" % [e_name, 65 + e_idx]
 
 			var enemy_combatant: Combatant = Combatant.new("enemy_%d" % e_idx, e_name, e_speed, false, e_idx, e_hp, e_max_hp, e_str, e_def, e_data)
 			enemy_combatant.meter = 0.0
@@ -147,11 +134,10 @@ func _on_combat_ended(victory: bool) -> void:
 		var living_party_members: int = 0
 		var enemies_killed: int = 0
 
-		# Sum up XP for ALL defeated enemies in this encounter
 		for c: Combatant in combatants:
 			if not c.is_player and c.current_hp <= 0:
 				enemies_killed += 1
-				var single_xp: int = 50 # Default XP per enemy
+				var single_xp: int = 50
 				if is_instance_valid(c.ref) and "xp_value" in c.ref:
 					var raw_xp: Variant = c.ref.get("xp_value")
 					if typeof(raw_xp) in [TYPE_INT, TYPE_FLOAT] and int(raw_xp) > 0:
@@ -160,7 +146,6 @@ func _on_combat_ended(victory: bool) -> void:
 			elif c.is_player and c.current_hp > 0:
 				living_party_members += 1
 		
-		# If no enemies were tracked, fall back gracefully
 		if enemies_killed == 0:
 			enemies_killed = 1
 			total_xp = 50
@@ -214,7 +199,6 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 	var acting_char: Combatant = active_combatant
 	var target_char: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
 
-	# Auto-target first living enemy if target_index is defeated or invalid
 	if not is_instance_valid(target_char) or target_char.current_hp <= 0:
 		for c in combatants:
 			if not c.is_player and c.current_hp > 0:
@@ -248,7 +232,6 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 			if target_char.current_hp <= 0:
 				print("[CombatManager] %s defeated!" % target_char.name)
 				
-				# 🎯 VICTORY GUARD: Only declare victory when ALL hostiles are defeated
 				var any_enemies_alive: bool = false
 				for c in combatants:
 					if not c.is_player and c.current_hp > 0:
