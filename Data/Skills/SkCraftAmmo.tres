@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://bmyod1qtxa67y"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_ngud8"]
+
+[resource]
+script = ExtResource("1_ngud8")
+skill_id = "sk_craft_ammo"
+skill_name = "Munitions Assembly"
+skill_type = 2
+description = "Fabricates Iron Arrows and Plasma Bolts from scavenged metal scrap."
+icon_path = "res://Data/Skills/Icons/craft_ammo.png"
+target_type = 5
+effect_type = 5
+effect_amount = 10
+accuracy = 100
+assigned_classes = Array[String](["Warden", "Ghostblade"])

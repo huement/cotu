@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://b5k08ffrunxia"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_dwq0a"]
+
+[resource]
+script = ExtResource("1_dwq0a")
+spell_id = "sp_corrosive_spray"
+spell_name = "Corrosive Spray"
+spellbook = 2
+description = "Sprays volatile acid that erodes armor plating on all foes."
+icon_path = "res://Data/Spells/Icons/corrosive_spray.png"
+energy_cost = 5
+target_type = 1
+element = 5
+base_amount = 8
+status_effect = 6

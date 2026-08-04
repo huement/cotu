@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://cjv00ponpveph"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_oyu2l"]
+
+[resource]
+script = ExtResource("1_oyu2l")
+spell_id = "sp_stimulant_mist"
+spell_name = "Stimulant Mist"
+spellbook = 2
+tier = 2
+description = "Releases airborne restoratives to patch up an ally's HP and Energy."
+icon_path = "res://Data/Spells/Icons/stimulant_mist.png"
+energy_cost = 6
+target_type = 2
+element = 4
+effect_type = 1
+var_multiplier = 0.3

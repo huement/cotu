@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://bnmvyqjx13xbb"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_5kuww"]
+
+[resource]
+script = ExtResource("1_5kuww")
+skill_id = "sk_camp_mastery"
+skill_name = "Purrgatory Camp"
+skill_type = 1
+description = "Secures the campsite and increases HP and Energy recovery during rest by 50%."
+icon_path = "res://Data/Skills/Icons/camp_mastery.png"
+target_type = 5
+effect_type = 4
+effect_amount = 50
+accuracy = 100
+assigned_classes = Array[String](["Warden", "Amazon", "Soulwright"])
+assigned_races = Array[String](["Bobcat"])

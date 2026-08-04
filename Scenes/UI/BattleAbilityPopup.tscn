@@ -1,0 +1,155 @@
+[gd_scene load_steps=2 format=3 uid="uid://bipols0hgobk7"]
+
+[ext_resource type="Script" uid="uid://djlohywo40cih" path="res://Scripts/UI/battle_ability_popup.gd" id="1_abcde"]
+
+[node name="BattleAbilityPopup" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_abcde")
+
+[node name="BackgroundDimmer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(400, 320)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -160.0
+offset_right = 200.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainVBox" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/MainVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "TACTICAL ABILITY SELECTION"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/MainVBox"]
+layout_mode = 2
+
+[node name="PageAbilitySelect" type="VBoxContainer" parent="PanelContainer/MainVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="TabBar" type="HBoxContainer" parent="PanelContainer/MainVBox/PageAbilitySelect"]
+layout_mode = 2
+
+[node name="SkillsTabBtn" type="Button" parent="PanelContainer/MainVBox/PageAbilitySelect/TabBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "[ SKILLS ]"
+
+[node name="SpellsTabBtn" type="Button" parent="PanelContainer/MainVBox/PageAbilitySelect/TabBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "  SPELLS  "
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MainVBox/PageAbilitySelect"]
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AbilityScrollList" type="VBoxContainer" parent="PanelContainer/MainVBox/PageAbilitySelect/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PreviewBox" type="VBoxContainer" parent="PanelContainer/MainVBox/PageAbilitySelect"]
+layout_mode = 2
+
+[node name="SelectedAbilityLabel" type="Label" parent="PanelContainer/MainVBox/PageAbilitySelect/PreviewBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 11
+text = "SELECT AN ABILITY"
+
+[node name="AbilityDescLabel" type="Label" parent="PanelContainer/MainVBox/PageAbilitySelect/PreviewBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "Choose a skill or spell from the list to view specifications."
+autowrap_mode = 3
+
+[node name="FooterHBox" type="HBoxContainer" parent="PanelContainer/MainVBox/PageAbilitySelect"]
+layout_mode = 2
+
+[node name="Page1CancelBtn" type="Button" parent="PanelContainer/MainVBox/PageAbilitySelect/FooterHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 28)
+layout_mode = 2
+text = "CANCEL"
+
+[node name="Spacer" type="Control" parent="PanelContainer/MainVBox/PageAbilitySelect/FooterHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Page1NextBtn" type="Button" parent="PanelContainer/MainVBox/PageAbilitySelect/FooterHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 28)
+layout_mode = 2
+disabled = true
+text = "NEXT: TARGET >"
+
+[node name="PageTargetSelect" type="VBoxContainer" parent="PanelContainer/MainVBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MainVBox/PageTargetSelect"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TargetGridContainer" type="GridContainer" parent="PanelContainer/MainVBox/PageTargetSelect/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="FooterHBox" type="HBoxContainer" parent="PanelContainer/MainVBox/PageTargetSelect"]
+layout_mode = 2
+
+[node name="Page2BackBtn" type="Button" parent="PanelContainer/MainVBox/PageTargetSelect/FooterHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 28)
+layout_mode = 2
+text = "< BACK"
+
+[node name="Spacer" type="Control" parent="PanelContainer/MainVBox/PageTargetSelect/FooterHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Page2ConfirmBtn" type="Button" parent="PanelContainer/MainVBox/PageTargetSelect/FooterHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 28)
+layout_mode = 2
+disabled = true
+text = "CONFIRM ACTION"

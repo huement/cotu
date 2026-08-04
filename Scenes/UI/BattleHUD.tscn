@@ -258,21 +258,23 @@ texture = ExtResource("10_55foo")
 [node name="TurnInfo" type="Label" parent="TurnCounter"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 28.0
-offset_top = 14.0
-offset_right = 159.0
+offset_left = 22.0
+offset_top = 13.0
+offset_right = 198.0
 offset_bottom = 34.0
+theme_override_colors/font_color = Color(0.12689295, 0.5175071, 0.38339102, 1)
+theme_override_colors/font_outline_color = Color(0.2821932, 0.0008392078, 0.4767928, 1)
 theme_override_fonts/font = ExtResource("9_qdnyl")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 15
 text = "ACTIVE"
 
 [node name="TurnCharacter" type="Label" parent="TurnCounter"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 20.0
-offset_top = 32.0
-offset_right = 172.0
-offset_bottom = 55.0
+offset_left = 22.0
+offset_top = 34.0
+offset_right = 199.0
+offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.15487596, 0.154876, 0.15487596, 1)
 theme_override_fonts/font = ExtResource("4_tbwvx")
 text = "CHARACTER NAME"

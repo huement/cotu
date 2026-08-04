@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://bxokiurnoho3f"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_luydo"]
+
+[resource]
+script = ExtResource("1_luydo")
+skill_id = "sk_whirlwind"
+skill_name = "Blade Storm"
+description = "Executes a 360-degree rotational strike slicing all active hostiles in the front row."
+icon_path = "res://Data/Skills/Icons/whirlwind.png"
+energy_cost = 8
+target_type = 1
+effect_amount = 18
+element = 2
+accuracy = 80
+assigned_classes = Array[String](["Ronin", "Amazon"])

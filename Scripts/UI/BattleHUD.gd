@@ -35,6 +35,7 @@ func _ready() -> void:
 	if is_instance_valid(auto_button):
 		auto_button.toggled.connect(_on_auto_button_toggled)
 
+
 func _bind_action_buttons() -> void:
 	if not is_instance_valid(action_bar):
 		return
@@ -57,6 +58,7 @@ func _bind_action_buttons() -> void:
 		if not btn.pressed.is_connected(_on_action_button_pressed):
 			btn.pressed.connect(_on_action_button_pressed.bind(action_type, btn.name))
 
+
 func _connect_to_signal_bus() -> void:
 	var sb: Node = SignalBus
 	if not is_instance_valid(sb): return
@@ -72,6 +74,7 @@ func _connect_to_signal_bus() -> void:
 	if not sb.chevron_flash_requested.is_connected(_on_chevron_flash):
 		sb.chevron_flash_requested.connect(_on_chevron_flash)
 
+
 func _on_combatant_turn_ready(combatant_id: String, slot_index: int) -> void:
 	if not combatant_id.begins_with("party_slot_"): return
 
@@ -82,12 +85,10 @@ func _on_combatant_turn_ready(combatant_id: String, slot_index: int) -> void:
 	_state = CombatState.AWAITING_ACTION
 	_active_slot_index = slot_index
 
-	# 1. Highlight Active Portrait Frame
 	for i: int in range(portrait_slots.size()):
 		if is_instance_valid(portrait_slots[i]) and portrait_slots[i].has_method("set_active"):
 			portrait_slots[i].set_active(i == slot_index)
 
-	# 2. Resolve Active Cat Name
 	var cat_name: String = "COMMANDER WHISKERS"
 	var gs: Node = get_tree().root.get_node_or_null("GameState")
 	
@@ -100,24 +101,36 @@ func _on_combatant_turn_ready(combatant_id: String, slot_index: int) -> void:
 			elif "character_name" in cat_res and cat_res.get("character_name") != null:
 				cat_name = str(cat_res.get("character_name")).to_upper()
 
-	# 3. Update Labels
-	if is_instance_valid(turn_character_label):
-		turn_character_label.text = cat_name
+	if is_instance_valid(turn_character_label): turn_character_label.text = cat_name
+	if is_instance_valid(turn_info_label): turn_info_label.text = "ACTIVE"
+	if is_instance_valid(action_bar): action_bar.show()
 
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "ACTIVE"
 
-	# 4. Display Action Bar
-	if is_instance_valid(action_bar):
-		action_bar.show()
-
-func _on_action_button_pressed(action_type: StringName, button_name: String) -> void:
+func _on_action_button_pressed(action_type: StringName, _button_name: String) -> void:
 	if _state != CombatState.AWAITING_ACTION: return
 
-	# FIX: Save active slot, reset UI state FIRST, then emit the action signal!
-	var current_slot: int = _active_slot_index
-	_reset_state()
-	SignalBus.player_action_selected.emit(current_slot, action_type, 0)
+	if action_type == &"SPELL" or action_type == &"SKILL":
+		var gs: Node = get_tree().root.get_node_or_null("GameState")
+		var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+		
+		var active_cat: CatCharacter = null
+		if is_instance_valid(gs) and gs.has_method("get_active_cat"):
+			active_cat = gs.get_active_cat() as CatCharacter
+
+		var combatants_list: Array = []
+		if is_instance_valid(cm) and "combatants" in cm:
+			combatants_list = cm.get("combatants") as Array
+
+		SignalBus.popup_requested.emit(&"BATTLE_ABILITIES", {
+			"character": active_cat,
+			"slot_index": _active_slot_index,
+			"combatants": combatants_list
+		})
+	else:
+		var current_slot: int = _active_slot_index
+		_reset_state()
+		SignalBus.player_action_selected.emit(current_slot, action_type, 0)
+
 
 func _reset_state() -> void:
 	for slot in portrait_slots:
@@ -128,20 +141,21 @@ func _reset_state() -> void:
 	_active_slot_index = -1
 	_selected_action = &""
 
-	if is_instance_valid(action_bar):
-		action_bar.hide()
-		
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "WAITING"
+	if is_instance_valid(action_bar): action_bar.hide()
+	if is_instance_valid(turn_info_label): turn_info_label.text = "WAITING"
+
 
 func _on_auto_button_toggled(is_on: bool) -> void:
 	_is_auto_battle_on = is_on
 	if is_instance_valid(auto_button):
 		auto_button.modulate = Color.GREEN if is_on else Color.WHITE
 
-func _on_enemy_health_changed(current_hp: int, max_hp: int) -> void:
+
+## 🎯 Updated: Accepts 3 arguments (_enemy_id, current_hp, max_hp)
+func _on_enemy_health_changed(_enemy_id: String, current_hp: int, max_hp: int) -> void:
 	if is_instance_valid(enemy_hp_label):
-		enemy_hp_label.text = "%d / %d" % [current_hp, max_hp]
+		enemy_hp_label.text = "%d / %d" % [max(0, current_hp), max_hp]
+
 
 func _on_chevron_flash(is_player_hit: bool) -> void:
 	var flash_color: Color = Color.RED if is_player_hit else Color.ORANGE
@@ -153,7 +167,7 @@ func _on_chevron_flash(is_player_hit: bool) -> void:
 		right_chevrons.modulate = flash_color
 		tween.tween_property(right_chevrons, "modulate", Color.WHITE, 0.4)
 
-# res://Scripts/UI/BattleHUD.gd
+
 func _initialize_portrait_slots() -> void:
 	portrait_slots.clear()
 	portrait_slots.resize(6)
@@ -162,20 +176,43 @@ func _initialize_portrait_slots() -> void:
 	if is_instance_valid(party_left): all_portraits.append_array(party_left.get_children())
 	if is_instance_valid(party_right): all_portraits.append_array(party_right.get_children())
 
-	for i: int in range(all_portraits.size()):
-		var portrait: Node = all_portraits[i]
-		if not is_instance_valid(portrait): continue
-
-		# Force explicit slot_index mapping (0..5)
-		var idx: int = i
+	for portrait: Node in all_portraits:
 		if "slot_index" in portrait:
-			var set_idx: Variant = portrait.get("slot_index")
-			if typeof(set_idx) == TYPE_INT and set_idx >= 0 and set_idx < 6:
-				idx = int(set_idx)
+			var idx: int = portrait.get("slot_index")
+			if idx >= 0 and idx < 6:
+				portrait_slots[idx] = portrait
 
-		portrait.set("slot_index", idx)
-		if idx < 6:
-			portrait_slots[idx] = portrait
+
+func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> void:
+	show()
+	_reset_state()
+	_bind_action_buttons()
+	setup_party_display(player_party)
+	
+	var enemy_resources: Array = []
+	if enemy_data_or_group is Array:
+		enemy_resources = enemy_data_or_group as Array
+	elif enemy_data_or_group is Resource:
+		enemy_resources.append(enemy_data_or_group as Resource)
+
+	if not enemy_resources.is_empty() and is_instance_valid(enemy_resources[0]):
+		var lead_enemy: Resource = enemy_resources[0] as Resource
+		var raw_name = lead_enemy.get("enemy_name")
+		var e_name: String = str(raw_name) if raw_name != null else "Cyber-Zombie Cat"
+		if enemy_resources.size() > 1:
+			e_name += " (x%d)" % enemy_resources.size()
+			
+		var raw_hp = lead_enemy.get("max_health")
+		var max_hp: int = int(raw_hp) if raw_hp != null else 30
+		
+		if is_instance_valid(enemy_name_label): enemy_name_label.text = e_name.to_upper()
+		if is_instance_valid(enemy_hp_label): enemy_hp_label.text = "%d / %d" % [max_hp, max_hp]
+
+
+func _on_combat_ended(_victory: bool) -> void:
+	hide()
+	_reset_state()
+
 
 func setup_party_display(party_members: Array) -> void:
 	if portrait_slots.is_empty(): _initialize_portrait_slots()
@@ -184,51 +221,9 @@ func setup_party_display(party_members: Array) -> void:
 		var slot_node: Node = portrait_slots[i]
 		if not is_instance_valid(slot_node): continue
 
-		# Guarantee slot index alignment
-		if "slot_index" in slot_node:
-			slot_node.set("slot_index", i)
-
 		if i < party_members.size() and is_instance_valid(party_members[i]):
 			if slot_node.has_method("setup_slot"):
 				slot_node.call("setup_slot", party_members[i])
 		else:
 			if slot_node.has_method("setup_slot"):
 				slot_node.call("setup_slot", null)
-
-## support both single resources and enemy arrays
-func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> void:
-	# 1. Normalize incoming parameter to an Array[Resource]
-	var enemy_group: Array[Resource] = []
-	if enemy_data_or_group is Array:
-		enemy_group = enemy_data_or_group as Array[Resource]
-	elif enemy_data_or_group is Resource:
-		enemy_group.append(enemy_data_or_group as Resource)
-
-	if enemy_group.is_empty():
-		return
-
-	# 2. Get the lead enemy resource to display stats in top banner
-	var primary_enemy: Resource = enemy_group[0]
-	if is_instance_valid(primary_enemy):
-		_update_enemy_banner_ui(primary_enemy)
-
-	# 🎯 3. RESTORED: Populate the 6 party slot portraits!
-	setup_party_display(player_party)
-
-	show()
-
-## Updates the top UI banner with enemy stats
-func _update_enemy_banner_ui(enemy_resource: Resource) -> void:
-	var e_name: String = str(enemy_resource.get("enemy_name")) if enemy_resource.get("enemy_name") != null else "CYBER-ZOMBIE CAT"
-	var e_max_hp: int = int(enemy_resource.get("max_health")) if "max_health" in enemy_resource else 30
-	var e_hp: int = int(enemy_resource.get("current_health")) if "current_health" in enemy_resource else e_max_hp
-
-	if is_instance_valid(enemy_name_label):
-		enemy_name_label.text = e_name.to_upper()
-		
-	if is_instance_valid(enemy_hp_label):
-		enemy_hp_label.text = "%d / %d" % [e_hp, e_max_hp]
-		
-func _on_combat_ended(_victory: bool) -> void:
-	hide()
-	_reset_state()

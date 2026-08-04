@@ -116,10 +116,8 @@ func _render_list() -> void:
 		else:
 			for item in skills:
 				if item is SkillData:
-					var prof: int = item.base_percentage if "base_percentage" in item else 0
-					var desc: String = item.description if "description" in item else ""
 					var icon_tex: Texture2D = item.icon if "icon" in item else null
-					var sub_info: String = "Proficiency: %d%% | %s" % [prof, desc]
+					var sub_info: String = "Accuracy: %d%% | Cost: %d EN" % [item.accuracy, item.energy_cost]
 					_create_entry(item.skill_name, sub_info, icon_tex, item)
 	else:
 		var spells: Array = _get_cat_spells(current_cat)

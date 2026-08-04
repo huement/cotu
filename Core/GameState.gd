@@ -35,10 +35,10 @@ func _ready() -> void:
 
 func _initialize_active_session() -> void:
 	print("GameState: Assembling tactical data structures...")
-	
+
 	if ResourceLoader.exists(SAVE_PATH):
 		if not load_game():
-			print("GameState: Save file invalid. Rebuilding default starter party...")
+			print("GameState: Existing save file invalid. Rebuilding default starter party...")
 			_build_default_starter_party()
 			save_game()
 	else:
@@ -47,45 +47,62 @@ func _initialize_active_session() -> void:
 		save_game()
 
 
-## Programmatically builds default starter party with multi-path item resolution
+## Programmatically builds default starter party with equipment, skills, & spells
 func _build_default_starter_party() -> void:
 	current_party = DungeonParty.new()
 	if current_party.has_method("setup_starter_party"):
 		current_party.setup_starter_party()
-		
+
 	inventory = Inventory.new()
 	var slots: Array = current_party.slots
 
-	# 1. Commander Whiskers (Slot 0 - Spartan)
+	# 1. Commander Whiskers (Slot 0 - Spartan / Maine Coon)
 	if slots.size() > 0 and slots[0] != null:
 		var whiskers: CatCharacter = slots[0] as CatCharacter
-		_safe_equip(whiskers, "HEAD", ["ArmorSpartanRegularHead", "Equipment/PowerSuit"])
-		_safe_equip(whiskers, "BODY", ["ArmorSpartanRegularBody", "Equipment/PowerSuit"])
-		_safe_equip(whiskers, "ARMS", ["ArmorSpartanRegularArms"])
-		_safe_equip(whiskers, "LEGS", ["ArmorSpartanRegularLegs"])
-		_safe_equip(whiskers, "FEET", ["ArmorSpartanRegularFeet"])
+		_safe_equip(whiskers, "HEAD", ["ArmorSpartanRegularHead", "Equipment/IronHeadArmor", "Equipment/PowerSuit"])
+		_safe_equip(whiskers, "BODY", ["ArmorSpartanRegularBody", "Equipment/IronBodyArmor", "Equipment/PowerSuit"])
+		_safe_equip(whiskers, "ARMS", ["ArmorSpartanRegularArms", "Equipment/IronArmsArmor"])
+		_safe_equip(whiskers, "LEGS", ["ArmorSpartanRegularLegs", "Equipment/IronLegsArmor"])
+		_safe_equip(whiskers, "FEET", ["ArmorSpartanRegularFeet", "Equipment/IronFeetArmor"])
 		_safe_equip(whiskers, "RIGHT_HAND", ["WeapSpartanRegularPrimary", "Equipment/Broadsword", "Equipment/LaserClaw"])
 
-	# 2. Baron Von Hiss (Slot 1 - Warden)
+		# Assign Martial Skills
+		_safe_add_skill(whiskers, ["OverdriveStrike", "KineticSlam", "GrenadeWorkshop", "LaserClawProficiency"])
+
+	# 2. Baron Von Hiss (Slot 1 - Warden / Siamese)
 	if slots.size() > 1 and slots[1] != null:
 		var baron: CatCharacter = slots[1] as CatCharacter
-		_safe_equip(baron, "HEAD", ["ArmorWardenRegularHead"])
-		_safe_equip(baron, "BODY", ["ArmorWardenRegularBody"])
-		_safe_equip(baron, "ARMS", ["ArmorWardenRegularArms"])
-		_safe_equip(baron, "LEGS", ["ArmorWardenRegularLegs"])
-		_safe_equip(baron, "FEET", ["ArmorWardenRegularFeet"])
+		_safe_equip(baron, "HEAD", ["ArmorWardenRegularHead", "Equipment/HunterHeadArmor"])
+		_safe_equip(baron, "BODY", ["ArmorWardenRegularBody", "Equipment/HunterBodyArmor"])
+		_safe_equip(baron, "ARMS", ["ArmorWardenRegularArms", "Equipment/HunterArmsArmor"])
+		_safe_equip(baron, "LEGS", ["ArmorWardenRegularLegs", "Equipment/HunterLegsArmor"])
+		_safe_equip(baron, "FEET", ["ArmorWardenRegularFeet", "Equipment/HunterFeetArmor"])
 		_safe_equip(baron, "RIGHT_HAND", ["WeapWardenRegularPrimary", "Equipment/Crossbow", "Equipment/LaserClaw"])
-		_safe_equip(baron, "LEFT_HAND", ["WeapWardenRegularAmmo", "Equipment/IronArrows"])
 
-	# 3. Sage Psych-Meow (Slot 3 - Wizard)
+		# Equip starting quiver of 20 Iron Arrows in Left Hand
+		var ammo: ItemData = _load_item_from_candidates(["WeapWardenRegularAmmo", "Equipment/IronArrows"])
+		if is_instance_valid(ammo):
+			var ammo_stack: ItemData = ammo.duplicate(true) as ItemData
+			ammo_stack.quantity = 20
+			baron.equip_item("LEFT_HAND", ammo_stack)
+
+		# Assign Skills & Spells (Maester / Ranger loadout)
+		_safe_add_skill(baron, ["TargetingLock", "MunitionsAssembly", "CyberLockpicking", "PurrgatoryCamp"])
+		_safe_add_spell(baron, ["CorrosiveSpray", "StimulantMist", "NeurotoxinGas"])
+
+	# 3. Sage Psych-Meow (Slot 3 - Wizard / Sphynx)
 	if slots.size() > 3 and slots[3] != null:
 		var sage: CatCharacter = slots[3] as CatCharacter
-		_safe_equip(sage, "HEAD", ["ArmorWizardRegularHead"])
-		_safe_equip(sage, "BODY", ["ArmorWizardRegularBody"])
-		_safe_equip(sage, "ARMS", ["ArmorWizardRegularArms"])
-		_safe_equip(sage, "LEGS", ["ArmorWizardRegularLegs"])
-		_safe_equip(sage, "FEET", ["ArmorWizardRegularFeet"])
+		_safe_equip(sage, "HEAD", ["ArmorWizardRegularHead", "Equipment/MysticHeadGarb"])
+		_safe_equip(sage, "BODY", ["ArmorWizardRegularBody", "Equipment/MysticBodyGarb"])
+		_safe_equip(sage, "ARMS", ["ArmorWizardRegularArms", "Equipment/MysticArmsGarb"])
+		_safe_equip(sage, "LEGS", ["ArmorWizardRegularLegs", "Equipment/MysticLegsGarb"])
+		_safe_equip(sage, "FEET", ["ArmorWizardRegularFeet", "Equipment/MysticFeetGarb"])
 		_safe_equip(sage, "RIGHT_HAND", ["WeapWizardRegularPrimary", "Equipment/ElderStaff"])
+
+		# Assign Skills & Spells (Archanist & Soulwright Caster)
+		_safe_add_skill(sage, ["PurrHealing", "ArcaneSynthesis", "RuneImbuement"])
+		_safe_add_spell(sage, ["PlasmaDart", "StaticNova", "OverclockShield", "NanoRepair", "AdrenalineSurge", "AegisGrid"])
 
 	# 4. Shared Inventory Potions
 	_safe_add_consumable(["PotHp50", "HealthPotion(+50)", "HealthPotion50", "Consumables/CatnipPotion"], 5)
@@ -108,6 +125,20 @@ func _safe_add_consumable(item_candidates: Array, count: int) -> void:
 			inventory.add_item(item)
 
 
+func _safe_add_skill(cat: CatCharacter, skill_candidates: Array) -> void:
+	for name_key in skill_candidates:
+		var res: Resource = _load_ability_from_candidates("Skills/", name_key)
+		if is_instance_valid(res) and not cat.known_skills.has(res):
+			cat.known_skills.append(res)
+
+
+func _safe_add_spell(cat: CatCharacter, spell_candidates: Array) -> void:
+	for name_key in spell_candidates:
+		var res: Resource = _load_ability_from_candidates("Spells/", name_key)
+		if is_instance_valid(res) and not cat.known_spells.has(res):
+			cat.known_spells.append(res)
+
+
 func _load_item_from_candidates(candidates: Array) -> ItemData:
 	for name_key in candidates:
 		var paths: Array[String] = [
@@ -119,6 +150,17 @@ func _load_item_from_candidates(candidates: Array) -> ItemData:
 		for path in paths:
 			if ResourceLoader.exists(path):
 				return load(path) as ItemData
+	return null
+
+
+func _load_ability_from_candidates(sub_folder: String, name_key: String) -> Resource:
+	var paths: Array[String] = [
+		"res://Data/" + sub_folder + name_key + ".tres",
+		"res://Data/" + sub_folder + name_key.to_pascal_case() + ".tres"
+	]
+	for path in paths:
+		if ResourceLoader.exists(path):
+			return load(path)
 	return null
 
 
@@ -160,7 +202,7 @@ func load_game() -> bool:
 	current_party = save.party
 	inventory = save.inventory if save.inventory != null else Inventory.new()
 	current_floor_id = save.current_floor_id
-	
+
 	_sync_party_references()
 	print("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, SAVE_PATH])
 	return true
@@ -181,6 +223,10 @@ func _sync_party_references() -> void:
 		if is_instance_valid(slot):
 			if "inventory" in slot:
 				slot.inventory = inventory
+			if slot.has_method("populate_starting_skills"):
+				slot.populate_starting_skills()
+			if slot.has_method("populate_starting_spells"):
+				slot.populate_starting_spells()
 			if slot.get("stats") == null and slot.has_method("initialize_stats"):
 				slot.initialize_stats()
 

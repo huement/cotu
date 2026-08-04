@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://cek1n3sew1ot"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_35jmo"]
+
+[resource]
+script = ExtResource("1_35jmo")
+skill_id = "sk_acid_spit"
+skill_name = "Plasma Spit"
+description = "Racial Skill (Savannah): Unleashes a fierce acid-spit spray across all foes."
+icon_path = "res://Data/Skills/Icons/acid_spit.png"
+energy_cost = 5
+target_type = 1
+effect_amount = 16
+accuracy = 85
+assigned_races = Array[String](["Savannah"])

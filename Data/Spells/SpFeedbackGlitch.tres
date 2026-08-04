@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://cxbobtywvkudq"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_fo08p"]
+
+[resource]
+script = ExtResource("1_fo08p")
+spell_id = "sp_feedback_glitch"
+spell_name = "Feedback Glitch"
+spellbook = 3
+tier = 2
+description = "Drains energy from an opponent and disrupts their spellcasting."
+icon_path = "res://Data/Spells/Icons/feedback_glitch.png"
+energy_cost = 6
+effect_type = 3
+base_amount = 10
+var_multiplier = 0.3
+stat_scaling = "PER"

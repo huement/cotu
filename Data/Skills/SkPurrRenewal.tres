@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://d2b1dimwpcai7"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_kuas6"]
+
+[resource]
+script = ExtResource("1_kuas6")
+skill_id = "sk_purr_renewal"
+skill_name = "Purr Healing"
+description = "Racial Skill (Sphynx): Emits a resonant harmonic purr that restores health to an ally."
+icon_path = "res://Data/Skills/Icons/purr_renewal.png"
+energy_cost = 6
+target_type = 2
+effect_type = 1
+effect_amount = 25
+element = 1
+accuracy = 100
+assigned_races = Array[String](["Sphynx"])

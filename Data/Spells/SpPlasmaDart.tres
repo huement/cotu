@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://hn3g4pepdbjk"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_43wxf"]
+
+[resource]
+script = ExtResource("1_43wxf")
+spell_id = "sp_plasma_dart"
+spell_name = "Plasma Dart"
+description = "Fires a concentrated bolt of superheated plasma at an enemy target."
+icon_path = "res://Data/Spells/Icons/plasma_dart.png"
+base_amount = 12

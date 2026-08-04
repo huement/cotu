@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://v1bikca638jx"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_cnv51"]
+
+[resource]
+script = ExtResource("1_cnv51")
+spell_id = "sp_radiant_smite"
+spell_name = "Radiant Smite"
+spellbook = 1
+tier = 3
+description = "Smites hostiles with a burst of holy solar energy."
+icon_path = "res://Data/Spells/Icons/radiant_smite.png"
+energy_cost = 10
+target_type = 1
+base_amount = 22
+stat_scaling = "PIE"

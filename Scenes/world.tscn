@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=30 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="21_xbk3s"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
+[ext_resource type="PackedScene" uid="uid://bipols0hgobk7" path="res://Scenes/UI/BattleAbilityPopup.tscn" id="26_dt0r1"]
 [ext_resource type="Script" uid="uid://716h0rosm8ii" path="res://Scripts/Testing/BattleTest.gd" id="26_pt3ps"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pl8yv"]
@@ -295,6 +296,8 @@ data = {
 script = ExtResource("6_5ukr8")
 
 [node name="Popup" parent="." instance=ExtResource("22_pyn1s")]
+
+[node name="BattleAbilityPopup" parent="." instance=ExtResource("26_dt0r1")]
 
 [node name="CharacterSheetMenu" parent="." instance=ExtResource("23_no8kt")]
 

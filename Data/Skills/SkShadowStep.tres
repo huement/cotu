@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://bnjpgc0gvhvfv"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_26xjj"]
+
+[resource]
+script = ExtResource("1_26xjj")
+skill_id = "sk_shadow_step"
+skill_name = "Shadow Flurry"
+description = "Teleports behind an enemy in a flash of dark data for a critical backstab."
+icon_path = "res://Data/Skills/Icons/shadow_step.png"
+energy_cost = 5
+effect_amount = 30
+element = 2
+accuracy = 95
+assigned_classes = Array[String](["Shade", "Ghostblade"])

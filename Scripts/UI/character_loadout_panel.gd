@@ -65,21 +65,29 @@ func _update_slot(slot_name: String, item: ItemData) -> void:
 	if not slot_button:
 		return
 
+	# Clean up any existing badge label child
+	var existing_badge: Node = slot_button.get_node_or_null("QuantityBadge")
+	if is_instance_valid(existing_badge):
+		existing_badge.queue_free()
+
 	var icon_node := slot_button.get_node_or_null("MarginContainer/HBoxContainer/Icon") as TextureRect
 	var name_label := slot_button.get_node_or_null("MarginContainer/HBoxContainer/VBoxContainer/ItemName") as Label
 	var status_label := slot_button.get_node_or_null("MarginContainer/HBoxContainer/VBoxContainer/StatusVal") as Label
 
 	if is_instance_valid(item):
-		if name_label: 
+		if name_label:
 			name_label.text = item.item_name
-		
+
+		var item_qty: int = item.quantity if "quantity" in item else 1
+
 		if status_label:
-			# If you add durability stats later, it reads them safely here
-			if "current_durability" in item and "max_durability" in item:
+			if item_qty > 1:
+				status_label.text = "QTY: %d" % item_qty
+			elif "current_durability" in item and "max_durability" in item:
 				status_label.text = "DUR: %d/%d" % [item.get("current_durability"), item.get("max_durability")]
 			else:
 				status_label.text = "EQUIPPED"
-				
+
 		if icon_node:
 			if "icon_path" in item and not str(item.get("icon_path")).is_empty():
 				icon_node.texture = load(item.get("icon_path")) as Texture
@@ -87,10 +95,33 @@ func _update_slot(slot_name: String, item: ItemData) -> void:
 				icon_node.texture = item.get("icon") as Texture
 			else:
 				icon_node.texture = null
+
+		# Overlay bottom-right quantity badge if quantity > 1
+		if item_qty > 1:
+			_add_quantity_badge(slot_button, item_qty)
 	else:
 		if name_label: name_label.text = "-- Empty --"
 		if status_label: status_label.text = ""
 		if icon_node: icon_node.texture = null
+
+func _add_quantity_badge(slot_button: Button, count: int) -> void:
+	var count_label := Label.new()
+	count_label.name = "QuantityBadge"
+	count_label.text = "%d" % count
+	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	count_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	count_label.offset_left = 2
+	count_label.offset_top = 2
+	count_label.offset_right = -8
+	count_label.offset_bottom = -4
+
+	count_label.add_theme_font_size_override("font_size", 11)
+	count_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3, 1.0)) # Gold
+	count_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 1.0))
+	count_label.add_theme_constant_override("outline_size", 4)
+
+	slot_button.add_child(count_label)
 
 ## Signal handler for equipment slot presses
 func _on_slot_pressed(slot_name: String) -> void:

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://c17gilcm24sd8"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_yhp0d"]
+
+[resource]
+script = ExtResource("1_yhp0d")
+spell_id = "sp_overclock_shield"
+spell_name = "Overclock Shield"
+tier = 2
+description = "Project an energy barrier that bolsters defense for all party members."
+icon_path = "res://Data/Spells/Icons/overclock_shield.png"
+energy_cost = 6
+target_type = 3
+effect_type = 2
+var_multiplier = 0.2
+status_effect = 5

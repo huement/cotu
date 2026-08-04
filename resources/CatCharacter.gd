@@ -1,4 +1,4 @@
-# res://Scripts/Resources/CatCharacter.gd
+# res://resources/CatCharacter.gd
 extends Resource
 class_name CatCharacter
 
@@ -26,7 +26,7 @@ const CharacterStats = preload("res://Models/character_stats.gd")
 @export var personality: int = 8
 
 @export_group("Dynamic Vitals Component")
-@export var stats: CharacterStats
+var stats: CharacterStats
 
 @export var current_energy: int = 10
 @export var max_energy: int = 10
@@ -65,7 +65,6 @@ var max_hp: int:
 		if stats:
 			stats.max_health = value
 
-# 🎯 ALIAS BRIDGES: Ensures HUD progress bars read values seamlessly
 var current_health: int:
 	get: return current_hp
 	set(value): current_hp = value
@@ -84,11 +83,12 @@ var max_mana: int:
 
 
 # =============================================================================
-# ⚙️ LIFECYCLE & STAT INITIALIZATION
+# ⚙️ LIFECYCLE & ABILITY INITIALIZATION
 # =============================================================================
 
 func _init() -> void:
 	stats = CharacterStats.new()
+
 
 ## Sets up baseline character capabilities from breed and profession templates
 func initialize_stats() -> void:
@@ -117,6 +117,11 @@ func initialize_stats() -> void:
 	stats.health = stats.max_health
 	current_energy = max_energy
 
+	# 🎯 Populate abilities for Class and Breed
+	populate_starting_skills()
+	populate_starting_spells()
+
+
 func _calculate_vitals() -> void:
 	var prof_name: String = profession.get("profession_name") if is_instance_valid(profession) and "profession_name" in profession else ""
 	if prof_name in ["Spartan", "Crusader", "Amazon"]:
@@ -124,6 +129,85 @@ func _calculate_vitals() -> void:
 	else:
 		stats.max_health = vitality * 2
 	max_energy = intelligence + piety
+
+
+## Auto-populates starting skills based on class and breed assignments
+func populate_starting_skills() -> void:
+	var skills_dir: String = "res://Data/Skills/"
+	if not DirAccess.dir_exists_absolute(skills_dir):
+		return
+
+	var prof_name: String = profession.get("profession_name") if is_instance_valid(profession) and "profession_name" in profession else ""
+	var breed_name_val: String = breed.get("breed_name") if is_instance_valid(breed) and "breed_name" in breed else ""
+
+	var dir := DirAccess.open(skills_dir)
+	if dir == null: return
+
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+
+	while file_name != "":
+		if not dir.current_is_dir() and file_name.ends_with(".tres"):
+			var skill_res := load(skills_dir + file_name) as Resource
+			if is_instance_valid(skill_res):
+				var assigned_c: Array = skill_res.get("assigned_classes") if "assigned_classes" in skill_res else []
+				var assigned_r: Array = skill_res.get("assigned_races") if "assigned_races" in skill_res else []
+
+				var matches_class: bool = not prof_name.is_empty() and assigned_c.has(prof_name)
+				var matches_race: bool = not breed_name_val.is_empty() and assigned_r.has(breed_name_val)
+
+				if (matches_class or matches_race) and not known_skills.has(skill_res):
+					known_skills.append(skill_res)
+
+		file_name = dir.get_next()
+
+
+## Auto-populates starting spells based on class's allowed spellbook(s)
+func populate_starting_spells() -> void:
+	var spells_dir: String = "res://Data/Spells/"
+	if not DirAccess.dir_exists_absolute(spells_dir):
+		return
+
+	if not is_instance_valid(profession):
+		return
+
+	var sb_type_str: String = profession.get("spellbook_type") if "spellbook_type" in profession else ""
+	if sb_type_str.is_empty() or sb_type_str == "None":
+		return
+
+	# Supports comma or pipe separated spellbooks e.g. "Soulwright, Archanist"
+	var allowed_books: Array[String] = []
+	for p in sb_type_str.split(","):
+		for inner_p in p.split("|"):
+			var trimmed := inner_p.strip_edges().to_upper()
+			if not trimmed.is_empty():
+				allowed_books.append(trimmed)
+
+	var dir := DirAccess.open(spells_dir)
+	if dir == null: return
+
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+
+	while file_name != "":
+		if not dir.current_is_dir() and file_name.ends_with(".tres"):
+			var spell_res := load(spells_dir + file_name) as Resource
+			if is_instance_valid(spell_res):
+				var s_book_val = spell_res.get("spellbook") if "spellbook" in spell_res else null
+				var s_book_name: String = ""
+				if s_book_val != null:
+					match int(s_book_val):
+						0: s_book_name = "ARCHANIST"
+						1: s_book_name = "SOULWRIGHT"
+						2: s_book_name = "MAESTER"
+						3: s_book_name = "PSYNIC"
+						_: s_book_name = str(s_book_val).to_upper()
+
+				if allowed_books.has(s_book_name) and not known_spells.has(spell_res):
+					known_spells.append(spell_res)
+
+		file_name = dir.get_next()
+
 
 func take_damage(amount: int) -> void:
 	if stats:

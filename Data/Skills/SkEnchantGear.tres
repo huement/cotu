@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://0r8qb17e4vdu"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_w15mn"]
+
+[resource]
+script = ExtResource("1_w15mn")
+skill_id = "sk_enchant_gear"
+skill_name = "Rune Imbuement"
+skill_type = 2
+description = "Permanently enchants weapons or armor with elemental power or defense."
+icon_path = "res://Data/Skills/Icons/enchant_gear.png"
+target_type = 5
+effect_type = 8
+effect_amount = 2
+accuracy = 100
+assigned_classes = Array[String](["Psynic", "Archanist", "Maester"])

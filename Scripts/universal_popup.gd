@@ -1,4 +1,4 @@
-# res://Scripts/UI/universal_popup.gd
+# res://Scripts/universal_popup.gd
 extends CanvasLayer
 class_name UniversalPopup
 
@@ -26,12 +26,12 @@ func _ready() -> void:
 		panel_container.visible = false
 	if background_dimmer:
 		background_dimmer.visible = false
-	
+
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
 		bus.popup_requested.connect(_on_popup_requested)
 		bus.battle_victory_popup_requested.connect(_on_popup_requested.bind(&"BATTLE_VICTORY"))
-		
+
 	if confirm_button:
 		confirm_button.pressed.connect(_on_confirm_pressed)
 
@@ -45,8 +45,10 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 	active_action_type = action_type
 	active_data = data
 	_clear_content_area()
-	
+
 	match action_type:
+		&"BATTLE_ABILITIES":
+			return # 🎯 Handled by dedicated BattleAbilityPopup; ignore silently!
 		&"BATTLE_VICTORY":
 			title_label.text = "VICTORY ACHIEVED"
 			_build_battle_victory_ui(data)
@@ -71,7 +73,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
-			
+
 	if background_dimmer:
 		background_dimmer.visible = true
 	if panel_container:
@@ -79,12 +81,12 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 
 func _on_confirm_pressed() -> void:
 	var payload: Dictionary = {}
-	
+
 	if active_action_type == &"REST":
 		var slider := content_area.get_node_or_null("RestSlider") as HSlider
 		if slider:
 			payload["hours"] = int(slider.value)
-			
+
 	_emit_confirmation(active_action_type, payload)
 
 func _clear_content_area() -> void:
@@ -97,7 +99,7 @@ func _emit_confirmation(action_type: StringName, extra_data: Dictionary) -> void
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
 		bus.popup_confirmed.emit(action_type, extra_data)
-		
+
 	_close_modal()
 
 func _close_modal() -> void:
@@ -121,7 +123,7 @@ func _build_search_ui() -> void:
 
 	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
 	close_btn.pressed.connect(_close_modal)
-	
+
 	var btn_center := HBoxContainer.new()
 	btn_center.alignment = BoxContainer.ALIGNMENT_CENTER
 	btn_center.add_child(close_btn)
@@ -133,7 +135,7 @@ func _build_rest_ui() -> void:
 	info_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_text.text = "Select rest duration (Hours):"
 	content_area.add_child(info_text)
-	
+
 	var slider := HSlider.new()
 	slider.name = "RestSlider"
 	slider.min_value = 1
@@ -141,15 +143,15 @@ func _build_rest_ui() -> void:
 	slider.value = 4
 	slider.step = 1
 	slider.custom_minimum_size = Vector2(200, 24)
-	
+
 	var value_label := Label.new()
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	value_label.text = "4 Hours"
-	
-	slider.value_changed.connect(func(val: float) -> void: 
+
+	slider.value_changed.connect(func(val: float) -> void:
 		value_label.text = str(int(val)) + " Hours"
 	)
-	
+
 	content_area.add_child(slider)
 	content_area.add_child(value_label)
 
@@ -243,7 +245,7 @@ func _build_items_inventory_ui() -> void:
 
 	footer_hbox.add_child(_items_use_btn)
 	footer_hbox.add_child(_items_drop_btn)
-	
+
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer_hbox.add_child(spacer)
@@ -299,7 +301,7 @@ func _reset_items_preview() -> void:
 ## 5. ALL SKILLS POPUP VIEW
 func _build_all_skills_popup_ui(data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
-	
+
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(360, 200)
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -313,7 +315,12 @@ func _build_all_skills_popup_ui(data: Dictionary) -> void:
 		for skill in cat.known_skills:
 			if skill is SkillData:
 				var lbl := Label.new()
-				lbl.text = "• %s (Proficiency: %d%%)\n  %s" % [skill.skill_name.to_upper(), skill.base_percentage, skill.description]
+				lbl.text = "• %s (Hit Chance: %d%% | Cost: %d EN)\n  %s" % [
+					skill.skill_name.to_upper(),
+					skill.accuracy,
+					skill.energy_cost,
+					skill.description
+				]
 				lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
 				vbox.add_child(lbl)
@@ -336,7 +343,7 @@ func _build_all_skills_popup_ui(data: Dictionary) -> void:
 ## 6. ALL SPELLS POPUP VIEW
 func _build_all_spells_popup_ui(data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
-	
+
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(360, 200)
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -349,8 +356,10 @@ func _build_all_spells_popup_ui(data: Dictionary) -> void:
 	if is_instance_valid(cat) and "known_spells" in cat and not cat.known_spells.is_empty():
 		for spell in cat.known_spells:
 			if spell is SpellData:
+				var title: String = spell.get("spell_title") if "spell_title" in spell and not str(spell.get("spell_title")).is_empty() else "Spell"
+				var cost: int = spell.get("energy_cost") if "energy_cost" in spell else 4
 				var lbl := Label.new()
-				lbl.text = "• %s [%s] - Cost: %d EN\n  %s" % [spell.spell_name.to_upper(), spell.spell_title, spell.energy_cost, spell.description]
+				lbl.text = "• %s [%s] - Cost: %d EN\n  %s" % [spell.spell_name.to_upper(), title, cost, spell.description]
 				lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
 				vbox.add_child(lbl)
@@ -369,25 +378,62 @@ func _build_all_spells_popup_ui(data: Dictionary) -> void:
 	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	btn_hbox.add_child(close_btn)
 	content_area.add_child(btn_hbox)
-	
-## 4. INDIVIDUAL ITEM ACTIONS MODAL (From Character Sheet)
+
+## 7. INDIVIDUAL ABILITY DETAILS POPUP
+func _build_ability_info_ui(data: Dictionary) -> void:
+	var res: Resource = data.get("resource", null) as Resource
+	if not is_instance_valid(res):
+		return
+
+	var name_str: String = res.get("skill_name") if "skill_name" in res else (res.get("spell_name") if "spell_name" in res else "Ability")
+	var desc_str: String = res.get("description") if "description" in res else ""
+	var cost_val: int = res.get("energy_cost") if "energy_cost" in res else 0
+
+	var name_lbl := Label.new()
+	name_lbl.text = name_str.to_upper()
+	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
+	name_lbl.add_theme_font_size_override("font_size", 16)
+	content_area.add_child(name_lbl)
+
+	var info_lbl := Label.new()
+	info_lbl.text = "Energy Cost: %d EN" % cost_val
+	info_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3, 1.0))
+	content_area.add_child(info_lbl)
+
+	var desc_lbl := Label.new()
+	desc_lbl.text = desc_str
+	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content_area.add_child(desc_lbl)
+
+	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
+	close_btn.pressed.connect(_close_modal)
+
+	var btn_center := HBoxContainer.new()
+	btn_center.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_center.add_child(close_btn)
+	content_area.add_child(btn_center)
+
+## 8. INDIVIDUAL ITEM ACTIONS MODAL (From Character Sheet)
 func _build_item_actions_ui(data: Dictionary) -> void:
 	var item: ItemData = data.get("item", null) as ItemData
 	var slot_name: String = data.get("slot", "")
 	var slot_idx: int = data.get("index", -1)
-	
+
 	var name_label := Label.new()
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	
+
 	if is_instance_valid(item):
 		name_label.text = item.item_name.to_upper() + "\n" + item.description
 	elif not slot_name.is_empty():
 		name_label.text = "SLOT: " + slot_name + " (EMPTY)"
 	else:
 		name_label.text = "NO ITEM SELECTED"
-		
+
 	content_area.add_child(name_label)
-	
+
 	var cat: CatCharacter = GameState.get_active_cat() if GameState.has_method("get_active_cat") else null
 	var inv: Inventory = GameState.get("inventory") if "inventory" in GameState else null
 
@@ -398,7 +444,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 					var unequipped: ItemData = cat.unequip_item(slot_name)
 					if is_instance_valid(inv) and is_instance_valid(unequipped):
 						inv.add_item(unequipped)
-						
+
 				_emit_confirmation(&"ITEM_ACTIONS", {
 					"sub_action": "UNEQUIP",
 					"slot": slot_name,
@@ -417,7 +463,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 							inv.remove_item(item)
 							if is_instance_valid(unequipped):
 								inv.add_item(unequipped)
-								
+
 					_emit_confirmation(&"ITEM_ACTIONS", {
 						"sub_action": "EQUIP",
 						"index": slot_idx,
@@ -429,7 +475,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 				_add_action_button("[ USE ]", func() -> void:
 					if is_instance_valid(inv) and slot_idx >= 0:
 						inv.use_item(slot_idx, cat)
-						
+
 					_emit_confirmation(&"ITEM_ACTIONS", {
 						"sub_action": "USE",
 						"index": slot_idx,
@@ -437,11 +483,11 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 					})
 					_refresh_party_ui()
 				)
-				
+
 			_add_action_button("[ DROP ]", func() -> void:
 				if is_instance_valid(inv):
 					inv.remove_item(item)
-					
+
 				_emit_confirmation(&"ITEM_ACTIONS", {
 					"sub_action": "DROP",
 					"index": slot_idx,
@@ -471,19 +517,18 @@ func _create_modal_button(text_val: String, color_val: Color) -> Button:
 	btn.text = text_val
 	btn.custom_minimum_size = Vector2(100, 36)
 	btn.focus_mode = Control.FOCUS_NONE
-	
+
 	var style := StyleBoxFlat.new()
 	style.bg_color = color_val
 	style.corner_radius_top_left = 2
 	style.corner_radius_bottom_right = 2
-	
+
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_color_override("font_color", Color.BLACK)
 	btn.add_theme_font_size_override("font_size", 14)
 	return btn
 
-
-## 7. BATTLE VICTORY SCREEN
+## 8. BATTLE VICTORY SCREEN
 func _build_battle_victory_ui(data: Dictionary) -> void:
 	var enemies_killed: int = data.get("enemies_killed", 0)
 	var total_xp: int = data.get("total_xp", 0)

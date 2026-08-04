@@ -2,44 +2,24 @@
 class_name EnemyVisualManager
 extends Node3D
 
-## Spawns, positions, and animates 3D enemy models in front of the Player Camera3D
-## during combat encounters.
-
-# ==============================================================================
-# 1. EXPORTED CONFIGURATION & POSITION TUNING
-# ==============================================================================
 @export var camera_node: Camera3D
-
-## Distance in front of camera (-Z vector). Set to 2.8 to fit multi-enemy groups cleanly.
-@export var forward_distance: float = 2.8
-
-## Vertical offset (-Y vector). Lower to ground feet onto the floor plane.
+@export var forward_distance: float = 2.5
 @export var vertical_offset: float = -0.85
+@export var model_scale: Vector3 = Vector3(0.4, 0.4, 0.4)
+@export var horizontal_spacing: float = 2.0
 
-## Uniform scale multiplier for 3D enemy models.
-@export var model_scale: Vector3 = Vector3(0.5, 0.5, 0.5)
-
-## Horizontal spacing between enemies (0.9 keeps 2-3 enemies framed in viewport center).
-@export var horizontal_spacing: float = 0.9
-
-# ==============================================================================
-# 2. RUNTIME STATE
-# ==============================================================================
 var _spawned_enemies: Dictionary = {}
 
-# ==============================================================================
-# 3. LIFECYCLE & INITIALIZATION
-# ==============================================================================
+
 func _ready() -> void:
-	visible = false
+	visible = false 
 	_connect_to_signal_bus()
+
 
 func _connect_to_signal_bus() -> void:
 	var sb: Node = SignalBus
-	if not is_instance_valid(sb):
-		push_error("EnemyVisualManager requires the SignalBus singleton.")
-		return
-
+	if not is_instance_valid(sb): return
+	
 	if not sb.combat_started.is_connected(_on_combat_started):
 		sb.combat_started.connect(_on_combat_started)
 	if not sb.combat_ended.is_connected(_on_combat_ended):
@@ -51,16 +31,11 @@ func _connect_to_signal_bus() -> void:
 	if not sb.enemy_health_changed.is_connected(_on_enemy_health_changed):
 		sb.enemy_health_changed.connect(_on_enemy_health_changed)
 
-# ==============================================================================
-# 4. SPAWNING & POSITIONING
-# ==============================================================================
 
 func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
-		if not is_instance_valid(camera_node):
-			push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
-			return
+		if not is_instance_valid(camera_node): return
 
 	_clear_all_enemies()
 	visible = true
@@ -70,38 +45,31 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 		enemy_group = enemy_data_or_group as Array
 	elif enemy_data_or_group is Resource:
 		enemy_group.append(enemy_data_or_group as Resource)
-
+	
 	for i in range(enemy_group.size()):
 		var e_data: Resource = enemy_group[i] as Resource
 		var model_scene: PackedScene = null
-
+		
 		if is_instance_valid(e_data) and "model_scene" in e_data:
 			model_scene = e_data.get("model_scene") as PackedScene
 
-		var enemy_node: Node3D
-		if is_instance_valid(model_scene):
-			enemy_node = model_scene.instantiate() as Node3D
-		else:
-			enemy_node = _create_debug_mesh()
-
+		var enemy_node: Node3D = model_scene.instantiate() as Node3D if is_instance_valid(model_scene) else _create_debug_mesh()
 		var enemy_id: String = "enemy_%d" % i
+		
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
-
 		_position_enemy(enemy_node, i, enemy_group.size())
 		play_animation(enemy_node, &"idle", true)
+
 
 func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void:
 	if not is_instance_valid(camera_node): return
 
-	# Centered offset calculation for multi-enemy framing
 	var horizontal_offset: float = 0.0
 	if total_enemies > 1:
 		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * horizontal_spacing
 
 	var cam_transform: Transform3D = camera_node.global_transform
-
-	# Compute 3D position relative to camera lens
 	var spawn_pos: Vector3 = cam_transform.origin \
 		- (cam_transform.basis.z * forward_distance) \
 		+ (cam_transform.basis.x * horizontal_offset) \
@@ -110,14 +78,10 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 	enemy_node.global_position = spawn_pos
 	enemy_node.scale = model_scale
 
-	# Flat Yaw rotation facing player camera
 	var target_look_at: Vector3 = Vector3(cam_transform.origin.x, enemy_node.global_position.y, cam_transform.origin.z)
 	enemy_node.look_at(target_look_at, Vector3.UP)
 	enemy_node.rotate_object_local(Vector3.UP, PI)
 
-# ==============================================================================
-# 5. ANIMATION & DEBUG HELPERS
-# ==============================================================================
 
 func play_animation(enemy_node: Node3D, anim_name: StringName, loop: bool = true) -> void:
 	if not is_instance_valid(enemy_node): return
@@ -134,6 +98,7 @@ func play_animation(enemy_node: Node3D, anim_name: StringName, loop: bool = true
 					play_animation(enemy_node, &"idle", true)
 			anim_player.animation_finished.connect(cb)
 
+
 func _create_debug_mesh() -> Node3D:
 	var container := Node3D.new()
 	var mesh_inst := MeshInstance3D.new()
@@ -147,14 +112,18 @@ func _create_debug_mesh() -> Node3D:
 	container.add_child(mesh_inst)
 	return container
 
+
 func _on_enemy_attack_started(enemy_id: String) -> void:
 	if _spawned_enemies.has(enemy_id):
 		play_animation(_spawned_enemies[enemy_id], &"attack-melee-left", false)
+
 
 func _on_enemy_damaged(enemy_id: String, _damage: int) -> void:
 	if _spawned_enemies.has(enemy_id):
 		play_animation(_spawned_enemies[enemy_id], &"interact-left", false)
 
+
+## 🎯 Updated: Accepts 3 arguments (enemy_id, current_hp, max_hp)
 func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -> void:
 	if current_hp <= 0 and _spawned_enemies.has(enemy_id):
 		var enemy_node: Node3D = _spawned_enemies[enemy_id]
@@ -168,13 +137,11 @@ func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -
 			enemy_node.queue_free()
 		_spawned_enemies.erase(enemy_id)
 
-# ==============================================================================
-# 6. CLEANUP
-# ==============================================================================
 
 func _on_combat_ended(_victory: bool) -> void:
 	_clear_all_enemies()
 	visible = false
+
 
 func _clear_all_enemies() -> void:
 	for enemy_id in _spawned_enemies:

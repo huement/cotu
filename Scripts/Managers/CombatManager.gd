@@ -27,7 +27,7 @@ class Combatant:
 		ref = p_ref
 
 const MAX_TURN_METER: float = 100.0
-const BASE_TICK_RATE: float = 12.0
+const BASE_TICK_RATE: float = 25.0
 
 @export var is_combat_active: bool = false
 @export var is_paused_for_input: bool = false
@@ -51,28 +51,33 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not is_combat_active or is_paused_for_input:
 		return
-
+		
 	_tick_turn_meters(delta)
 
 
+## Accepts a single EnemyData Resource, an Array[Resource] of enemies, or an EnemyGroupData resource
 func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> void:
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
 
-	# 1. Resolve Active Party Members
-	var party_to_process: Array = player_party
-	if party_to_process.is_empty():
+	# 1. Resolve Player Party Combatants
+	var valid_party: Array = []
+	for slot in player_party:
+		if is_instance_valid(slot):
+			valid_party.append(slot)
+
+	if valid_party.is_empty():
 		var gs: Node = get_tree().root.get_node_or_null("GameState")
 		if is_instance_valid(gs) and "current_party" in gs and gs.get("current_party") != null:
 			var party_res: Resource = gs.get("current_party") as Resource
 			if "slots" in party_res:
-				party_to_process = party_res.get("slots") as Array
+				for slot in (party_res.get("slots") as Array):
+					if is_instance_valid(slot): valid_party.append(slot)
 
-	# 2. Register Party Members (Preserves exact 0..5 slot indices)
-	for i: int in range(party_to_process.size()):
-		var cat: Resource = party_to_process[i] as Resource
-		if is_instance_valid(cat):
+	for i: int in range(valid_party.size()):
+		var cat: Resource = valid_party[i] as Resource
+		if cat != null:
 			var c_id: String = "party_slot_%d" % i
 			var c_speed: float = float(cat.get("speed")) if "speed" in cat else 12.0
 			var c_name: String = str(cat.get("name")) if cat.get("name") != null else "Space Cat %d" % (i + 1)
@@ -85,40 +90,35 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			combatant.meter = 0.0
 			combatants.append(combatant)
 
-	# 3. Normalize & Register Enemies (Handles single Resource OR Array[Resource])
+	# 2. Unpack Enemy Roster (Handles Single Enemy, Array of Enemies, or EnemyGroupData)
 	var enemy_resources: Array[Resource] = []
 	if enemy_data_or_group is Array:
 		for item in (enemy_data_or_group as Array):
 			if item is Resource:
 				enemy_resources.append(item as Resource)
-	elif enemy_data_or_group is Resource:
-		enemy_resources.append(enemy_data_or_group as Resource)
+	elif is_instance_valid(enemy_data_or_group):
+		if "members" in enemy_data_or_group and enemy_data_or_group.get("members") is Array:
+			for member in (enemy_data_or_group.get("members") as Array):
+				if member is Resource:
+					enemy_resources.append(member as Resource)
+		elif enemy_data_or_group is Resource:
+			enemy_resources.append(enemy_data_or_group as Resource)
 
-	GameLogger.combat("Starting Combat w/ %d party slots vs %d hostiles" % [party_to_process.size(), enemy_resources.size()])
+	GameLogger.combat("Starting Combat w/ %d party members vs %d hostiles" % [valid_party.size(), enemy_resources.size()])
 
 	for e_idx in range(enemy_resources.size()):
 		var e_data: Resource = enemy_resources[e_idx]
 		if is_instance_valid(e_data):
-			var e_speed: float = 10.0
-			if "initiative_speed" in e_data: e_speed = float(e_data.get("initiative_speed"))
-			elif "speed" in e_data: e_speed = float(e_data.get("speed"))
-
-			var e_max_hp: int = 30
-			if "max_health" in e_data: e_max_hp = int(e_data.get("max_health"))
-			elif "max_hp" in e_data: e_max_hp = int(e_data.get("max_hp"))
-
-			var e_hp: int = e_max_hp
-			if "current_health" in e_data: e_hp = int(e_data.get("current_health"))
-			elif "current_hp" in e_data: e_hp = int(e_data.get("current_hp"))
-
-			var e_str: int = 8
-			if "attack_damage" in e_data: e_str = int(e_data.get("attack_damage"))
-			elif "strength" in e_data: e_str = int(e_data.get("strength"))
-
+			var e_speed: float = float(e_data.get("speed")) if "speed" in e_data else (float(e_data.get("initiative_speed")) if "initiative_speed" in e_data else 10.0)
+			var e_max_hp: int = int(e_data.get("max_health")) if "max_health" in e_data else 30
+			var e_hp: int = int(e_data.get("current_health")) if "current_health" in e_data else e_max_hp
+			var e_str: int = int(e_data.get("strength")) if "strength" in e_data else (int(e_data.get("attack_damage")) if "attack_damage" in e_data else 8)
 			var e_def: int = int(e_data.get("defense")) if "defense" in e_data else 2
 			var e_name: String = str(e_data.get("enemy_name")) if e_data.get("enemy_name") != null else "Cyber-Zombie Cat"
+
+			# Give unique names if multiple enemies share the same name
 			if enemy_resources.size() > 1:
-				e_name += " %d" % (e_idx + 1)
+				e_name = "%s %c" % [e_name, 65 + e_idx] # e.g. Cyber-Zombie Cat A, B, C
 
 			var enemy_combatant: Combatant = Combatant.new("enemy_%d" % e_idx, e_name, e_speed, false, e_idx, e_hp, e_max_hp, e_str, e_def, e_data)
 			enemy_combatant.meter = 0.0
@@ -126,11 +126,10 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 
 	is_combat_active = true
 	is_paused_for_input = false
-
-	# Reset meters to 0% for visual fill accumulation
+	
 	for c: Combatant in combatants:
-		c.meter = 0.0
-		SignalBus.turn_meter_updated.emit(c.id, 0.0)
+		c.meter = minf(MAX_TURN_METER, c.speed * 5.0)
+		SignalBus.turn_meter_updated.emit(c.id, c.meter / MAX_TURN_METER)
 
 
 func _on_combat_ended(victory: bool) -> void:
@@ -148,19 +147,27 @@ func _on_combat_ended(victory: bool) -> void:
 		var living_party_members: int = 0
 		var enemies_killed: int = 0
 
+		# Sum up XP for ALL defeated enemies in this encounter
 		for c: Combatant in combatants:
 			if not c.is_player and c.current_hp <= 0:
 				enemies_killed += 1
+				var single_xp: int = 50 # Default XP per enemy
 				if is_instance_valid(c.ref) and "xp_value" in c.ref:
-					var xp: Variant = c.ref.get("xp_value")
-					if typeof(xp) == TYPE_INT:
-						total_xp += int(xp)
+					var raw_xp: Variant = c.ref.get("xp_value")
+					if typeof(raw_xp) in [TYPE_INT, TYPE_FLOAT] and int(raw_xp) > 0:
+						single_xp = int(raw_xp)
+				total_xp += single_xp
 			elif c.is_player and c.current_hp > 0:
 				living_party_members += 1
+		
+		# If no enemies were tracked, fall back gracefully
+		if enemies_killed == 0:
+			enemies_killed = 1
+			total_xp = 50
 
 		victory_data = {
-			"enemies_killed": max(1, enemies_killed),
-			"total_xp": max(50, total_xp),
+			"enemies_killed": enemies_killed,
+			"total_xp": total_xp,
 			"living_members": max(1, living_party_members)
 		}
 
@@ -180,9 +187,8 @@ func _tick_turn_meters(delta: float) -> void:
 			c.meter = minf(c.meter + (c.speed * delta * BASE_TICK_RATE), MAX_TURN_METER)
 			SignalBus.turn_meter_updated.emit(c.id, c.meter / MAX_TURN_METER)
 
-		# UNNESTED CHECK: Enqueues combatant when meter hits 100%
-		if c.meter >= MAX_TURN_METER and not turn_queue.has(c) and active_combatant != c:
-			turn_queue.append(c)
+			if c.meter >= MAX_TURN_METER and not turn_queue.has(c) and active_combatant != c:
+				turn_queue.append(c)
 
 	if not turn_queue.is_empty() and not is_paused_for_input:
 		_process_turn_queue()
@@ -204,9 +210,16 @@ func _process_turn_queue() -> void:
 func _on_player_action_selected(slot_index: int, action_type: StringName, target_index: int) -> void:
 	if active_combatant == null or active_combatant.slot_index != slot_index:
 		return
-
+	
 	var acting_char: Combatant = active_combatant
 	var target_char: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
+
+	# Auto-target first living enemy if target_index is defeated or invalid
+	if not is_instance_valid(target_char) or target_char.current_hp <= 0:
+		for c in combatants:
+			if not c.is_player and c.current_hp > 0:
+				target_char = c
+				break
 
 	if not is_instance_valid(target_char):
 		_reset_combatant_meter(acting_char)
@@ -214,7 +227,7 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		return
 
 	match action_type:
-		&"ATTACK":
+		&"ATTACK", &"SKILL", &"SPELL":
 			var damage: int = _calculate_physical_damage(acting_char, target_char)
 			target_char.current_hp = max(0, target_char.current_hp - damage)
 
@@ -225,17 +238,27 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 					target_char.ref.set("current_hp", target_char.current_hp)
 
 			SignalBus.enemy_damaged_visual.emit(target_char.id, damage)
-			SignalBus.enemy_health_changed.emit(target_char.current_hp, target_char.max_hp)
+			SignalBus.enemy_health_changed.emit(target_char.id, target_char.current_hp, target_char.max_hp)
 			SignalBus.chevron_flash_requested.emit(false)
 
 			GameLogger.combat("%s dealt %d damage to %s! Enemy HP: %d/%d" % [
 				acting_char.name, damage, target_char.name, target_char.current_hp, target_char.max_hp
 			])
-
+			
 			if target_char.current_hp <= 0:
-				print("[CombatManager] VICTORY! %s defeated!" % target_char.name)
-				_on_combat_ended(true)
-				return
+				print("[CombatManager] %s defeated!" % target_char.name)
+				
+				# 🎯 VICTORY GUARD: Only declare victory when ALL hostiles are defeated
+				var any_enemies_alive: bool = false
+				for c in combatants:
+					if not c.is_player and c.current_hp > 0:
+						any_enemies_alive = true
+						break
+
+				if not any_enemies_alive:
+					print("[CombatManager] VICTORY! All hostiles defeated!")
+					_on_combat_ended(true)
+					return
 
 	_reset_combatant_meter(acting_char)
 	_unpause_and_continue()
@@ -247,7 +270,7 @@ func _calculate_physical_damage(attacker: Combatant, defender: Combatant) -> int
 
 func _execute_enemy_ai(enemy: Combatant) -> void:
 	SignalBus.enemy_attack_started.emit(enemy.id)
-
+	
 	var alive_party: Array[Combatant] = []
 	for c in combatants:
 		if c.is_player and c.current_hp > 0:
@@ -264,10 +287,6 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 
 		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
 		SignalBus.chevron_flash_requested.emit(true)
-
-		GameLogger.combat("%s attacked %s for %d damage! HP: %d/%d" % [
-			enemy.name, target.name, damage, target.current_hp, target.max_hp
-		])
 
 		var any_party_alive: bool = false
 		for c in combatants:

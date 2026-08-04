@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://ick4oxj0krkb"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_grvpk"]
+
+[resource]
+script = ExtResource("1_grvpk")
+spell_id = "sp_revive_protocol"
+spell_name = "Revive Protocol"
+spellbook = 1
+tier = 3
+description = "Restores a fallen or severely damaged party member back to peak vitals."
+icon_path = "res://Data/Spells/Icons/revive_protocol.png"
+energy_cost = 12
+target_type = 2
+element = 4
+effect_type = 1
+base_amount = 50
+var_multiplier = 0.2
+stat_scaling = "PIE"

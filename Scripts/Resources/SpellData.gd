@@ -1,55 +1,42 @@
 # res://Scripts/Resources/SpellData.gd
-extends Resource
 class_name SpellData
+extends Resource
 
-enum SpellType { OFFENSIVE, DEFENSIVE, HEALING, UTILITY }
-enum Element { NONE, FIRE, WATER, EARTH, AIR, HOLY, DARK }
-enum TargetType { SELF, SINGLE_ALLY, SINGLE_ENEMY, ALL_ALLIES, ALL_ENEMIES }
-enum ScalingStat { STRENGTH, INTELLIGENCE, PIETY, DEXTERITY }
+enum SpellbookType { ARCHANIST, SOULWRIGHT, MAESTER, PSYNIC }
+enum TargetType { SINGLE_ENEMY, ALL_ENEMIES, SINGLE_ALLY, ALL_PARTY, SELF }
+enum EffectType { DAMAGE, HEAL, BUFF, DEBUFF, UTILITY }
+enum StatusEffect { NONE, STUN, POISON, SLOW, HASTE, SHIELD, DEFENSE_DOWN }
 
-@export var spell_id: StringName
-@export var spell_name: String
-@export var spell_title: String
-@export var description: String
+@export_group("Identity & Grouping")
+@export var spell_id: String = ""
+@export var spell_name: String = ""
+@export var spellbook: SpellbookType = SpellbookType.ARCHANIST
+@export var tier: int = 1
+@export_multiline var description: String = ""
+@export var icon_path: String = ""
 @export var icon: Texture2D
-@export var spell_level: int = 1
-@export var energy_cost: int = 1
-@export var spell_type: SpellType = SpellType.OFFENSIVE
-@export var element: Element = Element.NONE
+
+@export_group("Cost & Targeting")
+@export var energy_cost: int = 4
 @export var target_type: TargetType = TargetType.SINGLE_ENEMY
+@export var element: ItemData.EffectElement = ItemData.EffectElement.MAGIC
 
-@export_group("Effect Calculation")
-@export var dice_count: int = 1
-@export var dice_sides: int = 4
-@export var base_bonus: int = 0
-@export var scaling_stat: ScalingStat = ScalingStat.INTELLIGENCE
-@export var stat_multiplier: float = 1.0
+@export_group("Potency & Scaling")
+@export var effect_type: EffectType = EffectType.DAMAGE
+@export var base_amount: int = 15
+@export var var_multiplier: float = 0.5
+@export var stat_scaling: String = "INT"
+@export var status_effect: StatusEffect = StatusEffect.NONE
 
-## Calculates the final effect value based on caster stats and a power level.
-## Typed as `Resource` to prevent circular class dependencies with CatCharacter
-func calculate_effect_value(caster: Resource, power_level: int = 1) -> int:
-	var final_value: int = 0
-	for _i in range(dice_count):
-		final_value += randi_range(1, dice_sides)
-	
-	final_value += base_bonus
-	
-	var scaling_bonus: int = 0
-	if is_instance_valid(caster):
-		var caster_stat_value: int = 0
-		match scaling_stat:
-			ScalingStat.STRENGTH:
-				caster_stat_value = caster.get("strength") if "strength" in caster else 0
-			ScalingStat.INTELLIGENCE:
-				caster_stat_value = caster.get("intelligence") if "intelligence" in caster else 0
-			ScalingStat.PIETY:
-				caster_stat_value = caster.get("piety") if "piety" in caster else 0
-			ScalingStat.DEXTERITY:
-				caster_stat_value = caster.get("dexterity") if "dexterity" in caster else 0
-		
-		scaling_bonus = int(caster_stat_value * stat_multiplier)
 
-	final_value += scaling_bonus
-	final_value += power_level # Add bonus from power level
+## Calculates spell potency using Base + Random Variance + Caster Stat Bonus
+func calculate_potency(caster_stat_value: int) -> int:
+	var max_var: int = int(float(base_amount) * var_multiplier)
+	var random_bonus: int = randi_range(0, max_var) if max_var > 0 else 0
+	var stat_bonus: int = int(float(caster_stat_value) * 0.5)
 	
-	return final_value
+	return base_amount + random_bonus + stat_bonus
+
+
+func can_cast(current_energy: int) -> bool:
+	return current_energy >= energy_cost

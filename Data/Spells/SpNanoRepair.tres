@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://c72wdnbtpnvr"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_xjt2e"]
+
+[resource]
+script = ExtResource("1_xjt2e")
+spell_id = "sp_nano_repair"
+spell_name = "Nano Repair"
+spellbook = 1
+description = "Deploys medical nanites to rapidly repair organic or mechanical tissue."
+icon_path = "res://Data/Spells/Icons/nano_repair.png"
+target_type = 2
+element = 4
+effect_type = 1
+base_amount = 18
+var_multiplier = 0.4
+stat_scaling = "PIE"

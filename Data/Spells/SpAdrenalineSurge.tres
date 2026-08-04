@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://dufq2jkax6txe"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_s83x3"]
+
+[resource]
+script = ExtResource("1_s83x3")
+spell_id = "sp_adrenaline_surge"
+spell_name = "Adrenaline Surge"
+spellbook = 1
+description = "Injects combat stimulants into an ally to boost action speed."
+icon_path = "res://Data/Spells/Icons/adrenaline_surge.png"
+energy_cost = 5
+target_type = 2
+element = 4
+effect_type = 2
+base_amount = 10
+var_multiplier = 0.2
+stat_scaling = "PIE"
+status_effect = 4

@@ -49,6 +49,9 @@ enum EffectElement {
 @export var icon: Texture2D
 @export var item_type: ItemType = ItemType.MISC
 
+## Quantity / Stack Count (for consumables, ammo, or stacked items)
+@export var quantity: int = 1
+
 @export_group("Equipment & Combat Specifications")
 @export var equipment_slot: EquipmentSlot = EquipmentSlot.NONE
 @export var weapon_type: WeaponType = WeaponType.NONE
@@ -56,6 +59,8 @@ enum EffectElement {
 @export var defense_bonus: int = 0
 @export var speed_bonus: int = 0
 @export var credit_value: int = 0
+@export var max_durability: int = 100
+@export var current_durability: int = 100
 
 @export_group("Consumables & Potions")
 @export var is_consumable: bool = false

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://bew7i14tgfy4u"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_mtqdw"]
+
+[resource]
+script = ExtResource("1_mtqdw")
+skill_id = "sk_alchemy"
+skill_name = "Arcane Synthesis"
+skill_type = 2
+description = "Brews Health Potions and Catnip Elixirs using raw arcane data samples."
+icon_path = "res://Data/Skills/Icons/alchemy.png"
+target_type = 5
+effect_type = 7
+effect_amount = 1
+accuracy = 100
+assigned_classes = Array[String](["Maester", "Archanist", "Wizard"])

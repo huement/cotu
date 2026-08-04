@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://bo6mlrsfq22yo"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_as3m5"]
+
+[resource]
+script = ExtResource("1_as3m5")
+spell_id = "sp_neural_distortion"
+spell_name = "Neural Distortion"
+spellbook = 3
+tier = 3
+description = "Scrambles enemy sensors"
+icon_path = "reducing their attack accuracy."
+energy_cost = 9
+target_type = 1
+effect_type = 3
+var_multiplier = 0.3
+stat_scaling = "PER"

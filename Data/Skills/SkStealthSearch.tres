@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://ckl8yx1a3okt2"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_nifrp"]
+
+[resource]
+script = ExtResource("1_nifrp")
+skill_id = "sk_stealth_search"
+skill_name = "Silent Scan"
+skill_type = 1
+description = "Scans corridors silently while completely suppressing random battle triggers."
+icon_path = "res://Data/Skills/Icons/stealth_search.png"
+target_type = 5
+effect_type = 3
+effect_amount = 100
+accuracy = 100
+assigned_classes = Array[String](["Shade", "Ghostblade", "Ronin"])
+assigned_races = Array[String](["Abyssinian"])

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://dyyvugnp37mtx"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_yse41"]
+
+[resource]
+script = ExtResource("1_yse41")
+spell_id = "sp_smoke_screen"
+spell_name = "Smoke Screen"
+spellbook = 2
+tier = 3
+description = "Blankets the party in thermal smoke to boost evasion against attacks."
+icon_path = "res://Data/Spells/Icons/smoke_screen.png"
+energy_cost = 8
+target_type = 3
+effect_type = 2
+base_amount = 20
+var_multiplier = 0.2

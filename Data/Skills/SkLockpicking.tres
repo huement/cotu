@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://ste52vk3fvg4"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_q78qs"]
+
+[resource]
+script = ExtResource("1_q78qs")
+skill_id = "sk_lockpicking"
+skill_name = "Cyber Lockpicking"
+skill_type = 1
+description = "Bypasses security doors and locked hazard chests across the dungeon."
+icon_path = "res://Data/Skills/Icons/lockpicking.png"
+target_type = 5
+effect_type = 2
+effect_amount = 80
+accuracy = 80
+assigned_classes = Array[String](["Shade", "Ghostblade", "Warden"])
+assigned_races = Array[String](["Bobtail"])

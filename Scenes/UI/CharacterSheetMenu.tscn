@@ -161,10 +161,24 @@ theme_override_colors/font_color = Color(0.1254902, 0.7764706, 0.972549, 1)
 theme_override_fonts/font = ExtResource("3_8aqvm")
 text = "---"
 
-[node name="XPProgressBar" type="ProgressBar" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock"]
+[node name="HBoxContainer" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock"]
+layout_mode = 2
+
+[node name="ExpLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0/0000"
+
+[node name="MarginContainer" type="MarginContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+
+[node name="XPProgressBar" type="ProgressBar" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/HeaderHbox/InfoVBox/LevelBlock/HBoxContainer/MarginContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 8)
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_7h3lb")
 theme_override_styles/fill = SubResource("StyleBoxFlat_v1s0b")
@@ -200,7 +214,7 @@ layout_mode = 2
 size_flags_horizontal = 10
 theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
 theme_override_fonts/font = ExtResource("6_op2n6")
-text = "99/99"
+text = "00/00"
 
 [node name="EnergyContainer" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/MarginContainer/VitalsVBox/Row1_HPMana"]
 layout_mode = 2
@@ -221,6 +235,7 @@ theme_override_fonts/font = ExtResource("6_op2n6")
 text = "0/0"
 
 [node name="Row2_Stamina" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/MarginContainer/VitalsVBox"]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 16
 
@@ -240,11 +255,20 @@ layout_mode = 2
 size_flags_horizontal = 10
 theme_override_colors/font_color = Color(0.9931863, 0.40165225, 0.26637855, 1)
 theme_override_fonts/font = ExtResource("6_op2n6")
-text = "136/140"
+text = "000/000"
 
 [node name="CharacterLoadoutPanel" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn" instance=ExtResource("4_3bdbs")]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 10
+theme_override_fonts/font = ExtResource("3_qfyrq")
+theme_override_font_sizes/font_size = 18
+text = "[ CLOSE ]"
 
 [node name="RightColumn" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox"]
 layout_mode = 2
@@ -253,17 +277,16 @@ theme_override_constants/separation = 16
 
 [node name="HBoxContainer" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn"]
 layout_mode = 2
-size_flags_vertical = 3
 
 [node name="CharacterStatsPanel" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn/HBoxContainer" instance=ExtResource("2_d4y6v")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 220)
+custom_minimum_size = Vector2(200, 270)
 layout_mode = 2
 size_flags_horizontal = 4
 
 [node name="SkillsSpellsPanel" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn/HBoxContainer" instance=ExtResource("6_abcde")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 200)
+custom_minimum_size = Vector2(0, 280)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -271,11 +294,4 @@ size_flags_vertical = 3
 [node name="CharacterInventoryGrid" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn" instance=ExtResource("5_n6ey3")]
 unique_name_in_owner = true
 layout_mode = 2
-
-[node name="CloseButton" type="Button" parent="OverlayPanel/MarginContainer/MainHBox/RightColumn"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_fonts/font = ExtResource("3_qfyrq")
-theme_override_font_sizes/font_size = 18
-text = "[ CLOSE ]"
+size_flags_vertical = 3

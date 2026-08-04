@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://d1suo0y5qicuq"]
+
+[ext_resource type="Script" uid="uid://ct06qg1qbvj4g" path="res://Scripts/Resources/SkillData.gd" id="1_e4h42"]
+
+[resource]
+script = ExtResource("1_e4h42")
+skill_id = "sk_snipers_eye"
+skill_name = "Targeting Lock"
+description = "Paints a high-precision laser grid on an enemy to maximize ranged damage."
+icon_path = "res://Data/Skills/Icons/snipers_eye.png"
+energy_cost = 3
+effect_amount = 28
+element = 3
+accuracy = 95
+assigned_classes = Array[String](["Warden"])
