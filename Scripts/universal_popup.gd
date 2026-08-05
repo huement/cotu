@@ -9,7 +9,7 @@ class_name UniversalPopup
 @onready var confirm_button: TextureButton = %ConfirmButton as TextureButton
 
 var active_action_type: StringName = &""
-var active_data: Dictionary = {}
+var active_data: Dictionary = { }
 
 # Standalone Items Modal State & UI Pointers
 var _selected_item: ItemData = null
@@ -20,6 +20,7 @@ var _preview_icon: TextureRect = null
 var _items_use_btn: Button = null
 var _items_drop_btn: Button = null
 var _items_grid_instance: CharacterInventoryGrid = null
+
 
 func _ready() -> void:
 	if panel_container:
@@ -35,10 +36,9 @@ func _ready() -> void:
 	if confirm_button:
 		confirm_button.pressed.connect(_on_confirm_pressed)
 
-## Catches incoming event requests and builds custom menus on the fly
-func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void:
-	# 🎯 Intercept item selection when the Standalone ITEMS Modal is already open
-	if action_type == &"ITEM_ACTIONS" and active_action_type == &"ITEMS":
+
+func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> void:
+	if action_type == &"ITEM_ACTIONS" and (active_action_type == &"ITEMS" or active_action_type == &"BATTLE_ITEMS"):
 		_update_items_preview(data)
 		return
 
@@ -48,7 +48,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 
 	match action_type:
 		&"BATTLE_ABILITIES":
-			return # 🎯 Handled by dedicated BattleAbilityPopup; ignore silently!
+			return
 		&"BATTLE_VICTORY":
 			title_label.text = "VICTORY ACHIEVED"
 			_build_battle_victory_ui(data)
@@ -58,6 +58,9 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 		&"REST":
 			title_label.text = "SET PURRGATORY CAMP DURATION"
 			_build_rest_ui()
+		&"BATTLE_ITEMS":
+			title_label.text = "BATTLE INVENTORY - SELECT ITEM"
+			_build_items_inventory_ui()
 		&"ITEMS":
 			title_label.text = "USEABLE ITEMS"
 			_build_items_inventory_ui()
@@ -79,8 +82,9 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 	if panel_container:
 		panel_container.visible = true
 
+
 func _on_confirm_pressed() -> void:
-	var payload: Dictionary = {}
+	var payload: Dictionary = { }
 
 	if active_action_type == &"REST":
 		var slider := content_area.get_node_or_null("RestSlider") as HSlider
@@ -89,11 +93,13 @@ func _on_confirm_pressed() -> void:
 
 	_emit_confirmation(active_action_type, payload)
 
+
 func _clear_content_area() -> void:
 	if confirm_button:
 		confirm_button.visible = false
 	for child in content_area.get_children():
 		child.queue_free()
+
 
 func _emit_confirmation(action_type: StringName, extra_data: Dictionary) -> void:
 	if get_tree().root.has_node("SignalBus"):
@@ -101,6 +107,7 @@ func _emit_confirmation(action_type: StringName, extra_data: Dictionary) -> void
 		bus.popup_confirmed.emit(action_type, extra_data)
 
 	_close_modal()
+
 
 func _close_modal() -> void:
 	if background_dimmer:
@@ -110,11 +117,7 @@ func _close_modal() -> void:
 	active_action_type = &""
 	active_data.clear()
 
-# =============================================================================
-# 🛠️ DYNAMIC CONTENT GENERATION METHODS
-# =============================================================================
 
-## 1. SEARCH MODAL
 func _build_search_ui() -> void:
 	var info_text := Label.new()
 	info_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -129,7 +132,7 @@ func _build_search_ui() -> void:
 	btn_center.add_child(close_btn)
 	content_area.add_child(btn_center)
 
-## 2. REST MODAL
+
 func _build_rest_ui() -> void:
 	var info_text := Label.new()
 	info_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -148,8 +151,9 @@ func _build_rest_ui() -> void:
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	value_label.text = "4 Hours"
 
-	slider.value_changed.connect(func(val: float) -> void:
-		value_label.text = str(int(val)) + " Hours"
+	slider.value_changed.connect(
+		func(val: float) -> void:
+			value_label.text = str(int(val)) + " Hours",
 	)
 
 	content_area.add_child(slider)
@@ -160,8 +164,9 @@ func _build_rest_ui() -> void:
 	btn_hbox.add_theme_constant_override("separation", 16)
 
 	var rest_btn := _create_modal_button("REST", Color(0.0, 0.9, 0.8, 1.0))
-	rest_btn.pressed.connect(func() -> void:
-		_emit_confirmation(&"REST", {"hours": int(slider.value)})
+	rest_btn.pressed.connect(
+		func() -> void:
+			_emit_confirmation(&"REST", { "hours": int(slider.value) }),
 	)
 
 	var cancel_btn := _create_modal_button("CANCEL", Color(0.5, 0.5, 0.5, 1.0))
@@ -171,17 +176,15 @@ func _build_rest_ui() -> void:
 	btn_hbox.add_child(cancel_btn)
 	content_area.add_child(btn_hbox)
 
-## 3. STANDALONE USEABLE ITEMS MODAL
+
 func _build_items_inventory_ui() -> void:
 	_selected_item = null
 	_selected_slot_index = -1
 
-	# --- Top Item Info / Preview Header ---
 	var preview_hbox := HBoxContainer.new()
 	preview_hbox.custom_minimum_size = Vector2(0, 80)
 	preview_hbox.add_theme_constant_override("separation", 16)
 
-	# Large Icon Box Frame
 	var icon_box := PanelContainer.new()
 	icon_box.custom_minimum_size = Vector2(72, 72)
 	var icon_style := StyleBoxFlat.new()
@@ -200,7 +203,6 @@ func _build_items_inventory_ui() -> void:
 	icon_box.add_child(_preview_icon)
 	preview_hbox.add_child(icon_box)
 
-	# Text Column (Title & Description)
 	var text_vbox := VBoxContainer.new()
 	text_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -223,7 +225,6 @@ func _build_items_inventory_ui() -> void:
 	var sep := HSeparator.new()
 	content_area.add_child(sep)
 
-	# --- Inventory Grid ---
 	var inventory_grid_scene: PackedScene = preload("res://Scenes/UI/CharacterInventoryGrid.tscn")
 	_items_grid_instance = inventory_grid_scene.instantiate() as CharacterInventoryGrid
 	content_area.add_child(_items_grid_instance)
@@ -231,14 +232,13 @@ func _build_items_inventory_ui() -> void:
 	if "inventory" in GameState:
 		_items_grid_instance.display_inventory(GameState.inventory)
 
-	# --- Bottom Action Footer Buttons ---
 	var footer_hbox := HBoxContainer.new()
 	footer_hbox.alignment = BoxContainer.ALIGNMENT_BEGIN
 	footer_hbox.add_theme_constant_override("separation", 12)
 
 	_items_use_btn = _create_modal_button("USE", Color(0.0, 0.9, 0.9, 1.0))
 	_items_drop_btn = _create_modal_button("DROP", Color(0.0, 0.8, 0.7, 1.0))
-	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
+	var close_btn := _create_modal_button("CANCEL" if active_action_type == &"BATTLE_ITEMS" else "CLOSE", Color(0.5, 0.5, 0.5, 1.0))
 
 	_items_use_btn.disabled = true
 	_items_drop_btn.disabled = true
@@ -255,25 +255,229 @@ func _build_items_inventory_ui() -> void:
 
 	close_btn.pressed.connect(_close_modal)
 
-	# Use Action Button
-	_items_use_btn.pressed.connect(func() -> void:
-		if is_instance_valid(_selected_item) and "inventory" in GameState:
-			var active_cat: CatCharacter = GameState.get_active_cat() if GameState.has_method("get_active_cat") else null
-			if is_instance_valid(active_cat) and _selected_slot_index >= 0:
-				GameState.inventory.use_item(_selected_slot_index, active_cat)
+	_items_use_btn.pressed.connect(
+		func() -> void:
+			if not is_instance_valid(_selected_item) or _selected_slot_index < 0:
+				return
+
+			var item_to_use: ItemData = _selected_item
+			var inv_slot_idx: int = _selected_slot_index
+			var in_battle: bool = (active_action_type == &"BATTLE_ITEMS")
+			var acting_slot_idx: int = active_data.get("slot_index", -1) if in_battle else -1
+
+			GameLogger.info("UniversalPopup: USE clicked for %s (Slot %d, Acting Slot %d)" % [
+				item_to_use.item_name, inv_slot_idx, acting_slot_idx
+			])
+
+			match item_to_use.target_type:
+				ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:
+					_execute_item_use_direct(item_to_use, inv_slot_idx, acting_slot_idx, -1)
+					_close_modal()
+				ItemData.TargetType.SINGLE_PARTY_MEMBER, ItemData.TargetType.SINGLE_ENEMY:
+					_build_item_target_selection_ui(item_to_use, inv_slot_idx, acting_slot_idx)
+	)
+
+	_items_drop_btn.pressed.connect(
+		func() -> void:
+			if is_instance_valid(_selected_item) and "inventory" in GameState:
+				GameState.inventory.remove_item(_selected_item)
 				_items_grid_instance.display_inventory(GameState.inventory)
 				_reset_items_preview()
 	)
 
-	# Drop Action Button
-	_items_drop_btn.pressed.connect(func() -> void:
-		if is_instance_valid(_selected_item) and "inventory" in GameState:
-			GameState.inventory.remove_item(_selected_item)
-			_items_grid_instance.display_inventory(GameState.inventory)
-			_reset_items_preview()
-	)
 
-## Dynamic Preview Updater triggered when selecting an item in the grid
+func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_slot_idx: int) -> void:
+	_clear_content_area()
+
+	var header_lbl := Label.new()
+	header_lbl.text = "SELECT TARGET FOR %s" % item.item_name.to_upper()
+	header_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header_lbl.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8, 1.0))
+	header_lbl.add_theme_font_size_override("font_size", 16)
+	content_area.add_child(header_lbl)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(360, 180)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	scroll.add_child(grid)
+
+	content_area.add_child(scroll)
+
+	var is_in_battle: bool = (acting_slot_idx >= 0)
+
+	if is_in_battle:
+		var combatants: Array = active_data.get("combatants", [])
+		var is_ally_target: bool = (item.target_type == ItemData.TargetType.SINGLE_PARTY_MEMBER or item.target_type == ItemData.TargetType.ALL_PARTY)
+
+		var valid_targets: Array = []
+		for c in combatants:
+			var is_player: bool = c.get("is_player") if "is_player" in c else false
+			var hp: int = c.get("current_hp") if "current_hp" in c else 0
+			if is_ally_target and is_player and hp > 0:
+				valid_targets.append(c)
+			elif not is_ally_target and not is_player and hp > 0:
+				valid_targets.append(c)
+
+		if valid_targets.is_empty():
+			valid_targets = combatants
+
+		for c in valid_targets:
+			var c_name: String = str(c.get("name")).to_upper() if "name" in c else "TARGET"
+			var c_hp: int = int(c.get("current_hp")) if "current_hp" in c else 0
+			var c_max_hp: int = int(c.get("max_hp")) if "max_hp" in c else 1
+			var c_slot: int = int(c.get("slot_index")) if "slot_index" in c else 0
+			var c_ref: Resource = c.get("ref") as Resource if "ref" in c else null
+
+			var btn := _create_target_card_button(c_name, c_hp, c_max_hp, c_ref)
+			btn.pressed.connect(
+				func() -> void:
+					_execute_item_use_direct(item, inv_slot_idx, acting_slot_idx, c_slot)
+					_close_modal()
+			)
+			grid.add_child(btn)
+	else:
+		var gs: Node = get_tree().root.get_node_or_null("GameState")
+		if is_instance_valid(gs) and "current_party" in gs and gs.current_party:
+			var party_slots: Array = gs.current_party.get("slots") as Array
+			for idx in range(party_slots.size()):
+				var cat: Resource = party_slots[idx] as Resource
+				if is_instance_valid(cat):
+					var c_name: String = str(cat.get("character_name")).to_upper() if "character_name" in cat and not str(cat.get("character_name")).is_empty() else (str(cat.get("name")).to_upper() if "name" in cat else "PARTY MEMBER")
+					var c_hp: int = int(cat.get("current_hp")) if "current_hp" in cat else 0
+					var c_max_hp: int = int(cat.get("max_hp")) if "max_hp" in cat else 1
+
+					var btn := _create_target_card_button(c_name, c_hp, c_max_hp, cat)
+					var target_idx: int = idx
+					btn.pressed.connect(
+						func() -> void:
+							_execute_item_use_direct(item, inv_slot_idx, -1, target_idx)
+							_close_modal()
+					)
+					grid.add_child(btn)
+
+	var cancel_btn := _create_modal_button("CANCEL", Color(0.5, 0.5, 0.5, 1.0))
+	cancel_btn.pressed.connect(_close_modal)
+
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_child(cancel_btn)
+	content_area.add_child(btn_hbox)
+
+
+func _create_target_card_button(c_name: String, c_hp: int, c_max_hp: int, portrait_res: Resource) -> Button:
+	var btn := Button.new()
+	btn.custom_minimum_size = Vector2(170, 52)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.focus_mode = Control.FOCUS_NONE
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 4)
+	margin.add_theme_constant_override("margin_top", 4)
+	margin.add_theme_constant_override("margin_right", 4)
+	margin.add_theme_constant_override("margin_bottom", 4)
+	btn.add_child(margin)
+
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 8)
+	margin.add_child(hbox)
+
+	var icon_rect := TextureRect.new()
+	icon_rect.custom_minimum_size = Vector2(40, 40)
+	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+
+	if is_instance_valid(portrait_res):
+		if "portrait" in portrait_res and portrait_res.get("portrait") is Texture2D:
+			icon_rect.texture = portrait_res.get("portrait")
+		elif "portrait_texture" in portrait_res and portrait_res.get("portrait_texture") is Texture2D:
+			icon_rect.texture = portrait_res.get("portrait_texture")
+		elif "portrait_path" in portrait_res and ResourceLoader.exists(str(portrait_res.get("portrait_path"))):
+			icon_rect.texture = load(str(portrait_res.get("portrait_path"))) as Texture2D
+
+	hbox.add_child(icon_rect)
+
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+
+	var title_lbl := Label.new()
+	title_lbl.text = c_name
+	title_lbl.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8, 1.0))
+	title_lbl.add_theme_font_size_override("font_size", 11)
+	vbox.add_child(title_lbl)
+
+	var hp_lbl := Label.new()
+	hp_lbl.text = "HP: %d / %d" % [c_hp, c_max_hp]
+	hp_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3, 1.0))
+	hp_lbl.add_theme_font_size_override("font_size", 10)
+	vbox.add_child(hp_lbl)
+
+	hbox.add_child(vbox)
+
+	var style_normal := StyleBoxFlat.new()
+	style_normal.bg_color = Color(0.06, 0.1, 0.14, 0.9)
+	style_normal.border_width_left = 1
+	style_normal.border_width_top = 1
+	style_normal.border_width_right = 1
+	style_normal.border_width_bottom = 1
+	style_normal.border_color = Color(0.0, 0.8, 0.7, 0.4)
+
+	var style_hover := style_normal.duplicate() as StyleBoxFlat
+	style_hover.bg_color = Color(0.12, 0.25, 0.3, 0.9)
+	style_hover.border_color = Color(0.0, 1.0, 0.8, 0.9)
+
+	btn.add_theme_stylebox_override("normal", style_normal)
+	btn.add_theme_stylebox_override("hover", style_hover)
+
+	return btn
+
+
+func _execute_item_use_direct(item: ItemData, inv_slot_idx: int, acting_slot_idx: int, target_slot_idx: int) -> void:
+	if acting_slot_idx >= 0:
+		GameLogger.combat("UniversalPopup: Direct Item Use in Battle (Acting Slot %d, Item: %s, Target: %d)" % [
+			acting_slot_idx, item.item_name, target_slot_idx
+		])
+		var target_mgr: Node = get_tree().root.get_node_or_null("TargetSelectionManager")
+		if is_instance_valid(target_mgr) and target_mgr.has_method("start_item_target_selection"):
+			target_mgr.call("start_item_target_selection", item, inv_slot_idx, acting_slot_idx)
+
+		if get_tree().root.has_node("SignalBus"):
+			SignalBus.player_action_selected.emit(acting_slot_idx, &"ITEM", max(0, target_slot_idx))
+	else:
+		var gs: Node = get_tree().root.get_node_or_null("GameState")
+		if is_instance_valid(gs) and "inventory" in gs and gs.inventory != null:
+			var target_cat: Resource = null
+			var resolved_target_idx: int = target_slot_idx
+
+			if resolved_target_idx < 0:
+				resolved_target_idx = gs.get("active_cat_index") if "active_cat_index" in gs else 0
+
+			if "current_party" in gs and gs.current_party:
+				var slots: Array = gs.current_party.get("slots") as Array
+				if resolved_target_idx >= 0 and resolved_target_idx < slots.size():
+					target_cat = slots[resolved_target_idx] as Resource
+
+			if not is_instance_valid(target_cat) and gs.has_method("get_active_cat"):
+				target_cat = gs.get_active_cat()
+
+			if is_instance_valid(target_cat):
+				var success: bool = gs.inventory.use_item(inv_slot_idx, target_cat)
+				GameLogger.info("UniversalPopup: Direct Field Item Use result = %s" % [str(success)])
+				if success and get_tree().root.has_node("SignalBus"):
+					if target_cat.get("current_hp") != null:
+						SignalBus.character_health_changed.emit(resolved_target_idx, target_cat.get("current_hp"))
+					if target_cat.get("current_energy") != null:
+						SignalBus.character_mana_changed.emit(resolved_target_idx, target_cat.get("current_energy"))
+
+
 func _update_items_preview(data: Dictionary) -> void:
 	var item: ItemData = data.get("item", null) as ItemData
 	var slot_idx: int = data.get("index", -1)
@@ -282,23 +486,41 @@ func _update_items_preview(data: Dictionary) -> void:
 		_selected_item = item
 		_selected_slot_index = slot_idx
 
-		if _preview_title_label: _preview_title_label.text = item.item_name.to_upper()
-		if _preview_desc_label: _preview_desc_label.text = item.description
-		if _preview_icon: _preview_icon.texture = item.icon if "icon" in item else null
+		if _preview_title_label:
+			_preview_title_label.text = item.item_name.to_upper()
+		if _preview_desc_label:
+			_preview_desc_label.text = item.description
+		if _preview_icon:
+			_preview_icon.texture = item.icon if "icon" in item else null
 
-		if _items_use_btn: _items_use_btn.disabled = false
-		if _items_drop_btn: _items_drop_btn.disabled = false
+		var in_combat: bool = (active_action_type == &"BATTLE_ITEMS")
+		var is_usable: bool = (
+			item.can_be_used(in_combat)
+			if item.has_method("can_be_used")
+			else (item.is_consumable or item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION)
+		)
+
+		if _items_use_btn:
+			_items_use_btn.disabled = not is_usable
+		if _items_drop_btn:
+			_items_drop_btn.disabled = in_combat
+
 
 func _reset_items_preview() -> void:
 	_selected_item = null
 	_selected_slot_index = -1
-	if _preview_title_label: _preview_title_label.text = "SELECT AN ITEM"
-	if _preview_desc_label: _preview_desc_label.text = "Click any item in the grid below to inspect its details or use it."
-	if _preview_icon: _preview_icon.texture = null
-	if _items_use_btn: _items_use_btn.disabled = true
-	if _items_drop_btn: _items_drop_btn.disabled = true
+	if _preview_title_label:
+		_preview_title_label.text = "SELECT AN ITEM"
+	if _preview_desc_label:
+		_preview_desc_label.text = "Click any item in the grid below to inspect its details or use it."
+	if _preview_icon:
+		_preview_icon.texture = null
+	if _items_use_btn:
+		_items_use_btn.disabled = true
+	if _items_drop_btn:
+		_items_drop_btn.disabled = true
 
-## 5. ALL SKILLS POPUP VIEW
+
 func _build_all_skills_popup_ui(data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
 
@@ -315,12 +537,7 @@ func _build_all_skills_popup_ui(data: Dictionary) -> void:
 		for skill in cat.known_skills:
 			if skill is SkillData:
 				var lbl := Label.new()
-				lbl.text = "• %s (Hit Chance: %d%% | Cost: %d EN)\n  %s" % [
-					skill.skill_name.to_upper(),
-					skill.accuracy,
-					skill.energy_cost,
-					skill.description
-				]
+				lbl.text = "• %s (Hit Chance: %d%% | Cost: %d EN)\n  %s" % [skill.skill_name.to_upper(), skill.accuracy, skill.energy_cost, skill.description]
 				lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
 				vbox.add_child(lbl)
@@ -340,7 +557,7 @@ func _build_all_skills_popup_ui(data: Dictionary) -> void:
 	btn_hbox.add_child(close_btn)
 	content_area.add_child(btn_hbox)
 
-## 6. ALL SPELLS POPUP VIEW
+
 func _build_all_spells_popup_ui(data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
 
@@ -379,7 +596,7 @@ func _build_all_spells_popup_ui(data: Dictionary) -> void:
 	btn_hbox.add_child(close_btn)
 	content_area.add_child(btn_hbox)
 
-## 7. INDIVIDUAL ABILITY DETAILS POPUP
+
 func _build_ability_info_ui(data: Dictionary) -> void:
 	var res: Resource = data.get("resource", null) as Resource
 	if not is_instance_valid(res):
@@ -416,7 +633,7 @@ func _build_ability_info_ui(data: Dictionary) -> void:
 	btn_center.add_child(close_btn)
 	content_area.add_child(btn_center)
 
-## 8. INDIVIDUAL ITEM ACTIONS MODAL (From Character Sheet)
+
 func _build_item_actions_ui(data: Dictionary) -> void:
 	var item: ItemData = data.get("item", null) as ItemData
 	var slot_name: String = data.get("slot", "")
@@ -439,22 +656,18 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 	if is_instance_valid(item):
 		if not slot_name.is_empty():
-			_add_action_button("[ UNEQUIP ]", func() -> void:
+			var unequip_action := func() -> void:
 				if is_instance_valid(cat):
 					var unequipped: ItemData = cat.unequip_item(slot_name)
 					if is_instance_valid(inv) and is_instance_valid(unequipped):
 						inv.add_item(unequipped)
-
-				_emit_confirmation(&"ITEM_ACTIONS", {
-					"sub_action": "UNEQUIP",
-					"slot": slot_name,
-					"item": item
-				})
+				_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "UNEQUIP", "slot": slot_name, "item": item })
 				_refresh_party_ui()
-			)
+
+			_add_action_button("[ UNEQUIP ]", unequip_action)
 		else:
 			if item.item_type == ItemData.ItemType.EQUIPMENT:
-				_add_action_button("[ EQUIP ]", func() -> void:
+				var equip_action := func() -> void:
 					if is_instance_valid(cat):
 						var target_slot: String = item.get_slot_string()
 						var unequipped: ItemData = cat.unequip_item(target_slot)
@@ -463,42 +676,35 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 							inv.remove_item(item)
 							if is_instance_valid(unequipped):
 								inv.add_item(unequipped)
-
-					_emit_confirmation(&"ITEM_ACTIONS", {
-						"sub_action": "EQUIP",
-						"index": slot_idx,
-						"item": item
-					})
+					_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "EQUIP", "index": slot_idx, "item": item })
 					_refresh_party_ui()
-				)
-			elif item.item_type == ItemData.ItemType.CONSUMABLE:
-				_add_action_button("[ USE ]", func() -> void:
-					if is_instance_valid(inv) and slot_idx >= 0:
-						inv.use_item(slot_idx, cat)
 
-					_emit_confirmation(&"ITEM_ACTIONS", {
-						"sub_action": "USE",
-						"index": slot_idx,
-						"item": item
-					})
-					_refresh_party_ui()
-				)
+				_add_action_button("[ EQUIP ]", equip_action)
 
-			_add_action_button("[ DROP ]", func() -> void:
+			elif item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION or item.is_consumable:
+				var use_action := func() -> void:
+					match item.target_type:
+						ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:
+							_execute_item_use_direct(item, slot_idx, -1, -1)
+							_close_modal()
+						ItemData.TargetType.SINGLE_PARTY_MEMBER, ItemData.TargetType.SINGLE_ENEMY:
+							_build_item_target_selection_ui(item, slot_idx, -1)
+
+				_add_action_button("[ USE ]", use_action)
+
+			var drop_action := func() -> void:
 				if is_instance_valid(inv):
 					inv.remove_item(item)
-
-				_emit_confirmation(&"ITEM_ACTIONS", {
-					"sub_action": "DROP",
-					"index": slot_idx,
-					"item": item
-				})
+				_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "DROP", "index": slot_idx, "item": item })
 				_refresh_party_ui()
-			)
 
-	_add_action_button("[ CANCEL ]", func() -> void:
+			_add_action_button("[ DROP ]", drop_action)
+
+	var cancel_action := func() -> void:
 		_close_modal()
-	)
+
+	_add_action_button("[ CANCEL ]", cancel_action)
+
 
 func _add_action_button(label_text: String, action_callable: Callable) -> void:
 	var btn := Button.new()
@@ -506,11 +712,13 @@ func _add_action_button(label_text: String, action_callable: Callable) -> void:
 	btn.pressed.connect(action_callable)
 	content_area.add_child(btn)
 
+
 func _refresh_party_ui() -> void:
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
 		var active_idx: int = GameState.get("active_cat_index") if "active_cat_index" in GameState else 0
 		bus.portrait_clicked.emit(active_idx)
+
 
 func _create_modal_button(text_val: String, color_val: Color) -> Button:
 	var btn := Button.new()
@@ -528,7 +736,7 @@ func _create_modal_button(text_val: String, color_val: Color) -> Button:
 	btn.add_theme_font_size_override("font_size", 14)
 	return btn
 
-## 8. BATTLE VICTORY SCREEN
+
 func _build_battle_victory_ui(data: Dictionary) -> void:
 	var enemies_killed: int = data.get("enemies_killed", 0)
 	var total_xp: int = data.get("total_xp", 0)
@@ -546,7 +754,10 @@ func _build_battle_victory_ui(data: Dictionary) -> void:
 	content_area.add_child(xp_label)
 
 	var confirm_btn := _create_modal_button("CONFIRM", Color(0.0, 0.9, 0.8, 1.0))
-	confirm_btn.pressed.connect(_close_modal)
+	confirm_btn.pressed.connect(
+		func() -> void:
+			_emit_confirmation(&"BATTLE_VICTORY", data),
+	)
 
 	var btn_center := HBoxContainer.new()
 	btn_center.alignment = BoxContainer.ALIGNMENT_CENTER

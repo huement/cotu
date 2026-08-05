@@ -6,7 +6,7 @@ extends Node3D
 @export var forward_distance: float = 2.5
 @export var vertical_offset: float = -0.85
 @export var model_scale: Vector3 = Vector3(0.4, 0.4, 0.4)
-@export var horizontal_spacing: float = 2.0
+@export var horizontal_spacing: float = 0.85
 
 var _spawned_enemies: Dictionary = {}
 

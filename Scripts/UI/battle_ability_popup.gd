@@ -5,12 +5,10 @@ extends CanvasLayer
 enum Page { ABILITY_SELECT, TARGET_SELECT }
 enum AbilityTab { SKILLS, SPELLS }
 
-# --- Scene Unique Node References (% Prefix) ---
 @onready var background_dimmer: ColorRect = $BackgroundDimmer
 @onready var panel_container: PanelContainer = $PanelContainer
 @onready var title_label: Label = %TitleLabel
 
-# Page 1: Ability Select Nodes
 @onready var page_ability_select: VBoxContainer = %PageAbilitySelect
 @onready var skills_tab_btn: Button = %SkillsTabBtn
 @onready var spells_tab_btn: Button = %SpellsTabBtn
@@ -20,44 +18,38 @@ enum AbilityTab { SKILLS, SPELLS }
 @onready var page1_cancel_btn: Button = %Page1CancelBtn
 @onready var page1_next_btn: Button = %Page1NextBtn
 
-# Page 2: Target Select Nodes
 @onready var page_target_select: VBoxContainer = %PageTargetSelect
 @onready var target_grid_container: GridContainer = %TargetGridContainer
 @onready var page2_back_btn: Button = %Page2BackBtn
 @onready var page2_confirm_btn: Button = %Page2ConfirmBtn
 
-# --- Runtime State ---
 var _active_cat: CatCharacter = null
 var _active_slot_index: int = -1
 var _current_page: Page = Page.ABILITY_SELECT
 var _current_tab: AbilityTab = AbilityTab.SKILLS
-var _selected_ability: Resource = null # SkillData or SpellData
+var _selected_ability: Resource = null
 var _selected_target_id: String = ""
 var _selected_target_index: int = -1
-var _combatants_list: Array = [] # Combatant data passed from CombatManager
+var _combatants_list: Array = []
 
 
 func _ready() -> void:
 	_close_popup()
 
-	# Connect Tab Controls
 	if skills_tab_btn: skills_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SKILLS))
 	if spells_tab_btn: spells_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SPELLS))
 
-	# Connect Navigation Buttons
 	if page1_cancel_btn: page1_cancel_btn.pressed.connect(_close_popup)
 	if page1_next_btn: page1_next_btn.pressed.connect(_go_to_target_page)
 	if page2_back_btn: page2_back_btn.pressed.connect(_go_to_ability_page)
 	if page2_confirm_btn: page2_confirm_btn.pressed.connect(_confirm_and_emit_action)
 
-	# SignalBus Connection
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
 		if not bus.has_user_signal("battle_ability_popup_requested"):
 			bus.popup_requested.connect(_on_popup_requested)
 
 
-## PUBLIC API: Opens the modal for a specific cat and combat state
 func open_ability_menu(cat: CatCharacter, slot_index: int, combatants_data: Array) -> void:
 	_active_cat = cat
 	_active_slot_index = slot_index
@@ -66,7 +58,6 @@ func open_ability_menu(cat: CatCharacter, slot_index: int, combatants_data: Arra
 	_selected_target_id = ""
 	_selected_target_index = -1
 
-	# Default to Skills if available, otherwise Spells
 	if is_instance_valid(cat) and cat.known_skills.is_empty() and not cat.known_spells.is_empty():
 		_current_tab = AbilityTab.SPELLS
 	else:
@@ -86,10 +77,6 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 		if is_instance_valid(cat):
 			open_ability_menu(cat, slot_idx, combatants)
 
-
-# =============================================================================
-# 🟢 STEP 1: ABILITY SELECTION PAGE
-# =============================================================================
 
 func _go_to_ability_page() -> void:
 	_current_page = Page.ABILITY_SELECT
@@ -155,13 +142,11 @@ func _create_ability_row_button(ability_res: Resource) -> Button:
 
 	btn.text = "  %s (Cost: %d EN)" % [name_str.to_upper(), cost_val]
 
-	# Check if character has enough energy
 	var current_en: int = _active_cat.current_energy
 	if current_en < cost_val:
 		btn.disabled = true
 		btn.text += " [LOW ENERGY]"
 
-	# Styling
 	var style_normal := StyleBoxFlat.new()
 	style_normal.bg_color = Color(0.08, 0.12, 0.15, 0.9)
 	style_normal.border_width_left = 1
@@ -201,10 +186,6 @@ func _update_ability_preview() -> void:
 		if page1_next_btn: page1_next_btn.disabled = true
 
 
-# =============================================================================
-# 🎯 STEP 2: TARGET SELECTION PAGE (2 Columns: [ ICON ][ Name / HP ])
-# =============================================================================
-
 func _go_to_target_page() -> void:
 	if not is_instance_valid(_selected_ability): return
 
@@ -224,7 +205,6 @@ func _render_target_grid() -> void:
 	for child in target_grid_container.get_children():
 		child.queue_free()
 
-	# Determine if targeting Enemies or Allies based on Ability TargetType
 	var target_type_val = _selected_ability.get("target_type")
 	var is_ally_target: bool = _is_ally_targeting(target_type_val)
 
@@ -233,14 +213,12 @@ func _render_target_grid() -> void:
 		var is_player: bool = c.get("is_player") if "is_player" in c else false
 		var hp: int = c.get("current_hp") if "current_hp" in c else 0
 
-		# Filter living allies or living enemies
 		if is_ally_target and is_player and hp > 0:
 			valid_targets.append(c)
 		elif not is_ally_target and not is_player and hp > 0:
 			valid_targets.append(c)
 
 	if valid_targets.is_empty():
-		# Fallback to all combatants
 		valid_targets = _combatants_list
 
 	for c in valid_targets:
@@ -248,7 +226,6 @@ func _render_target_grid() -> void:
 		target_grid_container.add_child(card)
 
 
-## Creates 2-column layout: [ ICON ][ VBox(Title, HP) ]
 func _create_target_card_button(combatant: Object) -> Button:
 	var btn := Button.new()
 	btn.custom_minimum_size = Vector2(175, 52)
@@ -262,7 +239,6 @@ func _create_target_card_button(combatant: Object) -> Button:
 	var c_slot: int = int(combatant.get("slot_index")) if "slot_index" in combatant else 0
 	var c_ref: Resource = combatant.get("ref") as Resource if "ref" in combatant else null
 
-	# Outer Margin
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 4)
@@ -271,12 +247,10 @@ func _create_target_card_button(combatant: Object) -> Button:
 	margin.add_theme_constant_override("margin_bottom", 4)
 	btn.add_child(margin)
 
-	# Column 1 & Column 2 Container
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 8)
 	margin.add_child(hbox)
 
-	# --- COLUMN 1: [ ICON ] ---
 	var icon_rect := TextureRect.new()
 	icon_rect.custom_minimum_size = Vector2(40, 40)
 	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -290,19 +264,16 @@ func _create_target_card_button(combatant: Object) -> Button:
 
 	hbox.add_child(icon_rect)
 
-	# --- COLUMN 2: [ Details (Row 1: Title | Row 2: HP) ] ---
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 
-	# Row 1: Title
 	var title_lbl := Label.new()
 	title_lbl.text = c_name
 	title_lbl.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8))
 	title_lbl.add_theme_font_size_override("font_size", 11)
 	vbox.add_child(title_lbl)
 
-	# Row 2: HP Text
 	var hp_lbl := Label.new()
 	hp_lbl.text = "HP: %d / %d" % [c_hp, c_max_hp]
 	hp_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
@@ -311,7 +282,6 @@ func _create_target_card_button(combatant: Object) -> Button:
 
 	hbox.add_child(vbox)
 
-	# Button Style
 	var style_normal := StyleBoxFlat.new()
 	style_normal.bg_color = Color(0.06, 0.1, 0.14, 0.9)
 	style_normal.border_width_left = 1
@@ -355,10 +325,6 @@ func _is_ally_targeting(target_type_val) -> bool:
 	return "ALLY" in type_str or "PARTY" in type_str or "SELF" in type_str or type_str == "2" or type_str == "3" or type_str == "4"
 
 
-# =============================================================================
-# 🚀 CONFIRMATION & EXECUTION
-# =============================================================================
-
 func _confirm_and_emit_action() -> void:
 	if not is_instance_valid(_selected_ability) or _selected_target_index == -1:
 		return
@@ -369,6 +335,9 @@ func _confirm_and_emit_action() -> void:
 	var cost_val: int = _selected_ability.get("energy_cost") if "energy_cost" in _selected_ability else 0
 	if is_instance_valid(_active_cat):
 		_active_cat.current_energy = max(0, _active_cat.current_energy - cost_val)
+		# 🎯 FIX 2: Emit character_mana_changed signal so UI MP bar updates immediately
+		if get_tree().root.has_node("SignalBus"):
+			SignalBus.character_mana_changed.emit(_active_slot_index, _active_cat.current_energy)
 
 	# Broadcast turn action payload through SignalBus
 	if get_tree().root.has_node("SignalBus"):

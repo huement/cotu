@@ -1,6 +1,7 @@
 # res://Scripts/Managers/CombatManager.gd
 extends Node
 
+
 class Combatant:
 	var id: String
 	var name: String
@@ -10,11 +11,14 @@ class Combatant:
 	var slot_index: int
 	var current_hp: int
 	var max_hp: int
+	var current_mp: int
+	var max_mp: int
 	var strength: int
 	var defense: int
 	var ref: Resource
 
-	func _init(p_id: String, p_name: String, p_speed: float, p_is_player: bool, p_slot: int, p_hp: int, p_max_hp: int, p_str: int, p_def: int, p_ref: Resource) -> void:
+
+	func _init(p_id: String, p_name: String, p_speed: float, p_is_player: bool, p_slot: int, p_hp: int, p_max_hp: int, p_mp: int, p_max_mp: int, p_str: int, p_def: int, p_ref: Resource) -> void:
 		id = p_id
 		name = p_name
 		speed = maxf(1.0, p_speed)
@@ -22,9 +26,12 @@ class Combatant:
 		slot_index = p_slot
 		current_hp = p_hp
 		max_hp = max(1, p_max_hp)
+		current_mp = p_mp
+		max_mp = max(0, p_max_mp)
 		strength = p_str
 		defense = p_def
 		ref = p_ref
+
 
 const MAX_TURN_METER: float = 100.0
 const BASE_TICK_RATE: float = 25.0
@@ -51,7 +58,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not is_combat_active or is_paused_for_input:
 		return
-		
+
 	_tick_turn_meters(delta)
 
 
@@ -60,7 +67,6 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 	turn_queue.clear()
 	active_combatant = null
 
-	# 1. 🎯 Register Player Party Combatants using their true slot index in player_party (0..5)
 	var registered_cats: int = 0
 	for i in range(player_party.size()):
 		var cat: Resource = player_party[i] as Resource
@@ -71,14 +77,28 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			var c_name: String = str(cat.get("name")) if cat.get("name") != null else "Space Cat %d" % (i + 1)
 			var c_hp: int = int(cat.get("current_hp")) if "current_hp" in cat else 20
 			var c_max_hp: int = int(cat.get("max_hp")) if "max_hp" in cat else 20
+
+			var c_mp: int = 10
+			if "current_mp" in cat:
+				c_mp = int(cat.get("current_mp"))
+			elif "current_mana" in cat:
+				c_mp = int(cat.get("current_mana"))
+			elif "mp" in cat:
+				c_mp = int(cat.get("mp"))
+
+			var c_max_mp: int = 10
+			if "max_mp" in cat:
+				c_max_mp = int(cat.get("max_mp"))
+			elif "max_mana" in cat:
+				c_max_mp = int(cat.get("max_mana"))
+
 			var c_str: int = int(cat.get("strength")) if "strength" in cat else 10
 			var c_def: int = int(cat.get("defense")) if "defense" in cat else 2
 
-			var combatant: Combatant = Combatant.new(c_id, c_name, c_speed, true, i, c_hp, c_max_hp, c_str, c_def, cat)
+			var combatant: Combatant = Combatant.new(c_id, c_name, c_speed, true, i, c_hp, c_max_hp, c_mp, c_max_mp, c_str, c_def, cat)
 			combatant.meter = 0.0
 			combatants.append(combatant)
 
-	# 2. Unpack Enemy Roster
 	var enemy_resources: Array[Resource] = []
 	if enemy_data_or_group is Array:
 		for item in (enemy_data_or_group as Array):
@@ -107,13 +127,13 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			if enemy_resources.size() > 1:
 				e_name = "%s %c" % [e_name, 65 + e_idx]
 
-			var enemy_combatant: Combatant = Combatant.new("enemy_%d" % e_idx, e_name, e_speed, false, e_idx, e_hp, e_max_hp, e_str, e_def, e_data)
+			var enemy_combatant: Combatant = Combatant.new("enemy_%d" % e_idx, e_name, e_speed, false, e_idx, e_hp, e_max_hp, 0, 0, e_str, e_def, e_data)
 			enemy_combatant.meter = 0.0
 			combatants.append(enemy_combatant)
 
 	is_combat_active = true
 	is_paused_for_input = false
-	
+
 	for c: Combatant in combatants:
 		c.meter = minf(MAX_TURN_METER, c.speed * 5.0)
 		SignalBus.turn_meter_updated.emit(c.id, c.meter / MAX_TURN_METER)
@@ -128,7 +148,7 @@ func _on_combat_ended(victory: bool) -> void:
 	is_combat_active = false
 	is_paused_for_input = false
 
-	var victory_data: Dictionary = {}
+	var victory_data: Dictionary = { }
 	if victory:
 		var total_xp: int = 0
 		var living_party_members: int = 0
@@ -145,16 +165,12 @@ func _on_combat_ended(victory: bool) -> void:
 				total_xp += single_xp
 			elif c.is_player and c.current_hp > 0:
 				living_party_members += 1
-		
+
 		if enemies_killed == 0:
 			enemies_killed = 1
 			total_xp = 50
 
-		victory_data = {
-			"enemies_killed": enemies_killed,
-			"total_xp": total_xp,
-			"living_members": max(1, living_party_members)
-		}
+		victory_data = { "enemies_killed": enemies_killed, "total_xp": total_xp, "living_members": max(1, living_party_members) }
 
 	combatants.clear()
 	turn_queue.clear()
@@ -195,8 +211,37 @@ func _process_turn_queue() -> void:
 func _on_player_action_selected(slot_index: int, action_type: StringName, target_index: int) -> void:
 	if active_combatant == null or active_combatant.slot_index != slot_index:
 		return
-	
+
 	var acting_char: Combatant = active_combatant
+
+	# Handle ITEM action during combat
+	if action_type == &"ITEM":
+		_execute_item_use_in_combat(acting_char, target_index)
+		_reset_combatant_meter(acting_char)
+		_unpause_and_continue()
+		return
+
+	if action_type == &"SPELL" or action_type == &"SKILL":
+		var mana_cost: int = 5
+
+		if acting_char.current_mp < mana_cost:
+			GameLogger.combat("%s does not have enough Mana/MP! (%d/%d)" % [acting_char.name, acting_char.current_mp, mana_cost])
+			_unpause_and_continue()
+			return
+
+		acting_char.current_mp = max(0, acting_char.current_mp - mana_cost)
+
+		if is_instance_valid(acting_char.ref):
+			if "current_mp" in acting_char.ref:
+				acting_char.ref.set("current_mp", acting_char.current_mp)
+			elif "current_mana" in acting_char.ref:
+				acting_char.ref.set("current_mana", acting_char.current_mp)
+			elif "mp" in acting_char.ref:
+				acting_char.ref.set("mp", acting_char.current_mp)
+
+		SignalBus.character_mana_changed.emit(acting_char.slot_index, acting_char.current_mp, acting_char.max_mp)
+		GameLogger.combat("%s spent %d Mana/MP! Remaining: %d/%d" % [acting_char.name, mana_cost, acting_char.current_mp, acting_char.max_mp])
+
 	var target_char: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
 
 	if not is_instance_valid(target_char) or target_char.current_hp <= 0:
@@ -213,6 +258,10 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 	match action_type:
 		&"ATTACK", &"SKILL", &"SPELL":
 			var damage: int = _calculate_physical_damage(acting_char, target_char)
+
+			if action_type == &"SPELL":
+				damage = int(damage * 1.5)
+
 			target_char.current_hp = max(0, target_char.current_hp - damage)
 
 			if is_instance_valid(target_char.ref):
@@ -225,13 +274,11 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 			SignalBus.enemy_health_changed.emit(target_char.id, target_char.current_hp, target_char.max_hp)
 			SignalBus.chevron_flash_requested.emit(false)
 
-			GameLogger.combat("%s dealt %d damage to %s! Enemy HP: %d/%d" % [
-				acting_char.name, damage, target_char.name, target_char.current_hp, target_char.max_hp
-			])
-			
+			GameLogger.combat("%s used %s on %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, action_type, target_char.name, damage, target_char.current_hp, target_char.max_hp])
+
 			if target_char.current_hp <= 0:
 				print("[CombatManager] %s defeated!" % target_char.name)
-				
+
 				var any_enemies_alive: bool = false
 				for c in combatants:
 					if not c.is_player and c.current_hp > 0:
@@ -247,13 +294,55 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 	_unpause_and_continue()
 
 
+func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int) -> void:
+	GameLogger.combat("_execute_item_use_in_combat fired for %s targeting slot %d" % [acting_char.name, target_slot_index])
+	var gs: Node = get_tree().root.get_node_or_null("GameState")
+	if not is_instance_valid(gs) or not "inventory" in gs or gs.inventory == null:
+		return
+
+	var inv: Inventory = gs.inventory as Inventory
+	var target_mgr: Node = get_tree().root.get_node_or_null("TargetSelectionManager")
+	var item_slot_idx: int = target_mgr.get_pending_slot_index() if is_instance_valid(target_mgr) and target_mgr.has_method("get_pending_slot_index") else -1
+
+	if item_slot_idx < 0:
+		GameLogger.combat("CombatManager: Invalid item slot index %d requested!" % item_slot_idx)
+		return
+
+	var target_cat: Resource = null
+	if "current_party" in gs and gs.current_party:
+		var slots: Array = gs.current_party.get("slots") as Array
+		if target_slot_index >= 0 and target_slot_index < slots.size():
+			target_cat = slots[target_slot_index] as Resource
+
+	if not is_instance_valid(target_cat):
+		target_cat = acting_char.ref
+
+	if is_instance_valid(target_cat):
+		var success: bool = inv.use_item(item_slot_idx, target_cat)
+
+		if success:
+			for c in combatants:
+				if c.ref == target_cat:
+					if "current_hp" in c.ref:
+						c.current_hp = int(c.ref.get("current_hp"))
+					if "current_mp" in c.ref:
+						c.current_mp = int(c.ref.get("current_mp"))
+					elif "current_energy" in c.ref:
+						c.current_mp = int(c.ref.get("current_energy"))
+
+					SignalBus.character_health_changed.emit(c.slot_index, c.current_hp)
+					SignalBus.character_mana_changed.emit(c.slot_index, c.current_mp, c.max_mp)
+
+		GameLogger.combat("CombatManager: Battle item used on target slot %d (Success = %s)" % [target_slot_index, str(success)])
+
+
 func _calculate_physical_damage(attacker: Combatant, defender: Combatant) -> int:
 	return max(1, attacker.strength - defender.defense)
 
 
 func _execute_enemy_ai(enemy: Combatant) -> void:
 	SignalBus.enemy_attack_started.emit(enemy.id)
-	
+
 	var alive_party: Array[Combatant] = []
 	for c in combatants:
 		if c.is_player and c.current_hp > 0:

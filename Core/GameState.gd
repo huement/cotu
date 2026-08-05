@@ -48,7 +48,7 @@ func _award_victory_xp(victory_data: Dictionary) -> void:
 		return
 
 	var xp_per_member: int = int(float(total_xp) / float(living_members))
-	print("GameState: Awarding %d XP each to %d living party members..." % [xp_per_member, living_members])
+	print("[GameState] 🏆 Battle victory confirmed! Awarding %d XP to %d living party members..." % [xp_per_member, living_members])
 
 	var party_slots: Array = current_party.slots
 	for i in range(party_slots.size()):

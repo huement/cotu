@@ -48,22 +48,18 @@ var stats: CharacterStats
 
 
 # =============================================================================
-# 🏢 UI & SYSTEM WRAPPER PROPERTIES (Bridges requests to CharacterStats)
+# 🏢 UI & SYSTEM WRAPPER PROPERTIES
 # =============================================================================
 
 var current_hp: int:
-	get:
-		return stats.health if stats else 0
+	get: return stats.health if stats else 0
 	set(value):
-		if stats:
-			stats.health = value
+		if stats: stats.health = value
 
 var max_hp: int:
-	get:
-		return stats.max_health if stats else 0
+	get: return stats.max_health if stats else 0
 	set(value):
-		if stats:
-			stats.max_health = value
+		if stats: stats.max_health = value
 
 var current_health: int:
 	get: return current_hp
@@ -83,14 +79,13 @@ var max_mana: int:
 
 
 # =============================================================================
-# ⚙️ LIFECYCLE & ABILITY INITIALIZATION
+# ⚙️ LIFECYCLE & STAT INITIALIZATION
 # =============================================================================
 
 func _init() -> void:
 	stats = CharacterStats.new()
 
 
-## Sets up baseline character capabilities from breed and profession templates
 func initialize_stats() -> void:
 	if stats == null:
 		stats = CharacterStats.new()
@@ -116,8 +111,8 @@ func initialize_stats() -> void:
 	_calculate_vitals()
 	stats.health = stats.max_health
 	current_energy = max_energy
+	max_xp = get_required_xp_for_level(level)
 
-	# 🎯 Populate abilities for Class and Breed
 	populate_starting_skills()
 	populate_starting_spells()
 
@@ -131,18 +126,62 @@ func _calculate_vitals() -> void:
 	max_energy = intelligence + piety
 
 
-## Auto-populates starting skills based on class and breed assignments
+# =============================================================================
+# 📈 LEVEL & XP PROGRESSION MECHANICS
+# =============================================================================
+
+## Calculates XP required to reach the target level.
+## Wizardry 7 style polynomial scaling: Base * Level^1.5
+func get_required_xp_for_level(target_level: int) -> int:
+	var base_xp: float = 1000.0
+	if is_instance_valid(profession) and "base_xp_requirement" in profession:
+		base_xp = float(profession.get("base_xp_requirement"))
+
+	return int(base_xp * pow(float(target_level), 1.5))
+
+
+## Adds XP to character, processes level ups, and carries over leftover XP.
+## Returns true if the character leveled up.
+func add_xp(amount: int) -> bool:
+	current_xp += amount
+	print("[CatCharacter] ", name, " gained ", amount, " XP! Current XP: ", current_xp, " / ", max_xp)
+
+	if max_xp <= 0:
+		max_xp = get_required_xp_for_level(level)
+
+	var leveled_up: bool = false
+	while current_xp >= max_xp:
+		current_xp -= max_xp
+		level += 1
+		leveled_up = true
+		max_xp = get_required_xp_for_level(level)
+		_on_level_up()
+
+	return leveled_up
+
+
+func _on_level_up() -> void:
+	vitality += 1
+	strength += 1
+	_calculate_vitals()
+	stats.health = stats.max_health # Restore HP on level up
+	current_energy = max_energy    # Restore Energy on level up
+	print("[CatCharacter] 🌟 ", name, " LEVELED UP to Level ", level, "! Next level requires ", max_xp, " XP.")
+
+
+# =============================================================================
+# ⚔️ ABILITY & EQUIPMENT MANAGERS
+# =============================================================================
+
 func populate_starting_skills() -> void:
 	var skills_dir: String = "res://Data/Skills/"
-	if not DirAccess.dir_exists_absolute(skills_dir):
-		return
+	if not DirAccess.dir_exists_absolute(skills_dir): return
 
 	var prof_name: String = profession.get("profession_name") if is_instance_valid(profession) and "profession_name" in profession else ""
 	var breed_name_val: String = breed.get("breed_name") if is_instance_valid(breed) and "breed_name" in breed else ""
 
 	var dir := DirAccess.open(skills_dir)
 	if dir == null: return
-
 	dir.list_dir_begin()
 	var file_name := dir.get_next()
 
@@ -158,34 +197,25 @@ func populate_starting_skills() -> void:
 
 				if (matches_class or matches_race) and not known_skills.has(skill_res):
 					known_skills.append(skill_res)
-
 		file_name = dir.get_next()
 
 
-## Auto-populates starting spells based on class's allowed spellbook(s)
 func populate_starting_spells() -> void:
 	var spells_dir: String = "res://Data/Spells/"
-	if not DirAccess.dir_exists_absolute(spells_dir):
-		return
-
-	if not is_instance_valid(profession):
-		return
+	if not DirAccess.dir_exists_absolute(spells_dir): return
+	if not is_instance_valid(profession): return
 
 	var sb_type_str: String = profession.get("spellbook_type") if "spellbook_type" in profession else ""
-	if sb_type_str.is_empty() or sb_type_str == "None":
-		return
+	if sb_type_str.is_empty() or sb_type_str == "None": return
 
-	# Supports comma or pipe separated spellbooks e.g. "Soulwright, Archanist"
 	var allowed_books: Array[String] = []
 	for p in sb_type_str.split(","):
 		for inner_p in p.split("|"):
 			var trimmed := inner_p.strip_edges().to_upper()
-			if not trimmed.is_empty():
-				allowed_books.append(trimmed)
+			if not trimmed.is_empty(): allowed_books.append(trimmed)
 
 	var dir := DirAccess.open(spells_dir)
 	if dir == null: return
-
 	dir.list_dir_begin()
 	var file_name := dir.get_next()
 
@@ -205,17 +235,14 @@ func populate_starting_spells() -> void:
 
 				if allowed_books.has(s_book_name) and not known_spells.has(spell_res):
 					known_spells.append(spell_res)
-
 		file_name = dir.get_next()
 
 
 func take_damage(amount: int) -> void:
-	if stats:
-		stats.take_damage(amount)
+	if stats: stats.take_damage(amount)
 
 func heal(amount: int) -> void:
-	if stats:
-		stats.heal(amount)
+	if stats: stats.heal(amount)
 
 func assemble_character(final_stats: Dictionary) -> void:
 	strength = final_stats.get("strength", strength)
@@ -229,11 +256,6 @@ func assemble_character(final_stats: Dictionary) -> void:
 	_calculate_vitals()
 	stats.health = stats.max_health
 	current_energy = max_energy
-
-
-# =============================================================================
-# ⚔️ EQUIPMENT MANAGERS
-# =============================================================================
 
 func equip_item(slot_name: String, item: Resource) -> bool:
 	if equipment.has(slot_name):

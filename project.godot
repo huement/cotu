@@ -21,6 +21,7 @@ SignalBus="*res://Core/SignalBus.gd"
 GameState="*res://Core/GameState.gd"
 CombatManager="*res://Scripts/Managers/CombatManager.gd"
 GameLogger="*res://Core/GameLogger.gd"
+TargetSelectionManager="*res://Scripts/Managers/TargetSelectionManager.gd"
 
 [editor_plugins]
 

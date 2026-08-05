@@ -24,6 +24,7 @@ signal enemy_damaged_visual(enemy_id: String, damage: int)
 
 # Vitals & Visual FX
 signal character_health_changed(target_slot: int, current_hp: int)
+signal character_mana_changed(target_slot: int, current_mp: int, max_mp: int)
 signal enemy_health_changed(enemy_id: String, current_hp: int, max_hp: int)
 signal chevron_flash_requested(is_player_hit: bool)
 
