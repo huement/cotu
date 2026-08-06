@@ -214,7 +214,6 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 
 	var acting_char: Combatant = active_combatant
 
-	# Handle ITEM action during combat
 	if action_type == &"ITEM":
 		_execute_item_use_in_combat(acting_char, target_index)
 		_reset_combatant_meter(acting_char)
@@ -222,46 +221,21 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		return
 
 	if action_type == &"SPELL" or action_type == &"SKILL":
-		var mana_cost: int = 5
-
-		if acting_char.current_mp < mana_cost:
-			GameLogger.combat("%s does not have enough Mana/MP! (%d/%d)" % [acting_char.name, acting_char.current_mp, mana_cost])
-			_unpause_and_continue()
-			return
-
-		acting_char.current_mp = max(0, acting_char.current_mp - mana_cost)
-
-		if is_instance_valid(acting_char.ref):
-			if "current_mp" in acting_char.ref:
-				acting_char.ref.set("current_mp", acting_char.current_mp)
-			elif "current_mana" in acting_char.ref:
-				acting_char.ref.set("current_mana", acting_char.current_mp)
-			elif "mp" in acting_char.ref:
-				acting_char.ref.set("mp", acting_char.current_mp)
-
-		SignalBus.character_mana_changed.emit(acting_char.slot_index, acting_char.current_mp, acting_char.max_mp)
-		GameLogger.combat("%s spent %d Mana/MP! Remaining: %d/%d" % [acting_char.name, mana_cost, acting_char.current_mp, acting_char.max_mp])
-
-	var target_char: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
-
-	if not is_instance_valid(target_char) or target_char.current_hp <= 0:
-		for c in combatants:
-			if not c.is_player and c.current_hp > 0:
-				target_char = c
-				break
-
-	if not is_instance_valid(target_char):
+		_execute_ability_use_in_combat(acting_char, action_type, target_index)
 		_reset_combatant_meter(acting_char)
 		_unpause_and_continue()
 		return
 
-	match action_type:
-		&"ATTACK", &"SKILL", &"SPELL":
+	if action_type == &"ATTACK":
+		var target_char: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
+		if not is_instance_valid(target_char) or target_char.current_hp <= 0:
+			for c in combatants:
+				if not c.is_player and c.current_hp > 0:
+					target_char = c
+					break
+
+		if is_instance_valid(target_char):
 			var damage: int = _calculate_physical_damage(acting_char, target_char)
-
-			if action_type == &"SPELL":
-				damage = int(damage * 1.5)
-
 			target_char.current_hp = max(0, target_char.current_hp - damage)
 
 			if is_instance_valid(target_char.ref):
@@ -274,24 +248,102 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 			SignalBus.enemy_health_changed.emit(target_char.id, target_char.current_hp, target_char.max_hp)
 			SignalBus.chevron_flash_requested.emit(false)
 
-			GameLogger.combat("%s used %s on %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, action_type, target_char.name, damage, target_char.current_hp, target_char.max_hp])
+			GameLogger.combat("%s ATTACKED %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, target_char.name, damage, target_char.current_hp, target_char.max_hp])
 
 			if target_char.current_hp <= 0:
-				print("[CombatManager] %s defeated!" % target_char.name)
-
 				var any_enemies_alive: bool = false
 				for c in combatants:
 					if not c.is_player and c.current_hp > 0:
 						any_enemies_alive = true
 						break
-
 				if not any_enemies_alive:
-					print("[CombatManager] VICTORY! All hostiles defeated!")
 					_on_combat_ended(true)
 					return
 
-	_reset_combatant_meter(acting_char)
-	_unpause_and_continue()
+		_reset_combatant_meter(acting_char)
+		_unpause_and_continue()
+
+
+func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringName, target_index: int) -> void:
+	var target_mgr: Node = get_tree().root.get_node_or_null("TargetSelectionManager")
+	var ability: Resource = target_mgr.get_pending_ability() if is_instance_valid(target_mgr) and target_mgr.has_method("get_pending_ability") else null
+
+	var target_type_val: Variant = null
+	if is_instance_valid(ability):
+		if "target_type" in ability:
+			target_type_val = ability.get("target_type")
+		elif "target" in ability:
+			target_type_val = ability.get("target")
+
+	var is_ally: bool = false
+	if is_instance_valid(target_mgr) and target_mgr.has_method("is_ally_targeting"):
+		is_ally = target_mgr.call("is_ally_targeting", target_type_val)
+	else:
+		is_ally = (target_type_val == 0 or target_type_val == 1 or str(target_type_val).to_upper().contains("PARTY"))
+
+	var target_char: Combatant = null
+	if is_ally:
+		target_char = _find_combatant_by_slot(target_index, true)
+		if not is_instance_valid(target_char):
+			target_char = acting_char
+	else:
+		target_char = _find_combatant_by_id("enemy_%d" % target_index)
+		if not is_instance_valid(target_char) or target_char.current_hp <= 0:
+			for c in combatants:
+				if not c.is_player and c.current_hp > 0:
+					target_char = c
+					break
+
+	if not is_instance_valid(target_char):
+		return
+
+	if is_ally:
+		var heal_amt: int = 0
+		if is_instance_valid(ability):
+			if "heal_amount" in ability:
+				heal_amt = int(ability.get("heal_amount"))
+			elif "health_restore" in ability:
+				heal_amt = int(ability.get("health_restore"))
+			elif "heal" in ability:
+				heal_amt = int(ability.get("heal"))
+		if heal_amt == 0:
+			heal_amt = 25
+
+		target_char.current_hp = min(target_char.max_hp, target_char.current_hp + heal_amt)
+		if is_instance_valid(target_char.ref):
+			if "current_hp" in target_char.ref:
+				target_char.ref.set("current_hp", target_char.current_hp)
+			elif "current_health" in target_char.ref:
+				target_char.ref.set("current_health", target_char.current_hp)
+
+		SignalBus.character_health_changed.emit(target_char.slot_index, target_char.current_hp)
+		GameLogger.combat("%s used %s on %s restoring %d HP! (HP: %d/%d)" % [acting_char.name, action_type, target_char.name, heal_amt, target_char.current_hp, target_char.max_hp])
+	else:
+		var damage: int = _calculate_physical_damage(acting_char, target_char)
+		if action_type == &"SPELL":
+			damage = int(damage * 1.5)
+
+		target_char.current_hp = max(0, target_char.current_hp - damage)
+		if is_instance_valid(target_char.ref):
+			if "current_health" in target_char.ref:
+				target_char.ref.set("current_health", target_char.current_hp)
+			elif "current_hp" in target_char.ref:
+				target_char.ref.set("current_hp", target_char.current_hp)
+
+		SignalBus.enemy_damaged_visual.emit(target_char.id, damage)
+		SignalBus.enemy_health_changed.emit(target_char.id, target_char.current_hp, target_char.max_hp)
+		SignalBus.chevron_flash_requested.emit(false)
+
+		GameLogger.combat("%s used %s on %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, action_type, target_char.name, damage, target_char.current_hp, target_char.max_hp])
+
+		if target_char.current_hp <= 0:
+			var any_enemies_alive: bool = false
+			for c in combatants:
+				if not c.is_player and c.current_hp > 0:
+					any_enemies_alive = true
+					break
+			if not any_enemies_alive:
+				_on_combat_ended(true)
 
 
 func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int) -> void:
@@ -388,5 +440,12 @@ func _unpause_and_continue() -> void:
 func _find_combatant_by_id(id: String) -> Combatant:
 	for c: Combatant in combatants:
 		if c.id == id:
+			return c
+	return null
+
+
+func _find_combatant_by_slot(slot_idx: int, is_player_target: bool) -> Combatant:
+	for c in combatants:
+		if c.is_player == is_player_target and c.slot_index == slot_idx:
 			return c
 	return null
