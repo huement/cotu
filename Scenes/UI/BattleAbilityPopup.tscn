@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bipols0hgobk7"]
+[gd_scene load_steps=4 format=3 uid="uid://bipols0hgobk7"]
 
 [ext_resource type="Script" uid="uid://djlohywo40cih" path="res://Scripts/UI/battle_ability_popup.gd" id="1_abcde"]
+[ext_resource type="Theme" uid="uid://lok6u6togy35" path="res://ui/tab_theme.tres" id="2_ebnvn"]
+[ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="3_lmqc3"]
 
 [node name="BattleAbilityPopup" type="CanvasLayer"]
 layer = 10
@@ -32,10 +34,30 @@ grow_vertical = 2
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TitleLabel" type="Label" parent="PanelContainer/MainVBox"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MainVBox"]
+layout_mode = 2
+
+[node name="CharacterLabel" type="Label" parent="PanelContainer/MainVBox/HBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+text = "XXXXXXXXXXXXXXXXXX"
+horizontal_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+visible_characters = 18
+
+[node name="Spacer" type="Control" parent="PanelContainer/MainVBox/HBoxContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/MainVBox/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9, 0.8, 1)
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
 theme_override_font_sizes/font_size = 14
 text = "TACTICAL ABILITY SELECTION"
 horizontal_alignment = 1
@@ -56,12 +78,26 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme = ExtResource("2_ebnvn")
+theme_override_colors/font_color = Color(0.8627451, 0.94509804, 0.9490196, 1)
+theme_override_colors/font_focus_color = Color(0, 0.95686275, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.015686275, 0.6862745, 0.8666667, 1)
+theme_override_colors/font_hover_color = Color(0.1254902, 0.7764706, 0.972549, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 0.7372549, 0.73333335, 1)
+theme_override_fonts/font = ExtResource("3_lmqc3")
 text = "[ SKILLS ]"
 
 [node name="SpellsTabBtn" type="Button" parent="PanelContainer/MainVBox/PageAbilitySelect/TabBar"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme = ExtResource("2_ebnvn")
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.78431374, 1)
+theme_override_colors/font_pressed_color = Color(0.1254902, 0.7764706, 0.972549, 1)
+theme_override_colors/font_hover_color = Color(0.015686275, 0.6862745, 0.8666667, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 0.7372549, 0.73333335, 1)
+theme_override_fonts/font = ExtResource("3_lmqc3")
 text = "  SPELLS  "
 
 [node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MainVBox/PageAbilitySelect"]
@@ -82,7 +118,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 12
 text = "SELECT AN ABILITY"
 
 [node name="AbilityDescLabel" type="Label" parent="PanelContainer/MainVBox/PageAbilitySelect/PreviewBox"]
@@ -90,8 +126,9 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 11
 text = "Choose a skill or spell from the list to view specifications."
+horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="FooterHBox" type="HBoxContainer" parent="PanelContainer/MainVBox/PageAbilitySelect"]

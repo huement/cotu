@@ -2,12 +2,19 @@
 class_name BattleAbilityPopup
 extends CanvasLayer
 
-enum Page { ABILITY_SELECT, TARGET_SELECT }
-enum AbilityTab { SKILLS, SPELLS }
+enum Page {
+	ABILITY_SELECT,
+	TARGET_SELECT,
+}
+enum AbilityTab {
+	SKILLS,
+	SPELLS,
+}
 
 @onready var background_dimmer: ColorRect = $BackgroundDimmer
 @onready var panel_container: PanelContainer = $PanelContainer
 @onready var title_label: Label = %TitleLabel
+@onready var character_label: Label = %CharacterLabel
 
 @onready var page_ability_select: VBoxContainer = %PageAbilitySelect
 @onready var skills_tab_btn: Button = %SkillsTabBtn
@@ -36,13 +43,19 @@ var _combatants_list: Array = []
 func _ready() -> void:
 	_close_popup()
 
-	if skills_tab_btn: skills_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SKILLS))
-	if spells_tab_btn: spells_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SPELLS))
+	if skills_tab_btn:
+		skills_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SKILLS))
+	if spells_tab_btn:
+		spells_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SPELLS))
 
-	if page1_cancel_btn: page1_cancel_btn.pressed.connect(_close_popup)
-	if page1_next_btn: page1_next_btn.pressed.connect(_go_to_target_page)
-	if page2_back_btn: page2_back_btn.pressed.connect(_go_to_ability_page)
-	if page2_confirm_btn: page2_confirm_btn.pressed.connect(_confirm_and_emit_action)
+	if page1_cancel_btn:
+		page1_cancel_btn.pressed.connect(_close_popup)
+	if page1_next_btn:
+		page1_next_btn.pressed.connect(_go_to_target_page)
+	if page2_back_btn:
+		page2_back_btn.pressed.connect(_go_to_ability_page)
+	if page2_confirm_btn:
+		page2_confirm_btn.pressed.connect(_confirm_and_emit_action)
 
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
@@ -57,6 +70,7 @@ func open_ability_menu(cat: CatCharacter, slot_index: int, combatants_data: Arra
 	_selected_ability = null
 	_selected_target_id = ""
 	_selected_target_index = -1
+	character_label.text = cat.name if is_instance_valid(cat) and "name" in cat else "UNKNOWN"
 
 	if is_instance_valid(cat) and cat.known_skills.is_empty() and not cat.known_spells.is_empty():
 		_current_tab = AbilityTab.SPELLS
@@ -65,11 +79,13 @@ func open_ability_menu(cat: CatCharacter, slot_index: int, combatants_data: Arra
 
 	_go_to_ability_page()
 	show()
-	if background_dimmer: background_dimmer.show()
-	if panel_container: panel_container.show()
+	if background_dimmer:
+		background_dimmer.show()
+	if panel_container:
+		panel_container.show()
 
 
-func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void:
+func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> void:
 	if action_type == &"BATTLE_ABILITIES":
 		var cat: CatCharacter = data.get("character", null) as CatCharacter
 		var slot_idx: int = data.get("slot_index", -1)
@@ -80,10 +96,13 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = {}) -> void
 
 func _go_to_ability_page() -> void:
 	_current_page = Page.ABILITY_SELECT
-	if title_label: title_label.text = "TACTICAL ABILITY SELECTION"
+	if title_label:
+		title_label.text = "TACTICAL ABILITY SELECTION"
 
-	if page_ability_select: page_ability_select.show()
-	if page_target_select: page_target_select.hide()
+	if page_ability_select:
+		page_ability_select.show()
+	if page_target_select:
+		page_target_select.hide()
 
 	_update_tab_buttons_ui()
 	_render_ability_list()
@@ -109,12 +128,14 @@ func _update_tab_buttons_ui() -> void:
 
 
 func _render_ability_list() -> void:
-	if not ability_scroll_list: return
+	if not ability_scroll_list:
+		return
 
 	for child in ability_scroll_list.get_children():
 		child.queue_free()
 
-	if not is_instance_valid(_active_cat): return
+	if not is_instance_valid(_active_cat):
+		return
 
 	var items_to_render: Array = _active_cat.known_skills if _current_tab == AbilityTab.SKILLS else _active_cat.known_spells
 
@@ -163,9 +184,10 @@ func _create_ability_row_button(ability_res: Resource) -> Button:
 	btn.add_theme_stylebox_override("hover", style_hover)
 	btn.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8))
 
-	btn.pressed.connect(func() -> void:
-		_selected_ability = ability_res
-		_update_ability_preview()
+	btn.pressed.connect(
+		func() -> void:
+			_selected_ability = ability_res
+			_update_ability_preview(),
 	)
 
 	return btn
@@ -177,30 +199,41 @@ func _update_ability_preview() -> void:
 		var desc_str: String = _selected_ability.get("description") if "description" in _selected_ability else ""
 		var cost_val: int = _selected_ability.get("energy_cost") if "energy_cost" in _selected_ability else 0
 
-		if selected_ability_label: selected_ability_label.text = "%s [COST: %d EN]" % [name_str.to_upper(), cost_val]
-		if ability_desc_label: ability_desc_label.text = desc_str
-		if page1_next_btn: page1_next_btn.disabled = false
+		if selected_ability_label:
+			selected_ability_label.text = "%s [COST: %d EN]" % [name_str.to_upper(), cost_val]
+		if ability_desc_label:
+			ability_desc_label.text = desc_str
+		if page1_next_btn:
+			page1_next_btn.disabled = false
 	else:
-		if selected_ability_label: selected_ability_label.text = "SELECT AN ABILITY ABOVE"
-		if ability_desc_label: ability_desc_label.text = "Choose a skill or spell from the list to view specifications and select a target."
-		if page1_next_btn: page1_next_btn.disabled = true
+		if selected_ability_label:
+			selected_ability_label.text = "SELECT AN ABILITY ABOVE"
+		if ability_desc_label:
+			ability_desc_label.text = "Choose a skill or spell from the list to view specifications and select a target."
+		if page1_next_btn:
+			page1_next_btn.disabled = true
 
 
 func _go_to_target_page() -> void:
-	if not is_instance_valid(_selected_ability): return
+	if not is_instance_valid(_selected_ability):
+		return
 
 	_current_page = Page.TARGET_SELECT
-	if title_label: title_label.text = "SELECT TARGET UNIT"
+	if title_label:
+		title_label.text = "SELECT TARGET UNIT"
 
-	if page_ability_select: page_ability_select.hide()
-	if page_target_select: page_target_select.show()
+	if page_ability_select:
+		page_ability_select.hide()
+	if page_target_select:
+		page_target_select.show()
 
 	_render_target_grid()
 	_update_target_confirm_ui()
 
 
 func _render_target_grid() -> void:
-	if not target_grid_container: return
+	if not target_grid_container:
+		return
 
 	for child in target_grid_container.get_children():
 		child.queue_free()
@@ -292,11 +325,12 @@ func _create_target_card_button(combatant: Object) -> Button:
 
 	btn.add_theme_stylebox_override("normal", style_normal)
 
-	btn.pressed.connect(func() -> void:
-		_selected_target_id = c_id
-		_selected_target_index = c_slot
-		_highlight_target_button(btn)
-		_update_target_confirm_ui()
+	btn.pressed.connect(
+		func() -> void:
+			_selected_target_id = c_id
+			_selected_target_index = c_slot
+			_highlight_target_button(btn)
+			_update_target_confirm_ui(),
 	)
 
 	return btn
@@ -350,8 +384,10 @@ func _confirm_and_emit_action() -> void:
 
 func _close_popup() -> void:
 	hide()
-	if background_dimmer: background_dimmer.hide()
-	if panel_container: panel_container.hide()
+	if background_dimmer:
+		background_dimmer.hide()
+	if panel_container:
+		panel_container.hide()
 	_selected_ability = null
 	_selected_target_id = ""
 	_selected_target_index = -1
