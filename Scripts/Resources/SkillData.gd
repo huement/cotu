@@ -2,9 +2,30 @@
 class_name SkillData
 extends Resource
 
-enum SkillType { COMBAT, ENVIRONMENT, INVENTORY }
-enum TargetType { SINGLE_ENEMY, ALL_ENEMIES, SINGLE_ALLY, ALL_PARTY, SELF, NONE }
-enum EffectType { DAMAGE, HEAL, LOCKPICK, STEALTH_SEARCH, REST_BOOST, CRAFT_AMMO, CRAFT_THROWABLE, CRAFT_POTION, ENCHANT_EQUIPMENT }
+enum SkillType {
+	COMBAT,
+	ENVIRONMENT,
+	INVENTORY,
+}
+enum TargetType {
+	SINGLE_ENEMY,
+	ALL_ENEMY,
+	SINGLE_ALLY,
+	ALL_ALLY,
+	SELF,
+	NONE,
+}
+enum EffectType {
+	DAMAGE,
+	HEAL,
+	LOCKPICK,
+	STEALTH_SEARCH,
+	REST_BOOST,
+	CRAFT_AMMO,
+	CRAFT_THROWABLE,
+	CRAFT_POTION,
+	ENCHANT_EQUIPMENT,
+}
 
 @export_group("Identity")
 @export var skill_id: String = ""
@@ -24,6 +45,7 @@ enum EffectType { DAMAGE, HEAL, LOCKPICK, STEALTH_SEARCH, REST_BOOST, CRAFT_AMMO
 @export var element: ItemData.EffectElement = ItemData.EffectElement.NONE
 ## Base success / hit chance (0% to 100%)
 @export var accuracy: int = 90
+@export var duration: int = 1
 
 @export_group("Class & Race Assignments")
 @export var assigned_classes: Array[String] = []
@@ -32,6 +54,7 @@ enum EffectType { DAMAGE, HEAL, LOCKPICK, STEALTH_SEARCH, REST_BOOST, CRAFT_AMMO
 
 func can_character_use(energy_available: int) -> bool:
 	return energy_available >= energy_cost
+
 
 ## Evaluates whether the skill lands successfully based on its accuracy rating
 func roll_success_check() -> bool:

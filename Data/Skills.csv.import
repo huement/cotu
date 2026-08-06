@@ -6,10 +6,10 @@ uid="uid://cljd8ftlcliv2"
 
 [deps]
 
-files=["res://Data/Skills.skill.translation", "res://Data/Skills.type.translation", "res://Data/Skills.energy.translation", "res://Data/Skills.target.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.element.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.description.translation", "res://Data/Skills.icon.translation", "res://Data/Skills.accuracy.translation"]
+files=["res://Data/Skills.skill.translation", "res://Data/Skills.type.translation", "res://Data/Skills.energy.translation", "res://Data/Skills.target.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.element.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.description.translation", "res://Data/Skills.icon.translation", "res://Data/Skills.accuracy.translation", "res://Data/Skills.duration.translation"]
 
 source_file="res://Data/Skills.csv"
-dest_files=["res://Data/Skills.skill.translation", "res://Data/Skills.type.translation", "res://Data/Skills.energy.translation", "res://Data/Skills.target.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.element.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.description.translation", "res://Data/Skills.icon.translation", "res://Data/Skills.accuracy.translation"]
+dest_files=["res://Data/Skills.skill.translation", "res://Data/Skills.type.translation", "res://Data/Skills.energy.translation", "res://Data/Skills.target.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.effect.translation", "res://Data/Skills.element.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.assigned.translation", "res://Data/Skills.description.translation", "res://Data/Skills.icon.translation", "res://Data/Skills.accuracy.translation", "res://Data/Skills.duration.translation"]
 
 [params]
 

@@ -17,3 +17,4 @@ base_amount = 12
 var_multiplier = 0.3
 stat_scaling = "PIE"
 status_effect = 5
+duration = 3

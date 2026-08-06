@@ -2,10 +2,35 @@
 class_name SpellData
 extends Resource
 
-enum SpellbookType { ARCHANIST, SOULWRIGHT, MAESTER, PSYNIC }
-enum TargetType { SINGLE_ENEMY, ALL_ENEMIES, SINGLE_ALLY, ALL_PARTY, SELF }
-enum EffectType { DAMAGE, HEAL, BUFF, DEBUFF, UTILITY }
-enum StatusEffect { NONE, STUN, POISON, SLOW, HASTE, SHIELD, DEFENSE_DOWN }
+enum SpellbookType {
+	ARCHANIST,
+	SOULWRIGHT,
+	MAESTER,
+	PSYNIC,
+}
+enum TargetType {
+	SINGLE_ENEMY,
+	ALL_ENEMY,
+	SINGLE_ALLY,
+	ALL_ALLY,
+	SELF,
+}
+enum EffectType {
+	DAMAGE,
+	HEAL,
+	BUFF,
+	DEBUFF,
+	UTILITY,
+}
+enum StatusEffect {
+	NONE,
+	STUN,
+	POISON,
+	SLOW,
+	HASTE,
+	SHIELD,
+	DEFENSE_DOWN,
+}
 
 @export_group("Identity & Grouping")
 @export var spell_id: String = ""
@@ -27,6 +52,7 @@ enum StatusEffect { NONE, STUN, POISON, SLOW, HASTE, SHIELD, DEFENSE_DOWN }
 @export var var_multiplier: float = 0.5
 @export var stat_scaling: String = "INT"
 @export var status_effect: StatusEffect = StatusEffect.NONE
+@export var duration: int = 1
 
 
 ## Calculates spell potency using Base + Random Variance + Caster Stat Bonus
@@ -34,7 +60,7 @@ func calculate_potency(caster_stat_value: int) -> int:
 	var max_var: int = int(float(base_amount) * var_multiplier)
 	var random_bonus: int = randi_range(0, max_var) if max_var > 0 else 0
 	var stat_bonus: int = int(float(caster_stat_value) * 0.5)
-	
+
 	return base_amount + random_bonus + stat_bonus
 
 

@@ -14,3 +14,4 @@ target_type = 1
 element = 5
 base_amount = 8
 status_effect = 6
+duration = 3

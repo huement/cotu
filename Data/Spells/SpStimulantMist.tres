@@ -15,3 +15,4 @@ target_type = 2
 element = 4
 effect_type = 1
 var_multiplier = 0.3
+duration = 2

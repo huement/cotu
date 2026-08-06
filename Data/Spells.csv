@@ -1,21 +1,21 @@
-spell_id,spell_name,spellbook,tier,energy_cost,element,target_type,effect_type,base_amount,var_multiplier,stat_scaling,status_effect,description,icon_path,
-sp_plasma_dart,Plasma Dart,Archanist,1,4,FIRE,SINGLE_ENEMY,DAMAGE,12,0.5,INT,NONE,Fires a concentrated bolt of superheated plasma at an enemy target.,res://Data/Spells/Icons/plasma_dart.png,
-sp_static_nova,Static Nova,Archanist,2,7,MAGIC,ALL_ENEMIES,DAMAGE,10,0.4,INT,STUN,Discharges an EMP wave across all hostiles with a chance to stun.,res://Data/Spells/Icons/static_nova.png,
-sp_overclock_shield,Overclock Shield,Archanist,2,6,MAGIC,ALL_PARTY,BUFF,15,0.2,INT,SHIELD,Project an energy barrier that bolsters defense for all party members.,res://Data/Spells/Icons/overclock_shield.png,
-sp_cryo_blast,Cryo Blast,Archanist,3,9,MAGIC,SINGLE_ENEMY,DAMAGE,28,0.5,INT,SLOW,Flash-freezes a target dealing high damage and slowing their action speed.,res://Data/Spells/Icons/cryo_blast.png,
-sp_arcane_cataclysm,Arcane Cataclysm,Archanist,4,14,FIRE,ALL_ENEMIES,DAMAGE,35,0.6,INT,NONE,Unleashes raw unrefined arcana to obliterate all enemy ranks.,res://Data/Spells/Icons/arcane_cataclysm.png,
-sp_nano_repair,Nano Repair,Soulwright,1,4,LIFE,SINGLE_ALLY,HEAL,18,0.4,PIE,NONE,Deploys medical nanites to rapidly repair organic or mechanical tissue.,res://Data/Spells/Icons/nano_repair.png,
-sp_adrenaline_surge,Adrenaline Surge,Soulwright,1,5,LIFE,SINGLE_ALLY,BUFF,10,0.2,PIE,HASTE,Injects combat stimulants into an ally to boost action speed.,res://Data/Spells/Icons/adrenaline_surge.png,
-sp_aegis_grid,Aegis Grid,Soulwright,2,7,MAGIC,ALL_PARTY,BUFF,12,0.3,PIE,SHIELD,Erects a consecrated defensive matrix protecting the whole party.,res://Data/Spells/Icons/aegis_grid.png,
-sp_revive_protocol,Revive Protocol,Soulwright,3,12,LIFE,SINGLE_ALLY,HEAL,50,0.2,PIE,NONE,Restores a fallen or severely damaged party member back to peak vitals.,res://Data/Spells/Icons/revive_protocol.png,
-sp_radiant_smite,Radiant Smite,Soulwright,3,10,MAGIC,ALL_ENEMIES,DAMAGE,22,0.5,PIE,NONE,Smites hostiles with a burst of holy solar energy.,res://Data/Spells/Icons/radiant_smite.png,
-sp_corrosive_spray,Corrosive Spray,Maester,1,5,BASH,ALL_ENEMIES,DAMAGE,8,0.5,INT,DEFENSE_DOWN,Sprays volatile acid that erodes armor plating on all foes.,res://Data/Spells/Icons/corrosive_spray.png,
-sp_neurotoxin_gas,Neurotoxin Gas,Maester,2,7,MAGIC,ALL_ENEMIES,DAMAGE,12,0.4,INT,POISON,Deploys toxic fumes that poison enemy ranks over time.,res://Data/Spells/Icons/neurotoxin_gas.png,
-sp_stimulant_mist,Stimulant Mist,Maester,2,6,LIFE,SINGLE_ALLY,HEAL,15,0.3,INT,NONE,Releases airborne restoratives to patch up an ally's HP and Energy.,res://Data/Spells/Icons/stimulant_mist.png,
-sp_smoke_screen,Smoke Screen,Maester,3,8,MAGIC,ALL_PARTY,BUFF,20,0.2,INT,NONE,Blankets the party in thermal smoke to boost evasion against attacks.,res://Data/Spells/Icons/smoke_screen.png,
-sp_molecular_dissolve,Molecular Dissolve,Maester,4,13,BASH,SINGLE_ENEMY,DAMAGE,40,0.5,INT,NONE,Breaks down a single target at the molecular level for massive damage.,res://Data/Spells/Icons/molecular_dissolve.png,
-sp_mind_spike,Mind Spike,Psynic,1,4,MAGIC,SINGLE_ENEMY,DAMAGE,14,0.5,PER,NONE,Pierces an enemy's consciousness with a sharp psionic shockwave.,res://Data/Spells/Icons/mind_spike.png,
-sp_feedback_glitch,Feedback Glitch,Psynic,2,6,MAGIC,SINGLE_ENEMY,DEBUFF,10,0.3,PER,NONE,Drains energy from an opponent and disrupts their spellcasting.,res://Data/Spells/Icons/feedback_glitch.png,
-sp_psychic_wave,Psychic Wave,Psynic,2,8,MAGIC,ALL_ENEMIES,DAMAGE,12,0.4,PER,STUN,Emits a mental concussive pulse that can stun all hostiles.,res://Data/Spells/Icons/psychic_wave.png,
-sp_synapse_overload,Synapse Overload,Psynic,3,11,MAGIC,SINGLE_ENEMY,DAMAGE,30,0.6,PER,NONE,Overloads a target's neural network to inflict devastating damage.,res://Data/Spells/Icons/synapse_overload.png,
-sp_neural_distortion,Neural Distortion,Psynic,3,9,MAGIC,ALL_ENEMIES,DEBUFF,15,0.3,PER,NONE,Scrambles enemy sensors,reducing their attack accuracy.,res://Data/Spells/Icons/neural_distortion.png
+spell_id,spell_name,spellbook,tier,energy_cost,element,target_type,effect_type,base_amount,var_multiplier,stat_scaling,status_effect,duration,description,icon_path
+sp_plasma_dart,Plasma Dart,Archanist,1,4,FIRE,SINGLE_ENEMY,DAMAGE,12,0.5,INT,NONE,1,Fires a concentrated bolt of superheated plasma at an enemy target.,res://Data/Spells/Icons/plasma_dart.png
+sp_static_nova,Static Nova,Archanist,2,7,MAGIC,ALL_ENEMY,DAMAGE,10,0.4,INT,STUN,1,Discharges an EMP wave across all hostiles with a chance to stun.,res://Data/Spells/Icons/static_nova.png
+sp_overclock_shield,Overclock Shield,Archanist,2,6,MAGIC,ALL_ALLY,BUFF,15,0.2,INT,SHIELD,3,Project an energy barrier that bolsters defense for all party members.,res://Data/Spells/Icons/overclock_shield.png
+sp_cryo_blast,Cryo Blast,Archanist,3,9,MAGIC,SINGLE_ENEMY,DAMAGE,28,0.5,INT,SLOW,1,Flash-freezes a target dealing high damage and slowing their action speed.,res://Data/Spells/Icons/cryo_blast.png
+sp_arcane_cataclysm,Arcane Cataclysm,Archanist,4,14,FIRE,ALL_ENEMY,DAMAGE,35,0.6,INT,NONE,1,Unleashes raw unrefined arcana to obliterate all enemy ranks.,res://Data/Spells/Icons/arcane_cataclysm.png
+sp_nano_repair,Nano Repair,Soulwright,1,4,LIFE,SINGLE_ALLY,HEAL,18,0.4,PIE,NONE,2,Deploys medical nanites to rapidly repair organic or mechanical tissue.,res://Data/Spells/Icons/nano_repair.png
+sp_adrenaline_surge,Adrenaline Surge,Soulwright,1,5,LIFE,SINGLE_ALLY,BUFF,10,0.2,PIE,HASTE,3,Injects combat stimulants into an ally to boost action speed.,res://Data/Spells/Icons/adrenaline_surge.png
+sp_aegis_grid,Aegis Grid,Soulwright,2,7,MAGIC,ALL_ALLY,BUFF,12,0.3,PIE,SHIELD,3,Erects a consecrated defensive matrix protecting the whole party.,res://Data/Spells/Icons/aegis_grid.png
+sp_revive_protocol,Revive Protocol,Soulwright,3,12,LIFE,SINGLE_ALLY,HEAL,50,0.2,PIE,NONE,1,Restores a fallen or severely damaged party member back to peak vitals.,res://Data/Spells/Icons/revive_protocol.png
+sp_radiant_smite,Radiant Smite,Soulwright,3,10,MAGIC,ALL_ENEMY,DAMAGE,22,0.5,PIE,NONE,1,Smites hostiles with a burst of holy solar energy.,res://Data/Spells/Icons/radiant_smite.png
+sp_corrosive_spray,Corrosive Spray,Maester,1,5,BASH,ALL_ENEMY,DAMAGE,8,0.5,INT,DEFENSE_DOWN,3,Sprays volatile acid that erodes armor plating on all foes.,res://Data/Spells/Icons/corrosive_spray.png
+sp_neurotoxin_gas,Neurotoxin Gas,Maester,2,7,MAGIC,ALL_ENEMY,DAMAGE,12,0.4,INT,POISON,5,Deploys toxic fumes that poison enemy ranks over time.,res://Data/Spells/Icons/neurotoxin_gas.png
+sp_stimulant_mist,Stimulant Mist,Maester,2,6,LIFE,SINGLE_ALLY,HEAL,15,0.3,INT,NONE,2,Releases airborne restoratives to patch up an ally's HP and Energy.,res://Data/Spells/Icons/stimulant_mist.png
+sp_smoke_screen,Smoke Screen,Maester,3,8,MAGIC,ALL_ALLY,BUFF,20,0.2,INT,NONE,3,Blankets the party in thermal smoke to boost evasion against attacks.,res://Data/Spells/Icons/smoke_screen.png
+sp_molecular_dissolve,Molecular Dissolve,Maester,4,13,BASH,SINGLE_ENEMY,DAMAGE,40,0.5,INT,NONE,1,Breaks down a single target at the molecular level for massive damage.,res://Data/Spells/Icons/molecular_dissolve.png
+sp_mind_spike,Mind Spike,Psynic,1,4,MAGIC,SINGLE_ENEMY,DAMAGE,14,0.5,PER,NONE,1,Pierces an enemy's consciousness with a sharp psionic shockwave.,res://Data/Spells/Icons/mind_spike.png
+sp_feedback_glitch,Feedback Glitch,Psynic,2,6,MAGIC,SINGLE_ENEMY,DEBUFF,10,0.3,PER,NONE,3,Drains energy from an opponent and disrupts their spellcasting.,res://Data/Spells/Icons/feedback_glitch.png
+sp_psychic_wave,Psychic Wave,Psynic,2,8,MAGIC,ALL_ENEMY,DAMAGE,12,0.4,PER,STUN,1,Emits a mental concussive pulse that can stun all hostiles.,res://Data/Spells/Icons/psychic_wave.png
+sp_synapse_overload,Synapse Overload,Psynic,3,11,MAGIC,SINGLE_ENEMY,DAMAGE,30,0.6,PER,NONE,1,Overloads a target's neural network to inflict devastating damage.,res://Data/Spells/Icons/synapse_overload.png
+sp_neural_distortion,Neural Distortion,Psynic,3,9,MAGIC,ALL_ENEMY,DEBUFF,15,0.3,PER,NONE,3,Scrambles enemy sensors reducing their attack accuracy.,res://Data/Spells/Icons/neural_distortion.png

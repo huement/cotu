@@ -14,3 +14,4 @@ target_type = 3
 effect_type = 2
 var_multiplier = 0.2
 status_effect = 5
+duration = 3

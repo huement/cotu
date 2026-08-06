@@ -15,3 +15,4 @@ target_type = 1
 base_amount = 12
 var_multiplier = 0.4
 status_effect = 2
+duration = 5
