@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://3c0mmuul18t5"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_dk2a8"]
+
+[resource]
+script = ExtResource("1_dk2a8")
+item_id = "wpn_cryo_vibro"
+item_name = "Cryo-Vibroblade"
+description = "High-frequency oscillations paired with a localized absolute-zero enchantment."
+icon_path = "res://Assets/Icons/Items/cryo_vibro.png"
+item_type = 1
+target_type = 2
+can_use_in_field = false
+equipment_slot = 6
+weapon_type = 1
+attack_bonus = 48
+speed_bonus = 12
+credit_value = 2000
+effects = "Freeze"
+effect_amount = 2.0
+effect_element = 1
+effect_stat = "speed"

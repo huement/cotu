@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dfahunhj70ru5"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_rmn86"]
+
+[resource]
+script = ExtResource("1_rmn86")
+item_id = "gem_aether_chip"
+item_name = "Aether-Chip"
+description = "A shard of pure magic shaped into a standard processing unit."
+icon_path = "res://Assets/Icons/Items/aether_chip.png"
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 450

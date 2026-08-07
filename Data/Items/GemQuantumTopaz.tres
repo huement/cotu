@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b5fev4cmcg6er"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_q27qd"]
+
+[resource]
+script = ExtResource("1_q27qd")
+item_id = "gem_quantum_topaz"
+item_name = "Quantum Topaz"
+description = "Exists in multiple realities at once, warm to the touch."
+icon_path = "res://Assets/Icons/Items/quantum_topaz.png"
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 600

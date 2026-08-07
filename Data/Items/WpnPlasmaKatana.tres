@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://ccjwcbet37m7s"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_ly0wf"]
+
+[resource]
+script = ExtResource("1_ly0wf")
+item_id = "wpn_plasma_katana"
+item_name = "Plasma Katana"
+description = "A masterwork blade of folded steel and magnetic super-heated gas."
+icon_path = "res://Assets/Icons/Items/plasma_katana.png"
+item_type = 1
+target_type = 2
+can_use_in_field = false
+equipment_slot = 6
+weapon_type = 1
+attack_bonus = 65
+speed_bonus = 15
+credit_value = 1500
+effect_element = 2

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bl5eok5ypw3kh"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_webf3"]
+
+[resource]
+script = ExtResource("1_webf3")
+item_id = "gem_synth_diamond"
+item_name = "Synthetic Diamond"
+description = "Flawless, compressed carbon woven with arcane nano-threads."
+icon_path = "res://Assets/Icons/Items/synth_diamond.png"
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 800

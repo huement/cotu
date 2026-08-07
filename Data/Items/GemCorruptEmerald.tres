@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dhuinnlbl4bri"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_8x6ow"]
+
+[resource]
+script = ExtResource("1_8x6ow")
+item_id = "gem_corrupt_emerald"
+item_name = "Corrupted Emerald"
+description = "A green jewel bleeding with malicious glitch-magic."
+icon_path = "res://Assets/Icons/Items/corrupt_emerald.png"
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 200

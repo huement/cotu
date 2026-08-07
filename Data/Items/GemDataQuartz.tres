@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b3bhve2hjcqyw"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_8m7kj"]
+
+[resource]
+script = ExtResource("1_8m7kj")
+item_id = "gem_data_quartz"
+item_name = "Data-Quartz"
+description = "A glowing crystal containing fractured source code from the elven mainframes."
+icon_path = "res://Assets/Icons/Items/data_quartz.png"
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 100

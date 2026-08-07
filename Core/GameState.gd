@@ -2,7 +2,11 @@
 extends Node
 class_name CoreGameState
 
-enum Mode { EXPLORING, BATTLE, MANAGEMENT }
+enum Mode {
+	EXPLORING,
+	BATTLE,
+	MANAGEMENT,
+}
 
 signal core_state_changed(new_mode: Mode)
 
@@ -17,6 +21,8 @@ var current_mode: Mode = Mode.EXPLORING:
 @export var current_party: DungeonParty
 @export var inventory: Inventory = Inventory.new()
 @export var current_floor_id: int = 1
+@export var party_gold: int = 0
+
 var active_character_index: int = 0
 
 
@@ -30,7 +36,7 @@ func get_active_cat() -> Resource:
 
 func _ready() -> void:
 	_initialize_active_session()
-	
+
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 	if sb and sb.has_signal("popup_confirmed"):
 		sb.popup_confirmed.connect(_on_popup_confirmed)
@@ -55,7 +61,7 @@ func _award_victory_xp(victory_data: Dictionary) -> void:
 		var cat: CatCharacter = party_slots[i] as CatCharacter
 		if is_instance_valid(cat) and cat.current_hp > 0:
 			var leveled_up: bool = cat.add_xp(xp_per_member)
-			
+
 			var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 			if sb:
 				if sb.has_signal("character_xp_changed"):
@@ -68,7 +74,7 @@ func _award_victory_xp(victory_data: Dictionary) -> void:
 
 func _initialize_active_session() -> void:
 	print("GameState: Assembling tactical data structures...")
-	
+
 	if ResourceLoader.exists(SAVE_PATH):
 		if not load_game():
 			print("GameState: Existing save file invalid. Rebuilding default starter party...")
@@ -84,7 +90,7 @@ func _build_default_starter_party() -> void:
 	current_party = DungeonParty.new()
 	if current_party.has_method("setup_starter_party"):
 		current_party.setup_starter_party()
-		
+
 	inventory = Inventory.new()
 	var slots: Array = current_party.slots
 
@@ -108,7 +114,7 @@ func _build_default_starter_party() -> void:
 		_safe_equip(baron, "LEGS", ["ArmorWardenRegularLegs", "Equipment/HunterLegsArmor"])
 		_safe_equip(baron, "FEET", ["ArmorWardenRegularFeet", "Equipment/HunterFeetArmor"])
 		_safe_equip(baron, "RIGHT_HAND", ["WeapWardenRegularPrimary", "Equipment/Crossbow", "Equipment/LaserClaw"])
-		
+
 		var ammo: ItemData = _load_item_from_candidates(["WeapWardenRegularAmmo", "Equipment/IronArrows"])
 		if is_instance_valid(ammo):
 			var ammo_stack: ItemData = ammo.duplicate(true) as ItemData
@@ -141,22 +147,30 @@ func _build_default_starter_party() -> void:
 
 func _safe_equip(cat: CatCharacter, slot: String, item_candidates: Array) -> void:
 	var item: ItemData = _load_item_from_candidates(item_candidates)
-	if is_instance_valid(item): cat.equip_item(slot, item)
+	if is_instance_valid(item):
+		cat.equip_item(slot, item)
+
 
 func _safe_add_consumable(item_candidates: Array, count: int) -> void:
 	var item: ItemData = _load_item_from_candidates(item_candidates)
 	if is_instance_valid(item):
-		for i in range(count): inventory.add_item(item)
+		for i in range(count):
+			inventory.add_item(item)
+
 
 func _safe_add_skill(cat: CatCharacter, skill_candidates: Array) -> void:
 	for name_key in skill_candidates:
 		var res: Resource = _load_ability_from_candidates("Skills/", name_key)
-		if is_instance_valid(res) and not cat.known_skills.has(res): cat.known_skills.append(res)
+		if is_instance_valid(res) and not cat.known_skills.has(res):
+			cat.known_skills.append(res)
+
 
 func _safe_add_spell(cat: CatCharacter, spell_candidates: Array) -> void:
 	for name_key in spell_candidates:
 		var res: Resource = _load_ability_from_candidates("Spells/", name_key)
-		if is_instance_valid(res) and not cat.known_spells.has(res): cat.known_spells.append(res)
+		if is_instance_valid(res) and not cat.known_spells.has(res):
+			cat.known_spells.append(res)
+
 
 func _load_item_from_candidates(candidates: Array) -> ItemData:
 	for name_key in candidates:
@@ -164,20 +178,21 @@ func _load_item_from_candidates(candidates: Array) -> ItemData:
 			"res://Data/Items/Equipment/" + name_key + ".tres",
 			"res://Data/Items/Consumables/" + name_key + ".tres",
 			"res://Data/Items/Misc/" + name_key + ".tres",
-			"res://Data/Items/" + name_key + ".tres"
+			"res://Data/Items/" + name_key + ".tres",
 		]
 		for path in paths:
-			if ResourceLoader.exists(path): return load(path) as ItemData
+			if ResourceLoader.exists(path):
+				return load(path) as ItemData
 	return null
 
+
 func _load_ability_from_candidates(sub_folder: String, name_key: String) -> Resource:
-	var paths: Array[String] = [
-		"res://Data/" + sub_folder + name_key + ".tres",
-		"res://Data/" + sub_folder + name_key.to_pascal_case() + ".tres"
-	]
+	var paths: Array[String] = ["res://Data/" + sub_folder + name_key + ".tres", "res://Data/" + sub_folder + name_key.to_pascal_case() + ".tres"]
 	for path in paths:
-		if ResourceLoader.exists(path): return load(path)
+		if ResourceLoader.exists(path):
+			return load(path)
 	return null
+
 
 func save_game() -> bool:
 	var save := SaveGame.new()
@@ -194,38 +209,70 @@ func save_game() -> bool:
 		printerr("GameState ERROR: Failed to save session! Error code: ", err)
 		return false
 
+
 func load_game() -> bool:
-	if not ResourceLoader.exists(SAVE_PATH): return false
+	if not ResourceLoader.exists(SAVE_PATH):
+		return false
 	var save := ResourceLoader.load(SAVE_PATH) as SaveGame
-	if save == null or save.party == null or save.party.slots == null: return false
+	if save == null or save.party == null or save.party.slots == null:
+		return false
 
 	var valid_cat_count: int = 0
 	for slot in save.party.slots:
-		if is_instance_valid(slot): valid_cat_count += 1
+		if is_instance_valid(slot):
+			valid_cat_count += 1
 
-	if valid_cat_count == 0: return false
+	if valid_cat_count == 0:
+		return false
 
 	current_party = save.party
 	inventory = save.inventory if save.inventory != null else Inventory.new()
 	current_floor_id = save.current_floor_id
-	
+
 	_sync_party_references()
 	print("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, SAVE_PATH])
 	return true
 
+
 func reset_to_starter_party() -> void:
-	if FileAccess.file_exists(SAVE_PATH): DirAccess.remove_absolute(SAVE_PATH)
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
 	_build_default_starter_party()
 	save_game()
+
 
 func _sync_party_references() -> void:
 	var party_slots: Array = current_party.get("slots") as Array if current_party else []
 	for slot in party_slots:
 		if is_instance_valid(slot):
-			if "inventory" in slot: slot.inventory = inventory
-			if slot.has_method("populate_starting_skills"): slot.populate_starting_skills()
-			if slot.has_method("populate_starting_spells"): slot.populate_starting_spells()
-			if slot.get("stats") == null and slot.has_method("initialize_stats"): slot.initialize_stats()
+			if "inventory" in slot:
+				slot.inventory = inventory
+			if slot.has_method("populate_starting_skills"):
+				slot.populate_starting_skills()
+			if slot.has_method("populate_starting_spells"):
+				slot.populate_starting_spells()
+			if slot.get("stats") == null and slot.has_method("initialize_stats"):
+				slot.initialize_stats()
 
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
-	if sb and sb.has_signal("party_roster_updated"): sb.party_roster_updated.emit(party_slots)
+	if sb and sb.has_signal("party_roster_updated"):
+		sb.party_roster_updated.emit(party_slots)
+
+
+## Adds gold to the party wallet and emits a signal
+func add_gold(amount: int) -> void:
+	if amount <= 0:
+		return
+	party_gold += amount
+	GameLogger.combat("Party gained %d coins! Total Gold: %d" % [amount, party_gold])
+	SignalBus.party_gold_changed.emit(party_gold, amount)
+
+
+## Attempts to spend gold from the party wallet. Returns true if successful.
+func spend_gold(amount: int) -> bool:
+	if amount <= 0 or party_gold < amount:
+		return false
+	party_gold -= amount
+	GameLogger.combat("Party spent %d coins. Remaining Gold: %d" % [amount, party_gold])
+	SignalBus.party_gold_changed.emit(party_gold, -amount)
+	return true

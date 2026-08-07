@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://xbvsxrwfmkn8"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_4uh0h"]
+
+[resource]
+script = ExtResource("1_4uh0h")
+item_id = "wpn_ignis_blade"
+item_name = "Ignis Monomolecular Sword"
+description = "A molecule-thin blade that constantly bursts into magical flames."
+icon_path = "res://Assets/Icons/Items/ignis_blade.png"
+item_type = 1
+target_type = 2
+can_use_in_field = false
+equipment_slot = 6
+weapon_type = 1
+attack_bonus = 50
+speed_bonus = 10
+credit_value = 2000
+effects = "Burn"
+effect_amount = 50.0
+effect_element = 1
+effect_stat = "health"

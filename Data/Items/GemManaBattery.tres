@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bm637xrtm8sbt"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_q83yn"]
+
+[resource]
+script = ExtResource("1_q83yn")
+item_id = "gem_mana_battery"
+item_name = "Mana-Battery"
+description = "An unrefined crystal geode that holds raw magical charge."
+icon_path = "res://Assets/Icons/Items/mana_battery.png"
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 150

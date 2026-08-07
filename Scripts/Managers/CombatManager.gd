@@ -195,33 +195,65 @@ func _on_combat_ended(victory: bool) -> void:
 		return
 
 	GameLogger.combat("BATTLE ENDED!")
-
 	is_combat_active = false
 	is_paused_for_input = false
 
 	var victory_data: Dictionary = { }
 	if victory:
 		var total_xp: int = 0
+		var total_gold: int = 0
 		var living_party_members: int = 0
+		var total_party_members: int = 0
 		var enemies_killed: int = 0
+		var items_dropped: Array[ItemData] = []
+		var gs: Node = get_tree().root.get_node_or_null("GameState")
 
 		for c: Combatant in combatants:
-			if not c.is_player and c.current_hp <= 0:
-				enemies_killed += 1
-				var single_xp: int = 50
-				if is_instance_valid(c.ref) and "xp_value" in c.ref:
-					var raw_xp: Variant = c.ref.get("xp_value")
-					if typeof(raw_xp) in [TYPE_INT, TYPE_FLOAT] and int(raw_xp) > 0:
-						single_xp = int(raw_xp)
-				total_xp += single_xp
-			elif c.is_player and c.current_hp > 0:
-				living_party_members += 1
+			if c.is_player:
+				total_party_members += 1
+				if c.current_hp > 0:
+					living_party_members += 1
+			else:
+				if c.current_hp <= 0:
+					enemies_killed += 1
+					var single_xp: int = 50
+					var single_gold: int = 25
+
+					if is_instance_valid(c.ref):
+						if "xp_value" in c.ref and int(c.ref.get("xp_value")) > 0:
+							single_xp = int(c.ref.get("xp_value"))
+						if "gold_value" in c.ref and int(c.ref.get("gold_value")) > 0:
+							single_gold = int(c.ref.get("gold_value"))
+
+						# Roll Enemy Loot Table (or Fallback if null)
+						var rolled: Array[ItemData] = _resolve_enemy_loot(c.ref)
+						items_dropped.append_array(rolled)
+
+						if is_instance_valid(gs) and "inventory" in gs and gs.inventory != null:
+							for dropped_item: ItemData in rolled:
+								if gs.inventory.has_method("add_item"):
+									gs.inventory.add_item(dropped_item)
+
+					total_xp += single_xp
+					total_gold += single_gold
 
 		if enemies_killed == 0:
 			enemies_killed = 1
 			total_xp = 50
+			total_gold = 25
 
-		victory_data = { "enemies_killed": enemies_killed, "total_xp": total_xp, "living_members": max(1, living_party_members) }
+		# Award Gold to Party Wallet
+		if is_instance_valid(gs) and gs.has_method("add_gold"):
+			gs.add_gold(total_gold)
+
+		victory_data = {
+			"enemies_killed": enemies_killed,
+			"total_xp": total_xp,
+			"total_gold": total_gold,
+			"items_dropped": items_dropped,
+			"living_members": max(1, living_party_members),
+			"total_members": max(1, total_party_members),
+		}
 
 	combatants.clear()
 	turn_queue.clear()
@@ -231,6 +263,45 @@ func _on_combat_ended(victory: bool) -> void:
 
 	if victory:
 		SignalBus.popup_requested.emit(&"BATTLE_VICTORY", victory_data)
+
+
+## Resolves loot for a defeated enemy. Uses enemy's LootTable if assigned, otherwise falls back to compiled item pool.
+func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
+	if not is_instance_valid(enemy_ref):
+		return _generate_fallback_loot()
+
+	# 1. Custom assigned LootTable
+	if "loot_table" in enemy_ref and is_instance_valid(enemy_ref.get("loot_table")):
+		var table: LootTable = enemy_ref.get("loot_table") as LootTable
+		return table.roll_table()
+
+	# 2. Fallback loot if enemy has no loot_table assigned
+	return _generate_fallback_loot()
+
+
+## Generates 1-2 random loot items from compiled .tres files in res://Data/Items/
+func _generate_fallback_loot() -> Array[ItemData]:
+	var drops: Array[ItemData] = []
+	var item_paths: Array[String] = [
+		"res://Data/Items/GemDataQuartz.tres",
+		"res://Data/Items/ConHealthVial.tres",
+		"res://Data/Items/ConCyberRation.tres",
+		"res://Data/Items/ConManaStim.tres",
+		"res://Data/Items/GemNeonRuby.tres",
+		"res://Data/Items/GemGlowOpal.tres",
+	]
+
+	var pool: Array[ItemData] = []
+	for p in item_paths:
+		if ResourceLoader.exists(p):
+			var item: ItemData = load(p) as ItemData
+			if is_instance_valid(item):
+				pool.append(item)
+
+	if not pool.is_empty():
+		drops.append(pool.pick_random())
+
+	return drops
 
 
 func _tick_turn_meters(delta: float) -> void:
@@ -363,8 +434,10 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 		return
 
 	var spell_name: String = str(ability.get("spell_name")) if "spell_name" in ability else (str(ability.get("name")) if "name" in ability else "Ability")
-	var spell_id: String = str(ability.get("id")) if "id" in ability else (
-		str(ability.get("spell_id")) if "spell_id" in ability else (str(ability.get("skill_id")) if "skill_id" in ability else spell_name.to_snake_case())
+	var spell_id: String = (
+		str(ability.get("id"))
+		if "id" in ability
+		else (str(ability.get("spell_id")) if "spell_id" in ability else (str(ability.get("skill_id")) if "skill_id" in ability else spell_name.to_snake_case()))
 	)
 
 	# 1. Energy / MP Cost Validation & Deduction
@@ -645,7 +718,7 @@ func _check_battle_state() -> bool:
 	var any_enemies_alive: bool = false
 	var any_party_alive: bool = false
 
-	for c: Combatant in combatants:
+	for c in combatants:
 		if c.current_hp > 0:
 			if c.is_player:
 				any_party_alive = true
@@ -682,7 +755,7 @@ func _find_combatant_by_id(id: String) -> Combatant:
 
 
 func _find_combatant_by_slot(slot_idx: int, is_player_target: bool) -> Combatant:
-	for c: Combatant in combatants:
+	for c in combatants:
 		if c.is_player == is_player_target and c.slot_index == slot_idx:
 			return c
 	return null

@@ -21,6 +21,8 @@ var _items_use_btn: Button = null
 var _items_drop_btn: Button = null
 var _items_grid_instance: CharacterInventoryGrid = null
 
+const BATTLE_VICTORY_SCENE: PackedScene = preload("res://Scenes/UI/BattleVictoryPopup.tscn")
+
 
 func _ready() -> void:
 	if panel_container:
@@ -50,7 +52,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		&"BATTLE_ABILITIES":
 			return
 		&"BATTLE_VICTORY":
-			title_label.text = "VICTORY ACHIEVED"
+			title_label.text = "VICTORIOUS BATTLE REPORT"
 			_build_battle_victory_ui(data)
 		&"SEARCH":
 			title_label.text = "SCANNING SYSTEM CORRIDORS"
@@ -265,9 +267,7 @@ func _build_items_inventory_ui() -> void:
 			var in_battle: bool = (active_action_type == &"BATTLE_ITEMS")
 			var acting_slot_idx: int = active_data.get("slot_index", -1) if in_battle else -1
 
-			GameLogger.info("UniversalPopup: USE clicked for %s (Slot %d, Acting Slot %d)" % [
-				item_to_use.item_name, inv_slot_idx, acting_slot_idx
-			])
+			GameLogger.info("UniversalPopup: USE clicked for %s (Slot %d, Acting Slot %d)" % [item_to_use.item_name, inv_slot_idx, acting_slot_idx])
 
 			match item_to_use.target_type:
 				ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:
@@ -282,7 +282,7 @@ func _build_items_inventory_ui() -> void:
 			if is_instance_valid(_selected_item) and "inventory" in GameState:
 				GameState.inventory.remove_item(_selected_item)
 				_items_grid_instance.display_inventory(GameState.inventory)
-				_reset_items_preview()
+				_reset_items_preview(),
 	)
 
 
@@ -339,7 +339,7 @@ func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_s
 			btn.pressed.connect(
 				func() -> void:
 					_execute_item_use_direct(item, inv_slot_idx, acting_slot_idx, c_slot)
-					_close_modal()
+					_close_modal(),
 			)
 			grid.add_child(btn)
 	else:
@@ -349,7 +349,11 @@ func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_s
 			for idx in range(party_slots.size()):
 				var cat: Resource = party_slots[idx] as Resource
 				if is_instance_valid(cat):
-					var c_name: String = str(cat.get("character_name")).to_upper() if "character_name" in cat and not str(cat.get("character_name")).is_empty() else (str(cat.get("name")).to_upper() if "name" in cat else "PARTY MEMBER")
+					var c_name: String = (
+						str(cat.get("character_name")).to_upper()
+						if "character_name" in cat and not str(cat.get("character_name")).is_empty()
+						else (str(cat.get("name")).to_upper() if "name" in cat else "PARTY MEMBER")
+					)
 					var c_hp: int = int(cat.get("current_hp")) if "current_hp" in cat else 0
 					var c_max_hp: int = int(cat.get("max_hp")) if "max_hp" in cat else 1
 
@@ -358,7 +362,7 @@ func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_s
 					btn.pressed.connect(
 						func() -> void:
 							_execute_item_use_direct(item, inv_slot_idx, -1, target_idx)
-							_close_modal()
+							_close_modal(),
 					)
 					grid.add_child(btn)
 
@@ -442,9 +446,7 @@ func _create_target_card_button(c_name: String, c_hp: int, c_max_hp: int, portra
 
 func _execute_item_use_direct(item: ItemData, inv_slot_idx: int, acting_slot_idx: int, target_slot_idx: int) -> void:
 	if acting_slot_idx >= 0:
-		GameLogger.combat("UniversalPopup: Direct Item Use in Battle (Acting Slot %d, Item: %s, Target: %d)" % [
-			acting_slot_idx, item.item_name, target_slot_idx
-		])
+		GameLogger.combat("UniversalPopup: Direct Item Use in Battle (Acting Slot %d, Item: %s, Target: %d)" % [acting_slot_idx, item.item_name, target_slot_idx])
 		var target_mgr: Node = get_tree().root.get_node_or_null("TargetSelectionManager")
 		if is_instance_valid(target_mgr) and target_mgr.has_method("start_item_target_selection"):
 			target_mgr.call("start_item_target_selection", item, inv_slot_idx, acting_slot_idx)
@@ -738,28 +740,13 @@ func _create_modal_button(text_val: String, color_val: Color) -> Button:
 
 
 func _build_battle_victory_ui(data: Dictionary) -> void:
-	var enemies_killed: int = data.get("enemies_killed", 0)
-	var total_xp: int = data.get("total_xp", 0)
-	var living_members: int = data.get("living_members", 1)
-	var xp_per_member: int = int(float(total_xp) / living_members) if living_members > 0 else 0
+	# Instantiates the dedicated component scene
+	var victory_popup: BattleVictoryPopup = BATTLE_VICTORY_SCENE.instantiate() as BattleVictoryPopup
+	content_area.add_child(victory_popup)
 
-	var summary_label := Label.new()
-	summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	summary_label.text = "You defeated %d enemies!" % enemies_killed
-	content_area.add_child(summary_label)
-
-	var xp_label := Label.new()
-	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	xp_label.text = "EXP Earned: %d / %d = %d XP each" % [total_xp, living_members, xp_per_member]
-	content_area.add_child(xp_label)
-
-	var confirm_btn := _create_modal_button("CONFIRM", Color(0.0, 0.9, 0.8, 1.0))
-	confirm_btn.pressed.connect(
+	# Initialize data and connect confirmation signal
+	victory_popup.setup_victory_display(data)
+	victory_popup.victory_confirmed.connect(
 		func() -> void:
 			_emit_confirmation(&"BATTLE_VICTORY", data),
 	)
-
-	var btn_center := HBoxContainer.new()
-	btn_center.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn_center.add_child(confirm_btn)
-	content_area.add_child(btn_center)

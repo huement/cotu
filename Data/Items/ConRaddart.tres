@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://tk6w5pyb8g8m"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_n0kso"]
+
+[resource]
+script = ExtResource("1_n0kso")
+item_id = "con_raddart"
+item_name = "Radium Dart"
+description = "Projectial Weapon with Exploding Core that deals extra damage"
+icon_path = "res://Data/Items/ammo.png"
+item_type = 1
+target_type = 2
+quantity = 20
+can_use_in_field = false
+equipment_slot = 5
+weapon_type = 3
+attack_bonus = 10
+credit_value = 150
+max_durability = 1
+current_durability = 1
+is_consumable = true
+effect_amount = 1.5

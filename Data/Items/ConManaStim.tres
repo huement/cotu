@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bjxg2d1bio7yi"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_thh3o"]
+
+[resource]
+script = ExtResource("1_thh3o")
+item_id = "con_mana_stim"
+item_name = "Mana-Stim"
+description = "Injectable liquid mana. Tastes like ozone."
+icon_path = "res://Assets/Icons/Items/mana_stim.png"
+item_type = 3
+credit_value = 75
+max_durability = 1
+current_durability = 1
+is_consumable = true
+mana_restore = 150

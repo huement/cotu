@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://d05j8c2ogb4nc"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_n2s0u"]
+
+[resource]
+script = ExtResource("1_n2s0u")
+item_id = "con_synth_elixir"
+item_name = "Synthetic Elixir"
+description = "A powerful cocktail of magic and science."
+icon_path = "res://Assets/Icons/Items/synth_elixir.png"
+item_type = 3
+credit_value = 200
+max_durability = 1
+current_durability = 1
+is_consumable = true
+heal_amount = 300
+energy_restore = 50
+mana_restore = 300
+health_restore = 300

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://c3fa4i8n0m7ma"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_abdkr"]
+
+[resource]
+script = ExtResource("1_abdkr")
+item_id = "eq_aero_boots"
+item_name = "Aero-Boots"
+description = "Magically enchanted thruster boots for superior agility."
+icon_path = "res://Assets/Icons/Items/aero_boots.png"
+item_type = 2
+target_type = 4
+can_use_in_battle = false
+equipment_slot = 4
+defense_bonus = 10
+speed_bonus = 25
+credit_value = 300

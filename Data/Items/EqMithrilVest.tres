@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bsvsgejrpxmn"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_1rvx0"]
+
+[resource]
+script = ExtResource("1_1rvx0")
+item_id = "eq_mithril_vest"
+item_name = "Kevlar Mithril Vest"
+description = "Lightweight, bulletproof, and resistant to low-level hexes."
+icon_path = "res://Assets/Icons/Items/mithril_vest.png"
+item_type = 2
+target_type = 4
+can_use_in_battle = false
+equipment_slot = 1
+defense_bonus = 35
+credit_value = 450

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://uhxttb6eogsy"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_ojl3t"]
+
+[resource]
+script = ExtResource("1_ojl3t")
+item_id = "eq_neural_amulet"
+item_name = "Neural Amulet"
+description = "Connects directly to the brainstem to ward off psychic and magical attacks."
+icon_path = "res://Assets/Icons/Items/neural_amulet.png"
+item_type = 5
+target_type = 4
+can_use_in_battle = false
+equipment_slot = 9
+defense_bonus = 10
+speed_bonus = 10
+credit_value = 600
+effects = "Resist"
+effect_amount = 0.5
+effect_element = 1
+effect_stat = "defense"

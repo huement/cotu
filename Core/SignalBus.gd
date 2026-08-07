@@ -1,8 +1,17 @@
 # res://Core/SignalBus.gd
 extends Node
 
-enum Direction { NORTH, EAST, SOUTH, WEST }
-enum CombatPhase { SELECTION, EXECUTION, RESOLUTION }
+enum Direction {
+	NORTH,
+	EAST,
+	SOUTH,
+	WEST,
+}
+enum CombatPhase {
+	SELECTION,
+	EXECUTION,
+	RESOLUTION,
+}
 
 # Exploration & Navigation
 signal party_moved(new_grid_pos: Vector3i, facing: Direction)
@@ -31,6 +40,7 @@ signal chevron_flash_requested(is_player_hit: bool)
 # 🎯 Progression & XP Signals
 signal character_xp_changed(slot_index: int, current_xp: int, max_xp: int)
 signal character_leveled_up(slot_index: int, new_level: int)
+signal party_gold_changed(new_total: int, amount_changed: int)
 
 # Popups & UI
 signal popup_requested(action_type: StringName, data: Dictionary)

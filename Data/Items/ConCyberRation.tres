@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bxbc286tkd8c3"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_fw541"]
+
+[resource]
+script = ExtResource("1_fw541")
+item_id = "con_cyber_ration"
+item_name = "Cyber-Ration"
+description = "Tasteless protein block enriched with healing magic."
+icon_path = "res://Assets/Icons/Items/cyber_ration.png"
+item_type = 4
+can_use_in_battle = false
+credit_value = 25
+max_durability = 1
+current_durability = 1
+is_consumable = true
+heal_amount = 50
+energy_restore = 20
+health_restore = 50

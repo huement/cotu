@@ -1,0 +1,140 @@
+[gd_scene load_steps=8 format=3 uid="uid://yyuh6fwo0ahv"]
+
+[ext_resource type="Script" uid="uid://cvky1llbcisxg" path="res://Scripts/UI/battle_victory_popup.gd" id="1_bswu8"]
+[ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="3_sn8tg"]
+[ext_resource type="FontFile" uid="uid://c1112jnjnfk4y" path="res://ui/fonts/RedditMono-Regular.ttf" id="4_hrdcq"]
+[ext_resource type="FontFile" uid="uid://eumoy65cj26v" path="res://ui/fonts/AvenirNextLTPro-Regular.otf" id="4_ubbpl"]
+[ext_resource type="Theme" uid="uid://lok6u6togy35" path="res://ui/tab_theme.tres" id="5_hrdcq"]
+[ext_resource type="FontFile" uid="uid://cx1vfygfe1ymt" path="res://ui/fonts/RedditMono-Bold.ttf" id="5_iqjvw"]
+[ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="6_iqjvw"]
+
+[node name="BattleVictoryPopup" type="PanelContainer"]
+custom_minimum_size = Vector2(350, 250)
+offset_right = 350.0
+offset_bottom = 250.0
+script = ExtResource("1_bswu8")
+metadata/_edit_vertical_guides_ = [188.0]
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_sn8tg")
+text = "=== HAZARD CONTAINMENT COMPLETE ==="
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StatsVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="EnemiesRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/StatsVBox/EnemiesRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_fonts/font = ExtResource("4_hrdcq")
+text = "ENEMIES DOWNED"
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/StatsVBox/EnemiesRow"]
+custom_minimum_size = Vector2(33, 0)
+layout_mode = 2
+
+[node name="EnemiesLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsVBox/EnemiesRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_fonts/font = ExtResource("5_iqjvw")
+text = "..."
+horizontal_alignment = 2
+
+[node name="ExpRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/StatsVBox/ExpRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.1254902, 0.7764706, 0.972549, 1)
+theme_override_fonts/font = ExtResource("4_hrdcq")
+text = "EXPERIENCE GAINS"
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/StatsVBox/ExpRow"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="ExpLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsVBox/ExpRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.1254902, 0.7764706, 0.972549, 1)
+theme_override_fonts/font = ExtResource("5_iqjvw")
+text = "..."
+horizontal_alignment = 2
+
+[node name="GoldRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/StatsVBox/GoldRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.3254902, 1)
+theme_override_fonts/font = ExtResource("4_hrdcq")
+text = "CREDITS RECOVERED"
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/StatsVBox/GoldRow"]
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+
+[node name="GoldLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsVBox/GoldRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 0.3254902, 1)
+theme_override_fonts/font = ExtResource("5_iqjvw")
+text = "..."
+horizontal_alignment = 2
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="LootHeaderLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_ubbpl")
+text = "RECOVERED ARTIFACTS & LOOT:"
+horizontal_alignment = 1
+
+[node name="NoLootLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+
+[node name="LootGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 4
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 10
+theme = ExtResource("5_hrdcq")
+theme_override_fonts/font = ExtResource("6_iqjvw")
+theme_override_font_sizes/font_size = 18
+text = "CLAIM LOOT"

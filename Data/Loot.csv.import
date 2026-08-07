@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://pahgepmpwiev"
+
+[deps]
+
+files=["res://Data/Loot.item.translation", "res://Data/Loot.description.translation", "res://Data/Loot.item.translation", "res://Data/Loot.target.translation", "res://Data/Loot.quantity.translation", "res://Data/Loot.can.translation", "res://Data/Loot.can.translation", "res://Data/Loot.equipment.translation", "res://Data/Loot.weapon.translation", "res://Data/Loot.attack.translation", "res://Data/Loot.defense.translation", "res://Data/Loot.speed.translation", "res://Data/Loot.credit.translation", "res://Data/Loot.max.translation", "res://Data/Loot.current.translation", "res://Data/Loot.is.translation", "res://Data/Loot.heal.translation", "res://Data/Loot.energy.translation", "res://Data/Loot.mana.translation", "res://Data/Loot.health.translation", "res://Data/Loot.effects.translation", "res://Data/Loot.effect.translation", "res://Data/Loot.effect.translation", "res://Data/Loot.effect.translation", "res://Data/Loot.icon.translation"]
+
+source_file="res://Data/Loot.csv"
+dest_files=["res://Data/Loot.item.translation", "res://Data/Loot.description.translation", "res://Data/Loot.item.translation", "res://Data/Loot.target.translation", "res://Data/Loot.quantity.translation", "res://Data/Loot.can.translation", "res://Data/Loot.can.translation", "res://Data/Loot.equipment.translation", "res://Data/Loot.weapon.translation", "res://Data/Loot.attack.translation", "res://Data/Loot.defense.translation", "res://Data/Loot.speed.translation", "res://Data/Loot.credit.translation", "res://Data/Loot.max.translation", "res://Data/Loot.current.translation", "res://Data/Loot.is.translation", "res://Data/Loot.heal.translation", "res://Data/Loot.energy.translation", "res://Data/Loot.mana.translation", "res://Data/Loot.health.translation", "res://Data/Loot.effects.translation", "res://Data/Loot.effect.translation", "res://Data/Loot.effect.translation", "res://Data/Loot.effect.translation", "res://Data/Loot.icon.translation"]
+
+[params]
+
+compress=true
+delimiter=0
