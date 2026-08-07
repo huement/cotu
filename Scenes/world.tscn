@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=31 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
@@ -23,6 +23,7 @@
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="12_1cojt"]
 [ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_i4fjy"]
 [ext_resource type="Script" uid="uid://dtnit1pwpe0ox" path="res://Scripts/3D/EnemyVisualManager.gd" id="20_hmc15"]
+[ext_resource type="Script" uid="uid://b8qk035c6nrth" path="res://Scripts/3D/CameraShake.gd" id="20_qebug"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="21_xbk3s"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
@@ -271,6 +272,10 @@ eye_height = 0.8
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_pl8yv")
+
+[node name="CameraShake" type="Node" parent="Player" node_paths=PackedStringArray("target_node")]
+script = ExtResource("20_qebug")
+target_node = NodePath("../Camera3D")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)

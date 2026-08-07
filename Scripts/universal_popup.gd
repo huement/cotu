@@ -653,31 +653,39 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 	content_area.add_child(name_label)
 
-	var cat: CatCharacter = GameState.get_active_cat() if GameState.has_method("get_active_cat") else null
-	var inv: Inventory = GameState.get("inventory") if "inventory" in GameState else null
+	var cat: Resource = GameState.get_active_cat() if GameState.has_method("get_active_cat") else null
+	var inv: Resource = GameState.get("inventory") if "inventory" in GameState else null
 
 	if is_instance_valid(item):
 		if not slot_name.is_empty():
+			# Unequip action from an active character slot
 			var unequip_action := func() -> void:
-				if is_instance_valid(cat):
+				if is_instance_valid(cat) and cat.has_method("unequip_item"):
 					var unequipped: ItemData = cat.unequip_item(slot_name)
-					if is_instance_valid(inv) and is_instance_valid(unequipped):
+					if is_instance_valid(inv) and is_instance_valid(unequipped) and inv.has_method("add_item"):
 						inv.add_item(unequipped)
 				_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "UNEQUIP", "slot": slot_name, "item": item })
 				_refresh_party_ui()
 
 			_add_action_button("[ UNEQUIP ]", unequip_action)
 		else:
-			if item.item_type == ItemData.ItemType.EQUIPMENT:
+			# Check if item is equippable (Weapons, Armor, or Equipment with an assigned slot)
+			var is_equippable: bool = item.equipment_slot != ItemData.EquipmentSlot.NONE or \
+					item.item_type in [ItemData.ItemType.EQUIPMENT, ItemData.ItemType.WEAPON, ItemData.ItemType.ARMOR]
+
+			if is_equippable:
 				var equip_action := func() -> void:
 					if is_instance_valid(cat):
 						var target_slot: String = item.get_slot_string()
-						var unequipped: ItemData = cat.unequip_item(target_slot)
-						cat.equip_item(target_slot, item)
-						if is_instance_valid(inv):
-							inv.remove_item(item)
-							if is_instance_valid(unequipped):
-								inv.add_item(unequipped)
+						if not target_slot.is_empty():
+							var unequipped: ItemData = cat.unequip_item(target_slot) if cat.has_method("unequip_item") else null
+							if cat.has_method("equip_item"):
+								cat.equip_item(target_slot, item)
+							if is_instance_valid(inv):
+								if inv.has_method("remove_item"):
+									inv.remove_item(item)
+								if is_instance_valid(unequipped) and inv.has_method("add_item"):
+									inv.add_item(unequipped)
 					_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "EQUIP", "index": slot_idx, "item": item })
 					_refresh_party_ui()
 
@@ -695,7 +703,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 				_add_action_button("[ USE ]", use_action)
 
 			var drop_action := func() -> void:
-				if is_instance_valid(inv):
+				if is_instance_valid(inv) and inv.has_method("remove_item"):
 					inv.remove_item(item)
 				_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "DROP", "index": slot_idx, "item": item })
 				_refresh_party_ui()

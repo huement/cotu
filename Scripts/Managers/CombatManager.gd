@@ -359,6 +359,7 @@ func _start_combatant_turn(c: Combatant) -> void:
 				SignalBus.enemy_damaged_visual.emit(c.id, dot_damage)
 				SignalBus.enemy_health_changed.emit(c.id, c.current_hp, c.max_hp)
 
+			SignalBus.camera_shake_requested.emit(0.35)
 			GameLogger.combat("%s took %d %s damage from %s! (HP: %d/%d)" % [c.name, dot_damage, eff.id, eff.name, c.current_hp, c.max_hp])
 
 		elif eff.effect_type == &"HOT":
@@ -416,6 +417,7 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 			SignalBus.enemy_damaged_visual.emit(target_char.id, damage)
 			SignalBus.enemy_health_changed.emit(target_char.id, target_char.current_hp, target_char.max_hp)
 			SignalBus.chevron_flash_requested.emit(false)
+			SignalBus.camera_shake_requested.emit(0.5)
 
 			GameLogger.combat("%s ATTACKED %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, target_char.name, damage, target_char.current_hp, target_char.max_hp])
 
@@ -688,6 +690,7 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 
 		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
 		SignalBus.chevron_flash_requested.emit(true)
+		SignalBus.camera_shake_requested.emit(0.35)
 
 		if _check_battle_state():
 			return

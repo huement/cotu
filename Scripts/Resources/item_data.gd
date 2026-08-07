@@ -103,6 +103,8 @@ func get_slot_string() -> String:
 			return "RIGHT_HAND"
 		EquipmentSlot.HEAD:
 			return "HEAD"
+		EquipmentSlot.ACCESSORY:
+			return "ACCESSORY"
 		_:
 			return ""
 

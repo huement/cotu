@@ -2,6 +2,8 @@
 extends Resource
 class_name CatCharacter
 
+signal equipment_changed
+
 const CharacterStats = preload("res://Models/character_stats.gd")
 
 @export_group("Identity")
@@ -33,54 +35,65 @@ var stats: CharacterStats
 
 @export_group("Equipment & Inventory")
 @export var inventory: Resource
-@export var equipment: Dictionary = {
-	"BODY": null,
-	"ARMS": null,
-	"LEGS": null,
-	"FEET": null,
-	"LEFT_HAND": null,
-	"RIGHT_HAND": null
-}
+## Dictionary mapping slot names ("BODY", "HEAD", "LEFT_HAND", "RIGHT_HAND", etc.) to ItemData resources
+@export var equipment: Dictionary = { "HEAD": null, "BODY": null, "ARMS": null, "LEGS": null, "FEET": null, "LEFT_HAND": null, "RIGHT_HAND": null, "ACCESSORY": null }
 
 @export_group("Abilities")
 @export var known_spells: Array[Resource] = []
 @export var known_skills: Array[Resource] = []
-
 
 # =============================================================================
 # 🏢 UI & SYSTEM WRAPPER PROPERTIES
 # =============================================================================
 
 var current_hp: int:
-	get: return stats.health if stats else 0
+	get:
+		return stats.health if stats else 0
 	set(value):
-		if stats: stats.health = value
+		if stats:
+			stats.health = value
 
 var max_hp: int:
-	get: return stats.max_health if stats else 0
+	get:
+		return stats.max_health if stats else 0
 	set(value):
-		if stats: stats.max_health = value
+		if stats:
+			stats.max_health = value
 
 var current_health: int:
-	get: return current_hp
-	set(value): current_hp = value
+	get:
+		return current_hp
+	set(value):
+		current_hp = value
 
 var max_health: int:
-	get: return max_hp
-	set(value): max_hp = value
+	get:
+		return max_hp
+	set(value):
+		max_hp = value
 
 var current_mana: int:
-	get: return current_energy
-	set(value): current_energy = value
+	get:
+		return current_energy
+	set(value):
+		current_energy = value
 
 var max_mana: int:
-	get: return max_energy
-	set(value): max_energy = value
+	get:
+		return max_energy
+	set(value):
+		max_energy = value
 
+# Calculated Equipment Stat Offsets
+var equipment_bonus_attack: int = 0
+var equipment_bonus_defense: int = 0
+var equipment_bonus_speed: int = 0
+var equipment_stat_bonuses: Dictionary = { }
 
 # =============================================================================
 # ⚙️ LIFECYCLE & STAT INITIALIZATION
 # =============================================================================
+
 
 func _init() -> void:
 	stats = CharacterStats.new()
@@ -125,10 +138,10 @@ func _calculate_vitals() -> void:
 		stats.max_health = vitality * 2
 	max_energy = intelligence + piety
 
-
 # =============================================================================
 # 📈 LEVEL & XP PROGRESSION MECHANICS
 # =============================================================================
+
 
 ## Calculates XP required to reach the target level.
 ## Wizardry 7 style polynomial scaling: Base * Level^1.5
@@ -165,23 +178,25 @@ func _on_level_up() -> void:
 	strength += 1
 	_calculate_vitals()
 	stats.health = stats.max_health # Restore HP on level up
-	current_energy = max_energy    # Restore Energy on level up
+	current_energy = max_energy # Restore Energy on level up
 	print("[CatCharacter] 🌟 ", name, " LEVELED UP to Level ", level, "! Next level requires ", max_xp, " XP.")
-
 
 # =============================================================================
 # ⚔️ ABILITY & EQUIPMENT MANAGERS
 # =============================================================================
 
+
 func populate_starting_skills() -> void:
 	var skills_dir: String = "res://Data/Skills/"
-	if not DirAccess.dir_exists_absolute(skills_dir): return
+	if not DirAccess.dir_exists_absolute(skills_dir):
+		return
 
 	var prof_name: String = profession.get("profession_name") if is_instance_valid(profession) and "profession_name" in profession else ""
 	var breed_name_val: String = breed.get("breed_name") if is_instance_valid(breed) and "breed_name" in breed else ""
 
 	var dir := DirAccess.open(skills_dir)
-	if dir == null: return
+	if dir == null:
+		return
 	dir.list_dir_begin()
 	var file_name := dir.get_next()
 
@@ -202,20 +217,25 @@ func populate_starting_skills() -> void:
 
 func populate_starting_spells() -> void:
 	var spells_dir: String = "res://Data/Spells/"
-	if not DirAccess.dir_exists_absolute(spells_dir): return
-	if not is_instance_valid(profession): return
+	if not DirAccess.dir_exists_absolute(spells_dir):
+		return
+	if not is_instance_valid(profession):
+		return
 
 	var sb_type_str: String = profession.get("spellbook_type") if "spellbook_type" in profession else ""
-	if sb_type_str.is_empty() or sb_type_str == "None": return
+	if sb_type_str.is_empty() or sb_type_str == "None":
+		return
 
 	var allowed_books: Array[String] = []
 	for p in sb_type_str.split(","):
 		for inner_p in p.split("|"):
 			var trimmed := inner_p.strip_edges().to_upper()
-			if not trimmed.is_empty(): allowed_books.append(trimmed)
+			if not trimmed.is_empty():
+				allowed_books.append(trimmed)
 
 	var dir := DirAccess.open(spells_dir)
-	if dir == null: return
+	if dir == null:
+		return
 	dir.list_dir_begin()
 	var file_name := dir.get_next()
 
@@ -227,11 +247,16 @@ func populate_starting_spells() -> void:
 				var s_book_name: String = ""
 				if s_book_val != null:
 					match int(s_book_val):
-						0: s_book_name = "ARCHANIST"
-						1: s_book_name = "SOULWRIGHT"
-						2: s_book_name = "MAESTER"
-						3: s_book_name = "PSYNIC"
-						_: s_book_name = str(s_book_val).to_upper()
+						0:
+							s_book_name = "ARCHANIST"
+						1:
+							s_book_name = "SOULWRIGHT"
+						2:
+							s_book_name = "MAESTER"
+						3:
+							s_book_name = "PSYNIC"
+						_:
+							s_book_name = str(s_book_val).to_upper()
 
 				if allowed_books.has(s_book_name) and not known_spells.has(spell_res):
 					known_spells.append(spell_res)
@@ -239,10 +264,14 @@ func populate_starting_spells() -> void:
 
 
 func take_damage(amount: int) -> void:
-	if stats: stats.take_damage(amount)
+	if stats:
+		stats.take_damage(amount)
+
 
 func heal(amount: int) -> void:
-	if stats: stats.heal(amount)
+	if stats:
+		stats.heal(amount)
+
 
 func assemble_character(final_stats: Dictionary) -> void:
 	strength = final_stats.get("strength", strength)
@@ -257,12 +286,18 @@ func assemble_character(final_stats: Dictionary) -> void:
 	stats.health = stats.max_health
 	current_energy = max_energy
 
+# =============================================================================
+# YOUR EXISTING EQUIPMENT METHODS (ENHANCED)
+# =============================================================================
+
+
 func equip_item(slot_name: String, item: Resource) -> bool:
 	if equipment.has(slot_name):
 		equipment[slot_name] = item
 		_recalculate_equipment_stats()
 		return true
 	return false
+
 
 func unequip_item(slot_name: String) -> Resource:
 	if equipment.has(slot_name):
@@ -272,8 +307,85 @@ func unequip_item(slot_name: String) -> Resource:
 		return item
 	return null
 
+
 func get_equipped_item(slot_name: String) -> Resource:
 	return equipment.get(slot_name, null)
 
+
 func _recalculate_equipment_stats() -> void:
-	print("Recalculating stats based on equipment...")
+	equipment_bonus_attack = 0
+	equipment_bonus_defense = 0
+	equipment_bonus_speed = 0
+	equipment_stat_bonuses.clear()
+
+	# Iterate over all currently equipped items in the equipment dictionary
+	for item_var in equipment.values():
+		var item: ItemData = item_var as ItemData
+		if not is_instance_valid(item):
+			continue
+
+		# Accumulate direct combat stats
+		equipment_bonus_attack += item.attack_bonus
+		equipment_bonus_defense += item.defense_bonus
+		equipment_bonus_speed += item.speed_bonus
+
+		# Accumulate primary attribute bonuses (e.g., strength, intelligence, speed)
+		var eff_stat: String = str(item.effect_stat).to_lower().strip_edges()
+		var eff_amt: int = int(item.effect_amount)
+
+		if not eff_stat.is_empty() and eff_amt != 0:
+			var current: int = equipment_stat_bonuses.get(eff_stat, 0)
+			equipment_stat_bonuses[eff_stat] = current + eff_amt
+
+	# Broadcast signal to trigger UI updates (CharacterStatsPanel, CharacterLoadoutPanel)
+	equipment_changed.emit()
+
+# =============================================================================
+# STAT GETTER HELPERS FOR UI & COMBAT
+# =============================================================================
+
+
+func get_equipment_stat_bonus(stat_name: StringName) -> int:
+	var key: String = str(stat_name).to_lower()
+	return equipment_stat_bonuses.get(key, 0)
+
+
+func get_total_equipment_attack() -> int:
+	return equipment_bonus_attack
+
+
+func get_total_equipment_defense() -> int:
+	return equipment_bonus_defense
+
+# =============================================================================
+# EFFECTIVE STAT RESOLVERS
+# =============================================================================
+
+
+func get_effective_stat(stat_name: StringName) -> int:
+	var base_val: int = 10
+	match stat_name:
+		&"strength", &"str":
+			base_val = strength
+		&"intelligence", &"int":
+			base_val = intelligence
+		&"piety", &"pie":
+			base_val = piety
+		&"vitality", &"vit":
+			base_val = vitality
+		&"dexterity", &"dex":
+			base_val = dexterity
+		&"speed", &"spd":
+			base_val = speed
+		&"personality", &"per":
+			base_val = personality
+
+	return base_val + get_equipment_stat_bonus(stat_name)
+
+
+func get_effective_strength() -> int:
+	return get_effective_stat(&"strength")
+
+
+func get_effective_speed() -> int:
+	return get_effective_stat(&"speed")

@@ -48,5 +48,8 @@ signal popup_confirmed(action_type: StringName, extra_data: Dictionary)
 signal portrait_clicked(slot_index: int)
 signal battle_victory_popup_requested(data: Dictionary)
 
+# JUICE IT
+signal camera_shake_requested(trauma: float)
+
 # Logging Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)

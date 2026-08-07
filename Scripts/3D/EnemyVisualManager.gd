@@ -8,18 +8,19 @@ extends Node3D
 @export var model_scale: Vector3 = Vector3(0.4, 0.4, 0.4)
 @export var horizontal_spacing: float = 0.85
 
-var _spawned_enemies: Dictionary = {}
+var _spawned_enemies: Dictionary = { }
 
 
 func _ready() -> void:
-	visible = false 
+	visible = false
 	_connect_to_signal_bus()
 
 
 func _connect_to_signal_bus() -> void:
 	var sb: Node = SignalBus
-	if not is_instance_valid(sb): return
-	
+	if not is_instance_valid(sb):
+		return
+
 	if not sb.combat_started.is_connected(_on_combat_started):
 		sb.combat_started.connect(_on_combat_started)
 	if not sb.combat_ended.is_connected(_on_combat_ended):
@@ -35,7 +36,8 @@ func _connect_to_signal_bus() -> void:
 func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
-		if not is_instance_valid(camera_node): return
+		if not is_instance_valid(camera_node):
+			return
 
 	_clear_all_enemies()
 	visible = true
@@ -45,17 +47,17 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 		enemy_group = enemy_data_or_group as Array
 	elif enemy_data_or_group is Resource:
 		enemy_group.append(enemy_data_or_group as Resource)
-	
+
 	for i in range(enemy_group.size()):
 		var e_data: Resource = enemy_group[i] as Resource
 		var model_scene: PackedScene = null
-		
+
 		if is_instance_valid(e_data) and "model_scene" in e_data:
 			model_scene = e_data.get("model_scene") as PackedScene
 
 		var enemy_node: Node3D = model_scene.instantiate() as Node3D if is_instance_valid(model_scene) else _create_debug_mesh()
 		var enemy_id: String = "enemy_%d" % i
-		
+
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
 		_position_enemy(enemy_node, i, enemy_group.size())
@@ -63,7 +65,8 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 
 
 func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void:
-	if not is_instance_valid(camera_node): return
+	if not is_instance_valid(camera_node):
+		return
 
 	var horizontal_offset: float = 0.0
 	if total_enemies > 1:
@@ -71,9 +74,9 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 
 	var cam_transform: Transform3D = camera_node.global_transform
 	var spawn_pos: Vector3 = cam_transform.origin \
-		- (cam_transform.basis.z * forward_distance) \
-		+ (cam_transform.basis.x * horizontal_offset) \
-		+ (cam_transform.basis.y * vertical_offset)
+			- (cam_transform.basis.z * forward_distance) \
+			+ (cam_transform.basis.x * horizontal_offset) \
+			+ (cam_transform.basis.y * vertical_offset)
 
 	enemy_node.global_position = spawn_pos
 	enemy_node.scale = model_scale
@@ -84,7 +87,8 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 
 
 func play_animation(enemy_node: Node3D, anim_name: StringName, loop: bool = true) -> void:
-	if not is_instance_valid(enemy_node): return
+	if not is_instance_valid(enemy_node):
+		return
 
 	var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if is_instance_valid(anim_player) and anim_player.has_animation(anim_name):
