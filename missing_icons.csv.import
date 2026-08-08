@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://8ap726ry7mmj"
+
+[deps]
+
+files=["res://missing_icons.icon.translation"]
+
+source_file="res://missing_icons.csv"
+dest_files=["res://missing_icons.icon.translation"]
+
+[params]
+
+compress=true
+delimiter=0

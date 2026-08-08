@@ -1,5 +1,11 @@
 # BATTLE SYSTEM
 
+| **Row Position** | **Blade / Bash (Melee)** | **Ranged Weapons** | **Spells** | **Damage Taken (Physical)** |
+|---|---|---|---|---|
+| **Front Row** | Full Damage | Full Damage | Full Damage | 100% (Standard) |
+| **Back Row** | Disabled *(or 50% penalty)* | Full Damage | Full Damage | 50% (Protected) |
+
+
 ## COMBAT MANAGER
 
 ### Combat Ability Execution Pipeline

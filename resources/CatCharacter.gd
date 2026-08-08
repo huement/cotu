@@ -42,6 +42,50 @@ var stats: CharacterStats
 @export var known_spells: Array[Resource] = []
 @export var known_skills: Array[Resource] = []
 
+# 🎯 Party Row Alignment (Defaults to Front Row)
+@export_group("Tactical Positioning")
+@export var is_front_row: bool = true
+
+# =============================================================================
+# ⚔️ ATTACK TYPE RESOLUTION
+# =============================================================================
+
+
+## Evaluates equipped weapons to return the active attack classification
+func get_attack_type_string() -> String:
+	var weapon: ItemData = get_equipped_item("RIGHT_HAND") as ItemData
+	if not is_instance_valid(weapon):
+		weapon = get_equipped_item("LEFT_HAND") as ItemData
+
+	if is_instance_valid(weapon):
+		if "weapon_type" in weapon and weapon.get("weapon_type") != null:
+			var wt_val = weapon.get("weapon_type")
+			if typeof(wt_val) == TYPE_INT:
+				match wt_val:
+					1:
+						return "BLADE"
+					2:
+						return "BASH"
+					3:
+						return "RANGED"
+					4:
+						return "MAGIC"
+			elif typeof(wt_val) == TYPE_STRING and not str(wt_val).is_empty():
+				return str(wt_val).to_upper()
+
+		var w_name: String = weapon.item_name.to_upper()
+		if "BOW" in w_name or "CROSSBOW" in w_name or "ARROW" in w_name or "BOLT" in w_name:
+			return "RANGED"
+		if "SWORD" in w_name or "BLADE" in w_name or "KATANA" in w_name or "CLAW" in w_name or "DAGGER" in w_name:
+			return "BLADE"
+		if "STAFF" in w_name or "WAND" in w_name or "ORB" in w_name or "SPELL" in w_name:
+			return "MAGIC"
+		if "HAMMER" in w_name or "MACE" in w_name or "CLUB" in w_name or "SHIELD" in w_name:
+			return "BASH"
+		return "BLADE"
+
+	return "UNARMED"
+
 # =============================================================================
 # 🏢 UI & SYSTEM WRAPPER PROPERTIES
 # =============================================================================

@@ -11,6 +11,7 @@ enum Mode {
 signal core_state_changed(new_mode: Mode)
 
 const SAVE_PATH: String = "user://save_game.tres"
+const DEFAULT_SAVE_PATH: String = "res://Data/default_save.tres"
 
 var current_mode: Mode = Mode.EXPLORING:
 	set(value):
@@ -73,125 +74,30 @@ func _award_victory_xp(victory_data: Dictionary) -> void:
 
 
 func _initialize_active_session() -> void:
-	print("GameState: Assembling tactical data structures...")
+	print("GameState: Initializing active session...")
 
 	if ResourceLoader.exists(SAVE_PATH):
 		if not load_game():
-			print("GameState: Existing save file invalid. Rebuilding default starter party...")
-			_build_default_starter_party()
-			save_game()
+			print("GameState: Existing save file in user:// invalid. Loading default_save.tres...")
+			_load_default_save()
 	else:
-		print("GameState: No save file found. Building default starter party...")
-		_build_default_starter_party()
-		save_game()
+		print("GameState: No save file found in user://. Loading default_save.tres...")
+		_load_default_save()
 
 
-func _build_default_starter_party() -> void:
-	current_party = DungeonParty.new()
-	if current_party.has_method("setup_starter_party"):
-		current_party.setup_starter_party()
+func _load_default_save() -> void:
+	if ResourceLoader.exists(DEFAULT_SAVE_PATH):
+		var default_save := load(DEFAULT_SAVE_PATH) as SaveGame
+		if default_save != null and default_save.party != null:
+			current_party = default_save.party.duplicate(true) as DungeonParty
+			inventory = default_save.inventory.duplicate(true) as Inventory if default_save.inventory != null else Inventory.new()
+			current_floor_id = default_save.current_floor_id
+			_sync_party_references()
+			save_game()
+			print("GameState: Starter party successfully initialized from default_save.tres")
+			return
 
-	inventory = Inventory.new()
-	var slots: Array = current_party.slots
-
-	# 1. Commander Whiskers (Slot 0 - Spartan / Maine Coon)
-	if slots.size() > 0 and slots[0] != null:
-		var whiskers: CatCharacter = slots[0] as CatCharacter
-		_safe_equip(whiskers, "HEAD", ["ArmorSpartanRegularHead", "Equipment/IronHeadArmor", "Equipment/PowerSuit"])
-		_safe_equip(whiskers, "BODY", ["ArmorSpartanRegularBody", "Equipment/IronBodyArmor", "Equipment/PowerSuit"])
-		_safe_equip(whiskers, "ARMS", ["ArmorSpartanRegularArms", "Equipment/IronArmsArmor"])
-		_safe_equip(whiskers, "LEGS", ["ArmorSpartanRegularLegs", "Equipment/IronLegsArmor"])
-		_safe_equip(whiskers, "FEET", ["ArmorSpartanRegularFeet", "Equipment/IronFeetArmor"])
-		_safe_equip(whiskers, "RIGHT_HAND", ["WeapSpartanRegularPrimary", "Equipment/Broadsword", "Equipment/LaserClaw"])
-		_safe_add_skill(whiskers, ["OverdriveStrike", "KineticSlam", "GrenadeWorkshop", "LaserClawProficiency"])
-
-	# 2. Baron Von Hiss (Slot 1 - Warden / Siamese)
-	if slots.size() > 1 and slots[1] != null:
-		var baron: CatCharacter = slots[1] as CatCharacter
-		_safe_equip(baron, "HEAD", ["ArmorWardenRegularHead", "Equipment/HunterHeadArmor"])
-		_safe_equip(baron, "BODY", ["ArmorWardenRegularBody", "Equipment/HunterBodyArmor"])
-		_safe_equip(baron, "ARMS", ["ArmorWardenRegularArms", "Equipment/HunterArmsArmor"])
-		_safe_equip(baron, "LEGS", ["ArmorWardenRegularLegs", "Equipment/HunterLegsArmor"])
-		_safe_equip(baron, "FEET", ["ArmorWardenRegularFeet", "Equipment/HunterFeetArmor"])
-		_safe_equip(baron, "RIGHT_HAND", ["WeapWardenRegularPrimary", "Equipment/Crossbow", "Equipment/LaserClaw"])
-
-		var ammo: ItemData = _load_item_from_candidates(["WeapWardenRegularAmmo", "Equipment/IronArrows"])
-		if is_instance_valid(ammo):
-			var ammo_stack: ItemData = ammo.duplicate(true) as ItemData
-			ammo_stack.quantity = 20
-			baron.equip_item("LEFT_HAND", ammo_stack)
-
-		_safe_add_skill(baron, ["TargetingLock", "MunitionsAssembly", "CyberLockpicking", "PurrgatoryCamp"])
-		_safe_add_spell(baron, ["CorrosiveSpray", "StimulantMist", "NeurotoxinGas"])
-
-	# 3. Sage Psych-Meow (Slot 3 - Wizard / Sphynx)
-	if slots.size() > 3 and slots[3] != null:
-		var sage: CatCharacter = slots[3] as CatCharacter
-		_safe_equip(sage, "HEAD", ["ArmorWizardRegularHead", "Equipment/MysticHeadGarb"])
-		_safe_equip(sage, "BODY", ["ArmorWizardRegularBody", "Equipment/MysticBodyGarb"])
-		_safe_equip(sage, "ARMS", ["ArmorWizardRegularArms", "Equipment/MysticArmsGarb"])
-		_safe_equip(sage, "LEGS", ["ArmorWizardRegularLegs", "Equipment/MysticLegsGarb"])
-		_safe_equip(sage, "FEET", ["ArmorWizardRegularFeet", "Equipment/MysticFeetGarb"])
-		_safe_equip(sage, "RIGHT_HAND", ["WeapWizardRegularPrimary", "Equipment/ElderStaff"])
-
-		_safe_add_skill(sage, ["PurrHealing", "ArcaneSynthesis", "RuneImbuement"])
-		_safe_add_spell(sage, ["PlasmaDart", "StaticNova", "OverclockShield", "NanoRepair", "AdrenalineSurge", "AegisGrid"])
-
-	# 4. Shared Inventory Potions
-	_safe_add_consumable(["PotHp50", "HealthPotion(+50)", "HealthPotion50", "Consumables/CatnipPotion"], 5)
-	_safe_add_consumable(["PotMana25", "ManaPotion(+25)", "ManaPotion25", "Consumables/CatnipPotion"], 3)
-	_safe_add_consumable(["PotCatnip", "Consumables/CatnipPotion"], 3)
-
-	_sync_party_references()
-
-
-func _safe_equip(cat: CatCharacter, slot: String, item_candidates: Array) -> void:
-	var item: ItemData = _load_item_from_candidates(item_candidates)
-	if is_instance_valid(item):
-		cat.equip_item(slot, item)
-
-
-func _safe_add_consumable(item_candidates: Array, count: int) -> void:
-	var item: ItemData = _load_item_from_candidates(item_candidates)
-	if is_instance_valid(item):
-		for i in range(count):
-			inventory.add_item(item)
-
-
-func _safe_add_skill(cat: CatCharacter, skill_candidates: Array) -> void:
-	for name_key in skill_candidates:
-		var res: Resource = _load_ability_from_candidates("Skills/", name_key)
-		if is_instance_valid(res) and not cat.known_skills.has(res):
-			cat.known_skills.append(res)
-
-
-func _safe_add_spell(cat: CatCharacter, spell_candidates: Array) -> void:
-	for name_key in spell_candidates:
-		var res: Resource = _load_ability_from_candidates("Spells/", name_key)
-		if is_instance_valid(res) and not cat.known_spells.has(res):
-			cat.known_spells.append(res)
-
-
-func _load_item_from_candidates(candidates: Array) -> ItemData:
-	for name_key in candidates:
-		var paths: Array[String] = [
-			"res://Data/Items/Equipment/" + name_key + ".tres",
-			"res://Data/Items/Consumables/" + name_key + ".tres",
-			"res://Data/Items/Misc/" + name_key + ".tres",
-			"res://Data/Items/" + name_key + ".tres",
-		]
-		for path in paths:
-			if ResourceLoader.exists(path):
-				return load(path) as ItemData
-	return null
-
-
-func _load_ability_from_candidates(sub_folder: String, name_key: String) -> Resource:
-	var paths: Array[String] = ["res://Data/" + sub_folder + name_key + ".tres", "res://Data/" + sub_folder + name_key.to_pascal_case() + ".tres"]
-	for path in paths:
-		if ResourceLoader.exists(path):
-			return load(path)
-	return null
+	printerr("GameState ERROR: Failed to load default_save.tres from ", DEFAULT_SAVE_PATH)
 
 
 func save_game() -> bool:
@@ -237,8 +143,7 @@ func load_game() -> bool:
 func reset_to_starter_party() -> void:
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.remove_absolute(SAVE_PATH)
-	_build_default_starter_party()
-	save_game()
+	_load_default_save()
 
 
 func _sync_party_references() -> void:
