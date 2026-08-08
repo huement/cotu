@@ -28,6 +28,7 @@ var _state: CombatState = CombatState.IDLE
 var _active_slot_index: int = -1
 var _selected_action: StringName = &""
 var _is_auto_battle_on: bool = false
+var _buttons_bound: bool = false
 
 
 func _ready() -> void:
@@ -41,13 +42,17 @@ func _ready() -> void:
 
 
 func _bind_action_buttons() -> void:
-	if not is_instance_valid(action_bar):
+	if _buttons_bound or not is_instance_valid(action_bar):
 		return
 
+	_buttons_bound = true
 	var buttons: Array[Node] = action_bar.find_children("*", "BaseButton", true, false)
 
 	for node: Node in buttons:
 		var btn: BaseButton = node as BaseButton
+		if is_instance_valid(auto_button) and btn == auto_button:
+			continue
+
 		var action_type: StringName = &"ATTACK"
 
 		if "action_type" in btn:
@@ -63,8 +68,7 @@ func _bind_action_buttons() -> void:
 			elif "RUN" in b_name or "FLEE" in b_name:
 				action_type = &"RUN"
 
-		if not btn.pressed.is_connected(_on_action_button_pressed):
-			btn.pressed.connect(_on_action_button_pressed.bind(action_type, btn.name))
+		btn.pressed.connect(_on_action_button_pressed.bind(action_type, btn.name))
 
 
 func _connect_to_signal_bus() -> void:

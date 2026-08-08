@@ -401,6 +401,9 @@ func _start_combatant_turn(c: Combatant) -> void:
 
 	_check_battle_state()
 
+# res://Scripts/Managers/CombatManager.gd
+# (Excerpt: Updated _on_player_action_selected and _consume_ranged_ammo)
+
 
 func _on_player_action_selected(slot_index: int, action_type: StringName, target_index: int) -> void:
 	if active_combatant == null or active_combatant.slot_index != slot_index:
@@ -411,13 +414,13 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 	if action_type == &"ITEM":
 		_execute_item_use_in_combat(acting_char, target_index)
 		_reset_combatant_meter(acting_char)
-		_unpause_and_continue()
+		call_deferred("_unpause_and_continue")
 		return
 
 	if action_type == &"SPELL" or action_type == &"SKILL":
 		_execute_ability_use_in_combat(acting_char, action_type, target_index)
 		_reset_combatant_meter(acting_char)
-		_unpause_and_continue()
+		call_deferred("_unpause_and_continue")
 		return
 
 	if action_type == &"ATTACK":
@@ -428,9 +431,9 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		# Consume Projectile for Ranged Attacks
 		if attack_type == "RANGED":
 			if not _consume_ranged_ammo(acting_char):
-				_reset_combatant_meter(acting_char)
-				_unpause_and_continue()
-				return
+				# 🎯 Fallback to UNARMED physical melee so the turn queue NEVER softlocks!
+				GameLogger.combat("%s has no ammo for Ranged Weapon! Falling back to Unarmed attack." % acting_char.name)
+				attack_type = "UNARMED"
 
 		var target_char: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
 		if not is_instance_valid(target_char) or target_char.current_hp <= 0:
@@ -455,75 +458,79 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 				return
 
 		_reset_combatant_meter(acting_char)
-		_unpause_and_continue()
+		call_deferred("_unpause_and_continue")
 
 
-## Consumes 1 projectile / ammo unit when executing a ranged attack.
-## Returns true if ammo was successfully consumed or false if out of ammo.
+## Consumes 1 projectile from equipped Ammunition (quantity) for ranged attacks.
+## Returns true if ammo was consumed, or false if out of ammo.
 func _consume_ranged_ammo(acting_char: Combatant) -> bool:
 	if not is_instance_valid(acting_char.ref):
 		return true
 
 	var cat: Resource = acting_char.ref
-	var equipped_item: ItemData = null
-	var slot_name: String = "RIGHT_HAND"
+	var right_item: ItemData = null
+	var left_item: ItemData = null
 
 	if cat.has_method("get_equipped_item"):
-		equipped_item = cat.call("get_equipped_item", "RIGHT_HAND") as ItemData
-		if not is_instance_valid(equipped_item):
-			slot_name = "LEFT_HAND"
-			equipped_item = cat.call("get_equipped_item", "LEFT_HAND") as ItemData
+		right_item = cat.call("get_equipped_item", "RIGHT_HAND") as ItemData
+		left_item = cat.call("get_equipped_item", "LEFT_HAND") as ItemData
 
-	if not is_instance_valid(equipped_item):
-		return true
+	var ammo_item: ItemData = null
+	var ammo_slot: String = ""
 
-	# Check quantity / current_durability / count / ammo properties on item
-	if "quantity" in equipped_item:
-		var qty: int = int(equipped_item.get("quantity"))
-		if qty <= 0:
-			_notify_out_of_ammo(acting_char, equipped_item)
-			return false
-		qty -= 1
-		equipped_item.set("quantity", qty)
-		GameLogger.combat("%s fired 1 projectile from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, qty])
-		if qty <= 0:
-			_deplete_weapon_slot(cat, slot_name, equipped_item)
-	elif "current_durability" in equipped_item:
-		var dur: int = int(equipped_item.current_durability)
-		if dur <= 0:
-			_notify_out_of_ammo(acting_char, equipped_item)
-			return false
-		dur -= 1
-		equipped_item.current_durability = max(0, dur)
-		GameLogger.combat("%s used 1 projectile/ammo unit from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, dur])
-		if dur <= 0:
-			_deplete_weapon_slot(cat, slot_name, equipped_item)
-	elif "count" in equipped_item:
-		var cnt: int = int(equipped_item.get("count"))
-		if cnt <= 0:
-			_notify_out_of_ammo(acting_char, equipped_item)
-			return false
-		cnt -= 1
-		equipped_item.set("count", max(0, cnt))
-		GameLogger.combat("%s fired 1 projectile from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, cnt])
-		if cnt <= 0:
-			_deplete_weapon_slot(cat, slot_name, equipped_item)
-	elif "ammo" in equipped_item:
-		var ammo: int = int(equipped_item.get("ammo"))
-		if ammo <= 0:
-			_notify_out_of_ammo(acting_char, equipped_item)
-			return false
-		ammo -= 1
-		equipped_item.set("ammo", max(0, ammo))
-		GameLogger.combat("%s used 1 ammo unit from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, ammo])
-		if ammo <= 0:
-			_deplete_weapon_slot(cat, slot_name, equipped_item)
+	# 1. Look for stackable Ammunition in LEFT_HAND or RIGHT_HAND
+	if _is_ammo_resource(left_item):
+		ammo_item = left_item
+		ammo_slot = "LEFT_HAND"
+	elif _is_ammo_resource(right_item):
+		ammo_item = right_item
+		ammo_slot = "RIGHT_HAND"
+
+	# 2. If no dedicated ammo item is equipped, notify player and return false
+	if not is_instance_valid(ammo_item):
+		var launcher_name: String = right_item.item_name if is_instance_valid(right_item) else (left_item.item_name if is_instance_valid(left_item) else "Ranged Weapon")
+		_notify_out_of_ammo(acting_char, launcher_name)
+		return false
+
+	# 3. Check remaining quantity
+	if ammo_item.quantity <= 0:
+		_notify_out_of_ammo(acting_char, ammo_item.item_name)
+		return false
+
+	ammo_item.quantity -= 1
+	GameLogger.combat("%s fired 1 projectile from %s! (%d remaining)" % [acting_char.name, ammo_item.item_name, ammo_item.quantity])
+
+	# 4. If completely depleted, unequip ONLY the ammunition item
+	if ammo_item.quantity <= 0:
+		if cat.has_method("unequip_item"):
+			cat.call("unequip_item", ammo_slot)
+			GameLogger.combat("%s's %s were depleted and unequipped." % [cat.get("name"), ammo_item.item_name])
+
+		var sb: Node = SignalBus
+		if is_instance_valid(sb) and sb.has_signal("show_toast"):
+			sb.show_toast.emit("%s ran out of %s!" % [acting_char.name, ammo_item.item_name], true)
 
 	return true
 
 
-func _notify_out_of_ammo(acting_char: Combatant, weapon: ItemData) -> void:
-	var msg: String = "Out of ammo! %s has no projectiles left for %s!" % [acting_char.name, weapon.item_name]
+func _is_ammo_resource(item: ItemData) -> bool:
+	if not is_instance_valid(item):
+		return false
+	if item.quantity > 1:
+		return true
+
+	var name_upper: String = item.item_name.to_upper()
+	var id_upper: String = item.item_id.to_upper()
+	if "ARROW" in name_upper or "BOLT" in name_upper or "AMMO" in name_upper or "QUIVER" in name_upper or "DART" in name_upper:
+		return true
+	if "ARROW" in id_upper or "BOLT" in id_upper or "AMMO" in id_upper:
+		return true
+
+	return false
+
+
+func _notify_out_of_ammo(acting_char: Combatant, weapon_or_ammo_name: String) -> void:
+	var msg: String = "No ammo! %s has no projectiles for %s!" % [acting_char.name, weapon_or_ammo_name]
 	GameLogger.combat(msg)
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and sb.has_signal("show_toast"):

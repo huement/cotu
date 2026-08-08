@@ -19,6 +19,7 @@ func _ready() -> void:
 func _connect_to_signal_bus() -> void:
 	var sb: Node = SignalBus
 	if not is_instance_valid(sb):
+		push_error("EnemyVisualManager requires the SignalBus singleton.")
 		return
 
 	if not sb.combat_started.is_connected(_on_combat_started):
@@ -37,6 +38,7 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
 		if not is_instance_valid(camera_node):
+			push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
 			return
 
 	_clear_all_enemies()
@@ -45,8 +47,11 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 	var enemy_group: Array = []
 	if enemy_data_or_group is Array:
 		enemy_group = enemy_data_or_group as Array
-	elif enemy_data_or_group is Resource:
-		enemy_group.append(enemy_data_or_group as Resource)
+	elif is_instance_valid(enemy_data_or_group):
+		if "members" in enemy_data_or_group and enemy_data_or_group.get("members") is Array:
+			enemy_group = enemy_data_or_group.get("members") as Array
+		elif enemy_data_or_group is Resource:
+			enemy_group = [enemy_data_or_group as Resource]
 
 	for i in range(enemy_group.size()):
 		var e_data: Resource = enemy_group[i] as Resource
@@ -55,11 +60,16 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 		if is_instance_valid(e_data) and "model_scene" in e_data:
 			model_scene = e_data.get("model_scene") as PackedScene
 
-		var enemy_node: Node3D = model_scene.instantiate() as Node3D if is_instance_valid(model_scene) else _create_debug_mesh()
-		var enemy_id: String = "enemy_%d" % i
+		var enemy_node: Node3D
+		if is_instance_valid(model_scene):
+			enemy_node = model_scene.instantiate() as Node3D
+		else:
+			enemy_node = _create_debug_mesh()
 
+		var enemy_id: String = "enemy_%d" % i
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
+
 		_position_enemy(enemy_node, i, enemy_group.size())
 		play_animation(enemy_node, &"idle", true)
 
@@ -73,6 +83,7 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * horizontal_spacing
 
 	var cam_transform: Transform3D = camera_node.global_transform
+
 	var spawn_pos: Vector3 = cam_transform.origin \
 			- (cam_transform.basis.z * forward_distance) \
 			+ (cam_transform.basis.x * horizontal_offset) \
@@ -94,13 +105,13 @@ func play_animation(enemy_node: Node3D, anim_name: StringName, loop: bool = true
 	if is_instance_valid(anim_player) and anim_player.has_animation(anim_name):
 		anim_player.play(anim_name)
 		if not loop:
-			var cb: Callable
-			cb = func(finished_anim: StringName):
-				if anim_player.animation_finished.is_connected(cb):
-					anim_player.animation_finished.disconnect(cb)
-				if finished_anim != &"die":
-					play_animation(enemy_node, &"idle", true)
-			anim_player.animation_finished.connect(cb)
+			# 🎯 Cleanly auto-disconnect using Godot 4's CONNECT_ONE_SHOT flag
+			anim_player.animation_finished.connect(
+				func(finished_anim: StringName) -> void:
+					if finished_anim != &"die" and is_instance_valid(enemy_node):
+						play_animation(enemy_node, &"idle", true),
+				CONNECT_ONE_SHOT,
+			)
 
 
 func _create_debug_mesh() -> Node3D:
@@ -127,7 +138,6 @@ func _on_enemy_damaged(enemy_id: String, _damage: int) -> void:
 		play_animation(_spawned_enemies[enemy_id], &"interact-left", false)
 
 
-## 🎯 Updated: Accepts 3 arguments (enemy_id, current_hp, max_hp)
 func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -> void:
 	if current_hp <= 0 and _spawned_enemies.has(enemy_id):
 		var enemy_node: Node3D = _spawned_enemies[enemy_id]

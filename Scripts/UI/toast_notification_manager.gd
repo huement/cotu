@@ -19,14 +19,12 @@ func _ready() -> void:
 
 
 func _build_ui_hierarchy() -> void:
-	# Full-screen overlay that ignores mouse clicks
 	var overlay: Control = Control.new()
 	overlay.name = "ToastOverlay"
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay)
 
-	# Container positioned at top-center of screen
 	_toast_container = VBoxContainer.new()
 	_toast_container.name = "ToastContainer"
 	_toast_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -67,7 +65,6 @@ func _spawn_toast(message: String, is_error: bool) -> void:
 
 	_toast_container.add_child(panel)
 
-	# Smooth Tween Animation: Fade in -> Hold -> Fade out -> Free
 	panel.modulate.a = 0.0
 	var tween: Tween = create_tween()
 	tween.tween_property(panel, "modulate:a", 1.0, 0.15)
