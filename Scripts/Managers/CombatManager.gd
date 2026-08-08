@@ -35,11 +35,26 @@ class Combatant:
 	var max_mp: int
 	var strength: int
 	var defense: int
+	var is_front_row: bool = true
 	var ref: Resource
 	var active_effects: Array[ActiveEffect] = []
 
 
-	func _init(p_id: String, p_name: String, p_speed: float, p_is_player: bool, p_slot: int, p_hp: int, p_max_hp: int, p_mp: int, p_max_mp: int, p_str: int, p_def: int, p_ref: Resource) -> void:
+	func _init(
+		p_id: String,
+		p_name: String,
+		p_speed: float,
+		p_is_player: bool,
+		p_slot: int,
+		p_hp: int,
+		p_max_hp: int,
+		p_mp: int,
+		p_max_mp: int,
+		p_str: int,
+		p_def: int,
+		p_ref: Resource,
+		p_is_front: bool = true,
+	) -> void:
 		id = p_id
 		name = p_name
 		speed = maxf(1.0, p_speed)
@@ -52,6 +67,7 @@ class Combatant:
 		strength = p_str
 		defense = p_def
 		ref = p_ref
+		is_front_row = p_is_front
 
 
 	func add_effect(effect: ActiveEffect) -> void:
@@ -146,7 +162,14 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			var c_str: int = int(cat.get("strength")) if "strength" in cat else 10
 			var c_def: int = int(cat.get("defense")) if "defense" in cat else 2
 
-			var combatant: Combatant = Combatant.new(c_id, c_name, c_speed, true, i, c_hp, c_max_hp, c_mp, c_max_mp, c_str, c_def, cat)
+			# Determine Row Alignment (Slots 0-2 = Front, Slots 3-5 = Back)
+			var c_is_front: bool = true
+			if "is_front_row" in cat:
+				c_is_front = bool(cat.get("is_front_row"))
+			else:
+				c_is_front = i <= 2
+
+			var combatant: Combatant = Combatant.new(c_id, c_name, c_speed, true, i, c_hp, c_max_hp, c_mp, c_max_mp, c_str, c_def, cat, c_is_front)
 			combatant.meter = 0.0
 			combatants.append(combatant)
 
@@ -178,7 +201,9 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			if enemy_resources.size() > 1:
 				e_name = "%s %c" % [e_name, 65 + e_idx]
 
-			var enemy_combatant: Combatant = Combatant.new("enemy_%d" % e_idx, e_name, e_speed, false, e_idx, e_hp, e_max_hp, 0, 0, e_str, e_def, e_data)
+			var e_is_front: bool = bool(e_data.get("is_front_row")) if "is_front_row" in e_data else true
+
+			var enemy_combatant: Combatant = Combatant.new("enemy_%d" % e_idx, e_name, e_speed, false, e_idx, e_hp, e_max_hp, 0, 0, e_str, e_def, e_data, e_is_front)
 			enemy_combatant.meter = 0.0
 			combatants.append(enemy_combatant)
 
@@ -225,7 +250,6 @@ func _on_combat_ended(victory: bool) -> void:
 						if "gold_value" in c.ref and int(c.ref.get("gold_value")) > 0:
 							single_gold = int(c.ref.get("gold_value"))
 
-						# Roll Enemy Loot Table (or Fallback if null)
 						var rolled: Array[ItemData] = _resolve_enemy_loot(c.ref)
 						items_dropped.append_array(rolled)
 
@@ -242,7 +266,6 @@ func _on_combat_ended(victory: bool) -> void:
 			total_xp = 50
 			total_gold = 25
 
-		# Award Gold to Party Wallet
 		if is_instance_valid(gs) and gs.has_method("add_gold"):
 			gs.add_gold(total_gold)
 
@@ -265,21 +288,17 @@ func _on_combat_ended(victory: bool) -> void:
 		SignalBus.popup_requested.emit(&"BATTLE_VICTORY", victory_data)
 
 
-## Resolves loot for a defeated enemy. Uses enemy's LootTable if assigned, otherwise falls back to compiled item pool.
 func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
 	if not is_instance_valid(enemy_ref):
 		return _generate_fallback_loot()
 
-	# 1. Custom assigned LootTable
 	if "loot_table" in enemy_ref and is_instance_valid(enemy_ref.get("loot_table")):
 		var table: LootTable = enemy_ref.get("loot_table") as LootTable
 		return table.roll_table()
 
-	# 2. Fallback loot if enemy has no loot_table assigned
 	return _generate_fallback_loot()
 
 
-## Generates 1-2 random loot items from compiled .tres files in res://Data/Items/
 func _generate_fallback_loot() -> Array[ItemData]:
 	var drops: Array[ItemData] = []
 	var item_paths: Array[String] = [
@@ -402,6 +421,17 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		return
 
 	if action_type == &"ATTACK":
+		var attack_type: String = "UNARMED"
+		if is_instance_valid(acting_char.ref) and acting_char.ref.has_method("get_attack_type_string"):
+			attack_type = acting_char.ref.get_attack_type_string()
+
+		# Consume Projectile for Ranged Attacks
+		if attack_type == "RANGED":
+			if not _consume_ranged_ammo(acting_char):
+				_reset_combatant_meter(acting_char)
+				_unpause_and_continue()
+				return
+
 		var target_char: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
 		if not is_instance_valid(target_char) or target_char.current_hp <= 0:
 			for c: Combatant in combatants:
@@ -410,7 +440,7 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 					break
 
 		if is_instance_valid(target_char):
-			var damage: int = _calculate_physical_damage(acting_char, target_char)
+			var damage: int = _calculate_physical_damage(acting_char, target_char, attack_type)
 			target_char.current_hp = max(0, target_char.current_hp - damage)
 			_sync_hp_to_ref(target_char)
 
@@ -419,13 +449,91 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 			SignalBus.chevron_flash_requested.emit(false)
 			SignalBus.camera_shake_requested.emit(0.5)
 
-			GameLogger.combat("%s ATTACKED %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, target_char.name, damage, target_char.current_hp, target_char.max_hp])
+			GameLogger.combat("%s ATTACKED %s with %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, target_char.name, attack_type, damage, target_char.current_hp, target_char.max_hp])
 
 			if _check_battle_state():
 				return
 
 		_reset_combatant_meter(acting_char)
 		_unpause_and_continue()
+
+
+## Consumes 1 projectile / ammo unit when executing a ranged attack.
+## Returns true if ammo was successfully consumed or false if out of ammo.
+func _consume_ranged_ammo(acting_char: Combatant) -> bool:
+	if not is_instance_valid(acting_char.ref):
+		return true
+
+	var cat: Resource = acting_char.ref
+	var equipped_item: ItemData = null
+	var slot_name: String = "RIGHT_HAND"
+
+	if cat.has_method("get_equipped_item"):
+		equipped_item = cat.call("get_equipped_item", "RIGHT_HAND") as ItemData
+		if not is_instance_valid(equipped_item):
+			slot_name = "LEFT_HAND"
+			equipped_item = cat.call("get_equipped_item", "LEFT_HAND") as ItemData
+
+	if not is_instance_valid(equipped_item):
+		return true
+
+	# Check quantity / current_durability / count / ammo properties on item
+	if "quantity" in equipped_item:
+		var qty: int = int(equipped_item.get("quantity"))
+		if qty <= 0:
+			_notify_out_of_ammo(acting_char, equipped_item)
+			return false
+		qty -= 1
+		equipped_item.set("quantity", qty)
+		GameLogger.combat("%s fired 1 projectile from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, qty])
+		if qty <= 0:
+			_deplete_weapon_slot(cat, slot_name, equipped_item)
+	elif "current_durability" in equipped_item:
+		var dur: int = int(equipped_item.current_durability)
+		if dur <= 0:
+			_notify_out_of_ammo(acting_char, equipped_item)
+			return false
+		dur -= 1
+		equipped_item.current_durability = max(0, dur)
+		GameLogger.combat("%s used 1 projectile/ammo unit from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, dur])
+		if dur <= 0:
+			_deplete_weapon_slot(cat, slot_name, equipped_item)
+	elif "count" in equipped_item:
+		var cnt: int = int(equipped_item.get("count"))
+		if cnt <= 0:
+			_notify_out_of_ammo(acting_char, equipped_item)
+			return false
+		cnt -= 1
+		equipped_item.set("count", max(0, cnt))
+		GameLogger.combat("%s fired 1 projectile from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, cnt])
+		if cnt <= 0:
+			_deplete_weapon_slot(cat, slot_name, equipped_item)
+	elif "ammo" in equipped_item:
+		var ammo: int = int(equipped_item.get("ammo"))
+		if ammo <= 0:
+			_notify_out_of_ammo(acting_char, equipped_item)
+			return false
+		ammo -= 1
+		equipped_item.set("ammo", max(0, ammo))
+		GameLogger.combat("%s used 1 ammo unit from %s (Remaining: %d)" % [acting_char.name, equipped_item.item_name, ammo])
+		if ammo <= 0:
+			_deplete_weapon_slot(cat, slot_name, equipped_item)
+
+	return true
+
+
+func _notify_out_of_ammo(acting_char: Combatant, weapon: ItemData) -> void:
+	var msg: String = "Out of ammo! %s has no projectiles left for %s!" % [acting_char.name, weapon.item_name]
+	GameLogger.combat(msg)
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and sb.has_signal("show_toast"):
+		sb.show_toast.emit(msg, true)
+
+
+func _deplete_weapon_slot(cat: Resource, slot_name: String, weapon: ItemData) -> void:
+	if cat.has_method("unequip_item"):
+		cat.call("unequip_item", slot_name)
+		GameLogger.combat("%s's %s was depleted and unequipped." % [cat.get("name"), weapon.item_name])
 
 
 func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringName, target_index: int) -> void:
@@ -442,7 +550,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 		else (str(ability.get("spell_id")) if "spell_id" in ability else (str(ability.get("skill_id")) if "skill_id" in ability else spell_name.to_snake_case()))
 	)
 
-	# 1. Energy / MP Cost Validation & Deduction
 	var energy_cost: int = int(ability.get("energy_cost")) if "energy_cost" in ability else 0
 	if acting_char.current_mp < energy_cost:
 		GameLogger.combat("%s does not have enough Energy/MP to cast %s! (Cost: %d, Current: %d)" % [acting_char.name, spell_name, energy_cost, acting_char.current_mp])
@@ -453,7 +560,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 	if acting_char.is_player:
 		SignalBus.character_mana_changed.emit(acting_char.slot_index, acting_char.current_mp, acting_char.max_mp)
 
-	# 2. Skill Accuracy Check
 	if action_type == &"SKILL" and ability.has_method("roll_success_check"):
 		if not ability.roll_success_check():
 			GameLogger.combat("%s used %s, but the attack MISSED!" % [acting_char.name, spell_name])
@@ -461,7 +567,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 				target_mgr.clear_pending_ability()
 			return
 
-	# 3. Standardized Target Type Resolution (Enum Integer & String Compatible)
 	var raw_target_val: Variant = ability.get("target_type") if "target_type" in ability else ability.get("target")
 	var is_all_enemies: bool = false
 	var is_all_allies: bool = false
@@ -507,7 +612,7 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 			targets.append(acting_char)
 	elif is_self:
 		targets.append(acting_char)
-	else: # SINGLE_ENEMY
+	else:
 		var enemy_target: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
 		if is_instance_valid(enemy_target) and enemy_target.current_hp > 0:
 			targets.append(enemy_target)
@@ -517,7 +622,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 					targets.append(c)
 					break
 
-	# 4. Potency & Caster Stat Scaling
 	var stat_name: String = str(ability.get("stat_scaling")).to_lower() if "stat_scaling" in ability else "int"
 	var caster_stat_val: int = 10
 	if is_instance_valid(acting_char.ref) and stat_name in acting_char.ref:
@@ -531,7 +635,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 	elif "effect_amount" in ability:
 		power_val = float(ability.get("effect_amount"))
 
-	# 5. Duration Calculation (Spells: Base Duration * Level/Tier)
 	var base_duration: int = 1
 	if "duration" in ability:
 		base_duration = int(ability.get("duration"))
@@ -550,7 +653,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 
 		total_duration = base_duration * max(1, spell_level)
 
-	# 6. Action Category & Status Identification
 	var action_category: String = ""
 	if "action_type" in ability:
 		action_category = str(ability.get("action_type")).to_upper()
@@ -563,7 +665,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 	if "status_effect" in ability:
 		status_effect = str(ability.get("status_effect")).to_upper()
 
-	# 7. Apply Ability Effects to Selected Targets
 	for t: Combatant in targets:
 		if action_category == "BUFF" or status_effect == "SHIELD" or status_effect == "HASTE":
 			var stat_to_buff: StringName = &"defense"
@@ -609,8 +710,12 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 				var hot_effect: ActiveEffect = ActiveEffect.new(spell_id, spell_name, total_duration - 1, &"HOT", &"", power_val, acting_char.id)
 				t.add_effect(hot_effect)
 
-		else: # Direct Magic or Skill Damage
+		else: # Direct Damage
 			var damage: int = int(power_val)
+			if action_type == &"SKILL" and not t.is_front_row:
+				damage = max(1, int(damage * 0.5))
+				GameLogger.combat("%s is protected in the Back Row! Physical skill damage reduced to %d" % [t.name, damage])
+
 			t.current_hp = max(0, t.current_hp - damage)
 			_sync_hp_to_ref(t)
 
@@ -618,9 +723,8 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 				SignalBus.enemy_damaged_visual.emit(t.id, damage)
 				SignalBus.enemy_health_changed.emit(t.id, t.current_hp, t.max_hp)
 
-			GameLogger.combat("%s cast %s on %s dealing %d damage!" % [acting_char.name, spell_name, t.name, damage])
+			GameLogger.combat("%s used %s on %s dealing %d damage!" % [acting_char.name, spell_name, t.name, damage])
 
-	# 8. Clear pending ability state
 	if is_instance_valid(target_mgr) and target_mgr.has_method("clear_pending_ability"):
 		target_mgr.clear_pending_ability()
 
@@ -669,8 +773,23 @@ func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int)
 		GameLogger.combat("CombatManager: Battle item used on target slot %d (Success = %s)" % [target_slot_index, str(success)])
 
 
-func _calculate_physical_damage(attacker: Combatant, defender: Combatant) -> int:
-	return max(1, attacker.get_effective_strength() - defender.get_effective_defense())
+func _calculate_physical_damage(attacker: Combatant, defender: Combatant, attack_type: String = "UNARMED") -> int:
+	var base_dmg: float = float(attacker.get_effective_strength() - defender.get_effective_defense())
+	base_dmg = maxf(1.0, base_dmg)
+
+	# 1. Attacker Row Penalty: Back Row Melee (Blade, Bash, Unarmed) incurs a 50% damage penalty
+	var attacker_mult: float = 1.0
+	if not attacker.is_front_row and attack_type in ["BLADE", "BASH", "UNARMED"]:
+		attacker_mult = 0.5
+		GameLogger.combat("%s attacks from the Back Row with melee! (50%% penalty applied)" % attacker.name)
+
+	# 2. Defender Row Protection: Back Row receives 50% (Protected) Physical Damage Taken
+	var defender_mult: float = 1.0
+	if not defender.is_front_row:
+		defender_mult = 0.5
+		GameLogger.combat("%s is protected in the Back Row! (50%% physical damage taken)" % defender.name)
+
+	return max(1, int(base_dmg * attacker_mult * defender_mult))
 
 
 func _execute_enemy_ai(enemy: Combatant) -> void:
@@ -683,7 +802,11 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 
 	if not alive_party.is_empty():
 		var target: Combatant = alive_party.pick_random()
-		var damage: int = _calculate_physical_damage(enemy, target)
+		var enemy_attack_type: String = "BLADE"
+		if is_instance_valid(enemy.ref) and enemy.ref.has_method("get_attack_type_string"):
+			enemy_attack_type = enemy.ref.get_attack_type_string()
+
+		var damage: int = _calculate_physical_damage(enemy, target, enemy_attack_type)
 		target.current_hp = max(0, target.current_hp - damage)
 
 		_sync_hp_to_ref(target)

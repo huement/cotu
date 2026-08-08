@@ -25,6 +25,11 @@ class_name CharacterSheetMenu
 @onready var attack_val_label: Label = %AttackValLabel as Label
 @onready var row_toggle_button: Button = %RowToggleButton as Button
 
+# 🎯 SceneUniqueNodes for Paginator
+@onready var prev_character_button: TextureButton = %PrevCharacterButton as TextureButton
+@onready var next_character_button: TextureButton = %NextCharacterButton as TextureButton
+@onready var index_label: Label = %IndexLabel as Label
+
 var _current_character: CatCharacter = null
 var _current_slot_index: int = -1
 
@@ -42,9 +47,17 @@ func _ready() -> void:
 	if close_button:
 		close_button.pressed.connect(_on_close_button_pressed)
 
+	# Connect Paginator Buttons
+	if prev_character_button:
+		prev_character_button.pressed.connect(_on_prev_character_pressed)
+	if next_character_button:
+		next_character_button.pressed.connect(_on_next_character_pressed)
+
 	if row_toggle_button:
+		# 🎯 Ensure toggle mode is enabled programmatically
+		row_toggle_button.toggle_mode = true
 		row_toggle_button.toggled.connect(_on_row_toggle_toggled)
-		# 1. Force the font color to remain Black (for normal, hover, and pressed states)
+		# Force font color overrides
 		row_toggle_button.add_theme_color_override("font_color", Color.BLACK)
 		row_toggle_button.add_theme_color_override("font_hover_color", Color.BLACK)
 		row_toggle_button.add_theme_color_override("font_pressed_color", Color.BLACK)
@@ -69,6 +82,9 @@ func _on_portrait_clicked(slot_index: int) -> void:
 func _render_character_sheet(character: CatCharacter) -> void:
 	if not is_instance_valid(character):
 		return
+
+	# 🎯 SAVE THE REFERENCE TO THE CURRENT CHARACTER
+	_current_character = character
 
 	# 1. Load Portrait Texture
 	if portrait_texture:
@@ -128,7 +144,10 @@ func _render_character_sheet(character: CatCharacter) -> void:
 			prof_title = character.profession.profession_name
 		profession_label.text = prof_title.to_upper()
 
-	# 4. Delegate Sub-Panel Displays
+	# 6. Update Paginator Index Label & Buttons
+	_update_paginator()
+
+	# 7. Delegate Sub-Panel Displays
 	if stats_panel:
 		stats_panel.display_character_stats(character)
 	if loadout_panel:
@@ -139,6 +158,65 @@ func _render_character_sheet(character: CatCharacter) -> void:
 		skills_spells_panel.display_character_abilities(character)
 
 
+# --- 🎯 PAGINATION LOGIC ---
+func _on_prev_character_pressed() -> void:
+	_navigate_character(-1)
+
+
+func _on_next_character_pressed() -> void:
+	_navigate_character(1)
+
+
+func _navigate_character(direction: int) -> void:
+	if not GameState.current_party or GameState.current_party.slots.is_empty():
+		return
+
+	# Get all active (non-null) characters in the party
+	var valid_characters: Array = GameState.current_party.slots.filter(
+		func(c):
+			return is_instance_valid(c),
+	)
+
+	if valid_characters.is_empty():
+		return
+
+	var current_idx: int = valid_characters.find(_current_character)
+	if current_idx == -1:
+		current_idx = 0
+
+	# Wrap-around calculation
+	var next_idx: int = (current_idx + direction + valid_characters.size()) % valid_characters.size()
+	var target_character: CatCharacter = valid_characters[next_idx] as CatCharacter
+
+	_current_slot_index = GameState.current_party.slots.find(target_character)
+	_render_character_sheet(target_character)
+
+
+func _update_paginator() -> void:
+	if not GameState.current_party:
+		return
+
+	# Count active characters
+	var valid_characters: Array = GameState.current_party.slots.filter(
+		func(c):
+			return is_instance_valid(c),
+	)
+
+	var total_count: int = valid_characters.size()
+	var current_pos: int = valid_characters.find(_current_character) + 1 if _current_character in valid_characters else 0
+
+	if index_label:
+		index_label.text = "%d | %d" % [current_pos, total_count]
+
+	# Disable buttons if there is 1 or fewer characters
+	var can_cycle: bool = total_count > 1
+	if prev_character_button:
+		prev_character_button.disabled = not can_cycle
+	if next_character_button:
+		next_character_button.disabled = not can_cycle
+
+
+# --- 🛡️ ROW TOGGLE LOGIC ---
 func _on_row_toggle_toggled(button_pressed: bool) -> void:
 	if not is_instance_valid(_current_character) or not GameState.current_party:
 		return
@@ -154,11 +232,26 @@ func _on_row_toggle_toggled(button_pressed: bool) -> void:
 			_update_row_button_text(true)
 			row_toggle_button.set_block_signals(false)
 			print("CharacterSheetMenu: Cannot move to Back Row: At least 1 party member must be in the Front Row!")
+			# 🎯 Broadcast warning toast to UI
+			var sb: Node = get_tree().root.get_node_or_null("SignalBus")
+			if sb and sb.has_signal("show_toast"):
+				sb.show_toast.emit("Cannot move: At least 1 party member must be in Front Row!", true)
 			return
 
+	# Apply row change and trigger party matrix reorganization
 	GameState.current_party.set_character_row(_current_character, target_front)
+
+	# 🎯 Update slot index tracking to match the character's new matrix location
+	_current_slot_index = GameState.current_party.slots.find(_current_character)
+	if "active_character_index" in GameState:
+		GameState.active_character_index = _current_slot_index
+
 	_update_row_button_text(target_front)
-	GameState.save_game()
+	_update_paginator()
+
+	# 🎯 Safe invocation for game saving
+	if GameState.has_method("save_game"):
+		GameState.call("save_game")
 
 
 func _update_row_button_text(is_front: bool) -> void:

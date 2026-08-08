@@ -51,5 +51,6 @@ signal battle_victory_popup_requested(data: Dictionary)
 # JUICE IT
 signal camera_shake_requested(trauma: float)
 
-# Logging Messages
+# Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)
+signal show_toast(message: String, is_error: bool)

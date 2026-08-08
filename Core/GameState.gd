@@ -92,6 +92,8 @@ func _load_default_save() -> void:
 			current_party = default_save.party.duplicate(true) as DungeonParty
 			inventory = default_save.inventory.duplicate(true) as Inventory if default_save.inventory != null else Inventory.new()
 			current_floor_id = default_save.current_floor_id
+			if "party_gold" in default_save:
+				party_gold = default_save.party_gold
 			_sync_party_references()
 			save_game()
 			print("GameState: Starter party successfully initialized from default_save.tres")
@@ -105,6 +107,8 @@ func save_game() -> bool:
 	save.party = current_party
 	save.inventory = inventory
 	save.current_floor_id = current_floor_id
+	if "party_gold" in save:
+		save.party_gold = party_gold
 	save.save_timestamp = Time.get_datetime_string_from_system()
 
 	var err := ResourceSaver.save(save, SAVE_PATH)
@@ -134,6 +138,8 @@ func load_game() -> bool:
 	current_party = save.party
 	inventory = save.inventory if save.inventory != null else Inventory.new()
 	current_floor_id = save.current_floor_id
+	if "party_gold" in save:
+		party_gold = save.party_gold
 
 	_sync_party_references()
 	print("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, SAVE_PATH])
@@ -170,7 +176,9 @@ func add_gold(amount: int) -> void:
 		return
 	party_gold += amount
 	GameLogger.combat("Party gained %d coins! Total Gold: %d" % [amount, party_gold])
-	SignalBus.party_gold_changed.emit(party_gold, amount)
+	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
+	if sb and sb.has_signal("party_gold_changed"):
+		sb.party_gold_changed.emit(party_gold, amount)
 
 
 ## Attempts to spend gold from the party wallet. Returns true if successful.
@@ -179,5 +187,7 @@ func spend_gold(amount: int) -> bool:
 		return false
 	party_gold -= amount
 	GameLogger.combat("Party spent %d coins. Remaining Gold: %d" % [amount, party_gold])
-	SignalBus.party_gold_changed.emit(party_gold, -amount)
+	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
+	if sb and sb.has_signal("party_gold_changed"):
+		sb.party_gold_changed.emit(party_gold, -amount)
 	return true

@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://ci4b8iodvo08n"]
+[gd_scene load_steps=20 format=3 uid="uid://ci4b8iodvo08n"]
 
 [ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
 [ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://f7h57ejroclo" path="res://ui/BATTLE/cmd_item.png" id="11_gv3jx"]
 [ext_resource type="Texture2D" uid="uid://cpl5l6wc3l6q1" path="res://ui/BATTLE/cmd_run.png" id="12_s15b2"]
 [ext_resource type="Texture2D" uid="uid://dyek5vtk5dj0r" path="res://ui/BATTLE/cmd_auto.png" id="15_lrf55"]
+[ext_resource type="Script" uid="uid://dp2c6nndb40o5" path="res://Scripts/UI/toast_notification_manager.gd" id="19_cvbxj"]
 
 [node name="BattleHud" type="Control"]
 layout_mode = 3
@@ -278,3 +279,6 @@ offset_bottom = 57.0
 theme_override_colors/font_color = Color(0.15487596, 0.154876, 0.15487596, 1)
 theme_override_fonts/font = ExtResource("4_tbwvx")
 text = "CHARACTER NAME"
+
+[node name="ToastController" type="CanvasLayer" parent="."]
+script = ExtResource("19_cvbxj")

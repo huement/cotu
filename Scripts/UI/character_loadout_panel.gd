@@ -20,17 +20,25 @@ var _current_cat: CatCharacter = null
 @onready var slot_left_hand: Button = %SlotLeftHand as Button
 @onready var slot_right_hand: Button = %SlotRightHand as Button
 
+
 func _ready() -> void:
 	# Connect all button signals safely
-	if slot_body: slot_body.pressed.connect(_on_slot_pressed.bind("BODY"))
-	if slot_arms: slot_arms.pressed.connect(_on_slot_pressed.bind("ARMS"))
-	if slot_legs: slot_legs.pressed.connect(_on_slot_pressed.bind("LEGS"))
-	if slot_feet: slot_feet.pressed.connect(_on_slot_pressed.bind("FEET"))
-	if slot_left_hand: slot_left_hand.pressed.connect(_on_slot_pressed.bind("LEFT_HAND"))
-	if slot_right_hand: slot_right_hand.pressed.connect(_on_slot_pressed.bind("RIGHT_HAND"))
+	if slot_body:
+		slot_body.pressed.connect(_on_slot_pressed.bind("BODY"))
+	if slot_arms:
+		slot_arms.pressed.connect(_on_slot_pressed.bind("ARMS"))
+	if slot_legs:
+		slot_legs.pressed.connect(_on_slot_pressed.bind("LEGS"))
+	if slot_feet:
+		slot_feet.pressed.connect(_on_slot_pressed.bind("FEET"))
+	if slot_left_hand:
+		slot_left_hand.pressed.connect(_on_slot_pressed.bind("LEFT_HAND"))
+	if slot_right_hand:
+		slot_right_hand.pressed.connect(_on_slot_pressed.bind("RIGHT_HAND"))
 
 	if _cached_cat:
 		display_loadout(_cached_cat)
+
 
 ## PUBLIC API: Populates the UI with a character's equipped ItemData resources
 func display_loadout(cat: CatCharacter) -> void:
@@ -51,16 +59,23 @@ func display_loadout(cat: CatCharacter) -> void:
 	_update_slot("LEFT_HAND", cat.get_equipped_item("LEFT_HAND") as ItemData)
 	_update_slot("RIGHT_HAND", cat.get_equipped_item("RIGHT_HAND") as ItemData)
 
+
 ## Updates a single equipment slot's UI elements safely
 func _update_slot(slot_name: String, item: ItemData) -> void:
 	var slot_button: Button = null
 	match slot_name:
-		"BODY": slot_button = slot_body
-		"ARMS": slot_button = slot_arms
-		"LEGS": slot_button = slot_legs
-		"FEET": slot_button = slot_feet
-		"LEFT_HAND": slot_button = slot_left_hand
-		"RIGHT_HAND": slot_button = slot_right_hand
+		"BODY":
+			slot_button = slot_body
+		"ARMS":
+			slot_button = slot_arms
+		"LEGS":
+			slot_button = slot_legs
+		"FEET":
+			slot_button = slot_feet
+		"LEFT_HAND":
+			slot_button = slot_left_hand
+		"RIGHT_HAND":
+			slot_button = slot_right_hand
 
 	if not slot_button:
 		return
@@ -97,12 +112,16 @@ func _update_slot(slot_name: String, item: ItemData) -> void:
 				icon_node.texture = null
 
 		# Overlay bottom-right quantity badge if quantity > 1
-		if item_qty > 1:
-			_add_quantity_badge(slot_button, item_qty)
+		# if item_qty > 1:
+		# 	_add_quantity_badge(slot_button, item_qty)
 	else:
-		if name_label: name_label.text = "-- Empty --"
-		if status_label: status_label.text = ""
-		if icon_node: icon_node.texture = null
+		if name_label:
+			name_label.text = "-- Empty --"
+		if status_label:
+			status_label.text = ""
+		if icon_node:
+			icon_node.texture = null
+
 
 func _add_quantity_badge(slot_button: Button, count: int) -> void:
 	var count_label := Label.new()
@@ -123,6 +142,7 @@ func _add_quantity_badge(slot_button: Button, count: int) -> void:
 
 	slot_button.add_child(count_label)
 
+
 ## Signal handler for equipment slot presses
 func _on_slot_pressed(slot_name: String) -> void:
 	var equipped_item: ItemData = null
@@ -132,8 +152,4 @@ func _on_slot_pressed(slot_name: String) -> void:
 	print("CharacterLoadoutPanel: Requesting item popup for slot: ", slot_name, " Item: ", equipped_item)
 
 	if get_tree().root.has_node("SignalBus"):
-		SignalBus.popup_requested.emit("ITEM_ACTIONS", {
-			"slot": slot_name,
-			"item": equipped_item,
-			"is_equipped": true
-		})
+		SignalBus.popup_requested.emit("ITEM_ACTIONS", { "slot": slot_name, "item": equipped_item, "is_equipped": true })
