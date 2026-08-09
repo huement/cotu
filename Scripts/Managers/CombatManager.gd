@@ -105,10 +105,12 @@ const BASE_TICK_RATE: float = 25.0
 
 @export var is_combat_active: bool = false
 @export var is_paused_for_input: bool = false
+@export var base_flee_chance: float = 0.60
 
 var combatants: Array[Combatant] = []
 var turn_queue: Array[Combatant] = []
 var active_combatant: Combatant = null
+var guarding_characters: Array[int] = [] # Stores party slot indices currently guarding
 
 
 func _ready() -> void:
@@ -133,6 +135,7 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
+	guarding_characters.clear()
 
 	var registered_cats: int = 0
 	for i in range(player_party.size()):
@@ -210,6 +213,10 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 	is_combat_active = true
 	is_paused_for_input = false
 
+	# Validate combat setup immediately
+	if _check_battle_state():
+		return
+
 	for c: Combatant in combatants:
 		c.meter = minf(MAX_TURN_METER, c.get_effective_speed() * 5.0)
 		SignalBus.turn_meter_updated.emit(c.id, c.meter / MAX_TURN_METER)
@@ -281,10 +288,10 @@ func _on_combat_ended(victory: bool) -> void:
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
+	guarding_characters.clear()
 
 	SignalBus.combat_ended.emit(victory)
 
-	# 🎯 Save current HP/Mana state to disk regardless of victory or retreat
 	var gs: Node = get_tree().root.get_node_or_null("GameState")
 	if is_instance_valid(gs) and gs.has_method("save_game"):
 		gs.save_game()
@@ -329,6 +336,9 @@ func _generate_fallback_loot() -> Array[ItemData]:
 
 
 func _tick_turn_meters(delta: float) -> void:
+	if not is_combat_active:
+		return
+
 	for c: Combatant in combatants:
 		if c.current_hp <= 0:
 			continue
@@ -340,12 +350,12 @@ func _tick_turn_meters(delta: float) -> void:
 			if c.meter >= MAX_TURN_METER and not turn_queue.has(c) and active_combatant != c:
 				turn_queue.append(c)
 
-	if not turn_queue.is_empty() and not is_paused_for_input:
+	if not turn_queue.is_empty() and not is_paused_for_input and is_combat_active:
 		_process_turn_queue()
 
 
 func _process_turn_queue() -> void:
-	if turn_queue.is_empty() or is_paused_for_input:
+	if turn_queue.is_empty() or is_paused_for_input or not is_combat_active:
 		return
 
 	active_combatant = turn_queue.pop_front()
@@ -355,6 +365,10 @@ func _process_turn_queue() -> void:
 		return
 
 	_start_combatant_turn(active_combatant)
+
+	# Guard assertion: If combat ended during _start_combatant_turn, active_combatant is set to null.
+	if not is_combat_active or not is_instance_valid(active_combatant):
+		return
 
 	if active_combatant.current_hp <= 0:
 		_reset_combatant_meter(active_combatant)
@@ -369,14 +383,18 @@ func _process_turn_queue() -> void:
 
 
 func _start_combatant_turn(c: Combatant) -> void:
+	if not is_instance_valid(c):
+		return
+
+	# Erase this combatant's guard status when their new turn starts
+	guarding_characters.erase(c.slot_index)
+
 	var expired_effects: Array[ActiveEffect] = []
 
 	for eff: ActiveEffect in c.active_effects:
 		if eff.effect_type == &"DOT":
 			var dot_damage: int = int(eff.value)
 			GameLogger.combat("%s took %d %s damage from %s!" % [c.name, dot_damage, eff.id, eff.name])
-
-			# 🎯 Centralized damage and death toast resolution
 			_apply_damage_to_combatant(c, dot_damage, eff.name)
 
 		elif eff.effect_type == &"HOT":
@@ -405,10 +423,27 @@ func _start_combatant_turn(c: Combatant) -> void:
 
 
 func _on_player_action_selected(slot_index: int, action_type: StringName, target_index: int) -> void:
-	if active_combatant == null or active_combatant.slot_index != slot_index:
+	if not is_combat_active or active_combatant == null or active_combatant.slot_index != slot_index:
 		return
 
 	var acting_char: Combatant = active_combatant
+
+	# --- DEFEND / GUARD ACTION ---
+	if action_type == &"DEFEND" or action_type == &"GUARD":
+		execute_guard_action(acting_char.slot_index)
+		_reset_combatant_meter(acting_char)
+		call_deferred("_unpause_and_continue")
+		return
+
+	# --- RUN / FLEE ACTION ---
+	if action_type == &"RUN" or action_type == &"FLEE":
+		var avg_enemy_spd: int = _get_average_enemy_speed()
+		execute_run_action(int(acting_char.get_effective_speed()), avg_enemy_spd)
+
+		if is_combat_active:
+			_reset_combatant_meter(acting_char)
+			call_deferred("_unpause_and_continue")
+		return
 
 	if action_type == &"ITEM":
 		_execute_item_use_in_combat(acting_char, target_index)
@@ -427,7 +462,6 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		if is_instance_valid(acting_char.ref) and acting_char.ref.has_method("get_attack_type_string"):
 			attack_type = acting_char.ref.get_attack_type_string()
 
-		# Consume Projectile for Ranged Attacks
 		if attack_type == "RANGED":
 			if not _consume_ranged_ammo(acting_char):
 				GameLogger.combat("%s has no ammo for Ranged Weapon! Falling back to Unarmed attack." % acting_char.name)
@@ -443,8 +477,6 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		if is_instance_valid(target_char):
 			var damage: int = _calculate_physical_damage(acting_char, target_char, attack_type)
 			GameLogger.combat("%s ATTACKED %s with %s dealing %d damage!" % [acting_char.name, target_char.name, attack_type, damage])
-
-			# 🎯 Centralized damage and death toast resolution
 			_apply_damage_to_combatant(target_char, damage, acting_char.name)
 
 			if _check_battle_state():
@@ -454,8 +486,6 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		call_deferred("_unpause_and_continue")
 
 
-## Consumes 1 projectile from equipped Ammunition (quantity) for ranged attacks.
-## Returns true if ammo was consumed, or false if out of ammo.
 func _consume_ranged_ammo(acting_char: Combatant) -> bool:
 	if not is_instance_valid(acting_char.ref):
 		return true
@@ -471,7 +501,6 @@ func _consume_ranged_ammo(acting_char: Combatant) -> bool:
 	var ammo_item: ItemData = null
 	var ammo_slot: String = ""
 
-	# 1. Look for stackable Ammunition in LEFT_HAND or RIGHT_HAND
 	if _is_ammo_resource(left_item):
 		ammo_item = left_item
 		ammo_slot = "LEFT_HAND"
@@ -479,13 +508,11 @@ func _consume_ranged_ammo(acting_char: Combatant) -> bool:
 		ammo_item = right_item
 		ammo_slot = "RIGHT_HAND"
 
-	# 2. If no dedicated ammo item is equipped, notify player and return false
 	if not is_instance_valid(ammo_item):
 		var launcher_name: String = right_item.item_name if is_instance_valid(right_item) else (left_item.item_name if is_instance_valid(left_item) else "Ranged Weapon")
 		_notify_out_of_ammo(acting_char, launcher_name)
 		return false
 
-	# 3. Check remaining quantity
 	if ammo_item.quantity <= 0:
 		_notify_out_of_ammo(acting_char, ammo_item.item_name)
 		return false
@@ -493,7 +520,6 @@ func _consume_ranged_ammo(acting_char: Combatant) -> bool:
 	ammo_item.quantity -= 1
 	GameLogger.combat("%s fired 1 projectile from %s! (%d remaining)" % [acting_char.name, ammo_item.item_name, ammo_item.quantity])
 
-	# 4. If completely depleted, unequip ONLY the ammunition item
 	if ammo_item.quantity <= 0:
 		if cat.has_method("unequip_item"):
 			cat.call("unequip_item", ammo_slot)
@@ -715,8 +741,6 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 				GameLogger.combat("%s is protected in the Back Row! Physical skill damage reduced to %d" % [t.name, damage])
 
 			GameLogger.combat("%s used %s on %s dealing %d damage!" % [acting_char.name, spell_name, t.name, damage])
-
-			# 🎯 Centralized damage and death toast resolution
 			_apply_damage_to_combatant(t, damage, acting_char.name)
 
 	if is_instance_valid(target_mgr) and target_mgr.has_method("clear_pending_ability"):
@@ -771,26 +795,45 @@ func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int)
 		GameLogger.combat("CombatManager: Battle item used on target slot %d (Success = %s)" % [target_slot_index, str(success)])
 
 
-func _calculate_physical_damage(attacker: Combatant, defender: Combatant, attack_type: String = "UNARMED") -> int:
-	var base_dmg: float = float(attacker.get_effective_strength() - defender.get_effective_defense())
-	base_dmg = maxf(1.0, base_dmg)
+## Process a Guard Command during Execution Phase
+func execute_guard_action(caster_index: int) -> void:
+	if not guarding_characters.has(caster_index):
+		guarding_characters.append(caster_index)
 
-	# 1. Attacker Row Penalty: Back Row Melee (Blade, Bash, Unarmed) incurs a 50% damage penalty
-	var attacker_mult: float = 1.0
-	if not attacker.is_front_row and attack_type in ["BLADE", "BASH", "UNARMED"]:
-		attacker_mult = 0.5
-		GameLogger.combat("%s attacks from the Back Row with melee! (50%% penalty applied)" % attacker.name)
+	SignalBus.character_guarded.emit(caster_index)
+	GameLogger.combat("Slot %d raises their defense!" % (caster_index + 1))
 
-	# 2. Defender Row Protection: Back Row receives 50% (Protected) Physical Damage Taken
-	var defender_mult: float = 1.0
-	if not defender.is_front_row:
-		defender_mult = 0.5
-		GameLogger.combat("%s is protected in the Back Row! (50%% physical damage taken)" % defender.name)
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and sb.has_signal("show_toast"):
+		sb.show_toast.emit("Slot %d guards!" % (caster_index + 1), false)
 
-	return max(1, int(base_dmg * attacker_mult * defender_mult))
+
+## Process a Run / Flee Command
+func execute_run_action(caster_speed: int, enemy_avg_speed: int) -> void:
+	var speed_diff: int = caster_speed - enemy_avg_speed
+	var final_flee_chance: float = clampf(base_flee_chance + (speed_diff * 0.05), 0.15, 0.95)
+
+	var roll: float = randf()
+	if roll <= final_flee_chance:
+		GameLogger.combat("The party successfully fled from battle!")
+		SignalBus.party_flee_attempted.emit(true)
+		var sb: Node = SignalBus
+		if is_instance_valid(sb) and sb.has_signal("show_toast"):
+			sb.show_toast.emit("The party successfully fled from battle!", false)
+
+		_on_combat_ended(false)
+	else:
+		GameLogger.combat("Escape failed! The enemies block your retreat!")
+		SignalBus.party_flee_attempted.emit(false)
+		var sb: Node = SignalBus
+		if is_instance_valid(sb) and sb.has_signal("show_toast"):
+			sb.show_toast.emit("Escape failed! The enemies block your retreat!", true)
 
 
 func _execute_enemy_ai(enemy: Combatant) -> void:
+	if not is_instance_valid(enemy) or enemy.current_hp <= 0 or not is_combat_active:
+		return
+
 	SignalBus.enemy_attack_started.emit(enemy.id)
 
 	var alive_party: Array[Combatant] = []
@@ -805,8 +848,6 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 			enemy_attack_type = enemy.ref.get_attack_type_string()
 
 		var damage: int = _calculate_physical_damage(enemy, target, enemy_attack_type)
-
-		# 🎯 Centralized damage and death toast resolution
 		_apply_damage_to_combatant(target, damage, enemy.name)
 
 		if _check_battle_state():
@@ -816,7 +857,34 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 	call_deferred("_unpause_and_continue")
 
 
-## Applies damage to a combatant, updates health bars/VFX, and emits toast notifications.
+func _calculate_physical_damage(attacker: Combatant, defender: Combatant, attack_type: String = "UNARMED") -> int:
+	if not is_instance_valid(attacker) or not is_instance_valid(defender):
+		return 1
+
+	var base_dmg: float = float(attacker.get_effective_strength() - defender.get_effective_defense())
+	base_dmg = maxf(1.0, base_dmg)
+
+	# 1. Attacker Row Penalty: Back Row Melee incurs 50% damage penalty
+	var attacker_mult: float = 1.0
+	if not attacker.is_front_row and attack_type in ["BLADE", "BASH", "UNARMED"]:
+		attacker_mult = 0.5
+		GameLogger.combat("%s attacks from the Back Row with melee! (50%% penalty)" % attacker.name)
+
+	# 2. Defender Row Protection: Back Row receives 50% damage
+	var defender_mult: float = 1.0
+	if not defender.is_front_row:
+		defender_mult = 0.5
+		GameLogger.combat("%s is protected in the Back Row! (50%% physical damage taken)" % defender.name)
+
+	# 3. Guard Multiplier
+	var guard_mult: float = 1.0
+	if defender.is_player and guarding_characters.has(defender.slot_index):
+		guard_mult = 0.5
+		GameLogger.combat("%s is Guarding! (50%% damage reduction)" % defender.name)
+
+	return max(1, int(base_dmg * attacker_mult * defender_mult * guard_mult))
+
+
 func _apply_damage_to_combatant(target: Combatant, damage: int, attacker_name: String = "") -> void:
 	if not is_instance_valid(target) or target.current_hp <= 0 or damage <= 0:
 		return
@@ -839,17 +907,15 @@ func _apply_damage_to_combatant(target: Combatant, damage: int, attacker_name: S
 	# 2. Toast Notifications
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and sb.has_signal("show_toast"):
-		# A. Damage Toast
 		if target.is_player:
 			var damage_msg: String = "⚡ %s took %d damage!" % [target.name, damage]
-			sb.show_toast.emit(damage_msg, true) # Red warning toast
+			sb.show_toast.emit(damage_msg, true)
 		else:
 			var damage_msg: String = "💥 %s took %d damage!" % [target.name, damage]
 			if not attacker_name.is_empty():
 				damage_msg = "💥 %s hit %s for %d damage!" % [attacker_name, target.name, damage]
-			sb.show_toast.emit(damage_msg, false) # Cyan info toast
+			sb.show_toast.emit(damage_msg, false)
 
-		# B. Death Toast (Health reaches 0)
 		if was_alive and target.current_hp <= 0:
 			if target.is_player:
 				var death_msg: String = "💀 %s HAS FALLEN IN BATTLE!" % target.name.to_upper()
@@ -878,6 +944,9 @@ func _sync_mp_to_ref(c: Combatant) -> void:
 
 
 func _check_battle_state() -> bool:
+	if not is_combat_active:
+		return true
+
 	var any_enemies_alive: bool = false
 	var any_party_alive: bool = false
 
@@ -900,14 +969,16 @@ func _check_battle_state() -> bool:
 
 
 func _reset_combatant_meter(combatant: Combatant) -> void:
-	combatant.meter = 0.0
-	SignalBus.turn_meter_updated.emit(combatant.id, 0.0)
+	if is_instance_valid(combatant):
+		combatant.meter = 0.0
+		SignalBus.turn_meter_updated.emit(combatant.id, 0.0)
 
 
 func _unpause_and_continue() -> void:
 	active_combatant = null
 	is_paused_for_input = false
-	_process_turn_queue()
+	if is_combat_active:
+		_process_turn_queue()
 
 
 func _find_combatant_by_id(id: String) -> Combatant:
@@ -922,3 +993,13 @@ func _find_combatant_by_slot(slot_idx: int, is_player_target: bool) -> Combatant
 		if c.is_player == is_player_target and c.slot_index == slot_idx:
 			return c
 	return null
+
+
+func _get_average_enemy_speed() -> int:
+	var total_speed: float = 0.0
+	var enemy_count: int = 0
+	for c: Combatant in combatants:
+		if not c.is_player and c.current_hp > 0:
+			total_speed += c.get_effective_speed()
+			enemy_count += 1
+	return int(total_speed / maxf(1.0, float(enemy_count)))

@@ -1,4 +1,4 @@
-# res://Scripts/UI/PartySlotPortrait.gd
+# res://Scripts/UI/party_slot_portrait.gd
 @tool
 class_name PartySlotPortrait
 extends Control
@@ -35,20 +35,74 @@ extends Control
 @onready var atb_bar: ProgressBar = %ATBBar as ProgressBar
 @onready var highlight_rect: TextureRect = %Highlight as TextureRect
 
+var _shine_material: ShaderMaterial = null
+var _shine_tween: Tween = null
+
 
 func _ready() -> void:
 	_apply_layout_settings()
 	if is_instance_valid(highlight_rect):
 		highlight_rect.hide()
 
+	_setup_shine_shader()
+
 	if not Engine.is_editor_hint():
 		_connect_signal_listeners()
+		mouse_entered.connect(_on_mouse_entered)
+		mouse_exited.connect(_on_mouse_exited)
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if get_tree().root.has_node("SignalBus"):
-			SignalBus.portrait_clicked.emit(slot_index)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_play_pressed_feedback()
+			if get_tree().root.has_node("SignalBus"):
+				SignalBus.portrait_clicked.emit(slot_index)
+
+
+func _setup_shine_shader() -> void:
+	var p_rect: TextureRect = portrait_texture if portrait_texture else get_node_or_null("%PortraitTexture") as TextureRect
+	if not is_instance_valid(p_rect):
+		return
+
+	# Load and assign a unique ShaderMaterial instance so portraits animate independently
+	var shader_res: Shader = load("res://Shaders/portrait_shine.gdshader") as Shader
+	if is_instance_valid(shader_res):
+		_shine_material = ShaderMaterial.new()
+		_shine_material.shader = shader_res
+		p_rect.material = _shine_material
+
+
+func _on_mouse_entered() -> void:
+	_play_shine_sweep(0.35)
+
+
+func _on_mouse_exited() -> void:
+	# Reset scale or modulation if mouse leaves
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "modulate", Color.WHITE, 0.15)
+
+
+func _play_shine_sweep(duration: float = 0.35) -> void:
+	if not is_instance_valid(_shine_material):
+		return
+
+	if _shine_tween and _shine_tween.is_running():
+		_shine_tween.kill()
+
+	_shine_material.set_shader_parameter("shine_progress", -0.5)
+	_shine_tween = create_tween()
+	_shine_tween.tween_property(_shine_material, "shader_parameter/shine_progress", 1.5, duration) \
+			.set_trans(Tween.TRANS_QUAD) \
+			.set_ease(Tween.EASE_OUT)
+
+
+func _play_pressed_feedback() -> void:
+	# Quick pulse and scale burst for immediate press response
+	var tween: Tween = create_tween().set_parallel(true)
+	modulate = Color(1.4, 1.4, 1.2, 1.0)
+	tween.tween_property(self, "modulate", Color.WHITE, 0.2)
+	_play_shine_sweep(0.2)
 
 
 func _apply_layout_settings() -> void:

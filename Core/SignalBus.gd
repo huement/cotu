@@ -22,10 +22,13 @@ signal combat_started(enemy_data_or_group: Variant, player_party: Array)
 signal combat_ended(victory: bool)
 signal combat_phase_changed(new_phase: CombatPhase)
 
+# Combat Actions & Escapes
 # Active Time Battle (ATB) Engine
 signal turn_meter_updated(combatant_id: String, percent: float)
 signal combatant_turn_ready(combatant_id: String, slot_index: int)
 signal player_action_selected(slot_index: int, action_type: StringName, target_index: int)
+signal character_guarded(character_index: int)
+signal party_flee_attempted(success: bool)
 
 # 3D Visual Enemy Animations
 signal enemy_attack_started(enemy_id: String)

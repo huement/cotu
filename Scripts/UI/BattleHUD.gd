@@ -29,6 +29,7 @@ var _active_slot_index: int = -1
 var _selected_action: StringName = &""
 var _is_auto_battle_on: bool = false
 var _buttons_bound: bool = false
+var current_turn_slot_index: int = -1
 
 
 func _ready() -> void:
@@ -95,6 +96,8 @@ func _on_player_action_selected(_slot_index: int, _action: StringName, _target_i
 
 
 func _on_combatant_turn_ready(combatant_id: String, slot_index: int) -> void:
+	current_turn_slot_index = slot_index
+
 	if not combatant_id.begins_with("party_slot_"):
 		return
 
@@ -269,3 +272,19 @@ func setup_party_display(party_members: Array) -> void:
 		else:
 			if slot_node.has_method("setup_slot"):
 				slot_node.call("setup_slot", null)
+
+
+func _on_defend_button_pressed() -> void:
+	if current_turn_slot_index < 0:
+		return
+
+	# Emit DEFEND action to CombatManager
+	SignalBus.player_action_selected.emit(current_turn_slot_index, &"DEFEND", -1)
+
+
+func _on_run_button_pressed() -> void:
+	if current_turn_slot_index < 0:
+		return
+
+	# Emit RUN action to CombatManager
+	SignalBus.player_action_selected.emit(current_turn_slot_index, &"RUN", -1)
