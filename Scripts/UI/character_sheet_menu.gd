@@ -67,11 +67,14 @@ func _ready() -> void:
 func _on_portrait_clicked(slot_index: int) -> void:
 	GameState.current_mode = GameState.Mode.MANAGEMENT
 	_current_slot_index = slot_index
+	# 🎯 Synchronize active_character_index on GameState singleton
+	if "active_character_index" in GameState:
+		GameState.active_character_index = slot_index
 
 	if not GameState.current_party or slot_index >= GameState.current_party.slots.size():
 		return
 
-	var character: CatCharacter = GameState.current_party.slots[slot_index]
+	var character: CatCharacter = GameState.current_party.slots[slot_index] as CatCharacter
 	if not is_instance_valid(character):
 		return
 
@@ -83,8 +86,12 @@ func _render_character_sheet(character: CatCharacter) -> void:
 	if not is_instance_valid(character):
 		return
 
-	# 🎯 SAVE THE REFERENCE TO THE CURRENT CHARACTER
+	# 🎯 SAVE THE REFERENCE TO THE CURRENT CHARACTER & SYNC ACTIVE SLOT INDEX
 	_current_character = character
+	if GameState.current_party:
+		_current_slot_index = GameState.current_party.slots.find(character)
+		if _current_slot_index != -1 and "active_character_index" in GameState:
+			GameState.active_character_index = _current_slot_index
 
 	# 1. Load Portrait Texture
 	if portrait_texture:
@@ -189,6 +196,9 @@ func _navigate_character(direction: int) -> void:
 	var target_character: CatCharacter = valid_characters[next_idx] as CatCharacter
 
 	_current_slot_index = GameState.current_party.slots.find(target_character)
+	if "active_character_index" in GameState:
+		GameState.active_character_index = _current_slot_index
+
 	_render_character_sheet(target_character)
 
 
@@ -196,7 +206,6 @@ func _update_paginator() -> void:
 	if not GameState.current_party:
 		return
 
-	# Count active characters
 	var valid_characters: Array = GameState.current_party.slots.filter(
 		func(c):
 			return is_instance_valid(c),
@@ -208,7 +217,6 @@ func _update_paginator() -> void:
 	if index_label:
 		index_label.text = "%d | %d" % [current_pos, total_count]
 
-	# Disable buttons if there is 1 or fewer characters
 	var can_cycle: bool = total_count > 1
 	if prev_character_button:
 		prev_character_button.disabled = not can_cycle
@@ -232,16 +240,13 @@ func _on_row_toggle_toggled(button_pressed: bool) -> void:
 			_update_row_button_text(true)
 			row_toggle_button.set_block_signals(false)
 			print("CharacterSheetMenu: Cannot move to Back Row: At least 1 party member must be in the Front Row!")
-			# 🎯 Broadcast warning toast to UI
 			var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 			if sb and sb.has_signal("show_toast"):
 				sb.show_toast.emit("Cannot move: At least 1 party member must be in Front Row!", true)
 			return
 
-	# Apply row change and trigger party matrix reorganization
 	GameState.current_party.set_character_row(_current_character, target_front)
 
-	# 🎯 Update slot index tracking to match the character's new matrix location
 	_current_slot_index = GameState.current_party.slots.find(_current_character)
 	if "active_character_index" in GameState:
 		GameState.active_character_index = _current_slot_index
@@ -249,7 +254,6 @@ func _on_row_toggle_toggled(button_pressed: bool) -> void:
 	_update_row_button_text(target_front)
 	_update_paginator()
 
-	# 🎯 Safe invocation for game saving
 	if GameState.has_method("save_game"):
 		GameState.call("save_game")
 
@@ -259,23 +263,17 @@ func _update_row_button_text(is_front: bool) -> void:
 		return
 
 	var bg_color: Color
-
 	if is_front:
 		row_toggle_button.text = "⚔️ FRONT ROW"
-		# High contrast dark text on the cyan button background
-		bg_color = Color("#00ffc8") # Cyberpunk Cyan
+		bg_color = Color("#00ffc8")
 	else:
 		row_toggle_button.text = "🛡️ BACK ROW"
-		bg_color = Color("#fd6644") # Cyberpunk Orange
+		bg_color = Color("#fd6644")
 
-	# 3. Create a StyleBox for the background
-	var style_box = StyleBoxFlat.new()
+	var style_box: StyleBoxFlat = StyleBoxFlat.new()
 	style_box.bg_color = bg_color
-
-	# Optional: Add subtle rounded corners to match standard UI
 	style_box.set_corner_radius_all(4)
 
-	# 4. Apply the stylebox to the button states
 	row_toggle_button.add_theme_stylebox_override("normal", style_box)
 	row_toggle_button.add_theme_stylebox_override("hover", style_box)
 	row_toggle_button.add_theme_stylebox_override("pressed", style_box)

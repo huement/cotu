@@ -636,6 +636,7 @@ func _build_ability_info_ui(data: Dictionary) -> void:
 	content_area.add_child(btn_center)
 
 
+## INDIVIDUAL ITEM ACTIONS MODAL (From Character Sheet)
 func _build_item_actions_ui(data: Dictionary) -> void:
 	var item: ItemData = data.get("item", null) as ItemData
 	var slot_name: String = data.get("slot", "")
@@ -653,15 +654,19 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 	content_area.add_child(name_label)
 
-	var cat: Resource = GameState.get_active_cat() if GameState.has_method("get_active_cat") else null
+	# 🎯 Target Resolution: Use passed character from payload first, fallback to GameState active cat
+	var cat: Resource = data.get("character", null) as Resource
+	if not is_instance_valid(cat) and GameState.has_method("get_active_cat"):
+		cat = GameState.get_active_cat() as Resource
+
 	var inv: Resource = GameState.get("inventory") if "inventory" in GameState else null
 
 	if is_instance_valid(item):
 		if not slot_name.is_empty():
-			# Unequip action from an active character slot
+			# 🛡️ UNEQUIP Action (Clicked from CharacterLoadoutPanel)
 			var unequip_action := func() -> void:
 				if is_instance_valid(cat) and cat.has_method("unequip_item"):
-					var unequipped: ItemData = cat.unequip_item(slot_name)
+					var unequipped: ItemData = cat.unequip_item(slot_name) as ItemData
 					if is_instance_valid(inv) and is_instance_valid(unequipped) and inv.has_method("add_item"):
 						inv.add_item(unequipped)
 				_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "UNEQUIP", "slot": slot_name, "item": item })
@@ -669,7 +674,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 			_add_action_button("[ UNEQUIP ]", unequip_action)
 		else:
-			# Check if item is equippable (Weapons, Armor, or Equipment with an assigned slot)
+			# ⚔️ EQUIP Action (Clicked from CharacterInventoryGrid)
 			var is_equippable: bool = item.equipment_slot != ItemData.EquipmentSlot.NONE or \
 					item.item_type in [ItemData.ItemType.EQUIPMENT, ItemData.ItemType.WEAPON, ItemData.ItemType.ARMOR]
 
@@ -678,7 +683,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 					if is_instance_valid(cat):
 						var target_slot: String = item.get_slot_string()
 						if not target_slot.is_empty():
-							var unequipped: ItemData = cat.unequip_item(target_slot) if cat.has_method("unequip_item") else null
+							var unequipped: ItemData = cat.unequip_item(target_slot) as ItemData if cat.has_method("unequip_item") else null
 							if cat.has_method("equip_item"):
 								cat.equip_item(target_slot, item)
 							if is_instance_valid(inv):
@@ -691,6 +696,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 				_add_action_button("[ EQUIP ]", equip_action)
 
+			# 🧪 USE Action (Consumables / Potions)
 			elif item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION or item.is_consumable:
 				var use_action := func() -> void:
 					match item.target_type:
@@ -702,6 +708,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 				_add_action_button("[ USE ]", use_action)
 
+			# 🗑️ DROP Action
 			var drop_action := func() -> void:
 				if is_instance_valid(inv) and inv.has_method("remove_item"):
 					inv.remove_item(item)
@@ -716,18 +723,23 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 	_add_action_button("[ CANCEL ]", cancel_action)
 
 
+# res://Scripts/UI/universal_popup.gd
+func _refresh_party_ui() -> void:
+	# 🎯 Save session whenever item actions (equip, unequip, drop, use) occur!
+	if GameState.has_method("save_game"):
+		GameState.save_game()
+
+	if get_tree().root.has_node("SignalBus"):
+		var bus: Node = get_tree().root.get_node("SignalBus")
+		var active_idx: int = GameState.get("active_character_index") if "active_character_index" in GameState else 0
+		bus.portrait_clicked.emit(active_idx)
+
+
 func _add_action_button(label_text: String, action_callable: Callable) -> void:
 	var btn := Button.new()
 	btn.text = label_text
 	btn.pressed.connect(action_callable)
 	content_area.add_child(btn)
-
-
-func _refresh_party_ui() -> void:
-	if get_tree().root.has_node("SignalBus"):
-		var bus: Node = get_tree().root.get_node("SignalBus")
-		var active_idx: int = GameState.get("active_cat_index") if "active_cat_index" in GameState else 0
-		bus.portrait_clicked.emit(active_idx)
 
 
 func _create_modal_button(text_val: String, color_val: Color) -> Button:

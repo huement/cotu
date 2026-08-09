@@ -27,6 +27,13 @@ var current_mode: Mode = Mode.EXPLORING:
 var active_character_index: int = 0
 
 
+func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> void:
+	if action_type == &"BATTLE_VICTORY":
+		_award_victory_xp(extra_data)
+	elif action_type == &"REST":
+		_process_party_rest(extra_data)
+
+
 func get_active_cat() -> Resource:
 	if current_party != null:
 		var party_slots: Array = current_party.get("slots") as Array
@@ -41,11 +48,6 @@ func _ready() -> void:
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 	if sb and sb.has_signal("popup_confirmed"):
 		sb.popup_confirmed.connect(_on_popup_confirmed)
-
-
-func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> void:
-	if action_type == &"BATTLE_VICTORY":
-		_award_victory_xp(extra_data)
 
 
 func _award_victory_xp(victory_data: Dictionary) -> void:
@@ -191,3 +193,37 @@ func spend_gold(amount: int) -> bool:
 	if sb and sb.has_signal("party_gold_changed"):
 		sb.party_gold_changed.emit(party_gold, -amount)
 	return true
+
+
+func _process_party_rest(rest_data: Dictionary) -> void:
+	var hours: int = int(rest_data.get("hours", 4))
+	if hours <= 0 or current_party == null:
+		return
+
+	print("[GameState] 🏕️ Party resting for %d hours..." % hours)
+
+	var total_hp_recovered: int = 0
+	var total_energy_recovered: int = 0
+	var party_slots: Array = current_party.slots
+	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
+
+	for i in range(party_slots.size()):
+		var cat: CatCharacter = party_slots[i] as CatCharacter
+		if is_instance_valid(cat) and cat.current_hp > 0:
+			var recovery: Dictionary = cat.rest(hours)
+			total_hp_recovered += int(recovery.get("hp_restored", 0))
+			total_energy_recovered += int(recovery.get("energy_restored", 0))
+
+			# Broadcast live HUD updates
+			if sb:
+				if sb.has_signal("character_health_changed"):
+					sb.character_health_changed.emit(i, cat.current_hp)
+				if sb.has_signal("character_mana_changed"):
+					sb.character_mana_changed.emit(i, cat.current_energy, cat.max_energy)
+
+	# Broadcast Toast Notification
+	if sb and sb.has_signal("show_toast"):
+		var toast_msg: String = "Rested for %d hours. Party recovered!" % hours
+		sb.show_toast.emit(toast_msg, false)
+
+	save_game()

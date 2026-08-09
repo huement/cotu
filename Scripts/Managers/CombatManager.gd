@@ -284,6 +284,11 @@ func _on_combat_ended(victory: bool) -> void:
 
 	SignalBus.combat_ended.emit(victory)
 
+	# 🎯 Save current HP/Mana state to disk regardless of victory or retreat
+	var gs: Node = get_tree().root.get_node_or_null("GameState")
+	if is_instance_valid(gs) and gs.has_method("save_game"):
+		gs.save_game()
+
 	if victory:
 		SignalBus.popup_requested.emit(&"BATTLE_VICTORY", victory_data)
 
@@ -346,14 +351,14 @@ func _process_turn_queue() -> void:
 	active_combatant = turn_queue.pop_front()
 
 	if not is_instance_valid(active_combatant) or active_combatant.current_hp <= 0:
-		_unpause_and_continue()
+		call_deferred("_unpause_and_continue")
 		return
 
 	_start_combatant_turn(active_combatant)
 
 	if active_combatant.current_hp <= 0:
 		_reset_combatant_meter(active_combatant)
-		_unpause_and_continue()
+		call_deferred("_unpause_and_continue")
 		return
 
 	if active_combatant.is_player:
@@ -369,17 +374,10 @@ func _start_combatant_turn(c: Combatant) -> void:
 	for eff: ActiveEffect in c.active_effects:
 		if eff.effect_type == &"DOT":
 			var dot_damage: int = int(eff.value)
-			c.current_hp = max(0, c.current_hp - dot_damage)
-			_sync_hp_to_ref(c)
+			GameLogger.combat("%s took %d %s damage from %s!" % [c.name, dot_damage, eff.id, eff.name])
 
-			if c.is_player:
-				SignalBus.character_health_changed.emit(c.slot_index, c.current_hp)
-			else:
-				SignalBus.enemy_damaged_visual.emit(c.id, dot_damage)
-				SignalBus.enemy_health_changed.emit(c.id, c.current_hp, c.max_hp)
-
-			SignalBus.camera_shake_requested.emit(0.35)
-			GameLogger.combat("%s took %d %s damage from %s! (HP: %d/%d)" % [c.name, dot_damage, eff.id, eff.name, c.current_hp, c.max_hp])
+			# 🎯 Centralized damage and death toast resolution
+			_apply_damage_to_combatant(c, dot_damage, eff.name)
 
 		elif eff.effect_type == &"HOT":
 			var hot_heal: int = int(eff.value)
@@ -390,6 +388,10 @@ func _start_combatant_turn(c: Combatant) -> void:
 				SignalBus.character_health_changed.emit(c.slot_index, c.current_hp)
 
 			GameLogger.combat("%s healed %d HP from %s! (HP: %d/%d)" % [c.name, hot_heal, eff.name, c.current_hp, c.max_hp])
+			var sb: Node = SignalBus
+			var toast_msg: String = "%s healed %d HP!" % [c.name, hot_heal]
+			if is_instance_valid(sb) and sb.has_signal("show_toast"):
+				sb.show_toast.emit(toast_msg, false)
 
 		eff.duration -= 1
 		if eff.duration <= 0:
@@ -400,9 +402,6 @@ func _start_combatant_turn(c: Combatant) -> void:
 		GameLogger.combat("%s effect expired on %s" % [exp.name, c.name])
 
 	_check_battle_state()
-
-# res://Scripts/Managers/CombatManager.gd
-# (Excerpt: Updated _on_player_action_selected and _consume_ranged_ammo)
 
 
 func _on_player_action_selected(slot_index: int, action_type: StringName, target_index: int) -> void:
@@ -431,7 +430,6 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 		# Consume Projectile for Ranged Attacks
 		if attack_type == "RANGED":
 			if not _consume_ranged_ammo(acting_char):
-				# 🎯 Fallback to UNARMED physical melee so the turn queue NEVER softlocks!
 				GameLogger.combat("%s has no ammo for Ranged Weapon! Falling back to Unarmed attack." % acting_char.name)
 				attack_type = "UNARMED"
 
@@ -444,15 +442,10 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 
 		if is_instance_valid(target_char):
 			var damage: int = _calculate_physical_damage(acting_char, target_char, attack_type)
-			target_char.current_hp = max(0, target_char.current_hp - damage)
-			_sync_hp_to_ref(target_char)
+			GameLogger.combat("%s ATTACKED %s with %s dealing %d damage!" % [acting_char.name, target_char.name, attack_type, damage])
 
-			SignalBus.enemy_damaged_visual.emit(target_char.id, damage)
-			SignalBus.enemy_health_changed.emit(target_char.id, target_char.current_hp, target_char.max_hp)
-			SignalBus.chevron_flash_requested.emit(false)
-			SignalBus.camera_shake_requested.emit(0.5)
-
-			GameLogger.combat("%s ATTACKED %s with %s dealing %d damage! Enemy HP: %d/%d" % [acting_char.name, target_char.name, attack_type, damage, target_char.current_hp, target_char.max_hp])
+			# 🎯 Centralized damage and death toast resolution
+			_apply_damage_to_combatant(target_char, damage, acting_char.name)
 
 			if _check_battle_state():
 				return
@@ -537,12 +530,6 @@ func _notify_out_of_ammo(acting_char: Combatant, weapon_or_ammo_name: String) ->
 		sb.show_toast.emit(msg, true)
 
 
-func _deplete_weapon_slot(cat: Resource, slot_name: String, weapon: ItemData) -> void:
-	if cat.has_method("unequip_item"):
-		cat.call("unequip_item", slot_name)
-		GameLogger.combat("%s's %s was depleted and unequipped." % [cat.get("name"), weapon.item_name])
-
-
 func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringName, target_index: int) -> void:
 	var target_mgr: Node = get_tree().root.get_node_or_null("TargetSelectionManager")
 	var ability: Resource = target_mgr.get_pending_ability() if is_instance_valid(target_mgr) and target_mgr.has_method("get_pending_ability") else null
@@ -560,6 +547,10 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 	var energy_cost: int = int(ability.get("energy_cost")) if "energy_cost" in ability else 0
 	if acting_char.current_mp < energy_cost:
 		GameLogger.combat("%s does not have enough Energy/MP to cast %s! (Cost: %d, Current: %d)" % [acting_char.name, spell_name, energy_cost, acting_char.current_mp])
+		var sb: Node = SignalBus
+		var toast_msg: String = "%s doesn't have enough MANA to cast %s!" % [acting_char.name, spell_name]
+		if is_instance_valid(sb) and sb.has_signal("show_toast"):
+			sb.show_toast.emit(toast_msg, true)
 		return
 
 	acting_char.current_mp = max(0, acting_char.current_mp - energy_cost)
@@ -723,14 +714,10 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 				damage = max(1, int(damage * 0.5))
 				GameLogger.combat("%s is protected in the Back Row! Physical skill damage reduced to %d" % [t.name, damage])
 
-			t.current_hp = max(0, t.current_hp - damage)
-			_sync_hp_to_ref(t)
-
-			if not t.is_player:
-				SignalBus.enemy_damaged_visual.emit(t.id, damage)
-				SignalBus.enemy_health_changed.emit(t.id, t.current_hp, t.max_hp)
-
 			GameLogger.combat("%s used %s on %s dealing %d damage!" % [acting_char.name, spell_name, t.name, damage])
+
+			# 🎯 Centralized damage and death toast resolution
+			_apply_damage_to_combatant(t, damage, acting_char.name)
 
 	if is_instance_valid(target_mgr) and target_mgr.has_method("clear_pending_ability"):
 		target_mgr.clear_pending_ability()
@@ -776,6 +763,10 @@ func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int)
 
 					SignalBus.character_health_changed.emit(c.slot_index, c.current_hp)
 					SignalBus.character_mana_changed.emit(c.slot_index, c.current_mp, c.max_mp)
+					var sb: Node = SignalBus
+					var toast_msg: String = "Item used on target slot %d (Success = %s)" % [target_slot_index, str(success)]
+					if is_instance_valid(sb) and sb.has_signal("show_toast"):
+						sb.show_toast.emit(toast_msg, true)
 
 		GameLogger.combat("CombatManager: Battle item used on target slot %d (Success = %s)" % [target_slot_index, str(success)])
 
@@ -814,19 +805,58 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 			enemy_attack_type = enemy.ref.get_attack_type_string()
 
 		var damage: int = _calculate_physical_damage(enemy, target, enemy_attack_type)
-		target.current_hp = max(0, target.current_hp - damage)
 
-		_sync_hp_to_ref(target)
-
-		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
-		SignalBus.chevron_flash_requested.emit(true)
-		SignalBus.camera_shake_requested.emit(0.35)
+		# 🎯 Centralized damage and death toast resolution
+		_apply_damage_to_combatant(target, damage, enemy.name)
 
 		if _check_battle_state():
 			return
 
 	_reset_combatant_meter(enemy)
-	_unpause_and_continue()
+	call_deferred("_unpause_and_continue")
+
+
+## Applies damage to a combatant, updates health bars/VFX, and emits toast notifications.
+func _apply_damage_to_combatant(target: Combatant, damage: int, attacker_name: String = "") -> void:
+	if not is_instance_valid(target) or target.current_hp <= 0 or damage <= 0:
+		return
+
+	var was_alive: bool = target.current_hp > 0
+	target.current_hp = max(0, target.current_hp - damage)
+	_sync_hp_to_ref(target)
+
+	# 1. Update HUD Vitals & Visual FX
+	if target.is_player:
+		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
+		SignalBus.chevron_flash_requested.emit(true)
+		SignalBus.camera_shake_requested.emit(0.35)
+	else:
+		SignalBus.enemy_damaged_visual.emit(target.id, damage)
+		SignalBus.enemy_health_changed.emit(target.id, target.current_hp, target.max_hp)
+		SignalBus.chevron_flash_requested.emit(false)
+		SignalBus.camera_shake_requested.emit(0.5)
+
+	# 2. Toast Notifications
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and sb.has_signal("show_toast"):
+		# A. Damage Toast
+		if target.is_player:
+			var damage_msg: String = "⚡ %s took %d damage!" % [target.name, damage]
+			sb.show_toast.emit(damage_msg, true) # Red warning toast
+		else:
+			var damage_msg: String = "💥 %s took %d damage!" % [target.name, damage]
+			if not attacker_name.is_empty():
+				damage_msg = "💥 %s hit %s for %d damage!" % [attacker_name, target.name, damage]
+			sb.show_toast.emit(damage_msg, false) # Cyan info toast
+
+		# B. Death Toast (Health reaches 0)
+		if was_alive and target.current_hp <= 0:
+			if target.is_player:
+				var death_msg: String = "💀 %s HAS FALLEN IN BATTLE!" % target.name.to_upper()
+				sb.show_toast.emit(death_msg, true)
+			else:
+				var death_msg: String = "☠️ %s HAS BEEN DEFEATED!" % target.name.to_upper()
+				sb.show_toast.emit(death_msg, false)
 
 
 func _sync_hp_to_ref(c: Combatant) -> void:
