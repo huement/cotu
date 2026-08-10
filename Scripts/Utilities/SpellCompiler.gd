@@ -29,7 +29,7 @@ func compile_spells() -> void:
 
 	while not file.eof_reached():
 		var line: PackedStringArray = file.get_csv_line()
-		if line.size() < 15 or line[0].strip_edges().is_empty():
+		if line.size() < 17 or line[0].strip_edges().is_empty():
 			continue
 
 		var spell := SpellData.new()
@@ -46,8 +46,11 @@ func compile_spells() -> void:
 		spell.stat_scaling = line[10].strip_edges()
 		spell.status_effect = _parse_status_effect(line[11].strip_edges())
 		spell.duration = int(line[12])
-		spell.description = line[13].strip_edges()
-		spell.icon_path = line[14].strip_edges()
+		spell.requirement = int(line[13])
+		var class_locked_str: String = line[14].strip_edges().to_upper()
+		spell.class_locked = (class_locked_str == "TRUE" or class_locked_str == "1")
+		spell.description = line[15].strip_edges()
+		spell.icon_path = line[16].strip_edges()
 
 		if not spell.icon_path.is_empty() and ResourceLoader.exists(spell.icon_path):
 			spell.icon = load(spell.icon_path) as Texture2D

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://c3ep1st117qen"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://ce6ka083v7fys"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_hmebd"]
 
@@ -11,5 +11,7 @@ description = "Unleashes raw unrefined arcana to obliterate all enemy ranks."
 icon_path = "res://Data/Spells/Icons/arcane_cataclysm.png"
 energy_cost = 14
 target_type = 1
+requirement = 1
+class_locked = true
 base_amount = 35
 var_multiplier = 0.6

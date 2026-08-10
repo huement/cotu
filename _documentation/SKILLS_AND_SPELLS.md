@@ -62,3 +62,28 @@ Targeting conventions across Spells, Skills, and Combat:
   $$ \text{Total Duration} = \text{Base Duration} \times \text{Spell Level} $$
 
 * **Skills**: Fixed base duration loaded from `Skills.csv` (defaults to `1`).
+
+## SPELL DATA & CLASS LOCKING API SPECIFICATION
+
+### Overview
+
+Spells belong to specific `SpellbookType` domains (`ARCHANIST`, `SOULWRIGHT`, `MAESTER`, `PSYNIC`). While characters can equip off-class spellbooks for utility, signature high-tier spells may have `class_locked = true`.
+
+### Resource API Helpers (`SpellData.gd`)
+
+#### `is_class_allowed(character_class_name: String) -> bool`
+
+* **Description**: Checks if a character's primary class name permits using this spell.
+
+* **Return Value**:
+  * `true` if `class_locked` is `false`.
+  * `true` if `class_locked` is `true` AND `character_class_name` matches `SpellbookType.keys()[spellbook]`.
+  * `false` otherwise.
+
+#### `can_cast(current_energy: int, character_class_name: String = "") -> bool`
+
+* **Description**: Validates energy availability and class restriction rules in a single call.
+
+* **Parameters**:
+  * `current_energy`: Caster's active energy/MP pool.
+  * `character_class_name`: Optional string identifier for the caster's primary class.

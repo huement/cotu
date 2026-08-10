@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://ld81bjcj0lru"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://be000qvbfu5ny"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_4x5yq"]
 
@@ -12,6 +12,7 @@ description = "Emits a mental concussive pulse that can stun all hostiles."
 icon_path = "res://Data/Spells/Icons/psychic_wave.png"
 energy_cost = 8
 target_type = 1
+requirement = 1
 base_amount = 12
 var_multiplier = 0.4
 stat_scaling = "PER"

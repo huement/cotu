@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://gt84ebbsoeyg"]
+[gd_scene load_steps=8 format=3 uid="uid://gt84ebbsoeyg"]
 
 [ext_resource type="Script" uid="uid://dgmar6r51wlgc" path="res://Scripts/universal_popup.gd" id="1_00won"]
 [ext_resource type="Shader" uid="uid://x0mchy8dkqk4" path="res://Shaders/frosted_glass.gdshader" id="2_hjxi7"]
 [ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="3_xopd3"]
 [ext_resource type="Texture2D" uid="uid://bypiwpfa35pmo" path="res://ui/buttons/button_rectangle_flat.png" id="4_3pqrk"]
 [ext_resource type="Texture2D" uid="uid://dppucpbb2lr0t" path="res://ui/buttons/button_rectangle_border.png" id="5_k17y6"]
+[ext_resource type="PackedScene" uid="uid://cfkoinm7gddbw" path="res://Scenes/UI/SkillSpellDetailPopup.tscn" id="6_hjxi7"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tt43e"]
 shader = ExtResource("2_hjxi7")
@@ -96,3 +97,5 @@ theme_override_fonts/font = ExtResource("3_xopd3")
 text = "OK"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="SkillSpellDetailPopup" parent="." instance=ExtResource("6_hjxi7")]

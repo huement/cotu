@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://b7ri2spwccyoh"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://cliruft07uwud"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_ado5q"]
 
@@ -11,6 +11,8 @@ tier = 3
 description = "Overloads a target's neural network to inflict devastating damage."
 icon_path = "res://Data/Spells/Icons/synapse_overload.png"
 energy_cost = 11
+requirement = 1
+class_locked = true
 base_amount = 30
 var_multiplier = 0.6
 stat_scaling = "PER"

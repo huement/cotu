@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://ddolh80s7sper"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://dmrayrsqiqnl1"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_1bpia"]
 
@@ -10,5 +10,7 @@ tier = 3
 description = "Flash-freezes a target dealing high damage and slowing their action speed."
 icon_path = "res://Data/Spells/Icons/cryo_blast.png"
 energy_cost = 9
+requirement = 1
+class_locked = true
 base_amount = 28
 status_effect = 3

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://bo6mlrsfq22yo"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://ciod2c62qxe3u"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_as3m5"]
 
@@ -12,6 +12,8 @@ description = "Scrambles enemy sensors reducing their attack accuracy."
 icon_path = "res://Data/Spells/Icons/neural_distortion.png"
 energy_cost = 9
 target_type = 1
+requirement = 1
+class_locked = true
 effect_type = 3
 var_multiplier = 0.3
 stat_scaling = "PER"

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://c17gilcm24sd8"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://crbnievxapi4g"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_yhp0d"]
 
@@ -11,6 +11,7 @@ description = "Project an energy barrier that bolsters defense for all party mem
 icon_path = "res://Data/Spells/Icons/overclock_shield.png"
 energy_cost = 6
 target_type = 3
+requirement = 1
 effect_type = 2
 var_multiplier = 0.2
 status_effect = 5

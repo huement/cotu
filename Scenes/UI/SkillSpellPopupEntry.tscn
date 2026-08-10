@@ -1,0 +1,82 @@
+[gd_scene load_steps=2 format=3 uid="uid://djbrtoqil1qdh"]
+
+[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="1_qfyrq"]
+
+[node name="SkillSpellEntry" type="Button"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="IconRect" type="TextureRect" parent="MarginContainer/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 28)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="MarginContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+theme_override_fonts/font = ExtResource("1_qfyrq")
+theme_override_font_sizes/font_size = 12
+text = "Spell Name"
+vertical_alignment = 1
+
+[node name="CostLabel" type="Label" parent="MarginContainer/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_qfyrq")
+theme_override_font_sizes/font_size = 11
+text = "00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PrereqLabel" type="Label" parent="MarginContainer/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_qfyrq")
+theme_override_font_sizes/font_size = 11
+text = "LVL 00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ElemLabel" type="Label" parent="MarginContainer/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_qfyrq")
+theme_override_font_sizes/font_size = 11
+text = "MAGIC"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DetailsLabel" type="Label" parent="MarginContainer/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+theme_override_fonts/font = ExtResource("1_qfyrq")
+theme_override_font_sizes/font_size = 10
+text = "Spell description goes here..."
+vertical_alignment = 1
+autowrap_mode = 2

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://dufq2jkax6txe"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://bbo35xludmfpk"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_s83x3"]
 
@@ -12,6 +12,7 @@ icon_path = "res://Data/Spells/Icons/adrenaline_surge.png"
 energy_cost = 5
 target_type = 2
 element = 4
+requirement = 1
 effect_type = 2
 base_amount = 10
 var_multiplier = 0.2

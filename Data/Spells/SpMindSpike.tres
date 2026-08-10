@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://cb6j8nu703lef"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://behp30jine2ox"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_0ds4d"]
 
@@ -9,5 +9,6 @@ spell_name = "Mind Spike"
 spellbook = 3
 description = "Pierces an enemy's consciousness with a sharp psionic shockwave."
 icon_path = "res://Data/Spells/Icons/mind_spike.png"
+requirement = 1
 base_amount = 14
 stat_scaling = "PER"

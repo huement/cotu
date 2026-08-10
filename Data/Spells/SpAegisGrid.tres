@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://drmapjyput7ve"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://b36ke14ahd8va"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_rvuf4"]
 
@@ -12,6 +12,7 @@ description = "Erects a consecrated defensive matrix protecting the whole party.
 icon_path = "res://Data/Spells/Icons/aegis_grid.png"
 energy_cost = 7
 target_type = 3
+requirement = 1
 effect_type = 2
 base_amount = 12
 var_multiplier = 0.3

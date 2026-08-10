@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://b5k08ffrunxia"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://dl34p5ysqq6x2"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_dwq0a"]
 
@@ -12,6 +12,7 @@ icon_path = "res://Data/Spells/Icons/corrosive_spray.png"
 energy_cost = 5
 target_type = 1
 element = 5
+requirement = 1
 base_amount = 8
 status_effect = 6
 duration = 3

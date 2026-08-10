@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://ick4oxj0krkb"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://dudhxw2mwa8yi"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_grvpk"]
 
@@ -13,6 +13,8 @@ icon_path = "res://Data/Spells/Icons/revive_protocol.png"
 energy_cost = 12
 target_type = 2
 element = 4
+requirement = 1
+class_locked = true
 effect_type = 1
 base_amount = 50
 var_multiplier = 0.2

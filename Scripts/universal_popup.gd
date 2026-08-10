@@ -22,6 +22,7 @@ var _items_drop_btn: Button = null
 var _items_grid_instance: CharacterInventoryGrid = null
 
 const BATTLE_VICTORY_SCENE: PackedScene = preload("res://Scenes/UI/BattleVictoryPopup.tscn")
+@export var skills_spells_popup_scene: PackedScene = preload("res://Scenes/UI/SkillsSpellsPopup.tscn")
 
 
 func _ready() -> void:
@@ -39,8 +40,14 @@ func _ready() -> void:
 		confirm_button.pressed.connect(_on_confirm_pressed)
 
 
+## Catches incoming event requests and builds custom menus on the fly
 func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> void:
-	if action_type == &"ITEM_ACTIONS" and (active_action_type == &"ITEMS" or active_action_type == &"BATTLE_ITEMS"):
+	# 🎯 Guard: Ignore ABILITY_INFO so UniversalPopup does not destroy its content
+	if action_type == &"ABILITY_INFO":
+		return
+
+	# Intercept item selection when the Standalone ITEMS Modal is already open
+	if action_type == &"ITEM_ACTIONS" and active_action_type == &"ITEMS":
 		_update_items_preview(data)
 		return
 
@@ -49,10 +56,8 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 	_clear_content_area()
 
 	match action_type:
-		&"BATTLE_ABILITIES":
-			return
 		&"BATTLE_VICTORY":
-			title_label.text = "VICTORIOUS BATTLE REPORT"
+			title_label.text = "VICTORY ACHIEVED"
 			_build_battle_victory_ui(data)
 		&"SEARCH":
 			title_label.text = "SCANNING SYSTEM CORRIDORS"
@@ -60,21 +65,15 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		&"REST":
 			title_label.text = "SET PURRGATORY CAMP DURATION"
 			_build_rest_ui()
-		&"BATTLE_ITEMS":
-			title_label.text = "BATTLE INVENTORY - SELECT ITEM"
-			_build_items_inventory_ui()
 		&"ITEMS":
 			title_label.text = "USEABLE ITEMS"
 			_build_items_inventory_ui()
 		&"ITEM_ACTIONS":
 			title_label.text = "ITEM ACTION PROTOCOL"
 			_build_item_actions_ui(data)
-		&"ALL_SKILLS":
-			title_label.text = "ALL KNOWN SKILLS PROTOCOL"
-			_build_all_skills_popup_ui(data)
-		&"ALL_SPELLS":
-			title_label.text = "SPELLBOOK DIRECTORY"
-			_build_all_spells_popup_ui(data)
+		&"ALL_SKILLS", &"ALL_SPELLS", &"SPELLBOOK":
+			title_label.text = ""
+			_build_skills_spells_popup_ui(action_type, data)
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
@@ -523,80 +522,35 @@ func _reset_items_preview() -> void:
 		_items_drop_btn.disabled = true
 
 
-func _build_all_skills_popup_ui(data: Dictionary) -> void:
+## Renders the styled popup scene inside the universal popup modal
+func _build_skills_spells_popup_ui(action_type: StringName, data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
-
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(360, 200)
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(vbox)
-
-	if is_instance_valid(cat) and "known_skills" in cat and not cat.known_skills.is_empty():
-		for skill in cat.known_skills:
-			if skill is SkillData:
-				var lbl := Label.new()
-				lbl.text = "• %s (Hit Chance: %d%% | Cost: %d EN)\n  %s" % [skill.skill_name.to_upper(), skill.accuracy, skill.energy_cost, skill.description]
-				lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-				lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
-				vbox.add_child(lbl)
+	print("UniversalPopup: Building Skills/Spells Popup for character: ", cat.name if is_instance_valid(cat) else "null", " with action_type: ", action_type)
+	# Determine initial tab mode
+	var initial_mode: SkillsSpellsPopup.Mode = SkillsSpellsPopup.Mode.SPELLS
+	if data.has("mode"):
+		initial_mode = data["mode"] as SkillsSpellsPopup.Mode
+	elif action_type == &"ALL_SKILLS":
+		initial_mode = SkillsSpellsPopup.Mode.SKILLS
 	else:
-		var empty_lbl := Label.new()
-		empty_lbl.text = "No skills registered for this character."
-		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		vbox.add_child(empty_lbl)
+		initial_mode = SkillsSpellsPopup.Mode.SPELLS
 
-	content_area.add_child(scroll)
+	if confirm_button:
+		confirm_button.visible = false
 
-	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
-	close_btn.pressed.connect(_close_modal)
+	if not skills_spells_popup_scene:
+		return
 
-	var btn_hbox := HBoxContainer.new()
-	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn_hbox.add_child(close_btn)
-	content_area.add_child(btn_hbox)
+	var popup_node: Control = skills_spells_popup_scene.instantiate() as Control
+	content_area.add_child(popup_node)
 
+	if popup_node is SkillsSpellsPopup:
+		var popup_instance := popup_node as SkillsSpellsPopup
+		if is_instance_valid(cat):
+			popup_instance.display_character_abilities(cat, initial_mode)
 
-func _build_all_spells_popup_ui(data: Dictionary) -> void:
-	var cat: CatCharacter = data.get("character", null) as CatCharacter
-
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(360, 200)
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(vbox)
-
-	if is_instance_valid(cat) and "known_spells" in cat and not cat.known_spells.is_empty():
-		for spell in cat.known_spells:
-			if spell is SpellData:
-				var title: String = spell.get("spell_title") if "spell_title" in spell and not str(spell.get("spell_title")).is_empty() else "Spell"
-				var cost: int = spell.get("energy_cost") if "energy_cost" in spell else 4
-				var lbl := Label.new()
-				lbl.text = "• %s [%s] - Cost: %d EN\n  %s" % [spell.spell_name.to_upper(), title, cost, spell.description]
-				lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-				lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
-				vbox.add_child(lbl)
-	else:
-		var empty_lbl := Label.new()
-		empty_lbl.text = "No spells registered in this spellbook."
-		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		vbox.add_child(empty_lbl)
-
-	content_area.add_child(scroll)
-
-	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
-	close_btn.pressed.connect(_close_modal)
-
-	var btn_hbox := HBoxContainer.new()
-	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn_hbox.add_child(close_btn)
-	content_area.add_child(btn_hbox)
+		# Connect CloseButton signal directly to dismiss UniversalPopup!
+		popup_instance.closed.connect(_close_modal)
 
 
 func _build_ability_info_ui(data: Dictionary) -> void:

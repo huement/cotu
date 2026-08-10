@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://c7l6c37lu33s4"]
 
 [ext_resource type="Script" uid="uid://dfw5bayfo6s8v" path="res://Scripts/UI/character_inventory_grid.gd" id="1_abcde"]
-[ext_resource type="Texture2D" uid="uid://ks5bkjxvjxo1" path="res://ui/HUD/storage-title.png" id="2_f25si"]
+[ext_resource type="Texture2D" uid="uid://bmgbyuldmq866" path="res://ui/HUD/storage-header.png" id="2_f25si"]
 
 [node name="CharacterInventoryGrid" type="VBoxContainer"]
 offset_right = 241.0

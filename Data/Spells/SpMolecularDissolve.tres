@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://48gd5mgjsep2"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://b66bca268rpoy"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_r0cg0"]
 
@@ -12,4 +12,6 @@ description = "Breaks down a single target at the molecular level for massive da
 icon_path = "res://Data/Spells/Icons/molecular_dissolve.png"
 energy_cost = 13
 element = 5
+requirement = 1
+class_locked = true
 base_amount = 40

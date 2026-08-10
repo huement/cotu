@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://cjv00ponpveph"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://cnqbonjr63l5y"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_oyu2l"]
 
@@ -13,6 +13,7 @@ icon_path = "res://Data/Spells/Icons/stimulant_mist.png"
 energy_cost = 6
 target_type = 2
 element = 4
+requirement = 1
 effect_type = 1
 var_multiplier = 0.3
 duration = 2

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://c72wdnbtpnvr"]
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://cegwnxllpgn6y"]
 
 [ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_xjt2e"]
 
@@ -11,6 +11,7 @@ description = "Deploys medical nanites to rapidly repair organic or mechanical t
 icon_path = "res://Data/Spells/Icons/nano_repair.png"
 target_type = 2
 element = 4
+requirement = 1
 effect_type = 1
 base_amount = 18
 var_multiplier = 0.4

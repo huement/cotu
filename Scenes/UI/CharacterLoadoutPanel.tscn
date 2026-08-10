@@ -1,27 +1,30 @@
 [gd_scene load_steps=5 format=3 uid="uid://b4n0j4k1s2w7x"]
 
 [ext_resource type="Script" uid="uid://d14gxjgaqmnhs" path="res://Scripts/UI/character_loadout_panel.gd" id="1_abcde"]
-[ext_resource type="Texture2D" uid="uid://bml5kv0skinh3" path="res://ui/HUD/gear-title.png" id="2_3slxo"]
 [ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="2_qfyrq"]
+[ext_resource type="Texture2D" uid="uid://7h0awl3rn8fw" path="res://ui/HUD/load-out.png" id="2_tt2k6"]
 [ext_resource type="Texture2D" uid="uid://bsjd6pdfqbolc" path="res://ui/HUD/hexagon.png" id="4_tt2k6"]
 
 [node name="CharacterLoadoutPanel" type="VBoxContainer"]
 custom_minimum_size = Vector2(390, 200)
 offset_right = 390.0
-offset_bottom = 200.0
+offset_bottom = 247.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource("1_abcde")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
 theme_override_constants/margin_top = 5
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_bottom = 6
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer"]
 layout_mode = 2
-texture = ExtResource("2_3slxo")
+texture = ExtResource("2_tt2k6")
 stretch_mode = 5
 
 [node name="GridContainer" type="GridContainer" parent="."]
+custom_minimum_size = Vector2(400, 210)
 layout_mode = 2
 theme_override_constants/h_separation = 18
 theme_override_constants/v_separation = 8
@@ -31,6 +34,7 @@ columns = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotBody"]
 layout_mode = 1
@@ -77,6 +81,7 @@ text = "100%"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotArms"]
 layout_mode = 1
@@ -123,6 +128,7 @@ text = "80%"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotLegs"]
 layout_mode = 1
@@ -169,6 +175,7 @@ text = "40%"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotFeet"]
 layout_mode = 1
@@ -215,6 +222,7 @@ text = "80%"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotLeftHand"]
 layout_mode = 1
@@ -261,6 +269,7 @@ text = "40%"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotRightHand"]
 layout_mode = 1
@@ -307,6 +316,7 @@ text = "80%"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotAccessory"]
 layout_mode = 1
@@ -354,6 +364,7 @@ text = "EMPTY"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(185, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="GridContainer/SlotRing"]
 layout_mode = 1

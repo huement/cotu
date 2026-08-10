@@ -1,0 +1,158 @@
+[gd_scene load_steps=5 format=3 uid="uid://c3k853pdqjiea"]
+
+[ext_resource type="Script" uid="uid://c6ckc4jx8ifdv" path="res://Scripts/UI/SkillsSpellsPopup.gd" id="1_mjwju"]
+[ext_resource type="Texture2D" uid="uid://buv02gxnyuor3" path="res://ui/HUD/chevron_border.png" id="2_50ghs"]
+[ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="2_kvkl8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mjwju"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.2754111, 0.9034853, 0.53732586, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[node name="SkillsSpellsPopup" type="VBoxContainer"]
+custom_minimum_size = Vector2(600, 400)
+script = ExtResource("1_mjwju")
+
+[node name="TopBorder" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_50ghs")
+
+[node name="TabContainer" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Control" type="Control" parent="TabContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="ClassBadge" type="PanelContainer" parent="TabContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 23.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_mjwju")
+
+[node name="ClassNameLabel" type="Label" parent="TabContainer/Control/ClassBadge"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.15487596, 0.154876, 0.15487596, 1)
+text = "MAESTER"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SkillsButton" type="Button" parent="TabContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_kvkl8")
+theme_override_font_sizes/font_size = 18
+text = "SKILLS"
+
+[node name="SpellsButton" type="Button" parent="TabContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_kvkl8")
+theme_override_font_sizes/font_size = 18
+text = "SPELLS"
+
+[node name="MarginContainer" type="MarginContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+
+[node name="CloseButton" type="Button" parent="TabContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " [X] "
+
+[node name="ToolbarContainer" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ColumnHeaderBar" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ColIcon" type="Label" parent="ColumnHeaderBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "ICON"
+
+[node name="ColName" type="Label" parent="ColumnHeaderBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+theme_override_font_sizes/font_size = 13
+text = "NAME"
+
+[node name="ColCost" type="Label" parent="ColumnHeaderBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "COST"
+horizontal_alignment = 1
+
+[node name="ColPrereq" type="Label" parent="ColumnHeaderBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "PREREQ"
+horizontal_alignment = 1
+
+[node name="ColElem" type="Label" parent="ColumnHeaderBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "ELEM"
+horizontal_alignment = 1
+
+[node name="ColDetails" type="Label" parent="ColumnHeaderBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+theme_override_font_sizes/font_size = 13
+text = "DETAILS"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ListContainer" type="VBoxContainer" parent="ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="BottomBorder" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_50ghs")
+flip_v = true

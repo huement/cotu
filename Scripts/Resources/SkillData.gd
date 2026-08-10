@@ -52,8 +52,45 @@ enum EffectType {
 @export var assigned_races: Array[String] = []
 
 
-func can_character_use(energy_available: int) -> bool:
-	return energy_available >= energy_cost
+## Checks if a character's class is permitted to use this skill.
+## An empty assigned_classes array means ALL classes can use it.
+func is_class_allowed(character_class_name: String) -> bool:
+	if assigned_classes.is_empty():
+		return true
+	if character_class_name.is_empty():
+		return false
+
+	var clean_target: String = character_class_name.strip_edges().to_upper()
+	for allowed in assigned_classes:
+		if allowed.strip_edges().to_upper() == clean_target:
+			return true
+	return false
+
+
+## Checks if a character's race/breed is permitted to use this skill.
+## An empty assigned_races array means ALL races can use it.
+func is_race_allowed(character_race_name: String) -> bool:
+	if assigned_races.is_empty():
+		return true
+	if character_race_name.is_empty():
+		return false
+
+	var clean_target: String = character_race_name.strip_edges().to_upper()
+	for allowed in assigned_races:
+		if allowed.strip_edges().to_upper() == clean_target:
+			return true
+	return false
+
+
+## Evaluates full availability (energy cost, class alignment, and race alignment)
+func can_use(current_energy: int, character_class_name: String = "", character_race_name: String = "") -> bool:
+	if current_energy < energy_cost:
+		return false
+	if not is_class_allowed(character_class_name):
+		return false
+	if not is_race_allowed(character_race_name):
+		return false
+	return true
 
 
 ## Evaluates whether the skill lands successfully based on its accuracy rating

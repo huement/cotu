@@ -1,4 +1,3 @@
-# res://Scripts/Resources/SpellData.gd
 class_name SpellData
 extends Resource
 
@@ -45,6 +44,8 @@ enum StatusEffect {
 @export var energy_cost: int = 4
 @export var target_type: TargetType = TargetType.SINGLE_ENEMY
 @export var element: ItemData.EffectElement = ItemData.EffectElement.MAGIC
+@export var requirement: int = 0
+@export var class_locked: bool = false
 
 @export_group("Potency & Scaling")
 @export var effect_type: EffectType = EffectType.DAMAGE
@@ -64,5 +65,26 @@ func calculate_potency(caster_stat_value: int) -> int:
 	return base_amount + random_bonus + stat_bonus
 
 
-func can_cast(current_energy: int) -> bool:
-	return current_energy >= energy_cost
+## Checks whether a given character class string is authorized to cast this spell.
+func is_class_allowed(character_class_name: String) -> bool:
+	# Off-class characters can cast unlocked spells freely
+	if not class_locked:
+		return true
+
+	if character_class_name.is_empty():
+		return false
+
+	# Convert enum key to string (e.g. SpellbookType.MAESTER -> "MAESTER")
+	var required_class_name: String = SpellbookType.keys()[spellbook]
+	return character_class_name.strip_edges().to_upper() == required_class_name
+
+
+## Evaluates whether the caster meets both resource (energy) and class locking rules.
+func can_cast(current_energy: int, character_class_name: String = "") -> bool:
+	if current_energy < energy_cost:
+		return false
+
+	if class_locked and not is_class_allowed(character_class_name):
+		return false
+
+	return true
