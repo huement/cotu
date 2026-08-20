@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://byfxw0wypla7f"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_i817k"]
+
+[resource]
+script = ExtResource("1_i817k")
+effect_id = "eff_hp_burn_3"
+name = "HP Burn III"
+description = "Deals 12.0% of MAX HP as fire damage per turn, ignoring armor."
+level = 3
+type = 1
+element = 4
+duration = 3
+modifier_stat = 7
+modifier_type = 4
+modifier_value = 12.0
+cured_by = "CLEANSE|BURN_SALVE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_hp_burn.png"

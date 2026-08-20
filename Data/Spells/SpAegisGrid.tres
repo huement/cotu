@@ -17,5 +17,5 @@ effect_type = 2
 base_amount = 12
 var_multiplier = 0.3
 stat_scaling = "PIE"
-status_effect = 5
+status_effect = "eff_shield_2"
 duration = 3

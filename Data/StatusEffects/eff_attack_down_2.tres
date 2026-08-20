@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://df2lgtw33v0fy"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_n4hu0"]
+
+[resource]
+script = ExtResource("1_n4hu0")
+effect_id = "eff_attack_down_2"
+name = "Attack Down II"
+description = "Decreases Attack by -25%."
+level = 2
+type = 1
+duration = 2
+modifier_stat = 2
+modifier_value = -25.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_attack_down.png"

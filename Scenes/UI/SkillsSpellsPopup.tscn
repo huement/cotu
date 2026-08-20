@@ -17,30 +17,25 @@ corner_radius_bottom_left = 3
 corner_detail = 5
 
 [node name="SkillsSpellsPopup" type="VBoxContainer"]
-custom_minimum_size = Vector2(600, 400)
+custom_minimum_size = Vector2(600, 450)
 script = ExtResource("1_mjwju")
 
-[node name="TopBorder" type="TextureRect" parent="."]
-unique_name_in_owner = true
+[node name="TopHeader" type="TextureRect" parent="."]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 0
 texture = ExtResource("2_50ghs")
 
 [node name="TabContainer" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Control" type="Control" parent="TabContainer"]
+[node name="Control" type="MarginContainer" parent="TabContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
 [node name="ClassBadge" type="PanelContainer" parent="TabContainer/Control"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 72.0
-offset_bottom = 23.0
+layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_mjwju")
 
 [node name="ClassNameLabel" type="Label" parent="TabContainer/Control/ClassBadge"]
@@ -92,7 +87,7 @@ alignment = 1
 
 [node name="ColIcon" type="Label" parent="ColumnHeaderBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(32, 0)
+custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "ICON"
@@ -150,9 +145,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="BottomBorder" type="TextureRect" parent="."]
-unique_name_in_owner = true
+[node name="BottomHeader" type="TextureRect" parent="."]
 layout_mode = 2
-size_flags_horizontal = 4
 texture = ExtResource("2_50ghs")
 flip_v = true

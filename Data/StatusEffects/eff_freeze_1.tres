@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://dhwfbnmhygq7b"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_cxx1f"]
+
+[resource]
+script = ExtResource("1_cxx1f")
+effect_id = "eff_freeze_1"
+name = "Freeze I"
+description = "Target cannot act for 1 turn(s)."
+type = 1
+element = 5
+modifier_type = 5
+modifier_value = 100.0
+cured_by = "CLEANSE|THAW"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_freeze.png"

@@ -14,5 +14,5 @@ target_type = 1
 element = 5
 requirement = 1
 base_amount = 8
-status_effect = 6
+status_effect = "eff_defense_down_1"
 duration = 3

@@ -14,5 +14,5 @@ target_type = 3
 requirement = 1
 effect_type = 2
 var_multiplier = 0.2
-status_effect = 5
+status_effect = "eff_shield_2"
 duration = 3

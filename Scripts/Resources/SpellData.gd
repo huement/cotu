@@ -21,15 +21,6 @@ enum EffectType {
 	DEBUFF,
 	UTILITY,
 }
-enum StatusEffect {
-	NONE,
-	STUN,
-	POISON,
-	SLOW,
-	HASTE,
-	SHIELD,
-	DEFENSE_DOWN,
-}
 
 @export_group("Identity & Grouping")
 @export var spell_id: String = ""
@@ -52,7 +43,7 @@ enum StatusEffect {
 @export var base_amount: int = 15
 @export var var_multiplier: float = 0.5
 @export var stat_scaling: String = "INT"
-@export var status_effect: StatusEffect = StatusEffect.NONE
+@export var status_effect: String = "NONE" # Replaced enum with String ID
 @export var duration: int = 1
 
 
@@ -88,3 +79,9 @@ func can_cast(current_energy: int, character_class_name: String = "") -> bool:
 		return false
 
 	return true
+
+## Convenience method to fetch the compiled StatusEffectData resource directly
+func get_status_effect_data() -> StatusEffectData:
+	if status_effect.is_empty() or status_effect.to_upper() == "NONE":
+		return null
+	return StatusEffectDatabase.get_effect(status_effect)

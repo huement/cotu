@@ -2,7 +2,7 @@
 @tool
 extends EditorScript
 
-const CSV_PATHS: Array[String] = ["res://Spells.csv", "res://Data/Spells.csv", "res://Data/Spells/Spells.csv"]
+const CSV_PATHS: Array[String] = ["res://Data/Spells.csv", "res://Data/Spells/Spells.csv"]
 const OUTPUT_DIR: String = "res://Data/Spells/"
 
 
@@ -44,7 +44,7 @@ func compile_spells() -> void:
 		spell.base_amount = int(line[8])
 		spell.var_multiplier = float(line[9])
 		spell.stat_scaling = line[10].strip_edges()
-		spell.status_effect = _parse_status_effect(line[11].strip_edges())
+		spell.status_effect = _parse_status_effect(line[11].strip_edges(), spell.tier)
 		spell.duration = int(line[12])
 		spell.requirement = int(line[13])
 		var class_locked_str: String = line[14].strip_edges().to_upper()
@@ -127,19 +127,53 @@ func _parse_effect_type(s: String) -> SpellData.EffectType:
 			return SpellData.EffectType.DAMAGE
 
 
-func _parse_status_effect(s: String) -> SpellData.StatusEffect:
-	match s.to_upper():
-		"STUN":
-			return SpellData.StatusEffect.STUN
-		"POISON":
-			return SpellData.StatusEffect.POISON
-		"SLOW":
-			return SpellData.StatusEffect.SLOW
-		"HASTE":
-			return SpellData.StatusEffect.HASTE
-		"SHIELD":
-			return SpellData.StatusEffect.SHIELD
+func _parse_status_effect(s: String, tier: int = 1) -> String:
+	var clean_s: String = s.strip_edges()
+	if clean_s.is_empty() or clean_s.to_upper() == "NONE":
+		return "NONE"
+
+	# Pass through explicit ID references (e.g. "eff_defense_down_1")
+	if clean_s.begins_with("eff_"):
+		return clean_s
+
+	# Map short CSV keywords to status_effects.csv IDs using the spell's tier level
+	var clamped_tier: int = clampi(tier, 1, 3)
+	match clean_s.to_upper():
 		"DEFENSE_DOWN":
-			return SpellData.StatusEffect.DEFENSE_DOWN
+			return "eff_defense_down_%d" % clamped_tier
+		"ATTACK_DOWN":
+			return "eff_attack_down_%d" % clamped_tier
+		"SPEED_DOWN", "SLOW":
+			return "eff_speed_down_%d" % clamped_tier
+		"ACCURACY_DOWN":
+			return "eff_accuracy_down_%d" % clamped_tier
+		"DEXTERITY_DOWN":
+			return "eff_dexterity_down_%d" % clamped_tier
+		"MAGIC_DOWN":
+			return "eff_magic_down_%d" % clamped_tier
+		"DEFENSE_UP":
+			return "eff_defense_up_%d" % clamped_tier
+		"ATTACK_UP":
+			return "eff_attack_up_%d" % clamped_tier
+		"SPEED_UP", "HASTE":
+			return "eff_speed_up_%d" % clamped_tier
+		"ACCURACY_UP":
+			return "eff_accuracy_up_%d" % clamped_tier
+		"STUN":
+			return "eff_stun_%d" % clamped_tier
+		"POISON":
+			return "eff_poison_%d" % clamped_tier
+		"FREEZE":
+			return "eff_freeze_%d" % clamped_tier
+		"SILENCE":
+			return "eff_silence_%d" % clamped_tier
+		"SHIELD":
+			return "eff_shield_%d" % clamped_tier
+		"MAGIC_SHIELD":
+			return "eff_magic_shield_%d" % clamped_tier
+		"HEAL", "CONTINUOUS_HEAL":
+			return "eff_continuous_heal_%d" % clamped_tier
+		"HP_BURN", "BURN":
+			return "eff_hp_burn_%d" % clamped_tier
 		_:
-			return SpellData.StatusEffect.NONE
+			return clean_s

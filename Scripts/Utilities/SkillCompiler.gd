@@ -2,7 +2,7 @@
 @tool
 extends EditorScript
 
-const CSV_PATHS: Array[String] = ["res://Skills.csv", "res://Data/Skills.csv", "res://Data/Skills/Skills.csv"]
+const CSV_PATHS: Array[String] = ["res://Data/Skills.csv", "res://Data/Skills/Skills.csv"]
 const OUTPUT_DIR: String = "res://Data/Skills/"
 
 
@@ -66,6 +66,12 @@ func compile_skills() -> void:
 			skill.icon = load(skill.icon_path) as Texture2D
 		skill.accuracy = int(line[12])
 		skill.duration = int(line[13])
+
+		# Column 14: status_effect
+		if line.size() >= 15:
+			skill.status_effect = _parse_status_effect(line[14].strip_edges(), skill.duration)
+		else:
+			skill.status_effect = "NONE"
 
 		var save_path: String = OUTPUT_DIR + save_path_filename(skill.skill_id)
 
@@ -151,3 +157,53 @@ func _parse_element(s: String) -> ItemData.EffectElement:
 			return ItemData.EffectElement.LIFE
 		_:
 			return ItemData.EffectElement.NONE
+
+
+func _parse_status_effect(s: String, duration: int = 1) -> String:
+	var clean_s: String = s.strip_edges()
+	if clean_s.is_empty() or clean_s.to_upper() == "NONE":
+		return "NONE"
+
+	if clean_s.begins_with("eff_"):
+		return clean_s
+
+	var clamped_tier: int = clampi(duration, 1, 3)
+	match clean_s.to_upper():
+		"DEFENSE_DOWN":
+			return "eff_defense_down_%d" % clamped_tier
+		"ATTACK_DOWN":
+			return "eff_attack_down_%d" % clamped_tier
+		"SPEED_DOWN", "SLOW":
+			return "eff_speed_down_%d" % clamped_tier
+		"ACCURACY_DOWN":
+			return "eff_accuracy_down_%d" % clamped_tier
+		"DEXTERITY_DOWN":
+			return "eff_dexterity_down_%d" % clamped_tier
+		"MAGIC_DOWN":
+			return "eff_magic_down_%d" % clamped_tier
+		"DEFENSE_UP":
+			return "eff_defense_up_%d" % clamped_tier
+		"ATTACK_UP":
+			return "eff_attack_up_%d" % clamped_tier
+		"SPEED_UP", "HASTE":
+			return "eff_speed_up_%d" % clamped_tier
+		"ACCURACY_UP":
+			return "eff_accuracy_up_%d" % clamped_tier
+		"STUN":
+			return "eff_stun_%d" % clamped_tier
+		"POISON":
+			return "eff_poison_%d" % clamped_tier
+		"FREEZE":
+			return "eff_freeze_%d" % clamped_tier
+		"SILENCE":
+			return "eff_silence_%d" % clamped_tier
+		"SHIELD":
+			return "eff_shield_%d" % clamped_tier
+		"MAGIC_SHIELD":
+			return "eff_magic_shield_%d" % clamped_tier
+		"HEAL", "CONTINUOUS_HEAL":
+			return "eff_continuous_heal_%d" % clamped_tier
+		"HP_BURN", "BURN":
+			return "eff_hp_burn_%d" % clamped_tier
+		_:
+			return clean_s

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://g5nccy8sr3do"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_5as0p"]
+
+[resource]
+script = ExtResource("1_5as0p")
+effect_id = "eff_magic_shield_3"
+name = "Magic Shield III"
+description = "Absorbs magical damage equal to 30% of MAX HP."
+level = 3
+element = 2
+duration = 3
+modifier_stat = 7
+modifier_type = 3
+modifier_value = 30.0
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_magic_shield.png"

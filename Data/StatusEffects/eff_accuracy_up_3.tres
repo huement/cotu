@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://d0xiw5rfrt4b4"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_0wuq6"]
+
+[resource]
+script = ExtResource("1_0wuq6")
+effect_id = "eff_accuracy_up_3"
+name = "Accuracy Up III"
+description = "Increases Accuracy by 50%."
+level = 3
+duration = 3
+modifier_stat = 3
+modifier_value = 50.0
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_accuracy_up.png"

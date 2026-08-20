@@ -14,4 +14,4 @@ target_type = 1
 requirement = 1
 base_amount = 10
 var_multiplier = 0.4
-status_effect = 1
+status_effect = "eff_stun_2"

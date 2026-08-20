@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://s5cqmfwrx48p"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_femol"]
+
+[resource]
+script = ExtResource("1_femol")
+effect_id = "eff_accuracy_down_3"
+name = "Accuracy Down III"
+description = "Decreases Accuracy by -50%."
+level = 3
+type = 1
+duration = 3
+modifier_stat = 3
+modifier_value = -50.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_accuracy_down.png"

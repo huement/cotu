@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://cs5gkxbg7aclm"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_8edog"]
+
+[resource]
+script = ExtResource("1_8edog")
+effect_id = "eff_attack_up_3"
+name = "Attack Up III"
+description = "Increases Attack by 50%."
+level = 3
+duration = 3
+modifier_stat = 2
+modifier_value = 50.0
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_attack_up.png"

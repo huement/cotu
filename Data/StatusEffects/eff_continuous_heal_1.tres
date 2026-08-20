@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://c42uqtxtuj0t3"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_jpuiq"]
+
+[resource]
+script = ExtResource("1_jpuiq")
+effect_id = "eff_continuous_heal_1"
+name = "Continuous Heal I"
+description = "Restores 5% of MAX HP at the start of the turn."
+element = 1
+duration = 2
+modifier_stat = 7
+modifier_type = 1
+modifier_value = 5.0
+max_stacks = 5
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_continuous_heal.png"

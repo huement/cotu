@@ -16,11 +16,33 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0.7372549, 0.73333335, 0.7137255)
+color = Color(0.19085723, 0.20503643, 0.20503551, 0.7137255)
+
+[node name="TopFrame" type="TextureRect" parent="."]
+unique_name_in_owner = true
+offset_left = 439.0
+offset_top = 122.0
+offset_right = 712.0
+offset_bottom = 144.0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("1_qtas1")
+stretch_mode = 5
+
+[node name="BottomFrame" type="TextureRect" parent="."]
+unique_name_in_owner = true
+offset_left = 435.0
+offset_top = 503.0
+offset_right = 716.0
+offset_bottom = 517.0
+size_flags_horizontal = 4
+size_flags_vertical = 8
+texture = ExtResource("2_68ux8")
+stretch_mode = 5
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(480, 360)
+custom_minimum_size = Vector2(540, 360)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -33,28 +55,12 @@ offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TopFrame" type="TextureRect" parent="PanelContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 0
-texture = ExtResource("1_qtas1")
-stretch_mode = 5
-
-[node name="BottomFrame" type="TextureRect" parent="PanelContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 8
-texture = ExtResource("2_68ux8")
-stretch_mode = 5
-
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 24
+theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_bottom = 20
 
 [node name="PageDetail" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
 unique_name_in_owner = true
@@ -71,6 +77,7 @@ layout_mode = 2
 
 [node name="IconRect" type="TextureRect" parent="PanelContainer/MarginContainer/PageDetail/TopSection/IconBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 80)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
@@ -84,17 +91,34 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.8, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "SPELL NAME"
 
-[node name="DescLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/TopSection/TextVBox"]
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/PageDetail/TopSection/TextVBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/PageDetail/TopSection/TextVBox/Control"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 70.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DescLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/TopSection/TextVBox/Control/ScrollContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(20, 10)
+custom_minimum_size = Vector2(360, 60)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 12
-text = "Spell description text goes here..."
+theme_override_font_sizes/font_size = 14
+text = "Spell description text goes here Spell description text goes here Spell description text goes here Spell description text goes here Spell  description text goes here Spell description text goes here Spell description text goes ..."
 autowrap_mode = 2
+
+[node name="Spacer2" type="Control" parent="PanelContainer/MarginContainer/PageDetail"]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="MiddleSection" type="VBoxContainer" parent="PanelContainer/MarginContainer/PageDetail"]
 layout_mode = 2
@@ -109,8 +133,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 13
-text = "COST: 00"
+theme_override_font_sizes/font_size = 18
+text = "CAST COST: 0 MP"
 
 [node name="ElemLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/GridRow1"]
 unique_name_in_owner = true
@@ -118,20 +142,20 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 13
-text = "ELEM: NONE"
+theme_override_font_sizes/font_size = 18
+text = "BASE TYPE: NONE"
 
-[node name="DurationLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/GridRow1"]
+[node name="GridRow2" type="HBoxContainer" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection"]
+layout_mode = 2
+
+[node name="TargetLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/GridRow2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 13
-text = "DUR: 00"
-
-[node name="GridRow2" type="HBoxContainer" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection"]
-layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "TARGET: SINGLE ALLY"
 
 [node name="EffectLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/GridRow2"]
 unique_name_in_owner = true
@@ -139,17 +163,65 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 13
-text = "EFCT: NONE"
+theme_override_font_sizes/font_size = 18
+text = "EFFECT TYPE: DAMAGE"
 
-[node name="TypeLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/GridRow2"]
+[node name="GridRow3" type="HBoxContainer" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection"]
+layout_mode = 2
+
+[node name="DurationLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/GridRow3"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 13
-text = "TYPE: DAMAGE"
+theme_override_font_sizes/font_size = 18
+text = "DURATION: 0 TURNS"
+
+[node name="ScaleLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/GridRow3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "SCALES WITH: INT"
+
+[node name="Spacer2" type="Control" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection"]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/HBoxContainer"]
+custom_minimum_size = Vector2(60, 50)
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/HBoxContainer/Control"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 0
+offset_left = 4.0
+offset_right = 54.0
+offset_bottom = 50.0
+
+[node name="StatusIcon" type="TextureRect" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/HBoxContainer/Control"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 0
+offset_left = 4.0
+offset_right = 54.0
+offset_bottom = 50.0
+
+[node name="StatusLabel" type="Label" parent="PanelContainer/MarginContainer/PageDetail/MiddleSection/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "STATUS EFFECT: 
+DEFENSE DOWN"
 
 [node name="Spacer" type="Control" parent="PanelContainer/MarginContainer/PageDetail"]
 layout_mode = 2

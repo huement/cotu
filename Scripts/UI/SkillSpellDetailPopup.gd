@@ -13,12 +13,17 @@ class_name SkillSpellDetailPopup
 @onready var cost_label: Label = %CostLabel as Label
 @onready var elem_label: Label = %ElemLabel as Label
 @onready var duration_label: Label = %DurationLabel as Label
+@onready var scales_with_label: Label = %ScaleLabel as Label
 @onready var effect_label: Label = %EffectLabel as Label
-@onready var type_label: Label = %TypeLabel as Label
+@onready var target_label: Label = %TargetLabel as Label
+@onready var status_effect: Label = %StatusLabel as Label
 @onready var cast_button: Button = %CastButton as Button
 @onready var requirement_badge: PanelContainer = %RequirementBadge as PanelContainer
 @onready var requirement_label: Label = %RequirementLabel as Label
 @onready var close_button: Button = %CloseButton as Button
+
+# SKILL SPECIFIC
+@onready var type_label: Label = %TypeLabel as Label
 
 # Page 2 Nodes (Target Selection View)
 @onready var page_target: VBoxContainer = %PageTarget as VBoxContainer
@@ -50,7 +55,6 @@ func _ready() -> void:
 
 
 func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> void:
-	print("SkillSpellDetailPopup Requst...")
 	if action_type == &"ABILITY_INFO":
 		var res: Resource = data.get("resource", null) as Resource
 		var cat: CatCharacter = data.get("character", null) as CatCharacter
@@ -111,15 +115,19 @@ func _populate_ability_stats() -> void:
 			icon_rect.texture = spell.icon
 
 		if cost_label:
-			cost_label.text = "COST: %d EN" % spell.energy_cost
+			cost_label.text = "CAST COST: %d MP" % spell.energy_cost
 		if elem_label:
-			elem_label.text = "ELEM: %s" % ItemData.EffectElement.keys()[spell.element]
+			elem_label.text = "BASE TYPE: %s" % ItemData.EffectElement.keys()[spell.element]
 		if duration_label:
-			duration_label.text = "DUR: %d" % spell.duration
+			duration_label.text = "DURATION: %d TURNS" % spell.duration
+		if scales_with_label:
+			scales_with_label.text = "SCALES WITH: %s" % spell.stat_scaling
 		if effect_label:
-			effect_label.text = "EFCT: %s" % SpellData.StatusEffect.keys()[spell.status_effect]
-		if type_label:
-			type_label.text = "TYPE: %s" % SpellData.EffectType.keys()[spell.effect_type]
+			effect_label.text = "EFFECT TYPE: %s" % SpellData.EffectType.keys()[spell.effect_type]
+		if target_label:
+			target_label.text = "TARGET: %s" % SpellData.TargetType.keys()[spell.target_type]
+
+		_render_status_effect_ui(spell.status_effect)
 
 		var is_allowed: bool = spell.is_class_allowed(char_class_name)
 		var meets_req: bool = char_level >= spell.requirement
@@ -137,21 +145,50 @@ func _populate_ability_stats() -> void:
 			icon_rect.texture = skill.icon
 
 		if cost_label:
-			cost_label.text = "COST: %d EN" % skill.energy_cost
+			cost_label.text = "CAST COST: %d MP" % skill.energy_cost
 		if elem_label:
-			elem_label.text = "ELEM: %s" % (ItemData.EffectElement.keys()[skill.element] if "element" in skill else "NONE")
+			elem_label.text = "BASE TYPE: %s" % (ItemData.EffectElement.keys()[skill.element] if "element" in skill else "NONE")
 		if duration_label:
-			duration_label.text = "ACC: %d%%" % skill.accuracy
+			duration_label.text = "ACCURACY: %d%%" % skill.accuracy
 		if effect_label:
-			effect_label.text = "EFCT: %s" % SkillData.EffectType.keys()[skill.effect_type]
+			effect_label.text = "EFFECT TYPE: %s" % SkillData.EffectType.keys()[skill.effect_type]
 		if type_label:
-			type_label.text = "TYPE: %s" % SkillData.SkillType.keys()[skill.skill_type]
+			type_label.text = "SKILL TYPE: %s" % SkillData.SkillType.keys()[skill.skill_type]
+
+		_render_status_effect_ui(skill.status_effect if "status_effect" in skill else "NONE")
 
 		var is_class_ok: bool = skill.is_class_allowed(char_class_name)
 		var is_race_ok: bool = skill.is_race_allowed(char_race_name)
 		var is_field_castable: bool = skill.skill_type != SkillData.SkillType.COMBAT
 
 		_configure_bottom_bar(is_class_ok and is_race_ok, true, is_field_castable, 1, "[ USE ]")
+
+
+func _render_status_effect_ui(status_effect_id: String) -> void:
+	var status_label := %StatusLabel as Label
+	var status_icon := %StatusIconRect as TextureRect if has_node("%StatusIconRect") else null
+
+	if status_effect_id.is_empty() or status_effect_id.to_upper() == "NONE":
+		if status_label:
+			status_label.text = "STATUS EFFECT:\nNONE"
+			status_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 0.6))
+		if status_icon:
+			status_icon.visible = false
+	else:
+		var info: Dictionary = StatusEffectDatabase.get_effect_info(status_effect_id)
+		if not info.is_empty():
+			if status_label:
+				status_label.text = "STATUS EFFECT:\n%s (%dT)" % [info["name"].to_upper(), info["duration"]]
+				var text_color: Color = Color(0.27, 0.90, 0.53, 1.0) if info["is_positive"] else Color(1.0, 0.35, 0.35, 1.0)
+				status_label.add_theme_color_override("font_color", text_color)
+
+			if status_icon and info["icon"] != null:
+				status_icon.texture = info["icon"] as Texture2D
+				status_icon.visible = true
+		else:
+			if status_label:
+				status_label.text = "STATUS EFFECT:\n%s" % status_effect_id.to_upper()
+				status_label.add_theme_color_override("font_color", Color(0, 0.95, 1, 1))
 
 
 func _configure_bottom_bar(is_allowed: bool, meets_req: bool, is_field_usable: bool, req_level: int, button_text: String) -> void:
@@ -263,7 +300,6 @@ func _emit_field_action_log() -> void:
 
 
 func _hide_popup() -> void:
-	print("SkillSpellDetailPopup: Hiding popup...")
 	hide()
 	if background_dimmer:
 		background_dimmer.hide()

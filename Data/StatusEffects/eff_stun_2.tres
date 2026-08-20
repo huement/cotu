@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://btsba74p0eo1w"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_65je2"]
+
+[resource]
+script = ExtResource("1_65je2")
+effect_id = "eff_stun_2"
+name = "Stun II"
+description = "Target is incapacitated for 2 turn(s)."
+level = 2
+type = 1
+duration = 2
+modifier_type = 5
+modifier_value = 100.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_stun.png"

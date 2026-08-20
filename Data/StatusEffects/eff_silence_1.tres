@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://d3gm214mnpa8g"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_g66fa"]
+
+[resource]
+script = ExtResource("1_g66fa")
+effect_id = "eff_silence_1"
+name = "Silence I"
+description = "Target cannot cast magic skills for 1 turn(s)."
+type = 1
+modifier_stat = 5
+modifier_type = 6
+modifier_value = 100.0
+cured_by = "CLEANSE|VOCAL_SALVE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_silence.png"

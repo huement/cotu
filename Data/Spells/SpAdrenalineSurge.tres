@@ -17,5 +17,5 @@ effect_type = 2
 base_amount = 10
 var_multiplier = 0.2
 stat_scaling = "PIE"
-status_effect = 4
+status_effect = "eff_speed_up_1"
 duration = 3

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://dko60d0381vho"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_or3vr"]
+
+[resource]
+script = ExtResource("1_or3vr")
+effect_id = "eff_stun_3"
+name = "Stun III"
+description = "Target is incapacitated for 3 turn(s)."
+level = 3
+type = 1
+duration = 3
+modifier_type = 5
+modifier_value = 100.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_stun.png"

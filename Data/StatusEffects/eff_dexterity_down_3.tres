@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://bxor8pnkkyyh1"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_ogprk"]
+
+[resource]
+script = ExtResource("1_ogprk")
+effect_id = "eff_dexterity_down_3"
+name = "Dexterity Down III"
+description = "Decreases Dexterity by -50%."
+level = 3
+type = 1
+duration = 3
+modifier_stat = 4
+modifier_value = -50.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_dexterity_down.png"

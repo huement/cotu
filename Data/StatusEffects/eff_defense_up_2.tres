@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://bqvftcv2fg3f8"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_gljil"]
+
+[resource]
+script = ExtResource("1_gljil")
+effect_id = "eff_defense_up_2"
+name = "Defense Up II"
+description = "Increases Defense by 30%."
+level = 2
+duration = 2
+modifier_stat = 1
+modifier_value = 30.0
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_defense_up.png"

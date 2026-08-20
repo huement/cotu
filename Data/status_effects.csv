@@ -1,0 +1,61 @@
+effect_id,name,description,level,type,element,duration,modifier_stat,modifier_type,modifier_value,max_stacks,cured_by,is_cleansable,is_dispellable,icon_path
+eff_defense_up_1,Defense Up I,Increases Defense by 15%.,1,POSITIVE,NONE,2,DEF,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_defense_up.png
+eff_defense_up_2,Defense Up II,Increases Defense by 30%.,2,POSITIVE,NONE,2,DEF,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_defense_up.png
+eff_defense_up_3,Defense Up III,Increases Defense by 60%.,3,POSITIVE,NONE,3,DEF,MULTIPLIER,60,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_defense_up.png
+eff_attack_up_1,Attack Up I,Increases Attack by 15%.,1,POSITIVE,NONE,2,ATK,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_attack_up.png
+eff_attack_up_2,Attack Up II,Increases Attack by 30%.,2,POSITIVE,NONE,2,ATK,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_attack_up.png
+eff_attack_up_3,Attack Up III,Increases Attack by 50%.,3,POSITIVE,NONE,3,ATK,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_attack_up.png
+eff_accuracy_up_1,Accuracy Up I,Increases Accuracy by 15%.,1,POSITIVE,NONE,2,ACC,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_accuracy_up.png
+eff_accuracy_up_2,Accuracy Up II,Increases Accuracy by 30%.,2,POSITIVE,NONE,2,ACC,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_accuracy_up.png
+eff_accuracy_up_3,Accuracy Up III,Increases Accuracy by 50%.,3,POSITIVE,NONE,3,ACC,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_accuracy_up.png
+eff_dexterity_up_1,Dexterity Up I,Increases Dexterity by 15%.,1,POSITIVE,NONE,2,DEX,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_dexterity_up.png
+eff_dexterity_up_2,Dexterity Up II,Increases Dexterity by 30%.,2,POSITIVE,NONE,2,DEX,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_dexterity_up.png
+eff_dexterity_up_3,Dexterity Up III,Increases Dexterity by 50%.,3,POSITIVE,NONE,3,DEX,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_dexterity_up.png
+eff_magic_up_1,Magic Up I,Increases Magic by 15%.,1,POSITIVE,NONE,2,MAG,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_magic_up.png
+eff_magic_up_2,Magic Up II,Increases Magic by 30%.,2,POSITIVE,NONE,2,MAG,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_magic_up.png
+eff_magic_up_3,Magic Up III,Increases Magic by 50%.,3,POSITIVE,NONE,3,MAG,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_magic_up.png
+eff_speed_up_1,Speed Up I,Increases Speed by 15%.,1,POSITIVE,NONE,2,SPD,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_speed_up.png
+eff_speed_up_2,Speed Up II,Increases Speed by 30%.,2,POSITIVE,NONE,2,SPD,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_speed_up.png
+eff_speed_up_3,Speed Up III,Increases Speed by 50%.,3,POSITIVE,NONE,3,SPD,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_speed_up.png
+eff_continuous_heal_1,Continuous Heal I,Restores 5% of MAX HP at the start of the turn.,1,POSITIVE,NATURE,2,HP,PERCENT_MAX_HP_HEAL,5,5,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_continuous_heal.png
+eff_continuous_heal_2,Continuous Heal II,Restores 10% of MAX HP at the start of the turn.,2,POSITIVE,NATURE,2,HP,PERCENT_MAX_HP_HEAL,10,5,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_continuous_heal.png
+eff_continuous_heal_3,Continuous Heal III,Restores 15% of MAX HP at the start of the turn.,3,POSITIVE,NATURE,3,HP,PERCENT_MAX_HP_HEAL,15,5,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_continuous_heal.png
+eff_shield_1,Shield I,Absorbs damage equal to 10% of MAX HP.,1,POSITIVE,NONE,2,HP,PERCENT_SHIELD,10,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_shield.png
+eff_shield_2,Shield II,Absorbs damage equal to 20% of MAX HP.,2,POSITIVE,NONE,3,HP,PERCENT_SHIELD,20,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_shield.png
+eff_shield_3,Shield III,Absorbs damage equal to 30% of MAX HP.,3,POSITIVE,NONE,3,HP,PERCENT_SHIELD,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_shield.png
+eff_magic_shield_1,Magic Shield I,Absorbs magical damage equal to 10% of MAX HP.,1,POSITIVE,ARCANE,2,HP,PERCENT_MAGIC_SHIELD,10,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_magic_shield.png
+eff_magic_shield_2,Magic Shield II,Absorbs magical damage equal to 20% of MAX HP.,2,POSITIVE,ARCANE,3,HP,PERCENT_MAGIC_SHIELD,20,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_magic_shield.png
+eff_magic_shield_3,Magic Shield III,Absorbs magical damage equal to 30% of MAX HP.,3,POSITIVE,ARCANE,3,HP,PERCENT_MAGIC_SHIELD,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/eff_magic_shield.png
+eff_defense_down_1,Defense Down I,Decreases Defense by -15%.,1,NEGATIVE,NONE,2,DEF,MULTIPLIER,-15,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_defense_down.png
+eff_defense_down_2,Defense Down II,Decreases Defense by -30%.,2,NEGATIVE,NONE,2,DEF,MULTIPLIER,-30,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_defense_down.png
+eff_defense_down_3,Defense Down III,Decreases Defense by -60%.,3,NEGATIVE,NONE,3,DEF,MULTIPLIER,-60,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_defense_down.png
+eff_attack_down_1,Attack Down I,Decreases Attack by -15%.,1,NEGATIVE,NONE,2,ATK,MULTIPLIER,-15,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_attack_down.png
+eff_attack_down_2,Attack Down II,Decreases Attack by -25%.,2,NEGATIVE,NONE,2,ATK,MULTIPLIER,-25,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_attack_down.png
+eff_attack_down_3,Attack Down III,Decreases Attack by -50%.,3,NEGATIVE,NONE,3,ATK,MULTIPLIER,-50,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_attack_down.png
+eff_accuracy_down_1,Accuracy Down I,Decreases Accuracy by -15%.,1,NEGATIVE,NONE,2,ACC,MULTIPLIER,-15,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_accuracy_down.png
+eff_accuracy_down_2,Accuracy Down II,Decreases Accuracy by -30%.,2,NEGATIVE,NONE,2,ACC,MULTIPLIER,-30,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_accuracy_down.png
+eff_accuracy_down_3,Accuracy Down III,Decreases Accuracy by -50%.,3,NEGATIVE,NONE,3,ACC,MULTIPLIER,-50,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_accuracy_down.png
+eff_dexterity_down_1,Dexterity Down I,Decreases Dexterity by -15%.,1,NEGATIVE,NONE,2,DEX,MULTIPLIER,-15,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_dexterity_down.png
+eff_dexterity_down_2,Dexterity Down II,Decreases Dexterity by -30%.,2,NEGATIVE,NONE,2,DEX,MULTIPLIER,-30,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_dexterity_down.png
+eff_dexterity_down_3,Dexterity Down III,Decreases Dexterity by -50%.,3,NEGATIVE,NONE,3,DEX,MULTIPLIER,-50,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_dexterity_down.png
+eff_magic_down_1,Magic Down I,Decreases Magic by -15%.,1,NEGATIVE,NONE,2,MAG,MULTIPLIER,-15,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_magic_down.png
+eff_magic_down_2,Magic Down II,Decreases Magic by -30%.,2,NEGATIVE,NONE,2,MAG,MULTIPLIER,-30,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_magic_down.png
+eff_magic_down_3,Magic Down III,Decreases Magic by -50%.,3,NEGATIVE,NONE,3,MAG,MULTIPLIER,-50,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_magic_down.png
+eff_speed_down_1,Speed Down I,Decreases Speed by -15%.,1,NEGATIVE,NONE,2,SPD,MULTIPLIER,-15,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_speed_down.png
+eff_speed_down_2,Speed Down II,Decreases Speed by -30%.,2,NEGATIVE,NONE,2,SPD,MULTIPLIER,-30,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_speed_down.png
+eff_speed_down_3,Speed Down III,Decreases Speed by -50%.,3,NEGATIVE,NONE,3,SPD,MULTIPLIER,-50,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_speed_down.png
+eff_poison_1,Poison I,Deals 2.5% of MAX HP as poison damage per turn.,1,NEGATIVE,BIO,2,HP,PERCENT_MAX_HP_TICK,2.5,10,CLEANSE|ANTIDOTE,TRUE,FALSE,res://Data/Effects/Icons/eff_poison.png
+eff_poison_2,Poison II,Deals 5.0% of MAX HP as poison damage per turn.,2,NEGATIVE,BIO,2,HP,PERCENT_MAX_HP_TICK,5,10,CLEANSE|ANTIDOTE,TRUE,FALSE,res://Data/Effects/Icons/eff_poison.png
+eff_poison_3,Poison III,Deals 10.0% of MAX HP as poison damage per turn.,3,NEGATIVE,BIO,3,HP,PERCENT_MAX_HP_TICK,10,10,CLEANSE|ANTIDOTE,TRUE,FALSE,res://Data/Effects/Icons/eff_poison.png
+eff_hp_burn_1,HP Burn I,"Deals 3.0% of MAX HP as fire damage per turn, ignoring armor.",1,NEGATIVE,FIRE,2,HP,PERCENT_MAX_HP_TICK,3,1,CLEANSE|BURN_SALVE,TRUE,FALSE,res://Data/Effects/Icons/eff_hp_burn.png
+eff_hp_burn_2,HP Burn II,"Deals 6.0% of MAX HP as fire damage per turn, ignoring armor.",2,NEGATIVE,FIRE,2,HP,PERCENT_MAX_HP_TICK,6,1,CLEANSE|BURN_SALVE,TRUE,FALSE,res://Data/Effects/Icons/eff_hp_burn.png
+eff_hp_burn_3,HP Burn III,"Deals 12.0% of MAX HP as fire damage per turn, ignoring armor.",3,NEGATIVE,FIRE,3,HP,PERCENT_MAX_HP_TICK,12,1,CLEANSE|BURN_SALVE,TRUE,FALSE,res://Data/Effects/Icons/eff_hp_burn.png
+eff_freeze_1,Freeze I,Target cannot act for 1 turn(s).,1,NEGATIVE,WATER,1,NONE,CC_SKIP_TURN,100,1,CLEANSE|THAW,TRUE,FALSE,res://Data/Effects/Icons/eff_freeze.png
+eff_freeze_2,Freeze II,Target cannot act for 2 turn(s).,2,NEGATIVE,WATER,2,NONE,CC_SKIP_TURN,100,1,CLEANSE|THAW,TRUE,FALSE,res://Data/Effects/Icons/eff_freeze.png
+eff_freeze_3,Freeze III,Target cannot act for 3 turn(s).,3,NEGATIVE,WATER,3,NONE,CC_SKIP_TURN,100,1,CLEANSE|THAW,TRUE,FALSE,res://Data/Effects/Icons/eff_freeze.png
+eff_silence_1,Silence I,Target cannot cast magic skills for 1 turn(s).,1,NEGATIVE,NONE,1,MAG,CC_LOCK_MAGIC,100,1,CLEANSE|VOCAL_SALVE,TRUE,FALSE,res://Data/Effects/Icons/eff_silence.png
+eff_silence_2,Silence II,Target cannot cast magic skills for 2 turn(s).,2,NEGATIVE,NONE,2,MAG,CC_LOCK_MAGIC,100,1,CLEANSE|VOCAL_SALVE,TRUE,FALSE,res://Data/Effects/Icons/eff_silence.png
+eff_silence_3,Silence III,Target cannot cast magic skills for 3 turn(s).,3,NEGATIVE,NONE,3,MAG,CC_LOCK_MAGIC,100,1,CLEANSE|VOCAL_SALVE,TRUE,FALSE,res://Data/Effects/Icons/eff_silence.png
+eff_stun_1,Stun I,Target is incapacitated for 1 turn(s).,1,NEGATIVE,NONE,1,NONE,CC_SKIP_TURN,100,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_stun.png
+eff_stun_2,Stun II,Target is incapacitated for 2 turn(s).,2,NEGATIVE,NONE,2,NONE,CC_SKIP_TURN,100,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_stun.png
+eff_stun_3,Stun III,Target is incapacitated for 3 turn(s).,3,NEGATIVE,NONE,3,NONE,CC_SKIP_TURN,100,1,CLEANSE,TRUE,FALSE,res://Data/Effects/Icons/eff_stun.png

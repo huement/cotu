@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://c8v7qswqjsd66"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_nimm2"]
+
+[resource]
+script = ExtResource("1_nimm2")
+effect_id = "eff_poison_3"
+name = "Poison III"
+description = "Deals 10.0% of MAX HP as poison damage per turn."
+level = 3
+type = 1
+element = 3
+duration = 3
+modifier_stat = 7
+modifier_type = 4
+modifier_value = 10.0
+max_stacks = 10
+cured_by = "CLEANSE|ANTIDOTE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_poison.png"

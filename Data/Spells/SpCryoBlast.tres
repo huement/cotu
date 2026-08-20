@@ -13,4 +13,4 @@ energy_cost = 9
 requirement = 1
 class_locked = true
 base_amount = 28
-status_effect = 3
+status_effect = "eff_speed_down_3"

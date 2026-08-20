@@ -45,6 +45,7 @@ enum EffectType {
 @export var element: ItemData.EffectElement = ItemData.EffectElement.NONE
 ## Base success / hit chance (0% to 100%)
 @export var accuracy: int = 90
+@export var status_effect: String = "NONE" # String ID referencing status_effects.csv
 @export var duration: int = 1
 
 @export_group("Class & Race Assignments")
@@ -53,7 +54,6 @@ enum EffectType {
 
 
 ## Checks if a character's class is permitted to use this skill.
-## An empty assigned_classes array means ALL classes can use it.
 func is_class_allowed(character_class_name: String) -> bool:
 	if assigned_classes.is_empty():
 		return true
@@ -68,7 +68,6 @@ func is_class_allowed(character_class_name: String) -> bool:
 
 
 ## Checks if a character's race/breed is permitted to use this skill.
-## An empty assigned_races array means ALL races can use it.
 func is_race_allowed(character_race_name: String) -> bool:
 	if assigned_races.is_empty():
 		return true
@@ -96,3 +95,10 @@ func can_use(current_energy: int, character_class_name: String = "", character_r
 ## Evaluates whether the skill lands successfully based on its accuracy rating
 func roll_success_check() -> bool:
 	return randi_range(1, 100) <= accuracy
+
+
+## Direct O(1) lookup helper to retrieve compiled StatusEffectData
+func get_status_effect_data() -> StatusEffectData:
+	if status_effect.is_empty() or status_effect.to_upper() == "NONE":
+		return null
+	return StatusEffectDatabase.get_effect(status_effect)

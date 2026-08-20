@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://cnuqp6ewga8rk"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_sb28m"]
+
+[resource]
+script = ExtResource("1_sb28m")
+effect_id = "eff_freeze_3"
+name = "Freeze III"
+description = "Target cannot act for 3 turn(s)."
+level = 3
+type = 1
+element = 5
+duration = 3
+modifier_type = 5
+modifier_value = 100.0
+cured_by = "CLEANSE|THAW"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_freeze.png"

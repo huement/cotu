@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dk0g6004vl7d5"
+
+[deps]
+
+files=["res://Data/status_effects.name.translation", "res://Data/status_effects.description.translation", "res://Data/status_effects.level.translation", "res://Data/status_effects.type.translation", "res://Data/status_effects.element.translation", "res://Data/status_effects.duration.translation", "res://Data/status_effects.modifier.translation", "res://Data/status_effects.modifier.translation", "res://Data/status_effects.modifier.translation", "res://Data/status_effects.max.translation", "res://Data/status_effects.cured.translation", "res://Data/status_effects.is.translation", "res://Data/status_effects.is.translation", "res://Data/status_effects.icon.translation"]
+
+source_file="res://Data/status_effects.csv"
+dest_files=["res://Data/status_effects.name.translation", "res://Data/status_effects.description.translation", "res://Data/status_effects.level.translation", "res://Data/status_effects.type.translation", "res://Data/status_effects.element.translation", "res://Data/status_effects.duration.translation", "res://Data/status_effects.modifier.translation", "res://Data/status_effects.modifier.translation", "res://Data/status_effects.modifier.translation", "res://Data/status_effects.max.translation", "res://Data/status_effects.cured.translation", "res://Data/status_effects.is.translation", "res://Data/status_effects.is.translation", "res://Data/status_effects.icon.translation"]
+
+[params]
+
+compress=true
+delimiter=0

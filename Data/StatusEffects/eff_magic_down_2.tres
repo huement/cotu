@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://bnysgl07tdenr"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_jvqe5"]
+
+[resource]
+script = ExtResource("1_jvqe5")
+effect_id = "eff_magic_down_2"
+name = "Magic Down II"
+description = "Decreases Magic by -30%."
+level = 2
+type = 1
+duration = 2
+modifier_stat = 5
+modifier_value = -30.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_magic_down.png"

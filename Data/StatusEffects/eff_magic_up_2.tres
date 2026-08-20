@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://dhpireem8dous"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_6jtjs"]
+
+[resource]
+script = ExtResource("1_6jtjs")
+effect_id = "eff_magic_up_2"
+name = "Magic Up II"
+description = "Increases Magic by 30%."
+level = 2
+duration = 2
+modifier_stat = 5
+modifier_value = 30.0
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_magic_up.png"

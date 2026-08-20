@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://bj0qdv1u2f5ds"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_hdwtd"]
+
+[resource]
+script = ExtResource("1_hdwtd")
+effect_id = "eff_defense_down_3"
+name = "Defense Down III"
+description = "Decreases Defense by -60%."
+level = 3
+type = 1
+duration = 3
+modifier_stat = 1
+modifier_value = -60.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_defense_down.png"

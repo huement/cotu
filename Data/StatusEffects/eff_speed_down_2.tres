@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://c3xqa74j7o4mt"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_dsirv"]
+
+[resource]
+script = ExtResource("1_dsirv")
+effect_id = "eff_speed_down_2"
+name = "Speed Down II"
+description = "Decreases Speed by -30%."
+level = 2
+type = 1
+duration = 2
+modifier_stat = 6
+modifier_value = -30.0
+cured_by = "CLEANSE"
+is_cleansable = true
+icon_path = "res://Data/Effects/Icons/eff_speed_down.png"

@@ -16,4 +16,4 @@ requirement = 1
 base_amount = 12
 var_multiplier = 0.4
 stat_scaling = "PER"
-status_effect = 1
+status_effect = "eff_stun_2"

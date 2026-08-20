@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://br0vm332f8p1d"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_wrapw"]
+
+[resource]
+script = ExtResource("1_wrapw")
+effect_id = "eff_dexterity_up_3"
+name = "Dexterity Up III"
+description = "Increases Dexterity by 50%."
+level = 3
+duration = 3
+modifier_stat = 4
+modifier_value = 50.0
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_dexterity_up.png"

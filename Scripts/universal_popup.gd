@@ -101,6 +101,38 @@ func _clear_content_area() -> void:
 	for child in content_area.get_children():
 		child.queue_free()
 
+# In res://Scripts/universal_popup.gd
+
+
+func display_popup(title_text: String, content_node: Control, options: Dictionary = { }) -> void:
+	# 1. Hide TitleLabel when empty so VBoxContainer collapses the top 20px separation
+	var title_lbl := %TitleLabel as Label
+	if title_lbl:
+		title_lbl.text = title_text
+		title_lbl.visible = not title_text.is_empty()
+
+	# 2. Hide ConfirmButton if the popup provides its own action/close buttons
+	var show_confirm: bool = options.get("show_confirm", true)
+	var confirm_btn := %ConfirmButton as TextureButton
+	if confirm_btn:
+		confirm_btn.visible = show_confirm
+
+	# 3. Dynamically adjust outer margins for full-bleed UI popups
+	var is_flush_ui: bool = options.get("flush_margins", false)
+	var main_margin := $PanelContainer/MarginContainer as MarginContainer
+	if main_margin:
+		var top_margin: int = 0 if (is_flush_ui or title_text.is_empty()) else 15
+		var side_margin: int = 0 if is_flush_ui else 15
+		main_margin.add_theme_constant_override("margin_top", top_margin)
+		main_margin.add_theme_constant_override("margin_left", side_margin)
+		main_margin.add_theme_constant_override("margin_right", side_margin)
+		main_margin.add_theme_constant_override("margin_bottom", side_margin)
+
+	# Attach content_node to %ContentArea as normal
+	# var content_area := %ContentArea as VBoxContainer
+	if content_area and content_node:
+		content_area.add_child(content_node)
+
 
 func _emit_confirmation(action_type: StringName, extra_data: Dictionary) -> void:
 	if get_tree().root.has_node("SignalBus"):
@@ -526,7 +558,8 @@ func _reset_items_preview() -> void:
 func _build_skills_spells_popup_ui(action_type: StringName, data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
 	print("UniversalPopup: Building Skills/Spells Popup for character: ", cat.name if is_instance_valid(cat) else "null", " with action_type: ", action_type)
-	# Determine initial tab mode
+
+	# 1. Determine initial tab mode
 	var initial_mode: SkillsSpellsPopup.Mode = SkillsSpellsPopup.Mode.SPELLS
 	if data.has("mode"):
 		initial_mode = data["mode"] as SkillsSpellsPopup.Mode
@@ -535,8 +568,17 @@ func _build_skills_spells_popup_ui(action_type: StringName, data: Dictionary) ->
 	else:
 		initial_mode = SkillsSpellsPopup.Mode.SPELLS
 
+	# 2. Hide default confirm button and title label to collapse VBoxContainer gaps
 	if confirm_button:
 		confirm_button.visible = false
+
+	var title_lbl := %TitleLabel as Label
+	if title_lbl:
+		title_lbl.text = ""
+		title_lbl.visible = false
+
+	# 3. Apply flush margins directly to the parent containers
+	_apply_popup_margins(true)
 
 	if not skills_spells_popup_scene:
 		return
@@ -549,8 +591,24 @@ func _build_skills_spells_popup_ui(action_type: StringName, data: Dictionary) ->
 		if is_instance_valid(cat):
 			popup_instance.display_character_abilities(cat, initial_mode)
 
-		# Connect CloseButton signal directly to dismiss UniversalPopup!
 		popup_instance.closed.connect(_close_modal)
+
+
+## Helper method to adjust container margins for standard vs flush modals
+func _apply_popup_margins(is_flush: bool) -> void:
+	var main_margin := $PanelContainer/MarginContainer as MarginContainer
+	if main_margin:
+		var pad: int = 0 if is_flush else 15
+		main_margin.add_theme_constant_override("margin_top", pad)
+		main_margin.add_theme_constant_override("margin_left", pad)
+		main_margin.add_theme_constant_override("margin_right", pad)
+		main_margin.add_theme_constant_override("margin_bottom", pad)
+
+	var content_margin := $PanelContainer/MarginContainer/VBoxContainer/MarginContainer as MarginContainer
+	if content_margin:
+		var inner_pad: int = 0 if is_flush else 5
+		content_margin.add_theme_constant_override("margin_top", inner_pad)
+		content_margin.add_theme_constant_override("margin_bottom", inner_pad)
 
 
 func _build_ability_info_ui(data: Dictionary) -> void:

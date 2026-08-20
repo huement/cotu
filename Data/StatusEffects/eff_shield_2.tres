@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://8831rg10gwe3"]
+
+[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_1me5x"]
+
+[resource]
+script = ExtResource("1_1me5x")
+effect_id = "eff_shield_2"
+name = "Shield II"
+description = "Absorbs damage equal to 20% of MAX HP."
+level = 2
+duration = 3
+modifier_stat = 7
+modifier_type = 2
+modifier_value = 20.0
+cured_by = "DISPEL"
+is_dispellable = true
+icon_path = "res://Data/Effects/Icons/eff_shield.png"
