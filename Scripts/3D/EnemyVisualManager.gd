@@ -33,6 +33,8 @@ func _connect_to_signal_bus() -> void:
 	if not sb.enemy_health_changed.is_connected(_on_enemy_health_changed):
 		sb.enemy_health_changed.connect(_on_enemy_health_changed)
 
+# res://Scripts/3D/EnemyVisualManager.gd
+
 
 func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> void:
 	if not is_instance_valid(camera_node):
@@ -54,15 +56,20 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 			enemy_group = [enemy_data_or_group as Resource]
 
 	for i in range(enemy_group.size()):
-		var e_data: Resource = enemy_group[i] as Resource
+		var e_data: EnemyData = enemy_group[i] as EnemyData
 		var model_scene: PackedScene = null
 
-		if is_instance_valid(e_data) and "model_scene" in e_data:
-			model_scene = e_data.get("model_scene") as PackedScene
+		if is_instance_valid(e_data):
+			model_scene = e_data.model_scene
 
-		var enemy_node: Node3D
+		var enemy_node: Node3D = null
 		if is_instance_valid(model_scene):
 			enemy_node = model_scene.instantiate() as Node3D
+
+			# Apply external custom_material if assigned (leaves embedded GLB textures untouched)
+			var mat_to_apply: Material = e_data.custom_material if is_instance_valid(e_data) else null
+			if mat_to_apply != null:
+				_apply_material_override_recursive(enemy_node, mat_to_apply)
 		else:
 			enemy_node = _create_debug_mesh()
 

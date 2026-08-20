@@ -8,7 +8,7 @@ extends Node
 ##   [B] - Toggle Combat Encounter ON / OFF (Spawns 1 Scavenger Drone + 1 Zombie Cat)
 ##   [H] - Test Chevron Flash Damage FX
 
-@export var enemy_a_path: String = "res://Data/Enemies/EnScavengerDrone.tres"
+@export var enemy_a_path: String = "res://Data/Enemies/EnScavengerCyclops.tres"
 @export var enemy_zombie_path: String = "res://Data/Enemies/EnZombieCat.tres"
 @export var legacy_zombie_path: String = "res://Data/Enemies/ZombieCat_Base.tres"
 
@@ -50,7 +50,7 @@ func _toggle_combat_encounter() -> void:
 			active_party = party_res.get("slots") as Array
 
 	# 3. Load Enemy A (Scavenger Drone)
-	var enemy1: Resource = _load_enemy_resource(enemy_a_path, "Scavenger Drone", 18, 8.0, 20, 10)
+	var enemy1: Resource = _load_enemy_resource(enemy_a_path, "Scavenger Cyclops", 18, 8.0, 20, 10)
 
 	# 4. Load Enemy B (Zombie Cat) with fallback
 	var enemy2_path: String = enemy_zombie_path if ResourceLoader.exists(enemy_zombie_path) else legacy_zombie_path

@@ -22,9 +22,6 @@ class_name SkillSpellDetailPopup
 @onready var requirement_label: Label = %RequirementLabel as Label
 @onready var close_button: Button = %CloseButton as Button
 
-# SKILL SPECIFIC
-@onready var type_label: Label = %TypeLabel as Label
-
 # Page 2 Nodes (Target Selection View)
 @onready var page_target: VBoxContainer = %PageTarget as VBoxContainer
 @onready var target_header_label: Label = %TargetHeaderLabel as Label
@@ -152,8 +149,6 @@ func _populate_ability_stats() -> void:
 			duration_label.text = "ACCURACY: %d%%" % skill.accuracy
 		if effect_label:
 			effect_label.text = "EFFECT TYPE: %s" % SkillData.EffectType.keys()[skill.effect_type]
-		if type_label:
-			type_label.text = "SKILL TYPE: %s" % SkillData.SkillType.keys()[skill.skill_type]
 
 		_render_status_effect_ui(skill.status_effect if "status_effect" in skill else "NONE")
 
