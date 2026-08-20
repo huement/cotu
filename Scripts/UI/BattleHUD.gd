@@ -238,16 +238,16 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 
 	if not enemy_resources.is_empty() and is_instance_valid(enemy_resources[0]):
 		var lead_enemy: Resource = enemy_resources[0] as Resource
-		var raw_name = lead_enemy.get("enemy_name")
-		var e_name: String = str(raw_name) if raw_name != null else "Cyber-Zombie Cat"
-		if enemy_resources.size() > 1:
-			e_name += " (x%d)" % enemy_resources.size()
-
+		# var raw_name = lead_enemy.get("enemy_name")
+		# var e_name: String = str(raw_name) if raw_name != null else "Cyber-Zombie Cat"
+		# if enemy_resources.size() > 1:
+		# 	e_name += " (x%d)" % enemy_resources.size()
+		# var e_name = update_enemy_header_display(enemy_resources)
 		var raw_hp = lead_enemy.get("max_health")
 		var max_hp: int = int(raw_hp) if raw_hp != null else 30
 
 		if is_instance_valid(enemy_name_label):
-			enemy_name_label.text = e_name.to_upper()
+			update_enemy_header_display(enemy_resources)
 		if is_instance_valid(enemy_hp_label):
 			enemy_hp_label.text = "%d / %d" % [max_hp, max_hp]
 
@@ -272,6 +272,43 @@ func setup_party_display(party_members: Array) -> void:
 		else:
 			if slot_node.has_method("setup_slot"):
 				slot_node.call("setup_slot", null)
+
+
+## Formats enemy names for single-type vs mixed encounters
+func update_enemy_header_display(enemy_pack: Array[Resource]) -> void:
+	var name_label := %EnemyNameLabel as Label if has_node("%EnemyNameLabel") else null
+	if name_label == null or enemy_pack.is_empty():
+		return
+
+	# Collect unique enemy names and counts
+	var name_counts: Dictionary = { }
+	for res in enemy_pack:
+		if res is EnemyData:
+			var e_name: String = (res as EnemyData).enemy_name.to_upper()
+			name_counts[e_name] = name_counts.get(e_name, 0) + 1
+
+	# Format display string based on pack composition
+	var display_text: String = ""
+	if name_counts.size() == 1:
+		# Single enemy type encounter (e.g. "SCAVENGER DRONE (X2)" or "ZOMBIE CAT")
+		var sole_name: String = name_counts.keys()[0] as String
+		var count: int = name_counts[sole_name] as int
+		if count > 1:
+			display_text = "%s  (X%d)" % [sole_name, count]
+		else:
+			display_text = sole_name
+	else:
+		# Mixed encounter (e.g. "SCAVENGER DRONE & ZOMBIE CAT")
+		var formatted_names: Array[String] = []
+		for e_name in name_counts.keys():
+			var count: int = name_counts[e_name] as int
+			if count > 1:
+				formatted_names.append("%s (X%d)" % [e_name, count])
+			else:
+				formatted_names.append(e_name as String)
+		display_text = " & ".join(formatted_names)
+
+	name_label.text = display_text
 
 
 func _on_defend_button_pressed() -> void:

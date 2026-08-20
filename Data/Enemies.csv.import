@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ciaglynv2bklm"
+
+[deps]
+
+files=["res://Data/Enemies.enemy.translation", "res://Data/Enemies.model.translation", "res://Data/Enemies.texture.translation", "res://Data/Enemies.base.translation", "res://Data/Enemies.scale.translation", "res://Data/Enemies.max.translation", "res://Data/Enemies.attack.translation", "res://Data/Enemies.defense.translation", "res://Data/Enemies.speed.translation", "res://Data/Enemies.initiative.translation", "res://Data/Enemies.weakness.translation", "res://Data/Enemies.attack.translation", "res://Data/Enemies.equipped.translation", "res://Data/Enemies.equipped.translation", "res://Data/Enemies.can.translation", "res://Data/Enemies.spell.translation", "res://Data/Enemies.max.translation", "res://Data/Enemies.occurs.translation", "res://Data/Enemies.min.translation", "res://Data/Enemies.max.translation", "res://Data/Enemies.movement.translation", "res://Data/Enemies.aggro.translation", "res://Data/Enemies.can.translation", "res://Data/Enemies.can.translation", "res://Data/Enemies.xp.translation", "res://Data/Enemies.gold.translation", "res://Data/Enemies.drops.translation"]
+
+source_file="res://Data/Enemies.csv"
+dest_files=["res://Data/Enemies.enemy.translation", "res://Data/Enemies.model.translation", "res://Data/Enemies.texture.translation", "res://Data/Enemies.base.translation", "res://Data/Enemies.scale.translation", "res://Data/Enemies.max.translation", "res://Data/Enemies.attack.translation", "res://Data/Enemies.defense.translation", "res://Data/Enemies.speed.translation", "res://Data/Enemies.initiative.translation", "res://Data/Enemies.weakness.translation", "res://Data/Enemies.attack.translation", "res://Data/Enemies.equipped.translation", "res://Data/Enemies.equipped.translation", "res://Data/Enemies.can.translation", "res://Data/Enemies.spell.translation", "res://Data/Enemies.max.translation", "res://Data/Enemies.occurs.translation", "res://Data/Enemies.min.translation", "res://Data/Enemies.max.translation", "res://Data/Enemies.movement.translation", "res://Data/Enemies.aggro.translation", "res://Data/Enemies.can.translation", "res://Data/Enemies.can.translation", "res://Data/Enemies.xp.translation", "res://Data/Enemies.gold.translation", "res://Data/Enemies.drops.translation"]
+
+[params]
+
+compress=true
+delimiter=0

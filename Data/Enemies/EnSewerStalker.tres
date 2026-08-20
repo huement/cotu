@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bf1w6x7g8kkk2"]
+
+[ext_resource type="Texture2D" uid="uid://baw61nabokfx7" path="res://resources/Enemies/Kenny/texture-b.png" id="1_7mbpn"]
+[ext_resource type="PackedScene" uid="uid://cvxowlotjrwjk" path="res://resources/Enemies/Kenny/character-b.glb" id="1_sbb0d"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_7mbpn"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qs0l4"]
+shading_mode = 0
+albedo_texture = ExtResource("1_7mbpn")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_7mbpn")
+enemy_id = "en_sewer_stalker"
+enemy_name = "Sewer Stalker"
+model_path = "res://resources/Enemies/Kenny/character-b.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-b.png"
+model_scene = ExtResource("1_sbb0d")
+custom_material = SubResource("StandardMaterial3D_qs0l4")
+max_health = 22
+current_health = 22
+attack_damage = 7
+defense = 1
+attack_element = 2
+equipped_weapon_id = "wpn_plasma_katana"
+movement_speed = 1.2
+aggro_range_tiles = 4
+can_surprise_player = true
+xp_value = 30
+gold_value = 15
+drops_loot = false

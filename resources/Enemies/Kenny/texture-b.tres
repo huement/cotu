@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://dhgyqo3wn0kd5"]
+
+[ext_resource type="Texture2D" uid="uid://baw61nabokfx7" path="res://resources/Enemies/Kenny/texture-b.png" id="1_yqqq6"]
+
+[resource]
+resource_name = "texture-b"
+shading_mode = 0
+albedo_texture = ExtResource("1_yqqq6")
+texture_filter = 0

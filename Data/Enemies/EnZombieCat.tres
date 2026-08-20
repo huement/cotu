@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bmr8xubrc2ff6"]
+
+[ext_resource type="Material" uid="uid://d37hfmbiw1ujo" path="res://resources/Enemies/Kenny/Materials/en_zombie_cat_mat.tres" id="1_ht43a"]
+[ext_resource type="PackedScene" uid="uid://khgjcdfj1u0w" path="res://resources/Enemies/Kenny/character-d.glb" id="2_y8ty1"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_t13a8"]
+
+[resource]
+script = ExtResource("3_t13a8")
+enemy_id = "en_zombie_cat"
+enemy_name = "Zombie Cat"
+model_path = "res://resources/Enemies/Kenny/character-d.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-d.png"
+model_scene = ExtResource("2_y8ty1")
+custom_material = ExtResource("1_ht43a")
+base_level = 2
+max_health = 35
+current_health = 35
+attack_damage = 10
+speed = 7.0
+initiative_speed = 9
+weakness_element = 2
+max_group_size = 4
+movement_speed = 0.8
+aggro_range_tiles = 4
+can_be_surprised = false

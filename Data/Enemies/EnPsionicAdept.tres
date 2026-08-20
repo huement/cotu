@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://qvxkrllo8e8h"]
+
+[ext_resource type="Texture2D" uid="uid://0yhbkrsjo1my" path="res://resources/Enemies/Kenny/texture-i.png" id="1_4umj8"]
+[ext_resource type="PackedScene" uid="uid://b8w2o1wvp8o5q" path="res://resources/Enemies/Kenny/character-i.glb" id="1_h8o4m"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_4umj8"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_soead"]
+shading_mode = 0
+albedo_texture = ExtResource("1_4umj8")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_4umj8")
+enemy_id = "en_psionic_adept"
+enemy_name = "Psionic Adept"
+model_path = "res://resources/Enemies/Kenny/character-i.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-i.png"
+model_scene = ExtResource("1_h8o4m")
+custom_material = SubResource("StandardMaterial3D_soead")
+base_level = 5
+max_health = 52
+current_health = 52
+attack_damage = 9
+defense = 3
+initiative_speed = 13
+weakness_element = 2
+attack_element = 1
+equipped_item_id = "con_mana_vial"
+can_cast_spells = true
+spell_ids = Array[String](["sp_mind_spike", "sp_static_nova"])
+max_mana = 35
+max_group_size = 2
+movement_speed = 1.1
+aggro_range_tiles = 4
+xp_value = 120
+gold_value = 65
+drops_loot = false

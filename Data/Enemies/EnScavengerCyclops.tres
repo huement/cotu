@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bcjsxojot82cj"]
+
+[ext_resource type="Material" uid="uid://digb6ca8o1lea" path="res://resources/Enemies/Kenny/Materials/en_scavenger_cyclops_mat.tres" id="1_8t6ej"]
+[ext_resource type="PackedScene" uid="uid://cubumacnlhjbl" path="res://resources/Enemies/Kenny/character-a.glb" id="2_rq6vv"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_dsujw"]
+
+[resource]
+script = ExtResource("3_dsujw")
+enemy_id = "en_scavenger_cyclops"
+enemy_name = "Scavenger Cyclops"
+model_path = "res://resources/Enemies/Kenny/character-a.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-a.png"
+model_scene = ExtResource("2_rq6vv")
+custom_material = ExtResource("1_8t6ej")
+max_health = 18
+current_health = 18
+attack_damage = 5
+defense = 1
+speed = 8.0
+initiative_speed = 10
+weakness_element = 5
+min_group_size = 2
+max_group_size = 4
+xp_value = 20
+gold_value = 10

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://etev8vi8qq8b"]
+
+[ext_resource type="PackedScene" uid="uid://d2a68umwkb2qb" path="res://resources/Enemies/Kenny/character-h.glb" id="1_5xl6q"]
+[ext_resource type="Texture2D" uid="uid://cdhn5cj66pw7h" path="res://resources/Enemies/Kenny/texture-h.png" id="1_l1ol1"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_l1ol1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s5j2g"]
+shading_mode = 0
+albedo_texture = ExtResource("1_l1ol1")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_l1ol1")
+enemy_id = "en_street_enforcer"
+enemy_name = "Street Enforcer"
+model_path = "res://resources/Enemies/Kenny/character-h.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-h.png"
+model_scene = ExtResource("1_5xl6q")
+custom_material = SubResource("StandardMaterial3D_s5j2g")
+base_level = 4
+max_health = 60
+current_health = 60
+attack_damage = 15
+defense = 5
+speed = 8.0
+initiative_speed = 10
+equipped_item_id = "con_health_vial"
+aggro_range_tiles = 4
+xp_value = 100
+gold_value = 55
+drops_loot = false

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://13cbyof3vuha"]
+
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_mjdjm"]
+
+[resource]
+script = ExtResource("1_mjdjm")
+item_id = "wpn_arcane_staff"
+item_name = "Arcane Staff"
+description = "Magic Staff made of an ancient ivory wrapped in thorns"
+icon_path = "res://Assets/Icons/Items/arcane_staff.png"
+item_type = 1
+target_type = 2
+can_use_in_field = false
+equipment_slot = 6
+weapon_type = 2
+attack_bonus = 42
+speed_bonus = 6
+credit_value = 200

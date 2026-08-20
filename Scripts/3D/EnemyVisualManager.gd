@@ -162,3 +162,32 @@ func _clear_all_enemies() -> void:
 		if is_instance_valid(_spawned_enemies[enemy_id]):
 			_spawned_enemies[enemy_id].queue_free()
 	_spawned_enemies.clear()
+
+
+## Instantiates 3D enemy model and applies compiled texture materials
+func spawn_enemy_model(enemy_data: EnemyData) -> Node3D:
+	if not is_instance_valid(enemy_data) or enemy_data.model_scene == null:
+		return null
+
+	var model_instance := enemy_data.model_scene.instantiate() as Node3D
+	add_child(model_instance)
+	model_instance.scale = enemy_data.model_scale
+
+	var mat_to_apply: Material = enemy_data.custom_material
+	if mat_to_apply == null and not enemy_data.texture_path.is_empty():
+		var tres_path: String = enemy_data.texture_path.replace(".png", ".tres")
+		if ResourceLoader.exists(tres_path):
+			mat_to_apply = load(tres_path) as StandardMaterial3D
+
+	if mat_to_apply != null:
+		_apply_material_override_recursive(model_instance, mat_to_apply)
+
+	return model_instance
+
+
+func _apply_material_override_recursive(node: Node, mat: Material) -> void:
+	if node is MeshInstance3D:
+		(node as MeshInstance3D).material_override = mat
+
+	for child in node.get_children():
+		_apply_material_override_recursive(child, mat)

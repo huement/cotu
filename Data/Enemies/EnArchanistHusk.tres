@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://cj24i5803tj43"]
+
+[ext_resource type="PackedScene" uid="uid://bxh86qkiiy5q2" path="res://resources/Enemies/Kenny/character-p.glb" id="1_8xx1g"]
+[ext_resource type="Texture2D" uid="uid://citcsesmjwfpp" path="res://resources/Enemies/Kenny/texture-p.png" id="1_td0ir"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_td0ir"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nm1jv"]
+shading_mode = 0
+albedo_texture = ExtResource("1_td0ir")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_td0ir")
+enemy_id = "en_archanist_husk"
+enemy_name = "Archanist Husk"
+model_path = "res://resources/Enemies/Kenny/character-p.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-p.png"
+model_scene = ExtResource("1_8xx1g")
+custom_material = SubResource("StandardMaterial3D_nm1jv")
+base_level = 8
+max_health = 95
+current_health = 95
+attack_damage = 18
+defense = 6
+speed = 12.0
+initiative_speed = 15
+weakness_element = 2
+attack_element = 1
+equipped_item_id = "con_mana_vial"
+can_cast_spells = true
+spell_ids = Array[String](["sp_arcane_cataclysm", "sp_static_nova"])
+max_mana = 60
+max_group_size = 2
+movement_speed = 1.3
+aggro_range_tiles = 6
+can_surprise_player = true
+xp_value = 280
+gold_value = 160
+drops_loot = false

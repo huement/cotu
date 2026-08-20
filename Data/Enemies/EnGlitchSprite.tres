@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://l1dna5llwwhj"]
+
+[ext_resource type="PackedScene" uid="uid://li0uonfyxjgd" path="res://resources/Enemies/Kenny/character-e.glb" id="1_jws7k"]
+[ext_resource type="Texture2D" uid="uid://d2b31noqcgpdh" path="res://resources/Enemies/Kenny/texture-e.png" id="1_pic5v"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_pic5v"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_70e7q"]
+shading_mode = 0
+albedo_texture = ExtResource("1_pic5v")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_pic5v")
+enemy_id = "en_glitch_sprite"
+enemy_name = "Glitch Sprite"
+model_path = "res://resources/Enemies/Kenny/character-e.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-e.png"
+model_scene = ExtResource("1_jws7k")
+custom_material = SubResource("StandardMaterial3D_70e7q")
+base_level = 3
+attack_damage = 6
+defense = 1
+speed = 12.0
+initiative_speed = 15
+weakness_element = 5
+attack_element = 1
+equipped_weapon_id = "wpn_arcane_staff"
+can_cast_spells = true
+spell_ids = Array[String](["sp_plasma_dart"])
+max_mana = 20
+movement_speed = 1.5
+aggro_range_tiles = 4
+can_surprise_player = true
+xp_value = 65
+gold_value = 30
+drops_loot = false

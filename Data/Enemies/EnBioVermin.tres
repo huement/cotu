@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://dunipckuegm54"]
+
+[ext_resource type="PackedScene" uid="uid://cxvj28bx34438" path="res://resources/Enemies/Kenny/character-c.glb" id="1_c8m4r"]
+[ext_resource type="Texture2D" uid="uid://crd4qmkyrk1qi" path="res://resources/Enemies/Kenny/texture-c.png" id="1_lp720"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_lp720"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_suer3"]
+shading_mode = 0
+albedo_texture = ExtResource("1_lp720")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_lp720")
+enemy_id = "en_bio_vermin"
+enemy_name = "Bio Vermin"
+model_path = "res://resources/Enemies/Kenny/character-c.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-c.png"
+model_scene = ExtResource("1_c8m4r")
+custom_material = SubResource("StandardMaterial3D_suer3")
+base_level = 2
+max_health = 28
+current_health = 28
+speed = 9.0
+initiative_speed = 11
+attack_element = 0
+min_group_size = 2
+max_group_size = 5
+movement_speed = 1.1
+can_surprise_player = true
+xp_value = 40
+gold_value = 18

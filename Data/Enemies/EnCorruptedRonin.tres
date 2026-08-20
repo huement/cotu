@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://dr7jm0dfljaeh"]
+
+[ext_resource type="PackedScene" uid="uid://c4i3cjpxmvrkq" path="res://resources/Enemies/Kenny/character-k.glb" id="1_7rlef"]
+[ext_resource type="Texture2D" uid="uid://d2nauxf2i8pvw" path="res://resources/Enemies/Kenny/texture-k.png" id="1_ssmvg"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_ssmvg"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wm3x1"]
+shading_mode = 0
+albedo_texture = ExtResource("1_ssmvg")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_ssmvg")
+enemy_id = "en_corrupted_ronin"
+enemy_name = "Corrupted Ronin"
+model_path = "res://resources/Enemies/Kenny/character-k.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-k.png"
+model_scene = ExtResource("1_7rlef")
+custom_material = SubResource("StandardMaterial3D_wm3x1")
+base_level = 6
+max_health = 85
+current_health = 85
+attack_damage = 22
+defense = 7
+speed = 11.0
+initiative_speed = 14
+weakness_element = 5
+attack_element = 2
+equipped_weapon_id = "katana"
+occurs_in_groups = false
+max_group_size = 1
+movement_speed = 1.2
+aggro_range_tiles = 5
+can_surprise_player = true
+xp_value = 160
+gold_value = 85
+drops_loot = false

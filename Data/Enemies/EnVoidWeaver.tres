@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://cfgvg67cpjn6l"]
+
+[ext_resource type="PackedScene" uid="uid://dw4rse5q0tnck" path="res://resources/Enemies/Kenny/character-m.glb" id="1_kk7hs"]
+[ext_resource type="Texture2D" uid="uid://bnwgrhwpq7ept" path="res://resources/Enemies/Kenny/texture-m.png" id="1_p6d5k"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_p6d5k"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dp8gt"]
+shading_mode = 0
+albedo_texture = ExtResource("1_p6d5k")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_p6d5k")
+enemy_id = "en_void_weaver"
+enemy_name = "Void Weaver"
+model_path = "res://resources/Enemies/Kenny/character-m.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-m.png"
+model_scene = ExtResource("1_kk7hs")
+custom_material = SubResource("StandardMaterial3D_dp8gt")
+base_level = 7
+max_health = 80
+current_health = 80
+attack_damage = 14
+defense = 5
+speed = 11.0
+initiative_speed = 14
+weakness_element = 5
+attack_element = 0
+equipped_weapon_id = "wpn_arcane_staff"
+can_cast_spells = true
+spell_ids = Array[String](["sp_cryo_blast", "sp_plasma_dart"])
+max_mana = 50
+max_group_size = 2
+movement_speed = 1.2
+aggro_range_tiles = 5
+xp_value = 200
+gold_value = 110
+drops_loot = false

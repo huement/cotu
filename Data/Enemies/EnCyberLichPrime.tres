@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://dydjwtmdkx2fb"]
+
+[ext_resource type="PackedScene" uid="uid://cym3tonljf3kt" path="res://resources/Enemies/Kenny/character-r.glb" id="1_3crfw"]
+[ext_resource type="Texture2D" uid="uid://dtv4cokd42t3k" path="res://resources/Enemies/Kenny/texture-r.png" id="1_de84u"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_de84u"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3lkpb"]
+shading_mode = 0
+albedo_texture = ExtResource("1_de84u")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_de84u")
+enemy_id = "en_cyber_lich_prime"
+enemy_name = "Cyber Lich Prime"
+model_path = "res://resources/Enemies/Kenny/character-r.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-r.png"
+model_scene = ExtResource("1_3crfw")
+custom_material = SubResource("StandardMaterial3D_3lkpb")
+base_level = 10
+max_health = 160
+current_health = 160
+attack_damage = 25
+defense = 9
+speed = 13.0
+initiative_speed = 16
+weakness_element = 4
+attack_element = 0
+equipped_weapon_id = "wpn_arcane_staff"
+can_cast_spells = true
+spell_ids = Array[String](["sp_arcane_cataclysm", "sp_neurotoxin_gas"])
+max_mana = 80
+occurs_in_groups = false
+max_group_size = 1
+movement_speed = 1.4
+aggro_range_tiles = 6
+can_surprise_player = true
+can_be_surprised = false
+xp_value = 400
+gold_value = 250
+drops_loot = false

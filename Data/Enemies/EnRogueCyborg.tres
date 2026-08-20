@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://squsvi1cmlu3"]
+
+[ext_resource type="Texture2D" uid="uid://lqknlxn3qpvv" path="res://resources/Enemies/Kenny/texture-f.png" id="1_0nhf5"]
+[ext_resource type="PackedScene" uid="uid://d2rgrhaldmh6r" path="res://resources/Enemies/Kenny/character-f.glb" id="1_4ep0w"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_0nhf5"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eppgt"]
+shading_mode = 0
+albedo_texture = ExtResource("1_0nhf5")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_0nhf5")
+enemy_id = "en_rogue_cyborg"
+enemy_name = "Rogue Cyborg"
+model_path = "res://resources/Enemies/Kenny/character-f.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-f.png"
+model_scene = ExtResource("1_4ep0w")
+custom_material = SubResource("StandardMaterial3D_eppgt")
+base_level = 3
+max_health = 45
+current_health = 45
+attack_damage = 12
+defense = 4
+speed = 9.0
+initiative_speed = 11
+attack_element = 2
+equipped_weapon_id = "wpn_plasma_katana"
+occurs_in_groups = false
+max_group_size = 1
+aggro_range_tiles = 4
+xp_value = 75
+gold_value = 40
+drops_loot = false

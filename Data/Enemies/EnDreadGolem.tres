@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bfrcj1d0d6vw7"]
+
+[ext_resource type="Texture2D" uid="uid://dbcx6fllub52a" path="res://resources/Enemies/Kenny/texture-q.png" id="1_kb8sp"]
+[ext_resource type="PackedScene" uid="uid://botxyxge2vrye" path="res://resources/Enemies/Kenny/character-q.glb" id="1_vr31a"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_kb8sp"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqre6"]
+shading_mode = 0
+albedo_texture = ExtResource("1_kb8sp")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_kb8sp")
+enemy_id = "en_dread_golem"
+enemy_name = "Dread Golem"
+model_path = "res://resources/Enemies/Kenny/character-q.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-q.png"
+model_scene = ExtResource("1_vr31a")
+custom_material = SubResource("StandardMaterial3D_hqre6")
+base_level = 9
+max_health = 140
+current_health = 140
+attack_damage = 32
+defense = 12
+speed = 5.0
+initiative_speed = 6
+occurs_in_groups = false
+max_group_size = 1
+movement_speed = 0.6
+aggro_range_tiles = 6
+can_be_surprised = false
+xp_value = 320
+gold_value = 180

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://nuhmv8jqoiqc"]
+
+[ext_resource type="Texture2D" uid="uid://xvai6anacxs8" path="res://resources/Enemies/Kenny/texture-j.png" id="1_43r4r"]
+[ext_resource type="PackedScene" uid="uid://dcw600hl4mocc" path="res://resources/Enemies/Kenny/character-j.glb" id="1_ykk4f"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_43r4r"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nb4l5"]
+shading_mode = 0
+albedo_texture = ExtResource("1_43r4r")
+texture_filter = 0
+
+[resource]
+script = ExtResource("2_43r4r")
+enemy_id = "en_hazard_cleaner"
+enemy_name = "Hazard Cleaner"
+model_path = "res://resources/Enemies/Kenny/character-j.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-j.png"
+model_scene = ExtResource("1_ykk4f")
+custom_material = SubResource("StandardMaterial3D_nb4l5")
+base_level = 5
+max_health = 70
+current_health = 70
+attack_damage = 18
+defense = 6
+speed = 7.5
+initiative_speed = 9
+attack_element = 0
+movement_speed = 0.9
+aggro_range_tiles = 5
+xp_value = 135
+gold_value = 70
