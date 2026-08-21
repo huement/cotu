@@ -5,3 +5,8 @@
 .DS_Store
 */.DS_Store/*
 **/.DS_Store
+
+## GODOT ADDONS
+addons/asset_placer
+addons/go_placer
+addons/ScatterShot

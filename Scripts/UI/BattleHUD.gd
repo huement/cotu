@@ -22,6 +22,8 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var party_left: VBoxContainer = %PartyLeft as VBoxContainer
 @onready var party_right: VBoxContainer = %PartyRight as VBoxContainer
 @onready var action_bar: Control = %ActionBar as Control
+@onready var elemental_vfx: AnimatedSprite2D = %ElementalVFX as AnimatedSprite2D
+@onready var edge_flash: Control = %EdgeFlash as Control
 
 var portrait_slots: Array[Node] = []
 var _state: CombatState = CombatState.IDLE
@@ -40,6 +42,10 @@ func _ready() -> void:
 
 	if is_instance_valid(auto_button):
 		auto_button.toggled.connect(_on_auto_button_toggled)
+	if is_instance_valid(elemental_vfx):
+		elemental_vfx.hide()
+		if not elemental_vfx.animation_finished.is_connected(_on_vfx_animation_finished):
+			elemental_vfx.animation_finished.connect(_on_vfx_animation_finished)
 
 
 func _bind_action_buttons() -> void:
@@ -89,6 +95,8 @@ func _connect_to_signal_bus() -> void:
 		sb.chevron_flash_requested.connect(_on_chevron_flash)
 	if not sb.player_action_selected.is_connected(_on_player_action_selected):
 		sb.player_action_selected.connect(_on_player_action_selected)
+	if not sb.spell_vfx_requested.is_connected(_on_spell_vfx_requested):
+		sb.spell_vfx_requested.connect(_on_spell_vfx_requested)
 
 
 func _on_player_action_selected(_slot_index: int, _action: StringName, _target_index: int) -> void:
@@ -168,6 +176,60 @@ func _on_action_button_pressed(action_type: StringName, _button_name: String) ->
 		_:
 			var current_slot: int = _active_slot_index
 			SignalBus.player_action_selected.emit(current_slot, action_type, 0)
+
+
+func _on_spell_vfx_requested(anim_name: String, element: ItemData.ElementalBase) -> void:
+	GameLogger.combat("_on_spell_vfx_requested %s" % [anim_name])
+	# 1. Play specific SpriteFrames animation by string key
+	if is_instance_valid(elemental_vfx) and elemental_vfx.sprite_frames.has_animation(anim_name):
+		GameLogger.combat("FIREING ANIMATION FOR %s" % [anim_name])
+		elemental_vfx.show()
+		elemental_vfx.play(anim_name)
+
+	# 2. Flash screen edge overlay using elemental tint
+	if is_instance_valid(edge_flash) and element != ItemData.ElementalBase.NONE:
+		var flash_color: Color = _get_element_color(element)
+		edge_flash.modulate = flash_color
+		edge_flash.modulate.a = 0.8
+		edge_flash.show()
+		GameLogger.combat("EDGE FLASH COLOR %s" % [flash_color])
+		
+		var tween: Tween = create_tween()
+		tween.tween_property(edge_flash, "modulate:a", 0.0, 0.5)
+		tween.tween_callback(edge_flash.hide)
+
+func _get_element_color(element: ItemData.ElementalBase) -> Color:
+	match element:
+		ItemData.ElementalBase.FIRE:
+			return Color(1.0, 0.2, 0.1) # Flame Red
+		ItemData.ElementalBase.WATER:
+			return Color(0.1, 0.5, 1.0) # Aqua Blue
+		ItemData.ElementalBase.EARTH:
+			return Color(0.4, 0.7, 0.2) # Nature Green
+		ItemData.ElementalBase.AIR:
+			return Color(0.6, 0.9, 1.0) # Gust Cyan
+		ItemData.ElementalBase.BOLT:
+			return Color(1.0, 0.9, 0.1) # Electric Yellow
+		ItemData.ElementalBase.DARK:
+			return Color(0.6, 0.1, 0.8) # Void Purple
+		ItemData.ElementalBase.LIFE:
+			return Color(0.2, 0.9, 0.4) # Holy Green
+		_:
+			return Color.WHITE
+					
+func _on_elemental_vfx_requested(element: ItemData.ElementalBase) -> void:
+	if not is_instance_valid(elemental_vfx):
+		return
+
+	var anim_name: String = ItemData.ElementalBase.keys()[element] # Returns "FIRE"
+	if elemental_vfx.sprite_frames.has_animation(anim_name):
+		elemental_vfx.show()
+		elemental_vfx.play(anim_name)
+
+
+func _on_vfx_animation_finished() -> void:
+	if is_instance_valid(elemental_vfx):
+		elemental_vfx.hide()
 
 
 func _reset_state() -> void:

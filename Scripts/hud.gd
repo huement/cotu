@@ -18,6 +18,7 @@ extends CanvasLayer
 # Battle HUD Overlay Reference
 @onready var battle_hud: Control = %BattleHUD as Control
 @onready var action_bar_anchor: Control = %ActionBarAnchor as Control
+@onready var edge_flash: TextureRect = %EdgeFlash as TextureRect
 
 # Strongly-typed reference to the player grid-walker
 @onready var player: Node3D = get_node("../Player") as Node3D
@@ -29,7 +30,7 @@ extends CanvasLayer
 	%Slot2_Portrait as PartySlotPortrait,
 	%Slot3_Portrait as PartySlotPortrait,
 	%Slot4_Portrait as PartySlotPortrait,
-	%Slot5_Portrait as PartySlotPortrait
+	%Slot5_Portrait as PartySlotPortrait,
 ]
 
 
@@ -42,6 +43,9 @@ func _ready() -> void:
 	if battle_hud:
 		battle_hud.hide()
 
+	if is_instance_valid(edge_flash):
+		edge_flash.hide()
+
 	# Connect to Autoload SignalBus events
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 	if sb:
@@ -50,9 +54,11 @@ func _ready() -> void:
 		if sb.has_signal("party_roster_updated"):
 			sb.party_roster_updated.connect(_update_party_portraits)
 		if sb.has_signal("combat_started"):
-			sb.combat_started.connect(_on_combat_started)
+			sb.combat_started.connect(on_combat_started)
 		if sb.has_signal("combat_ended"):
 			sb.combat_ended.connect(_on_combat_ended)
+		if is_instance_valid(sb) and not sb.edge_flash_requested.is_connected(_on_edge_flash_requested):
+			sb.edge_flash_requested.connect(_on_edge_flash_requested)
 
 	_setup_portrait_click_listeners()
 	_connect_to_signal_bus()
@@ -72,12 +78,13 @@ func _ready() -> void:
 func _connect_to_signal_bus() -> void:
 	var sb: Node = SignalBus
 	if is_instance_valid(sb):
-		if not sb.combat_started.is_connected(_on_combat_started):
-			sb.combat_started.connect(_on_combat_started)
+		if not sb.combat_started.is_connected(on_combat_started):
+			sb.combat_started.connect(on_combat_started)
 		if not sb.combat_ended.is_connected(_on_combat_ended):
 			sb.combat_ended.connect(_on_combat_ended)
 
-func _on_combat_started(enemy_data_or_group: Variant = null, player_party: Array = []) -> void:
+
+func on_combat_started(enemy_data_or_group: Variant = null, player_party: Array = []) -> void:
 	_set_exploration_ui_visible(false)
 
 	var active_party: Array = player_party
@@ -87,22 +94,47 @@ func _on_combat_started(enemy_data_or_group: Variant = null, player_party: Array
 
 	if battle_hud:
 		battle_hud.show()
-		if battle_hud.has_method("_on_combat_started"):
-			battle_hud._on_combat_started(enemy_data_or_group, active_party)
+		if battle_hud.has_method("on_combat_started"):
+			battle_hud.on_combat_started(enemy_data_or_group, active_party)
+
 
 func _on_combat_ended(_victory: bool) -> void:
 	if battle_hud:
 		battle_hud.hide()
 	_set_exploration_ui_visible(true)
 
+
 ## Cleanly toggles exploration overlays (renamed parameter prevents shadowing base CanvasLayer method)
 func _set_exploration_ui_visible(show_ui: bool) -> void:
-	if minimap_anchor: minimap_anchor.visible = show_ui
-	if compass_label: compass_label.visible = show_ui
-	if cockpit_background: cockpit_background.visible = show_ui
-	if top_bar: top_bar.visible = show_ui
-	if right_sidebar_anchor: right_sidebar_anchor.visible = show_ui
-	if action_bar_anchor: action_bar_anchor.visible = show_ui
+	if minimap_anchor:
+		minimap_anchor.visible = show_ui
+	if compass_label:
+		compass_label.visible = show_ui
+	if cockpit_background:
+		cockpit_background.visible = show_ui
+	if top_bar:
+		top_bar.visible = show_ui
+	if right_sidebar_anchor:
+		right_sidebar_anchor.visible = show_ui
+	if action_bar_anchor:
+		action_bar_anchor.visible = show_ui
+
+
+func _on_edge_flash_requested(color: Color, duration: float = 0.4) -> void:
+	GameLogger.info("EDGE FLASH REQUESTED %s" % color)
+	if not is_instance_valid(edge_flash):
+		return
+
+	var flash_color: Color = color
+	flash_color.a = 0.8
+	edge_flash.modulate = flash_color
+	edge_flash.modulate.a = 0.8
+	edge_flash.show()
+
+	GameLogger.info("EDGE FLASHED %s" % flash_color)
+	var tween: Tween = create_tween()
+	tween.tween_property(edge_flash, "modulate:a", 0.0, duration)
+	tween.tween_callback(edge_flash.hide)
 
 
 # ==============================================================================
@@ -112,16 +144,23 @@ func _on_party_coordinates_changed(_grid_pos: Vector3i, facing_direction: String
 	_update_compass_text(facing_direction)
 	_update_minimap_pointer(facing_direction)
 
+
 func _update_compass_text(direction: String) -> void:
 	if not compass_label:
 		return
 
 	match direction.to_upper():
-		"NORTH": compass_label.text = "NORTH"
-		"WEST": compass_label.text = "WEST"
-		"SOUTH": compass_label.text = "SOUTH"
-		"EAST": compass_label.text = "EAST"
-		_: compass_label.text = "UNKWN"
+		"NORTH":
+			compass_label.text = "NORTH"
+		"WEST":
+			compass_label.text = "WEST"
+		"SOUTH":
+			compass_label.text = "SOUTH"
+		"EAST":
+			compass_label.text = "EAST"
+		_:
+			compass_label.text = "UNKWN"
+
 
 func _update_minimap_pointer(direction: String) -> void:
 	if not minimap_indicator:
@@ -129,15 +168,19 @@ func _update_minimap_pointer(direction: String) -> void:
 
 	var target_2d_angle: float = 0.0
 	match direction.to_upper():
-		"NORTH": target_2d_angle = 0.0
-		"WEST": target_2d_angle = -90.0
-		"SOUTH": target_2d_angle = 180.0
-		"EAST": target_2d_angle = 90.0
+		"NORTH":
+			target_2d_angle = 0.0
+		"WEST":
+			target_2d_angle = -90.0
+		"SOUTH":
+			target_2d_angle = 180.0
+		"EAST":
+			target_2d_angle = 90.0
 
 	var tween: Tween = create_tween()
 	tween.tween_property(minimap_indicator, "rotation_degrees", target_2d_angle, 0.15) \
-		.set_trans(Tween.TRANS_SINE) \
-		.set_ease(Tween.EASE_IN_OUT)
+			.set_trans(Tween.TRANS_SINE) \
+			.set_ease(Tween.EASE_IN_OUT)
 
 
 # ==============================================================================
@@ -159,6 +202,7 @@ func _setup_portrait_click_listeners() -> void:
 			if not slot_component.gui_input.is_connected(click_callable):
 				slot_component.gui_input.connect(click_callable)
 
+
 func _on_portrait_gui_input(event: InputEvent, slot_index: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if GameState.current_party and slot_index < GameState.current_party.slots.size():
@@ -166,6 +210,7 @@ func _on_portrait_gui_input(event: InputEvent, slot_index: int) -> void:
 				var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 				if sb and sb.has_signal("portrait_clicked"):
 					sb.portrait_clicked.emit(slot_index)
+
 
 ## Reads incoming roster resources and delegates rendering directly to component slots
 func _update_party_portraits(active_slots: Array) -> void:
@@ -183,6 +228,7 @@ func _update_party_portraits(active_slots: Array) -> void:
 		if portrait_slots[i].has_method("setup_slot"):
 			portrait_slots[i].setup_slot(cat)
 
+
 # ==============================================================================
 # 6. HELPER & DEBUG TESTING
 # ==============================================================================
@@ -192,16 +238,20 @@ func _verify_ui_nodes() -> void:
 	if not compass_label:
 		push_error("HUD: Unique Node %CompassLabel missing from scene tree!")
 
+
 func switch_state(new_state: int) -> void:
 	GameState.current_mode = new_state as GameState.Mode
+
 
 func _on_game_state_changed(new_state: int) -> void:
 	match new_state:
 		GameState.Mode.EXPLORING:
 			_set_exploration_ui_visible(true)
-			if battle_hud: battle_hud.hide()
+			if battle_hud:
+				battle_hud.hide()
 		GameState.Mode.BATTLE:
 			_set_exploration_ui_visible(false)
-			if battle_hud: battle_hud.show()
+			if battle_hud:
+				battle_hud.show()
 		GameState.Mode.MANAGEMENT:
 			_set_exploration_ui_visible(false)

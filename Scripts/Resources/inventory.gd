@@ -145,6 +145,6 @@ func _apply_item_effects(item: ItemData, cat: CatCharacter) -> void:
 					break
 
 		if sb.has_signal("character_health_changed") and heal_amt > 0:
-			sb.character_health_changed.emit(slot_idx, cat.current_hp)
+			sb.character_health_changed.emit(slot_idx, cat.current_hp, cat.max_hp)
 		if sb.has_signal("character_mana_changed") and energy_amt > 0:
-			sb.character_mana_changed.emit(slot_idx, cat.current_energy)
+			sb.character_mana_changed.emit(slot_idx, cat.current_mana, cat.max_mana)

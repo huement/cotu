@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://bn831ajspvksv"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_rpqaw"]
+
+[resource]
+script = ExtResource("1_rpqaw")
+spell_id = "sp_cryo_explosion"
+spell_name = "Cryo Explosion"
+tier = 3
+description = "Flash-freezes ALL targets dealing high damage and slowing their action speed."
+icon_path = "res://Data/Spells/Icons/cryo_explosion.png"
+energy_cost = 16
+target_type = 1
+element = 3
+requirement = 3
+class_locked = true
+base_amount = 40
+var_multiplier = 0.65
+status_effect = "eff_speed_down_3"
+duration = 3
+animation = "WATER"

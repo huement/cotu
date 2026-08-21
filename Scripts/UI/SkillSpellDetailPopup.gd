@@ -114,13 +114,13 @@ func _populate_ability_stats() -> void:
 		if cost_label:
 			cost_label.text = "CAST COST: %d MP" % spell.energy_cost
 		if elem_label:
-			elem_label.text = "BASE TYPE: %s" % ItemData.EffectElement.keys()[spell.element]
+			elem_label.text = "ELEMENT: %s" % ItemData.ElementalBase.keys()[spell.element]
 		if duration_label:
 			duration_label.text = "DURATION: %d TURNS" % spell.duration
 		if scales_with_label:
 			scales_with_label.text = "SCALES WITH: %s" % spell.stat_scaling
 		if effect_label:
-			effect_label.text = "EFFECT TYPE: %s" % SpellData.EffectType.keys()[spell.effect_type]
+			effect_label.text = "DAMAGE EFFECT: %s" % SpellData.EffectType.keys()[spell.effect_type]
 		if target_label:
 			target_label.text = "TARGET: %s" % SpellData.TargetType.keys()[spell.target_type]
 

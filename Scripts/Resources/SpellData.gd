@@ -34,7 +34,7 @@ enum EffectType {
 @export_group("Cost & Targeting")
 @export var energy_cost: int = 4
 @export var target_type: TargetType = TargetType.SINGLE_ENEMY
-@export var element: ItemData.EffectElement = ItemData.EffectElement.MAGIC
+@export var element: ItemData.ElementalBase = ItemData.ElementalBase.NONE
 @export var requirement: int = 0
 @export var class_locked: bool = false
 
@@ -45,7 +45,7 @@ enum EffectType {
 @export var stat_scaling: String = "INT"
 @export var status_effect: String = "NONE" # Replaced enum with String ID
 @export var duration: int = 1
-
+@export var animation: String = "NONE"
 
 ## Calculates spell potency using Base + Random Variance + Caster Stat Bonus
 func calculate_potency(caster_stat_value: int) -> int:
@@ -79,6 +79,7 @@ func can_cast(current_energy: int, character_class_name: String = "") -> bool:
 		return false
 
 	return true
+
 
 ## Convenience method to fetch the compiled StatusEffectData resource directly
 func get_status_effect_data() -> StatusEffectData:

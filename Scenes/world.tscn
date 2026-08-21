@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=34 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_go701"]
@@ -22,11 +22,13 @@
 [ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="9_pyn1s"]
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="12_1cojt"]
 [ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_i4fjy"]
+[ext_resource type="Texture2D" uid="uid://be14sjxl48syt" path="res://ui/HUD/edge_vignette.png" id="19_1vso6"]
 [ext_resource type="Script" uid="uid://dtnit1pwpe0ox" path="res://Scripts/3D/EnemyVisualManager.gd" id="20_hmc15"]
 [ext_resource type="Script" uid="uid://b8qk035c6nrth" path="res://Scripts/3D/CameraShake.gd" id="20_qebug"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="21_xbk3s"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
+[ext_resource type="MeshLibrary" uid="uid://bxgdx6gy414a7" path="res://resources/mesh_library/simple_mesh_library.tres" id="25_3ua1v"]
 [ext_resource type="PackedScene" uid="uid://bipols0hgobk7" path="res://Scenes/UI/BattleAbilityPopup.tscn" id="26_dt0r1"]
 [ext_resource type="Script" uid="uid://716h0rosm8ii" path="res://Scripts/Testing/BattleTest.gd" id="26_pt3ps"]
 [ext_resource type="Script" uid="uid://dp2c6nndb40o5" path="res://Scripts/UI/toast_notification_manager.gd" id="29_o2rbt"]
@@ -260,6 +262,16 @@ horizontal_alignment = 1
 clip_text = true
 text_overrun_behavior = 1
 
+[node name="EdgeFlash" type="TextureRect" parent="HUD"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("19_1vso6")
+
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
 collision_mask = 2
@@ -290,6 +302,7 @@ script = ExtResource("5_fo5ed")
 dungeon_grid = NodePath("../GridMap")
 
 [node name="GridMap" parent="." instance=ExtResource("5_5ukr8")]
+mesh_library = ExtResource("25_3ua1v")
 data = {
 "cells": PackedInt32Array(5, 11, 0, 6, 0, 0, 6, 11, 0, 7, 0, 0, 7, 11, 0, 8, 0, 0, 8, 11, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 12, 1, 0, 12, 2, 0, 12, 7, 0, 12, 8, 0, 12, 9, 0, 13, 0, 0, 13, 1, 0, 13, 2, 0, 13, 3, 0, 13, 4, 0, 13, 5, 0, 13, 6, 0, 13, 7, 0, 13, 8, 0, 13, 9, 0, 5, 0, 1, 4, 0, 1, 3, 0, 1, 2, 0, 1, 11, 9, 1, 10, 9, 1, 9, 9, 1, 9, 8, 1, 8, 8, 1, 4, 11, 1, 3, 10, 1, 2, 10, 1, 2, 9, 1, 1, 9, 1, 1, 8, 1, 0, 8, 1, 65535, 8, 1, 65535, 7, 1, 65535, 6, 1, 65534, 6, 1, 65534, 5, 1, 65533, 5, 1, 65533, 4, 1, 65533, 3, 1, 65533, 2, 1, 65533, 1, 1, 65533, 0, 1, 65533, 65535, 1, 65533, 65534, 1, 65533, 65533, 1, 65534, 65533, 1, 65534, 65532, 1, 65535, 65532, 1, 0, 65532, 1, 1, 65532, 1, 2, 65532, 1, 2, 65533, 1, 2, 65534, 1, 2, 65535, 1, 9, 11, 1, 9, 10, 1, 4, 4, 1, 5, 4, 1, 6, 4, 1, 7, 4, 1, 4, 5, 1, 4, 3, 1, 3, 4, 1, 3, 5, 1)
 }

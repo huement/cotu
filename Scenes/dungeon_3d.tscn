@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8j2m3n4x5y6"]
+
+[ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_3d_lib"]
+[ext_resource type="MeshLibrary" uid="uid://bxgdx6gy414a7" path="res://resources/mesh_library/simple_mesh_library.tres" id="2_mini_lib"]
+
+[node name="Dungeon3D" type="Node3D"]
+
+[node name="GridMap3D" type="GridMap" parent="."]
+mesh_library = ExtResource("1_3d_lib")
+cell_size = Vector3(2, 2, 2)
+layers = 1
+
+[node name="GridMapMinimap" type="GridMap" parent="."]
+mesh_library = ExtResource("2_mini_lib")
+cell_size = Vector3(2, 2, 2)
+layers = 2

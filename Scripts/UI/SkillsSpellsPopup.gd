@@ -142,7 +142,8 @@ func _render_spell_row(spell: SpellData, char_class_name: String) -> void:
 	if prereq_label:
 		prereq_label.text = "LVL %d" % spell.requirement
 	if elem_label:
-		elem_label.text = ItemData.EffectElement.keys()[spell.element]
+		var element_key: String = ItemData.ElementalBase.keys()[spell.element]
+		elem_label.text = element_key.capitalize()
 	if details_label:
 		details_label.text = spell.description
 

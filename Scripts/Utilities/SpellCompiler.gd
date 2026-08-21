@@ -51,6 +51,7 @@ func compile_spells() -> void:
 		spell.class_locked = (class_locked_str == "TRUE" or class_locked_str == "1")
 		spell.description = line[15].strip_edges()
 		spell.icon_path = line[16].strip_edges()
+		spell.animation = line[17].strip_edges()
 
 		if not spell.icon_path.is_empty() and ResourceLoader.exists(spell.icon_path):
 			spell.icon = load(spell.icon_path) as Texture2D
@@ -85,18 +86,24 @@ func _parse_spellbook(s: String) -> SpellData.SpellbookType:
 			return SpellData.SpellbookType.ARCHANIST
 
 
-func _parse_element(s: String) -> ItemData.EffectElement:
+func _parse_element(s: String) -> ItemData.ElementalBase:
 	match s.to_upper():
 		"FIRE":
-			return ItemData.EffectElement.MAGIC
+			return ItemData.ElementalBase.FIRE
+		"BOLT":
+			return ItemData.ElementalBase.BOLT
+		"EARTH", "ACID":
+			return ItemData.ElementalBase.EARTH
+		"WATER":
+			return ItemData.ElementalBase.WATER
+		"AIR":
+			return ItemData.ElementalBase.AIR
+		"DARK":
+			return ItemData.ElementalBase.DARK
 		"LIFE", "HOLY":
-			return ItemData.EffectElement.LIFE
-		"BASH", "ACID":
-			return ItemData.EffectElement.BASH
-		"BLADE":
-			return ItemData.EffectElement.BLADE
+			return ItemData.ElementalBase.LIFE
 		_:
-			return ItemData.EffectElement.MAGIC
+			return ItemData.ElementalBase.NONE
 
 
 func _parse_target_type(s: String) -> SpellData.TargetType:

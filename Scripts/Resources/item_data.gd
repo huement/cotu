@@ -49,6 +49,17 @@ enum EffectElement {
 	BASH,
 }
 
+enum ElementalBase {
+	NONE,
+	FIRE,
+	EARTH,
+	WATER,
+	AIR,
+	LIFE,
+	DARK,
+	BOLT,
+}
+
 @export_group("Item Core Identity")
 @export var item_id: String = ""
 @export var item_name: String = "New Item"

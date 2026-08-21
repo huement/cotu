@@ -6,10 +6,9 @@
 script = ExtResource("1_43wxf")
 spell_id = "sp_plasma_dart"
 spell_name = "Plasma Dart"
-tier = 2
 description = "Fires a concentrated bolt of superheated plasma at an enemy target."
 icon_path = "res://Data/Spells/Icons/plasma_dart.png"
-energy_cost = 12
-requirement = 3
-base_amount = 30
-var_multiplier = 0.7
+element = 1
+requirement = 1
+base_amount = 12
+animation = "FIRE"

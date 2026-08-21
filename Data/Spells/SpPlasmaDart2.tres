@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3 uid="uid://6k5q8baulsqg"]
+
+[ext_resource type="Script" uid="uid://bd0crvcevebh1" path="res://Scripts/Resources/SpellData.gd" id="1_cfa2y"]
+
+[resource]
+script = ExtResource("1_cfa2y")
+spell_id = "sp_plasma_dart_2"
+spell_name = "Plasma Double Dart"
+tier = 2
+description = "Fires a spread of concentrated bolts of superheated plasma at all enemy targets."
+icon_path = "res://Data/Spells/Icons/plasma_double_dart.png"
+energy_cost = 12
+target_type = 1
+element = 1
+requirement = 3
+base_amount = 30
+var_multiplier = 0.7
+animation = "FIRE"

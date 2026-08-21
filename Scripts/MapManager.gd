@@ -3,6 +3,7 @@ class_name MapManager
 
 ## The main GridMap node containing your painted dungeon architecture.
 @export var dungeon_grid: GridMap
+@export var active_map_instance: Node3D
 
 ## Maps out standard cardinal direction vectors to help calculate steps.
 const DIRECTION_MAP: Dictionary = {
@@ -63,3 +64,21 @@ func can_party_move(current_world_pos: Vector3, facing_direction: String) -> boo
 	var target_grid: Vector3i = current_grid + direction_vector
 	
 	return not is_tile_blocked(target_grid)
+
+
+func switch_map(scene_path: String) -> void:
+	var map_resource: PackedScene = load(scene_path) as PackedScene
+	if not map_resource:
+		push_error("MapManager: Failed to load map scene at " + scene_path)
+		return
+		
+	if is_instance_valid(active_map_instance):
+		active_map_instance.queue_free()
+		
+	active_map_instance = map_resource.instantiate() as Node3D
+	add_child(active_map_instance)
+	
+	if active_map_instance is GridMap:
+		dungeon_grid = active_map_instance as GridMap
+	else:
+		dungeon_grid = active_map_instance.get_node("GridMap3D") as GridMap

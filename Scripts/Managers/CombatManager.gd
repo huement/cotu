@@ -689,6 +689,16 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 	if "status_effect" in ability:
 		status_effect = str(ability.get("status_effect")).to_upper()
 
+	# 1. Resolve spell element
+	# 1. Extract animation key and elemental type from resource
+	var anim_name: String = str(ability.get("animation")) if "animation" in ability else "NONE"
+	var spell_element: ItemData.ElementalBase = ability.get("element") as ItemData.ElementalBase if "element" in ability else ItemData.ElementalBase.NONE
+
+	# 2. Emit VFX and Camera Shake once per cast
+	if anim_name != "NONE" and not anim_name.is_empty():
+		SignalBus.spell_vfx_requested.emit(anim_name, spell_element)
+		SignalBus.camera_shake_requested.emit(0.6)
+
 	for t: Combatant in targets:
 		if action_category == "BUFF" or status_effect == "SHIELD" or status_effect == "HASTE":
 			var stat_to_buff: StringName = &"defense"
@@ -897,12 +907,12 @@ func _apply_damage_to_combatant(target: Combatant, damage: int, attacker_name: S
 	if target.is_player:
 		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
 		SignalBus.chevron_flash_requested.emit(true)
-		SignalBus.camera_shake_requested.emit(0.35)
+		SignalBus.camera_shake_requested.emit(0.5)
 	else:
 		SignalBus.enemy_damaged_visual.emit(target.id, damage)
 		SignalBus.enemy_health_changed.emit(target.id, target.current_hp, target.max_hp)
 		SignalBus.chevron_flash_requested.emit(false)
-		SignalBus.camera_shake_requested.emit(0.5)
+		SignalBus.camera_shake_requested.emit(0.75)
 
 	# 2. Toast Notifications
 	var sb: Node = SignalBus

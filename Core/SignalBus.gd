@@ -36,7 +36,7 @@ signal enemy_damaged_visual(enemy_id: String, damage: int)
 
 # Vitals & Visual FX
 signal character_health_changed(target_slot: int, current_hp: int)
-signal character_mana_changed(target_slot: int, current_mp: int, max_mp: int)
+signal character_mana_changed(target_slot: int, current_mana: int, max_mana: int)
 signal enemy_health_changed(enemy_id: String, current_hp: int, max_hp: int)
 signal chevron_flash_requested(is_player_hit: bool)
 
@@ -53,6 +53,9 @@ signal battle_victory_popup_requested(data: Dictionary)
 
 # JUICE IT
 signal camera_shake_requested(trauma: float)
+signal elemental_vfx_requested(element: ItemData.ElementalBase)
+signal spell_vfx_requested(anim_name: String, element: ItemData.ElementalBase)
+signal edge_flash_requested(color: Color, duration: float)
 
 # Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)
