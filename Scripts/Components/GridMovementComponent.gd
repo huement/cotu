@@ -1,5 +1,4 @@
 # res://Scripts/Components/GridMovementComponent.gd
-# TODO: get this hooked up and working. 
 class_name GridMovementComponent
 extends Node3D
 
@@ -14,34 +13,58 @@ signal turn_completed(cardinal_direction: Vector3)
 @onready var ray_front: RayCast3D = %RayFront
 
 var is_moving: bool = false
-var current_heading: Vector3 = Vector3.FORWARD # Defaulting North (-Z)
+var current_heading: Vector3 = Vector3.FORWARD
+var map_manager: MapManager
+
 
 func _ready() -> void:
+	var world_root: Node3D = get_tree().root.get_node_or_null("World") as Node3D
+	if is_instance_valid(world_root):
+		map_manager = world_root.get_node_or_null("MapManager") as MapManager
 	if ray_front != null:
 		ray_front.target_position = Vector3.FORWARD * tile_size
 
 
-func try_move_forward(parent_node: Node3D) -> bool:
-	if is_moving:
+## Attempts a cardinal step relative to parent orientation.
+func try_step(parent_node: Node3D, local_input_dir: Vector3, _current_facing: String) -> bool:
+	GameLogger.nav('try_step FIRED')
+	if is_moving or not parent_node:
 		return false
 
-	ray_front.force_raycast_update()
-	if ray_front.is_colliding():
-		# Play bumped wall SFX or signal
-		SignalBus.audio_effect_requested.emit(&"wall_bump")
-		return false
+	var world_dir: Vector3 = Vector3.ZERO
+	if local_input_dir == Vector3.FORWARD:
+		world_dir = -parent_node.global_transform.basis.z
+	elif local_input_dir == Vector3.BACK:
+		world_dir = parent_node.global_transform.basis.z
+	elif local_input_dir == Vector3.RIGHT:
+		world_dir = parent_node.global_transform.basis.x
+	elif local_input_dir == Vector3.LEFT:
+		world_dir = -parent_node.global_transform.basis.x
 
-	var target_pos: Vector3 = parent_node.global_position + (parent_node.global_transform.basis.z * -tile_size)
-	_animate_step(parent_node, target_pos)
-	return true
+	var target_world_pos: Vector3 = parent_node.global_position + (world_dir.normalized() * tile_size)
 
+	if map_manager:
+		var target_grid_pos: Vector3i = map_manager.world_to_grid(target_world_pos)
+		if map_manager.is_tile_blocked(target_grid_pos):
+			GameLogger.nav('try_step BLOCKED INSTANCE')
+			var enemy_node: Node3D = map_manager.get_enemy_at_grid_pos(target_grid_pos)
+			if is_instance_valid(enemy_node):
+				var enemy_data: Variant = enemy_node.get("data") if "data" in enemy_node else null
 
-func try_move_backward(parent_node: Node3D) -> bool:
-	if is_moving:
-		return false
+				var party_members: Array = []
+				var gs: Node = get_tree().root.get_node_or_null("GameState")
+				if is_instance_valid(gs) and "current_party" in gs and gs.current_party:
+					if "slots" in gs.current_party:
+						party_members = gs.current_party.get("slots") as Array
 
-	var target_pos: Vector3 = parent_node.global_position + (parent_node.global_transform.basis.z * tile_size)
-	_animate_step(parent_node, target_pos)
+				if is_instance_valid(SignalBus):
+					SignalBus.combat_started.emit(enemy_data, party_members)
+			else:
+				if is_instance_valid(SignalBus):
+					SignalBus.audio_effect_requested.emit(&"wall_bump")
+			return false
+
+	_animate_step(parent_node, target_world_pos)
 	return true
 
 
@@ -54,10 +77,11 @@ func try_turn(parent_node: Node3D, angle_degrees: float) -> void:
 	var tween: Tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	tween.tween_property(parent_node, "rotation", target_rotation, turn_duration)
-	tween.finished.connect(func() -> void:
-		is_moving = false
-		current_heading = -parent_node.global_transform.basis.z
-		turn_completed.emit(current_heading)
+	tween.finished.connect(
+		func() -> void:
+			is_moving = false
+			current_heading = -parent_node.global_transform.basis.z
+			turn_completed.emit(current_heading),
 	)
 
 
@@ -67,7 +91,8 @@ func _animate_step(parent_node: Node3D, target_pos: Vector3) -> void:
 
 	var tween: Tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(parent_node, "global_position", target_pos, step_duration)
-	tween.finished.connect(func() -> void:
-		is_moving = false
-		step_completed.emit(parent_node.global_position)
+	tween.finished.connect(
+		func() -> void:
+			is_moving = false
+			step_completed.emit(parent_node.global_position),
 	)

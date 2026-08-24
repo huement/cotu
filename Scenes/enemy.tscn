@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://0pd2daw71vxk"]
 
-[ext_resource type="Script" path="res://Scripts/Enemies/enemy.gd" id="1_1f0kj"]
-[ext_resource type="Resource" path="res://Data/Enemies/ZombieCat_Base.tres" id="2_287tu"]
-[ext_resource type="Script" path="res://Scripts/Enemies/enemy_ai.gd" id="3_afpow"]
+[ext_resource type="Script" uid="uid://7gxx82jfbfly" path="res://Scripts/Enemies/enemy.gd" id="1_1f0kj"]
+[ext_resource type="Resource" uid="uid://b8fmdf3b7jc8n" path="res://Data/Enemies/ZombieCat_Base.tres" id="2_287tu"]
+[ext_resource type="Script" uid="uid://bsqsmyq71cyjt" path="res://Scripts/Enemies/enemy_ai.gd" id="3_afpow"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_t80xl"]
 size = Vector3(0.8, 2, 0.8)
@@ -19,7 +19,6 @@ script = ExtResource("3_afpow")
 [node name="ActivationArea" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 8
-collision_mask = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ActivationArea"]
 shape = SubResource("BoxShape3D_t80xl")
@@ -27,7 +26,6 @@ shape = SubResource("BoxShape3D_t80xl")
 [node name="Body" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 2
-collision_mask = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
 shape = SubResource("BoxShape3D_t80xl")

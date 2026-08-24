@@ -12,7 +12,7 @@ extends Node
 
 ## Category-specific toggles for granular control
 @export var log_combat_events: bool = true
-@export var log_movement_events: bool = false
+@export var log_movement_events: bool = true
 @export var log_ui_events: bool = false
 @export var log_system_events: bool = true
 

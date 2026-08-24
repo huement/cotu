@@ -10,6 +10,12 @@ enum Facing {
 }
 
 @onready var camera: Camera3D = $Camera3D as Camera3D
+@onready var grid_movement: GridMovementComponent = %GridMovementComponent as GridMovementComponent
+@export var initial_cell: Vector2i = Vector2i(2, 1)
+@export var use_editor_spawn: bool = false
+@export var movement_duration: float = 0.2
+@export var rotation_duration: float = 0.15
+@export var eye_height: float = 2
 
 var grid_map: GridMap
 var map_manager: MapManager
@@ -19,16 +25,14 @@ var current_facing: Facing = Facing.NORTH
 var is_moving: bool = false
 var _is_in_combat: bool = false
 
-@export var initial_cell: Vector2i = Vector2i(2, 1)
-@export var use_editor_spawn: bool = false
-@export var movement_duration: float = 0.2
-@export var rotation_duration: float = 0.15
-@export var eye_height: float = 1.5
-
 
 func _ready() -> void:
 	call_deferred("_initialize_player")
 	_connect_to_signal_bus()
+
+	if is_instance_valid(grid_movement):
+		grid_movement.step_completed.connect(_on_component_step_completed)
+		grid_movement.turn_completed.connect(_on_component_turn_completed)
 
 
 func _connect_to_signal_bus() -> void:
@@ -42,18 +46,25 @@ func _connect_to_signal_bus() -> void:
 
 func _initialize_player() -> void:
 	var world_root: Node3D = get_parent() as Node3D
-	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	map_manager = world_root.get_node_or_null("MapManager") as MapManager
 
+	if map_manager and is_instance_valid(map_manager.dungeon_grid):
+		grid_map = map_manager.dungeon_grid
+	else:
+		grid_map = world_root.get_node_or_null("GridMap") as GridMap
+
 	if not grid_map:
-		push_error("Player: GridMap sibling node could not be resolved from World root!")
+		push_error("Player: Active GridMap reference could not be resolved from MapManager!")
 		return
 
 	rotation_degrees.x = 0.0
 	rotation_degrees.z = 0.0
 
+	# Fetch spawn cell from active map's SpawnPoint node if present
 	if use_editor_spawn:
 		current_grid_pos = _world_to_cell(global_position)
+	elif map_manager:
+		current_grid_pos = map_manager.get_active_spawn_grid_pos()
 	else:
 		current_grid_pos = initial_cell
 
@@ -77,22 +88,21 @@ func _physics_process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	# 🛑 LOCKOUT GUARD: Block forward, strafe, backward, and turning while in combat
-	if _is_in_combat or is_moving or not grid_map:
+	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
 
 	if event.is_action_pressed("move_forward"):
-		_execute_grid_step(Vector3.FORWARD)
+		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
 	elif event.is_action_pressed("move_backward"):
-		_execute_grid_step(Vector3.BACK)
+		grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_left"):
-		_execute_grid_step(Vector3.LEFT)
+		grid_movement.try_step(self, Vector3.LEFT, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_right"):
-		_execute_grid_step(Vector3.RIGHT)
+		grid_movement.try_step(self, Vector3.RIGHT, _get_cardinal_string())
 	elif event.is_action_pressed("turn_left"):
-		_execute_grid_rotation(90.0)
+		grid_movement.try_turn(self, 90.0)
 	elif event.is_action_pressed("turn_right"):
-		_execute_grid_rotation(-90.0)
+		grid_movement.try_turn(self, -90.0)
 
 
 # ==============================================================================
@@ -268,10 +278,40 @@ func _on_grid_step_completed() -> void:
 		SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.35)
 
 
+func _on_component_step_completed(world_position: Vector3) -> void:
+	if map_manager:
+		var grid_3d: Vector3i = map_manager.world_to_grid(world_position)
+		current_grid_pos = Vector2i(grid_3d.x, grid_3d.z)
+
+	if is_instance_valid(SignalBus):
+		SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+	_on_grid_step_completed()
+
+
+func _on_component_turn_completed(_direction: Vector3) -> void:
+	var rounded_angle: int = roundi(wrapf(rotation_degrees.y, 0.0, 360.0))
+	match rounded_angle:
+		0, 360:
+			current_facing = Facing.NORTH
+		90:
+			current_facing = Facing.WEST
+		180:
+			current_facing = Facing.SOUTH
+		270:
+			current_facing = Facing.EAST
+
+
 # player.gd (or world.tscn debug controller)
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.is_echo():
 		match event.keycode:
+			KEY_M: # Press 'M' to switch between Main Dungeon and Testbed
+				if map_manager:
+					var testbed_scene: PackedScene = load("res://Scenes/dungeon_testbed.tscn")
+					map_manager.switch_map_from_resource(testbed_scene)
+					grid_map = map_manager.dungeon_grid
+					print("Map swapped to Testbed!")
 			KEY_T: # Press 'T' to test FIRE VFX & Shake
 				SignalBus.camera_shake_requested.emit(0.5)
 				SignalBus.edge_flash_requested.emit(Color(0.15, 1.0, 0.15), 0.35)

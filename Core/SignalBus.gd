@@ -56,6 +56,7 @@ signal camera_shake_requested(trauma: float)
 signal elemental_vfx_requested(element: ItemData.ElementalBase)
 signal spell_vfx_requested(anim_name: String, element: ItemData.ElementalBase)
 signal edge_flash_requested(color: Color, duration: float)
+signal audio_effect_requested(effect_name: StringName)
 
 # Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3o0hjl5fpfei"]
+
+[ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_7w0xv"]
+
+[node name="GridMap" type="GridMap"]
+mesh_library = ExtResource("1_7w0xv")

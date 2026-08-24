@@ -292,20 +292,18 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 	_bind_action_buttons()
 	setup_party_display(player_party)
 
-	var enemy_resources: Array = []
+	# Declare as Array[EnemyData] to satisfy static parameter typing
+	var enemy_resources: Array[EnemyData] = []
 	if enemy_data_or_group is Array:
-		enemy_resources = enemy_data_or_group as Array
-	elif enemy_data_or_group is Resource:
-		enemy_resources.append(enemy_data_or_group as Resource)
+		for item in enemy_data_or_group:
+			if item is EnemyData:
+				enemy_resources.append(item as EnemyData)
+	elif enemy_data_or_group is EnemyData:
+		enemy_resources.append(enemy_data_or_group as EnemyData)
 
 	if not enemy_resources.is_empty() and is_instance_valid(enemy_resources[0]):
-		var lead_enemy: Resource = enemy_resources[0] as Resource
-		# var raw_name = lead_enemy.get("enemy_name")
-		# var e_name: String = str(raw_name) if raw_name != null else "Cyber-Zombie Cat"
-		# if enemy_resources.size() > 1:
-		# 	e_name += " (x%d)" % enemy_resources.size()
-		# var e_name = update_enemy_header_display(enemy_resources)
-		var raw_hp = lead_enemy.get("max_health")
+		var lead_enemy: EnemyData = enemy_resources[0]
+		var raw_hp: Variant = lead_enemy.get("max_health")
 		var max_hp: int = int(raw_hp) if raw_hp != null else 30
 
 		if is_instance_valid(enemy_name_label):
@@ -337,7 +335,7 @@ func setup_party_display(party_members: Array) -> void:
 
 
 ## Formats enemy names for single-type vs mixed encounters
-func update_enemy_header_display(enemy_pack: Array[Resource]) -> void:
+func update_enemy_header_display(enemy_pack: Array[EnemyData]) -> void:
 	var name_label := %EnemyNameLabel as Label if has_node("%EnemyNameLabel") else null
 	if name_label == null or enemy_pack.is_empty():
 		return

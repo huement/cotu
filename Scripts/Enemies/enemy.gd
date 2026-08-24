@@ -31,6 +31,10 @@ extends Node3D
 @onready var model_holder: Node3D = $ModelHolder as Node3D
 @onready var activation_area: Area3D = $ActivationArea as Area3D
 
+var _grid_position: Vector2i = Vector2i.ZERO
+var _is_in_active_combat: bool = false
+
+
 # ==============================================================================
 # 3. LIFECYCLE & SETUP
 # ==============================================================================
@@ -39,6 +43,11 @@ func _ready() -> void:
 	_align_to_grid()
 	_instantiate_world_model()
 	_connect_trigger_signals()
+
+
+func get_grid_pos() -> Vector2i:
+	return _grid_position
+
 
 ## Ensures 'enemy_group' is populated with the correct number of enemy resources
 func _setup_enemy_group() -> void:
@@ -55,6 +64,7 @@ func _setup_enemy_group() -> void:
 				for i: int in range(pack_size):
 					enemy_group.append(fallback_cat)
 
+
 ## Converts cell coordinates into 3D world space and applies vertical floor grounding
 func _align_to_grid() -> void:
 	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
@@ -66,6 +76,7 @@ func _align_to_grid() -> void:
 		base_pos = grid.map_to_local(cell_3d)
 
 	global_position = Vector3(base_pos.x, base_pos.y + vertical_offset, base_pos.z)
+
 
 ## Spawns the 3D overworld mesh representing the pack leader in the dungeon corridor
 func _instantiate_world_model() -> void:
@@ -97,6 +108,7 @@ func _instantiate_world_model() -> void:
 		mesh_inst.material_override = mat
 		model_holder.add_child(mesh_inst)
 
+
 # ==============================================================================
 # 4. COMBAT TRIGGERING
 # ==============================================================================
@@ -105,16 +117,51 @@ func _connect_trigger_signals() -> void:
 		if not activation_area.body_entered.is_connected(_on_body_entered):
 			activation_area.body_entered.connect(_on_body_entered)
 
+	var sb: Node = SignalBus
+	if is_instance_valid(sb):
+		if not sb.combat_started.is_connected(_on_combat_started):
+			sb.combat_started.connect(_on_combat_started)
+		if not sb.combat_ended.is_connected(_on_combat_ended):
+			sb.combat_ended.connect(_on_combat_ended)
+
+
 func _on_body_entered(body: Node3D) -> void:
 	if body.name == "Player" or body is CharacterBody3D:
 		if is_instance_valid(GameLogger):
 			GameLogger.info("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), initial_cell])
 
-		# 🎯 Correctly extract the slots Array from the DungeonParty Resource
 		var party_slots: Array = []
 		if "current_party" in GameState and GameState.current_party != null:
 			if "slots" in GameState.current_party:
 				party_slots = GameState.current_party.slots
 
 		SignalBus.combat_started.emit(enemy_group, party_slots)
+
+
+func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
+	if not visible:
+		return
+
+	var is_target: bool = false
+	if enemy_payload == data or enemy_payload == enemy_group:
+		is_target = true
+	elif enemy_payload is Array:
+		if enemy_payload == enemy_group:
+			is_target = true
+		elif not enemy_group.is_empty() and enemy_payload.has(enemy_group[0]):
+			is_target = true
+
+	if is_target:
+		_is_in_active_combat = true
+		hide()
+
+
+func _on_combat_ended(victory: bool) -> void:
+	if not _is_in_active_combat:
+		return
+
+	if victory:
 		queue_free()
+	else:
+		_is_in_active_combat = false
+		show()

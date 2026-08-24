@@ -217,9 +217,9 @@ func _process_party_rest(rest_data: Dictionary) -> void:
 			# Broadcast live HUD updates
 			if sb:
 				if sb.has_signal("character_health_changed"):
-					sb.character_health_changed.emit(i, cat.current_hp, cat.max_hp)
+					sb.character_health_changed.emit(i, cat.current_hp)
 				if sb.has_signal("character_mana_changed"):
-					sb.character_mana_changed.emit(i, cat.current_mana, cat.max_mana)
+					sb.character_mana_changed.emit(i, cat.current_mana)
 
 	# Broadcast Toast Notification
 	if sb and sb.has_signal("show_toast"):

@@ -4,8 +4,8 @@ class_name CatCharacter
 
 signal equipment_changed
 
-const CharacterStats = preload("res://Models/character_stats.gd")
-
+const CharacterStatsData = preload("res://Models/character_stats.gd")
+ 
 @export_group("Identity")
 @export var name: String = "New Recruit"
 @export var breed: Resource # CatBreed
@@ -28,7 +28,7 @@ const CharacterStats = preload("res://Models/character_stats.gd")
 @export var personality: int = 8
 
 @export_group("Dynamic Vitals Component")
-var stats: CharacterStats
+var stats: CharacterStatsData
 
 # 🎯 EXPORTED VITALS FOR PERSISTENCE
 @export var current_hp: int = 10:
@@ -48,6 +48,7 @@ var stats: CharacterStats
 		if stats:
 			stats.max_health = value
 
+# ENERGY = MANA
 @export var current_energy: int = 10
 @export var max_energy: int = 10
 
@@ -140,12 +141,12 @@ var equipment_stat_bonuses: Dictionary = { }
 
 
 func _init() -> void:
-	stats = CharacterStats.new()
+	stats = CharacterStatsData.new()
 
 
 func initialize_stats() -> void:
 	if stats == null:
-		stats = CharacterStats.new()
+		stats = CharacterStatsData.new()
 
 	if is_instance_valid(breed):
 		strength = breed.get("base_strength") if "base_strength" in breed else strength

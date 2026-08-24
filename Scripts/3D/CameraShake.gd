@@ -1,4 +1,3 @@
-# res://Scripts/3D/CameraShake.gd
 class_name CameraShake
 extends Node
 
