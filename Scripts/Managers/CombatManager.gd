@@ -395,7 +395,7 @@ func _start_combatant_turn(c: Combatant) -> void:
 		if eff.effect_type == &"DOT":
 			var dot_damage: int = int(eff.value)
 			GameLogger.combat("%s took %d %s damage from %s!" % [c.name, dot_damage, eff.id, eff.name])
-			_apply_damage_to_combatant(c, dot_damage, eff.name)
+			_apply_damage_to_combatant(c, dot_damage, eff.name, null)
 
 		elif eff.effect_type == &"HOT":
 			var hot_heal: int = int(eff.value)
@@ -475,9 +475,16 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 					break
 
 		if is_instance_valid(target_char):
-			var damage: int = _calculate_physical_damage(acting_char, target_char, attack_type)
+			var weapon: Resource = null
+			if is_instance_valid(acting_char.ref):
+				if acting_char.ref.has_method("get_equipped_weapon"):
+					weapon = acting_char.ref.get_equipped_weapon()
+				elif acting_char.ref.has_method("get_equipped_item"):
+					weapon = acting_char.ref.get_equipped_item("RIGHT_HAND")
+
+			var damage: int = _calculate_physical_damage(acting_char, target_char, attack_type, weapon)
 			GameLogger.combat("%s ATTACKED %s with %s dealing %d damage!" % [acting_char.name, target_char.name, attack_type, damage])
-			_apply_damage_to_combatant(target_char, damage, acting_char.name)
+			_apply_damage_to_combatant(target_char, damage, acting_char.name, weapon)
 
 			if _check_battle_state():
 				return
@@ -751,7 +758,7 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 				GameLogger.combat("%s is protected in the Back Row! Physical skill damage reduced to %d" % [t.name, damage])
 
 			GameLogger.combat("%s used %s on %s dealing %d damage!" % [acting_char.name, spell_name, t.name, damage])
-			_apply_damage_to_combatant(t, damage, acting_char.name)
+			_apply_damage_to_combatant(t, damage, acting_char.name, ability)
 
 	if is_instance_valid(target_mgr) and target_mgr.has_method("clear_pending_ability"):
 		target_mgr.clear_pending_ability()
@@ -858,7 +865,7 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 			enemy_attack_type = enemy.ref.get_attack_type_string()
 
 		var damage: int = _calculate_physical_damage(enemy, target, enemy_attack_type)
-		_apply_damage_to_combatant(target, damage, enemy.name)
+		_apply_damage_to_combatant(target, damage, enemy.name, enemy.ref)
 
 		if _check_battle_state():
 			return
@@ -867,11 +874,28 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 	call_deferred("_unpause_and_continue")
 
 
-func _calculate_physical_damage(attacker: Combatant, defender: Combatant, attack_type: String = "UNARMED") -> int:
+func _calculate_physical_damage(
+	attacker: Combatant, 
+	defender: Combatant, 
+	attack_type: String = "UNARMED", 
+	weapon_data: Resource = null
+) -> int:
 	if not is_instance_valid(attacker) or not is_instance_valid(defender):
 		return 1
 
-	var base_dmg: float = float(attacker.get_effective_strength() - defender.get_effective_defense())
+	# Automatically attempt to resolve weapon if omitted for player combatants
+	if weapon_data == null and is_instance_valid(attacker.ref):
+		if attacker.ref.has_method("get_equipped_weapon"):
+			weapon_data = attacker.ref.call("get_equipped_weapon") as Resource
+		elif attacker.ref.has_method("get_equipped_item"):
+			weapon_data = attacker.ref.call("get_equipped_item", "RIGHT_HAND") as Resource
+
+	var weapon_atk: int = 0
+	if is_instance_valid(weapon_data) and "attack_bonus" in weapon_data:
+		weapon_atk = int(weapon_data.get("attack_bonus"))
+
+	# Combine base strength with weapon attack bonus against defender defense
+	var base_dmg: float = float((attacker.get_effective_strength() + weapon_atk) - defender.get_effective_defense())
 	base_dmg = maxf(1.0, base_dmg)
 
 	# 1. Attacker Row Penalty: Back Row Melee incurs 50% damage penalty
@@ -895,7 +919,38 @@ func _calculate_physical_damage(attacker: Combatant, defender: Combatant, attack
 	return max(1, int(base_dmg * attacker_mult * defender_mult * guard_mult))
 
 
-func _apply_damage_to_combatant(target: Combatant, damage: int, attacker_name: String = "") -> void:
+## Resolves a descriptive combat verb based on the weapon/action resource type
+func _get_attack_verb(action_resource: Resource) -> String:
+	if not is_instance_valid(action_resource):
+		return "hit"
+
+	var type_str: String = ""
+
+	if action_resource.has_method("get_attack_type_string"):
+		type_str = str(action_resource.call("get_attack_type_string")).to_upper()
+	elif "weapon_type" in action_resource:
+		type_str = str(action_resource.get("weapon_type")).to_upper()
+	elif "element" in action_resource:
+		type_str = str(action_resource.get("element")).to_upper()
+	elif "effect_element" in action_resource:
+		type_str = str(action_resource.get("effect_element")).to_upper()
+
+	if "RANGED" in type_str:
+		return "SHOT"
+	elif "BLADE" in type_str:
+		return "SLASHED"
+	elif "BASH" in type_str:
+		return "BASHED"
+
+	return "hit"
+
+
+func _apply_damage_to_combatant(
+	target: Combatant, 
+	damage: int, 
+	attacker_name: String = "", 
+	action_resource: Resource = null
+) -> void:
 	if not is_instance_valid(target) or target.current_hp <= 0 or damage <= 0:
 		return
 
@@ -903,7 +958,7 @@ func _apply_damage_to_combatant(target: Combatant, damage: int, attacker_name: S
 	target.current_hp = max(0, target.current_hp - damage)
 	_sync_hp_to_ref(target)
 
-	# 1. Update HUD Vitals & Visual FX
+	# Update HUD Vitals & Visual FX
 	if target.is_player:
 		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
 		SignalBus.chevron_flash_requested.emit(true)
@@ -912,18 +967,25 @@ func _apply_damage_to_combatant(target: Combatant, damage: int, attacker_name: S
 		SignalBus.enemy_damaged_visual.emit(target.id, damage)
 		SignalBus.enemy_health_changed.emit(target.id, target.current_hp, target.max_hp)
 		SignalBus.chevron_flash_requested.emit(false)
-		SignalBus.camera_shake_requested.emit(0.75)
+		
+		# Trigger target-overlay VFX or baseline camera shake
+		if is_instance_valid(action_resource):
+			_trigger_physical_impact_vfx(target.id, action_resource, 0.5)
+		else:
+			SignalBus.camera_shake_requested.emit(0.35)
 
-	# 2. Toast Notifications
+	# Toast Notifications
 	var sb: Node = SignalBus
-	if is_instance_valid(sb) and sb.has_signal("show_toast"):
+	if is_instance_valid(sb) and sb.has_signal(&"show_toast"):
+		var verb: String = _get_attack_verb(action_resource)
+		
 		if target.is_player:
 			var damage_msg: String = "⚡ %s took %d damage!" % [target.name, damage]
 			sb.show_toast.emit(damage_msg, true)
 		else:
 			var damage_msg: String = "💥 %s took %d damage!" % [target.name, damage]
 			if not attacker_name.is_empty():
-				damage_msg = "💥 %s hit %s for %d damage!" % [attacker_name, target.name, damage]
+				damage_msg = "💥 %s %s %s for %d damage!" % [attacker_name, verb, target.name, damage]
 			sb.show_toast.emit(damage_msg, false)
 
 		if was_alive and target.current_hp <= 0:
@@ -1013,3 +1075,30 @@ func _get_average_enemy_speed() -> int:
 			total_speed += c.get_effective_speed()
 			enemy_count += 1
 	return int(total_speed / maxf(1.0, float(enemy_count)))
+
+
+## Emits target-centered 2D overlay animation, screen slice shader, and trauma for physical hits
+func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data: Resource, trauma: float = 0.3) -> void:
+	var vfx_frames: SpriteFrames = null
+
+	if is_instance_valid(weapon_or_skill_data):
+		if "attack_vfx" in weapon_or_skill_data:
+			vfx_frames = weapon_or_skill_data.get("attack_vfx") as SpriteFrames
+
+		# Detect BLADE weapon type or BLADE elemental property
+		var is_blade: bool = false
+		if "weapon_type" in weapon_or_skill_data and weapon_or_skill_data.get("weapon_type") == ItemData.WeaponType.BLADE:
+			is_blade = true
+		elif "element" in weapon_or_skill_data and weapon_or_skill_data.get("element") == ItemData.EffectElement.BLADE:
+			is_blade = true
+		elif "effect_element" in weapon_or_skill_data and weapon_or_skill_data.get("effect_element") == ItemData.EffectElement.BLADE:
+			is_blade = true
+
+		if is_blade and is_instance_valid(SignalBus):
+			SignalBus.screen_slice_requested.emit()
+			SignalBus.weapon_swing_requested.emit()
+			SignalBus.camera_shake_requested.emit(0.65)
+
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and is_instance_valid(vfx_frames):
+		sb.target_vfx_requested.emit(target_enemy_id, vfx_frames, trauma)

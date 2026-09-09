@@ -34,6 +34,7 @@ enum EffectType {
 @export_multiline var description: String = ""
 @export var icon_path: String = ""
 @export var icon: Texture2D
+@export var attack_vfx: SpriteFrames
 
 @export_group("Cost & Targeting")
 @export var energy_cost: int = 0

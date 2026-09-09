@@ -16,6 +16,10 @@ enum Facing {
 @export var movement_duration: float = 0.2
 @export var rotation_duration: float = 0.15
 @export var eye_height: float = 2
+@export var max_shake_offset: Vector3 = Vector3(0.15, 0.15, 0.05)
+@export var shake_decay: float = 3.0
+
+var _trauma: float = 0.0
 
 var grid_map: GridMap
 var map_manager: MapManager
@@ -27,6 +31,7 @@ var _is_in_combat: bool = false
 
 
 func _ready() -> void:
+	add_to_group(&"player") # Ensures WorldEnemy can locate player's current_grid_pos
 	call_deferred("_initialize_player")
 	_connect_to_signal_bus()
 
@@ -42,6 +47,8 @@ func _connect_to_signal_bus() -> void:
 			sb.combat_started.connect(_on_combat_started)
 		if not sb.combat_ended.is_connected(_on_combat_ended):
 			sb.combat_ended.connect(_on_combat_ended)
+		if not sb.camera_shake_requested.is_connected(add_trauma):
+			sb.camera_shake_requested.connect(add_trauma)
 
 
 func _initialize_player() -> void:
@@ -87,6 +94,23 @@ func _physics_process(_delta: float) -> void:
 		_apply_canonical_transform()
 
 
+func _process(delta: float) -> void:
+	if _trauma > 0.0:
+		_trauma = lerpf(_trauma, 0.0, shake_decay * delta)
+		var shake_power: float = _trauma * _trauma
+		
+		var offset: Vector3 = max_shake_offset
+		offset.x *= shake_power * randf_range(-1.0, 1.0)
+		offset.y *= shake_power * randf_range(-1.0, 1.0)
+		offset.z *= shake_power * randf_range(-1.0, 1.0)
+		
+		camera.h_offset = offset.x
+		camera.v_offset = offset.y
+	else:
+		camera.h_offset = 0.0
+		camera.v_offset = 0.0
+
+
 func _input(event: InputEvent) -> void:
 	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
@@ -115,6 +139,10 @@ func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array) -> 
 
 func _on_combat_ended(_victory: bool) -> void:
 	_is_in_combat = false
+
+
+func add_trauma(amount: float) -> void:
+	_trauma = clampf(_trauma + amount, 0.0, 1.0)
 
 
 # ==============================================================================

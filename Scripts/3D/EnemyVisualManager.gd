@@ -32,6 +32,8 @@ func _connect_to_signal_bus() -> void:
 		sb.enemy_damaged_visual.connect(_on_enemy_damaged)
 	if not sb.enemy_health_changed.is_connected(_on_enemy_health_changed):
 		sb.enemy_health_changed.connect(_on_enemy_health_changed)
+	if not sb.target_vfx_requested.is_connected(play_target_vfx):
+		sb.target_vfx_requested.connect(play_target_vfx)
 
 # res://Scripts/3D/EnemyVisualManager.gd
 
@@ -198,3 +200,32 @@ func _apply_material_override_recursive(node: Node, mat: Material) -> void:
 
 	for child in node.get_children():
 		_apply_material_override_recursive(child, mat)
+
+## Instantiates a billboarded 2D attack overlay directly on the targeted enemy model and triggers screen shake juice
+func play_target_vfx(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: float = 0.3) -> void:
+	if not _spawned_enemies.has(enemy_id) or vfx_frames == null:
+		return
+
+	var enemy_node: Node3D = _spawned_enemies[enemy_id] as Node3D
+	if not is_instance_valid(enemy_node):
+		return
+
+	var vfx_sprite := AnimatedSprite3D.new()
+	vfx_sprite.sprite_frames = vfx_frames
+	vfx_sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	vfx_sprite.no_depth_test = true
+	vfx_sprite.position = Vector3(0.0, 0.8, 0.2) # Centered on model chest
+
+	enemy_node.add_child(vfx_sprite)
+
+	var anim_names: PackedStringArray = vfx_frames.get_animation_names()
+	if anim_names.size() > 0:
+		vfx_sprite.play(anim_names[0])
+		vfx_sprite.animation_finished.connect(vfx_sprite.queue_free, CONNECT_ONE_SHOT)
+	else:
+		vfx_sprite.queue_free()
+
+	# Trigger camera shake juice channel
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and sb.has_signal(&"camera_shake_requested"):
+		sb.camera_shake_requested.emit(trauma_amount)

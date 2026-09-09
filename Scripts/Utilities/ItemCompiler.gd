@@ -56,6 +56,7 @@ func compile_items() -> void:
 		if line.size() >= 16: item.effect_stat = line[15].strip_edges()
 		if line.size() >= 17: item.weapon_type = _parse_weapon_type(line[16].strip_edges())
 		if line.size() >= 18: item.is_consumable = line[17].strip_edges().to_lower() in ["true", "1", "t", "yes"]
+		if line.size() >= 19: _apply_vfx_frames(item, line[18].strip_edges())
 
 		item.stat_effect = {}
 		if item.heal_amount > 0:
@@ -132,3 +133,16 @@ func _parse_effect_element(elem_str: String) -> ItemData.EffectElement:
 		"BASH": return ItemData.EffectElement.BASH
 		"LIFE": return ItemData.EffectElement.LIFE
 		_: return ItemData.EffectElement.NONE
+
+## Safely loads and assigns a SpriteFrames resource from a CSV string path
+func _apply_vfx_frames(target_resource: Resource, vfx_path_string: String) -> void:
+	var clean_path: String = vfx_path_string.strip_edges()
+	if clean_path.is_empty():
+		return
+
+	if ResourceLoader.exists(clean_path):
+		var vfx_frames: SpriteFrames = load(clean_path) as SpriteFrames
+		if is_instance_valid(vfx_frames):
+			target_resource.set("attack_vfx", vfx_frames)
+	else:
+		push_warning("DataCompiler: VFX file not found at path: %s" % clean_path)

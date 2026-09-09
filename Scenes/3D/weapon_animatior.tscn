@@ -1,0 +1,106 @@
+[gd_scene load_steps=6 format=3 uid="uid://d1rfhycwotsyq"]
+
+[ext_resource type="PackedScene" uid="uid://dxopm065yrls6" path="res://resources/Weapons/Broadsword.glb" id="1_jhe2x"]
+[ext_resource type="Script" uid="uid://dr1mlle0su820" path="res://Scripts/3D/weapon_animatior.gd" id="1_scqai"]
+
+[sub_resource type="Animation" id="Animation_b102c"]
+resource_name = "sword_swing"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.14982341, 0.3007286),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0.4, -0.6, -0.4), Vector3(-0.1, 0, -0.5), Vector3(-0.5, -0.5, -0.4)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.14982341, 0.3007286),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(-0.34906584, 0.6981317, -0.6981317), Vector3(0.2617994, -0.5235988, 0.87266463), Vector3(0.5235988, -1.0471976, 1.2217305)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.14982341, 0.3007286, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [true, true, true, false]
+}
+
+[sub_resource type="Animation" id="Animation_8cfq0"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0.4, -0.6, -0.4)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-0.34906584, 0.6981317, -0.6981317)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_3ud87"]
+_data = {
+&"RESET": SubResource("Animation_8cfq0"),
+&"sword_swing": SubResource("Animation_b102c")
+}
+
+[node name="WeaponAnimatior" type="Node3D"]
+script = ExtResource("1_scqai")
+
+[node name="Pivot" type="Node3D" parent="."]
+transform = Transform3D(0.7281385, 0.3239918, 0.60402274, -0.60402274, 0.7198463, 0.34202012, -0.3239918, -0.6138815, 0.7198463, 0.4, -0.6, -0.4)
+
+[node name="SwordModel" type="Node3D" parent="Pivot"]
+
+[node name="Broadsword" parent="Pivot/SwordModel" instance=ExtResource("1_jhe2x")]
+transform = Transform3D(1, 0, 0, 0, 0.74700963, 0.6648132, 0, -0.6648132, 0.74700963, 0, 0, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_3ud87")
+}

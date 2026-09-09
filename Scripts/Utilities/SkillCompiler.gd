@@ -73,6 +73,10 @@ func compile_skills() -> void:
 		else:
 			skill.status_effect = "NONE"
 
+		# Column 15: attack_vfx_path
+		if line.size() >= 16:
+			_apply_vfx_frames(skill, line[15].strip_edges())
+
 		var save_path: String = OUTPUT_DIR + save_path_filename(skill.skill_id)
 
 		var err := ResourceSaver.save(skill, save_path)
@@ -207,3 +211,16 @@ func _parse_status_effect(s: String, duration: int = 1) -> String:
 			return "eff_hp_burn_%d" % clamped_tier
 		_:
 			return clean_s
+
+## Safely loads and assigns a SpriteFrames resource from a CSV string path
+func _apply_vfx_frames(target_resource: Resource, vfx_path_string: String) -> void:
+	var clean_path: String = vfx_path_string.strip_edges()
+	if clean_path.is_empty():
+		return
+
+	if ResourceLoader.exists(clean_path):
+		var vfx_frames: SpriteFrames = load(clean_path) as SpriteFrames
+		if is_instance_valid(vfx_frames):
+			target_resource.set("attack_vfx", vfx_frames)
+	else:
+		push_warning("DataCompiler: VFX file not found at path: %s" % clean_path)

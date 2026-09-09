@@ -1,7 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://yo001sb3lbfp"]
+[gd_scene load_steps=9 format=3 uid="uid://yo001sb3lbfp"]
 
 [ext_resource type="Script" uid="uid://cjuypfilihv7d" path="res://Scripts/UI/party_slot_portrait.gd" id="1_ux4tg"]
 [ext_resource type="Texture2D" uid="uid://ckuqgesrygqgq" path="res://ui/BATTLE/portraitFrame.png" id="2_eysv2"]
+[ext_resource type="Shader" uid="uid://85y4hjmvh5t6" path="res://Shaders/portrait_shine.gdshader" id="3_eysv2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5i4px"]
+shader = ExtResource("3_eysv2")
+shader_parameter/shine_progress = -0.5
+shader_parameter/shine_size = 0.25
+shader_parameter/shine_color = Color(1, 1, 0.8, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ux4tg"]
 bg_color = Color(0.154876, 0.154876, 0.154876, 1)
@@ -26,6 +33,7 @@ script = ExtResource("1_ux4tg")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 2
 
 [node name="PortraitFrame" type="TextureRect" parent="ContentVBox"]
@@ -34,18 +42,21 @@ custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
+mouse_filter = 2
 texture = ExtResource("2_eysv2")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="PortraitTexture" type="TextureRect" parent="ContentVBox/PortraitFrame"]
 unique_name_in_owner = true
+material = SubResource("ShaderMaterial_5i4px")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
@@ -63,6 +74,7 @@ color = Color(0.1254902, 0.7764706, 0.972549, 1)
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 4)
 layout_mode = 2
+mouse_filter = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/background = SubResource("StyleBoxFlat_ux4tg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_5i4px")
@@ -72,6 +84,7 @@ show_percentage = false
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 4)
 layout_mode = 2
+mouse_filter = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/background = SubResource("StyleBoxFlat_ux4tg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_5ne87")
@@ -81,6 +94,7 @@ show_percentage = false
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 4)
 layout_mode = 2
+mouse_filter = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/background = SubResource("StyleBoxFlat_ux4tg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_eysv2")

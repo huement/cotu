@@ -1,4 +1,4 @@
-[gd_scene load_steps=428 format=3 uid="uid://ci4b8iodvo08n"]
+[gd_scene load_steps=430 format=3 uid="uid://ci4b8iodvo08n"]
 
 [ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
 [ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
@@ -26,6 +26,7 @@
 [ext_resource type="Texture2D" uid="uid://cm4rs2u8nn7je" path="res://ui/animations/life_ring_60f_320px-sheet.png" id="24_rwnwi"]
 [ext_resource type="Texture2D" uid="uid://d370tgajiw10q" path="res://ui/animations/water_60f_320px-sheet.png" id="25_oqcyr"]
 [ext_resource type="Texture2D" uid="uid://glx0il76w00y" path="res://ui/animations/smoke_60f_320px-sheet.png" id="25_wgq8a"]
+[ext_resource type="Shader" uid="uid://ddae7co6523v3" path="res://Shaders/screen_slice.gdshader" id="27_mpqy4"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_7ppdr"]
 blend_mode = 1
@@ -2866,6 +2867,13 @@ animations = [{
 "speed": 60.0
 }]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_28ab4"]
+shader = ExtResource("27_mpqy4")
+shader_parameter/progress = 0.0
+shader_parameter/line_width = 0.10000000405148
+shader_parameter/line_color = Color(0.9041508, 0, 0.075268306, 1)
+shader_parameter/glow_color = Color(0.9983018, 0.48437268, 0.44557494, 0.8)
+
 [node name="BattleHud" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -3147,3 +3155,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="SliceOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_28ab4")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

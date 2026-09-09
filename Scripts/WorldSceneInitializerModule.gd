@@ -12,6 +12,7 @@ func _ready() -> void:
 		_add_floor(world_root)
 		_add_ceiling(world_root)
 		_setup_retro_environment(world_root)
+		_setup_dust_particles(world_root)
 		_verify_scene_dependencies()
 	else:
 		push_error("[SceneInitializerModule]: Parent must be a Node3D root!")
@@ -81,6 +82,61 @@ func _setup_retro_environment(root: Node3D) -> void:
 			camera.add_child.call_deferred(torch)
 			print("SceneInitializerModule: Tactical torch successfully mounted to Player Camera3D.")
 
+## Programmatically mounts floating cavern dust particles around the player
+func _setup_dust_particles(root: Node3D) -> void:
+	var player: Node3D = root.get_node_or_null("Player") as Node3D
+	var parent_node: Node3D = player if player != null else root
+
+	var particles: GPUParticles3D = GPUParticles3D.new()
+	particles.name = "AmbientDustParticles"
+	particles.amount = 180
+	particles.lifetime = 6.0
+	particles.visibility_aabb = AABB(Vector3(-10.0, -3.0, -10.0), Vector3(20.0, 6.0, 20.0))
+
+	# Configure Particle Process Material
+	var p_mat: ParticleProcessMaterial = ParticleProcessMaterial.new()
+	p_mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	p_mat.emission_box_extents = Vector3(8.0, 2.0, 8.0)
+	p_mat.direction = Vector3(0.05, -0.1, 0.05)
+	p_mat.spread = 180.0
+	p_mat.initial_velocity_min = 0.02
+	p_mat.initial_velocity_max = 0.1
+	p_mat.gravity = Vector3(0.0, -0.01, 0.0)
+	p_mat.scale_min = 0.015
+	p_mat.scale_max = 0.035
+
+	# Smooth Alpha Fade In / Fade Out Ramp
+	var color_ramp: Gradient = Gradient.new()
+	color_ramp.offsets = PackedFloat32Array([0.0, 0.2, 0.8, 1.0])
+	color_ramp.colors = PackedColorArray([
+		Color(1.0, 1.0, 1.0, 0.0),
+		Color(0.8, 0.85, 0.95, 0.35),
+		Color(0.8, 0.85, 0.95, 0.35),
+		Color(1.0, 1.0, 1.0, 0.0)
+	])
+
+	var ramp_tex: GradientTexture1D = GradientTexture1D.new()
+	ramp_tex.gradient = color_ramp
+	p_mat.color_ramp = ramp_tex
+
+	particles.process_material = p_mat
+
+	# Draw Pass Quad Mesh
+	var quad_mesh: QuadMesh = QuadMesh.new()
+	quad_mesh.size = Vector2(0.04, 0.04)
+
+	var pass_mat: StandardMaterial3D = StandardMaterial3D.new()
+	pass_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pass_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED # Fixed enum name for Godot 4
+	pass_mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	pass_mat.albedo_color = Color(0.85, 0.9, 1.0, 0.4)
+
+	quad_mesh.material = pass_mat
+	particles.draw_pass_1 = quad_mesh
+
+	parent_node.add_child.call_deferred(particles)
+
+
 func _add_floor(root: Node3D) -> void:
 	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
 	mesh_instance.name = "GeneratedFloor"
@@ -109,7 +165,7 @@ func _add_ceiling(root: Node3D) -> void:
 	mesh_instance.name = "GeneratedCeiling"
 	mesh_instance.position = _get_grid_visual_offset(root) + Vector3(0.0, CEILING_HEIGHT, 0.0)
 	mesh_instance.rotate_x(PI)
-	mesh_instance.layers = 2 
+	mesh_instance.layers = 1
 
 	var plane: PlaneMesh = PlaneMesh.new()
 	plane.size = GRID_PLANE_SIZE
@@ -123,7 +179,8 @@ func _add_ceiling(root: Node3D) -> void:
 	mat.texture_repeat = 1
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.uv1_scale = _uv_scale_for_grid(root, plane.size)
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	# Set to CULL_BACK so top-down minimap cameras ignore the back face
+	mat.cull_mode = BaseMaterial3D.CULL_BACK
 	mesh_instance.material_override = mat
 
 	root.add_child.call_deferred(mesh_instance)

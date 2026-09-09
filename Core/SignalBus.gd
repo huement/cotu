@@ -57,6 +57,9 @@ signal elemental_vfx_requested(element: ItemData.ElementalBase)
 signal spell_vfx_requested(anim_name: String, element: ItemData.ElementalBase)
 signal edge_flash_requested(color: Color, duration: float)
 signal audio_effect_requested(effect_name: StringName)
+signal target_vfx_requested(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: float)
+signal screen_slice_requested()
+signal weapon_swing_requested
 
 # Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)

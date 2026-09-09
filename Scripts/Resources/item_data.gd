@@ -95,7 +95,7 @@ enum ElementalBase {
 @export var effect_amount: float = 0.0
 @export var effect_element: EffectElement = EffectElement.NONE
 @export var effect_stat: String = ""
-
+@export var attack_vfx: SpriteFrames
 
 ## Returns string key matching CharacterLoadoutPanel slot keys ("BODY", "LEFT_HAND", "RIGHT_HAND", etc.)
 func get_slot_string() -> String:

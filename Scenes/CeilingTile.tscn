@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dm3x7g1sp5m8w"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0kgan"]
+albedo_color = Color(0.18960822, 0.06733964, 0, 1)
+metallic_specular = 0.22
+roughness = 0.85
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_p5a0x"]
+
+[node name="CeilingTile" type="Node3D"]
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -1, 8.742278e-08, 0, -8.742278e-08, -1, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_0kgan")
+mesh = SubResource("PlaneMesh_p5a0x")

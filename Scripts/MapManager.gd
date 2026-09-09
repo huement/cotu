@@ -5,6 +5,8 @@ class_name MapManager
 @export var dungeon_grid: GridMap
 @export var active_map_instance: Node3D
 @export var default_map_scene: PackedScene
+@export var ceiling_tile_scene: PackedScene = preload("res://Scenes/CeilingTile.tscn") 
+@export var ceiling_height: float = 2.0
 
 ## Maps out standard cardinal direction vectors to help calculate steps.
 const DIRECTION_MAP: Dictionary = { "NORTH": Vector3i(0, 0, -1), "SOUTH": Vector3i(0, 0, 1), "EAST": Vector3i(1, 0, 0), "WEST": Vector3i(-1, 0, 0) }
@@ -141,3 +143,14 @@ func switch_map(scene_path: String) -> void:
 		dungeon_grid = active_map_instance as GridMap
 	else:
 		dungeon_grid = active_map_instance.get_node("GridMap3D") as GridMap
+
+func _spawn_ceiling_tile(grid_pos: Vector2i) -> void:
+	if ceiling_tile_scene == null:
+		return
+
+	var ceiling_instance: Node3D = ceiling_tile_scene.instantiate() as Node3D
+	var world_x: float = grid_pos.x * 2.0
+	var world_z: float = grid_pos.y * 2.0
+
+	ceiling_instance.position = Vector3(world_x, ceiling_height, world_z)
+	add_child(ceiling_instance)

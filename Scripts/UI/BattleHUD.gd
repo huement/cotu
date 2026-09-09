@@ -24,6 +24,7 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var action_bar: Control = %ActionBar as Control
 @onready var elemental_vfx: AnimatedSprite2D = %ElementalVFX as AnimatedSprite2D
 @onready var edge_flash: Control = %EdgeFlash as Control
+@onready var slice_overlay: ColorRect = %SliceOverlay as ColorRect
 
 var portrait_slots: Array[Node] = []
 var _state: CombatState = CombatState.IDLE
@@ -46,7 +47,9 @@ func _ready() -> void:
 		elemental_vfx.hide()
 		if not elemental_vfx.animation_finished.is_connected(_on_vfx_animation_finished):
 			elemental_vfx.animation_finished.connect(_on_vfx_animation_finished)
-
+	if is_instance_valid(SignalBus) and SignalBus.has_signal(&"screen_slice_requested"):
+		if not SignalBus.screen_slice_requested.is_connected(play_screen_slice):
+			SignalBus.screen_slice_requested.connect(play_screen_slice)
 
 func _bind_action_buttons() -> void:
 	if _buttons_bound or not is_instance_valid(action_bar):
@@ -385,3 +388,22 @@ func _on_run_button_pressed() -> void:
 
 	# Emit RUN action to CombatManager
 	SignalBus.player_action_selected.emit(current_turn_slot_index, &"RUN", -1)
+
+## Plays the diagonal full-screen slice animation for blade impacts
+func play_screen_slice() -> void:
+	if not is_instance_valid(slice_overlay) or slice_overlay.material == null:
+		return
+
+	var mat := slice_overlay.material as ShaderMaterial
+	if mat == null:
+		return
+
+	var tween: Tween = create_tween()
+	tween.tween_property(mat, "shader_parameter/progress", 1.0, 0.22) \
+		.from(0.0) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_OUT)
+
+	tween.finished.connect(func() -> void:
+		mat.set_shader_parameter("progress", 0.0)
+	, CONNECT_ONE_SHOT)
