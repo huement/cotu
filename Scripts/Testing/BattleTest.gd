@@ -50,11 +50,11 @@ func _toggle_combat_encounter() -> void:
 			active_party = party_res.get("slots") as Array
 
 	# 3. Load Enemy A (Scavenger Drone)
-	var enemy1: Resource = _load_enemy_resource(enemy_a_path, "Scavenger Cyclops", 18, 8.0, 20, 10)
+	var enemy1: Resource = _load_enemy_resource(enemy_a_path, "Scavenger Cyclops", 60, 8.0, 20, 10)
 
 	# 4. Load Enemy B (Zombie Cat) with fallback
 	var enemy2_path: String = enemy_zombie_path if ResourceLoader.exists(enemy_zombie_path) else legacy_zombie_path
-	var enemy2: Resource = _load_enemy_resource(enemy2_path, "Zombie Cat", 35, 7.0, 50, 25)
+	var enemy2: Resource = _load_enemy_resource(enemy2_path, "Zombie Cat", 75, 7.0, 50, 25)
 
 	# 5. Attach guaranteed test loot tables
 	var test_loot_table: Resource = _build_test_loot_table(2)

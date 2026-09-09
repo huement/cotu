@@ -251,12 +251,18 @@ func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
 		return
 
 	var is_target: bool = false
-	if enemy_payload == data or enemy_payload == enemy_group:
-		is_target = true
-	elif enemy_payload is Array:
-		if enemy_payload == enemy_group:
-			is_target = true
-		elif not enemy_group.is_empty() and enemy_payload.has(enemy_group[0]):
+
+	if enemy_payload is Array:
+		var payload_array: Array = enemy_payload as Array
+		if not payload_array.is_empty():
+			if is_instance_valid(data) and payload_array.has(data):
+				is_target = true
+			elif is_instance_valid(enemy_group) and payload_array.has(enemy_group):
+				is_target = true
+			elif enemy_group is Array and payload_array == (enemy_group as Array):
+				is_target = true
+	elif enemy_payload is Object:
+		if enemy_payload == data or enemy_payload == enemy_group:
 			is_target = true
 
 	if is_target:

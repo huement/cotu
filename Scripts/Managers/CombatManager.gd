@@ -87,17 +87,46 @@ class Combatant:
 		return max(1, base_val + int(modifier))
 
 
+	## Sums a specific bonus property across all equipped items on the underlying character resource
+	func get_equipment_bonus(bonus_property: StringName) -> int:
+		var total: int = 0
+		if not is_instance_valid(ref):
+			return 0
+
+		var equipped_items: Array[Resource] = []
+		if ref.has_method("get_all_equipped_items"):
+			equipped_items = ref.call("get_all_equipped_items") as Array[Resource]
+		elif ref.has_method("get_equipped_item"):
+			# Fallback slot iteration if no get_all_equipped_items method exists
+			var slots: Array[String] = ["RIGHT_HAND", "LEFT_HAND", "HEAD", "BODY", "LEGS", "ACCESSORY_1", "ACCESSORY_2"]
+			for slot in slots:
+				var item: Resource = ref.call("get_equipped_item", slot) as Resource
+				if is_instance_valid(item):
+					equipped_items.append(item)
+
+		for item: Resource in equipped_items:
+			if is_instance_valid(item) and bonus_property in item:
+				total += int(item.get(bonus_property))
+
+		return total
+
+
+	## Total Effective Strength: (Base STR + Equipment Attack Bonus) + Active Buffs
 	func get_effective_strength() -> int:
-		return get_effective_stat(&"strength", strength)
+		var total_base_str: int = strength + get_equipment_bonus(&"attack_bonus")
+		return get_effective_stat(&"strength", total_base_str)
 
 
+	## Total Effective Defense: (Base DEF + Equipment Defense Bonus) + Active Buffs
 	func get_effective_defense() -> int:
-		return get_effective_stat(&"defense", defense)
+		var total_base_def: int = defense + get_equipment_bonus(&"defense_bonus")
+		return get_effective_stat(&"defense", total_base_def)
 
 
+	## Total Effective Speed: (Base SPD + Equipment Speed Bonus) + Active Buffs
 	func get_effective_speed() -> float:
-		var base_spd: int = int(speed)
-		return float(get_effective_stat(&"speed", base_spd))
+		var total_base_spd: int = int(speed) + get_equipment_bonus(&"speed_bonus")
+		return float(get_effective_stat(&"speed", total_base_spd))
 
 
 const MAX_TURN_METER: float = 100.0
@@ -962,7 +991,9 @@ func _apply_damage_to_combatant(
 	if target.is_player:
 		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
 		SignalBus.chevron_flash_requested.emit(true)
-		SignalBus.camera_shake_requested.emit(0.5)
+		# Always trigger screen slice overlay and severe camera shake when the player is hit
+		SignalBus.screen_slice_requested.emit()
+		SignalBus.camera_shake_requested.emit(0.85)
 	else:
 		SignalBus.enemy_damaged_visual.emit(target.id, damage)
 		SignalBus.enemy_health_changed.emit(target.id, target.current_hp, target.max_hp)
@@ -972,7 +1003,7 @@ func _apply_damage_to_combatant(
 		if is_instance_valid(action_resource):
 			_trigger_physical_impact_vfx(target.id, action_resource, 0.5)
 		else:
-			SignalBus.camera_shake_requested.emit(0.35)
+			SignalBus.camera_shake_requested.emit(0.4)
 
 	# Toast Notifications
 	var sb: Node = SignalBus
@@ -996,6 +1027,37 @@ func _apply_damage_to_combatant(
 				var death_msg: String = "☠️ %s HAS BEEN DEFEATED!" % target.name.to_upper()
 				sb.show_toast.emit(death_msg, false)
 
+
+## Emits target-centered 2D overlay animation, screen slice shader, and trauma for physical hits
+func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data: Resource, trauma: float = 0.3) -> void:
+	var vfx_frames: SpriteFrames = null
+
+	if is_instance_valid(weapon_or_skill_data):
+		var type_str: String = _resolve_resource_type_string(weapon_or_skill_data)
+
+		if "attack_vfx" in weapon_or_skill_data:
+			vfx_frames = weapon_or_skill_data.get("attack_vfx") as SpriteFrames
+
+		GameLogger.combat("Triggering physical impact VFX for %s weapon type %s" % [target_enemy_id, type_str])
+
+		if is_instance_valid(SignalBus):
+			if "BASH" in type_str:
+				SignalBus.weapon_swing_requested.emit("staff_bash")
+				SignalBus.camera_shake_requested.emit(0.50)
+				GameLogger.combat("Triggered staff_bash")
+			elif "RANGED" in type_str or "BOW" in type_str or "SHOOT" in type_str:
+				SignalBus.weapon_swing_requested.emit("bow_shot")
+				SignalBus.camera_shake_requested.emit(0.40)
+				GameLogger.combat("Triggered bow_shot")
+			elif "BLADE" in type_str or "SLASH" in type_str:
+				SignalBus.screen_slice_requested.emit()
+				SignalBus.weapon_swing_requested.emit("sword_swing")
+				SignalBus.camera_shake_requested.emit(0.55)
+				GameLogger.combat("Triggered sword_swing")
+
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and is_instance_valid(vfx_frames):
+		sb.target_vfx_requested.emit(target_enemy_id, vfx_frames, trauma)
 
 func _sync_hp_to_ref(c: Combatant) -> void:
 	if is_instance_valid(c.ref):
@@ -1077,28 +1139,36 @@ func _get_average_enemy_speed() -> int:
 	return int(total_speed / maxf(1.0, float(enemy_count)))
 
 
-## Emits target-centered 2D overlay animation, screen slice shader, and trauma for physical hits
-func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data: Resource, trauma: float = 0.3) -> void:
-	var vfx_frames: SpriteFrames = null
+## Converts enum integers or string properties on action resources into string keys
+func _resolve_resource_type_string(res: Resource) -> String:
+	if not is_instance_valid(res):
+		return ""
 
-	if is_instance_valid(weapon_or_skill_data):
-		if "attack_vfx" in weapon_or_skill_data:
-			vfx_frames = weapon_or_skill_data.get("attack_vfx") as SpriteFrames
+	if res.has_method("get_attack_type_string"):
+		return str(res.call("get_attack_type_string")).to_upper()
 
-		# Detect BLADE weapon type or BLADE elemental property
-		var is_blade: bool = false
-		if "weapon_type" in weapon_or_skill_data and weapon_or_skill_data.get("weapon_type") == ItemData.WeaponType.BLADE:
-			is_blade = true
-		elif "element" in weapon_or_skill_data and weapon_or_skill_data.get("element") == ItemData.EffectElement.BLADE:
-			is_blade = true
-		elif "effect_element" in weapon_or_skill_data and weapon_or_skill_data.get("effect_element") == ItemData.EffectElement.BLADE:
-			is_blade = true
+	if "weapon_type" in res:
+		var wt_val: Variant = res.get("weapon_type")
+		if typeof(wt_val) in [TYPE_INT, TYPE_FLOAT]:
+			var idx: int = int(wt_val)
+			if idx >= 0 and idx < ItemData.WeaponType.keys().size():
+				return ItemData.WeaponType.keys()[idx].to_upper()
+		return str(wt_val).to_upper()
 
-		if is_blade and is_instance_valid(SignalBus):
-			SignalBus.screen_slice_requested.emit()
-			SignalBus.weapon_swing_requested.emit()
-			SignalBus.camera_shake_requested.emit(0.65)
+	if "element" in res:
+		var el_val: Variant = res.get("element")
+		if typeof(el_val) in [TYPE_INT, TYPE_FLOAT]:
+			var idx: int = int(el_val)
+			if idx >= 0 and idx < ItemData.ElementalBase.keys().size():
+				return ItemData.ElementalBase.keys()[idx].to_upper()
+		return str(el_val).to_upper()
 
-	var sb: Node = SignalBus
-	if is_instance_valid(sb) and is_instance_valid(vfx_frames):
-		sb.target_vfx_requested.emit(target_enemy_id, vfx_frames, trauma)
+	if "effect_element" in res:
+		var ee_val: Variant = res.get("effect_element")
+		if typeof(ee_val) in [TYPE_INT, TYPE_FLOAT]:
+			var idx: int = int(ee_val)
+			if idx >= 0 and idx < ItemData.EffectElement.keys().size():
+				return ItemData.EffectElement.keys()[idx].to_upper()
+		return str(ee_val).to_upper()
+
+	return ""
