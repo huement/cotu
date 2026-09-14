@@ -166,6 +166,9 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 	active_combatant = null
 	guarding_characters.clear()
 
+	# 🔍 DIAGNOSTIC LOG: Print exact runtime type and value received
+	print("[DEBUG CombatManager] combat_started payload type: ", typeof(enemy_data_or_group), " | Value: ", enemy_data_or_group)
+	
 	var registered_cats: int = 0
 	for i in range(player_party.size()):
 		var cat: Resource = player_party[i] as Resource
@@ -205,18 +208,8 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 			combatant.meter = 0.0
 			combatants.append(combatant)
 
-	var enemy_resources: Array[Resource] = []
-	if enemy_data_or_group is Array:
-		for item in (enemy_data_or_group as Array):
-			if item is Resource:
-				enemy_resources.append(item as Resource)
-	elif is_instance_valid(enemy_data_or_group):
-		if "members" in enemy_data_or_group and enemy_data_or_group.get("members") is Array:
-			for member in (enemy_data_or_group.get("members") as Array):
-				if member is Resource:
-					enemy_resources.append(member as Resource)
-		elif enemy_data_or_group is Resource:
-			enemy_resources.append(enemy_data_or_group as Resource)
+	# 🎯 Extract enemy resources using universal resolver
+	var enemy_resources: Array[Resource] = _resolve_enemy_resources(enemy_data_or_group)
 
 	GameLogger.combat("Starting Combat w/ %d party members vs %d hostiles" % [registered_cats, enemy_resources.size()])
 
@@ -329,6 +322,68 @@ func _on_combat_ended(victory: bool) -> void:
 		SignalBus.popup_requested.emit(&"BATTLE_VICTORY", victory_data)
 
 
+## Resolves any enemy payload variant (Array, WorldEnemy node, EnemyGroupData, or single Resource) into a typed Array[Resource]
+func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
+	var result: Array[Resource] = []
+
+	if payload is Array:
+		for item in (payload as Array):
+			if item is Resource:
+				result.append(item as Resource)
+			elif is_instance_valid(item) and "enemy_group" in item:
+				var group_array: Variant = item.get("enemy_group")
+				if group_array is Array:
+					for sub_item in (group_array as Array):
+						if sub_item is Resource:
+							result.append(sub_item as Resource)
+
+	elif is_instance_valid(payload):
+		# 1. Payload is the WorldEnemy Node3D (or object containing 'enemy_group')
+		if "enemy_group" in payload:
+			var group_val: Variant = payload.get("enemy_group")
+			if group_val is Array and not (group_val as Array).is_empty():
+				for item in (group_val as Array):
+					if item is Resource:
+						result.append(item as Resource)
+
+		# 2. Payload is an EnemyGroupData resource containing 'members'
+		if result.is_empty() and "members" in payload:
+			var members_val: Variant = payload.get("members")
+			if members_val is Array and not (members_val as Array).is_empty():
+				for item in (members_val as Array):
+					if item is Resource:
+						result.append(item as Resource)
+
+		# 3. Payload is a single EnemyData Resource: search overworld WorldEnemy nodes for a match!
+		if result.is_empty() and payload is Resource:
+			var target_res: Resource = payload as Resource
+			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+			if overworld_enemies.is_empty():
+				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+
+			for node in overworld_enemies:
+				if is_instance_valid(node) and ("enemy_group" in node):
+					var grp: Variant = node.get("enemy_group")
+					var n_data: Variant = node.get("data") if "data" in node else null
+					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
+
+					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
+						if grp is Array and not (grp as Array).is_empty():
+							for item in (grp as Array):
+								if item is Resource:
+									result.append(item as Resource)
+							break
+
+			# 4. Fallback if no matching overworld WorldEnemy node was found
+			if result.is_empty():
+				var count: int = 1
+				if "pack_size" in payload:
+					count = max(1, int(payload.get("pack_size")))
+				for i in range(count):
+					result.append(target_res.duplicate() if count > 1 else target_res)
+
+	return result
+	
 func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
 	if not is_instance_valid(enemy_ref):
 		return _generate_fallback_loot()

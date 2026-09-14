@@ -2,15 +2,34 @@
 class_name EnemyVisualManager
 extends Node3D
 
+## Spawns, positions, and animates 3D enemy models in front of the Player Camera3D
+## during combat encounters.
+
+# ==============================================================================
+# 1. EXPORTED CONFIGURATION & POSITION TUNING
+# ==============================================================================
 @export var camera_node: Camera3D
+
+## Distance in front of camera (-Z vector).
 @export var forward_distance: float = 2.5
+
+## Vertical offset (-Y vector). Lower to ground feet onto the floor plane.
 @export var vertical_offset: float = -0.85
+
+## Uniform scale multiplier for 3D enemy models.
 @export var model_scale: Vector3 = Vector3(0.4, 0.4, 0.4)
-@export var horizontal_spacing: float = 0.85
 
-var _spawned_enemies: Dictionary = { }
+## Horizontal spacing when multiple enemies are spawned.
+@export var horizontal_spacing: float = 1.2
 
+# ==============================================================================
+# 2. RUNTIME STATE
+# ==============================================================================
+var _spawned_enemies: Dictionary = {}
 
+# ==============================================================================
+# 3. LIFECYCLE & INITIALIZATION
+# ==============================================================================
 func _ready() -> void:
 	visible = false
 	_connect_to_signal_bus()
@@ -35,43 +54,90 @@ func _connect_to_signal_bus() -> void:
 	if not sb.target_vfx_requested.is_connected(play_target_vfx):
 		sb.target_vfx_requested.connect(play_target_vfx)
 
-# res://Scripts/3D/EnemyVisualManager.gd
+
+# ==============================================================================
+# 4. SPAWNING & RESOLUTION
+# ==============================================================================
+func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
+	var result: Array[Resource] = []
+
+	if payload is Array:
+		for item in (payload as Array):
+			if item is Resource:
+				result.append(item as Resource)
+			elif is_instance_valid(item) and "enemy_group" in item:
+				var group_array: Variant = item.get("enemy_group")
+				if group_array is Array:
+					for sub_item in (group_array as Array):
+						if sub_item is Resource:
+							result.append(sub_item as Resource)
+
+	elif is_instance_valid(payload):
+		if "enemy_group" in payload:
+			var group_val: Variant = payload.get("enemy_group")
+			if group_val is Array and not (group_val as Array).is_empty():
+				for item in (group_val as Array):
+					if item is Resource:
+						result.append(item as Resource)
+
+		if result.is_empty() and "members" in payload:
+			var members_val: Variant = payload.get("members")
+			if members_val is Array and not (members_val as Array).is_empty():
+				for item in (members_val as Array):
+					if item is Resource:
+						result.append(item as Resource)
+
+		if result.is_empty() and payload is Resource:
+			var target_res: Resource = payload as Resource
+			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+			if overworld_enemies.is_empty():
+				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+
+			for node in overworld_enemies:
+				if is_instance_valid(node) and ("enemy_group" in node):
+					var grp: Variant = node.get("enemy_group")
+					var n_data: Variant = node.get("data") if "data" in node else null
+					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
+
+					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
+						if grp is Array and not (grp as Array).is_empty():
+							for item in (grp as Array):
+								if item is Resource:
+									result.append(item as Resource)
+							break
+
+			if result.is_empty():
+				var count: int = 1
+				if "pack_size" in payload:
+					count = max(1, int(payload.get("pack_size")))
+				for i in range(count):
+					result.append(target_res.duplicate() if count > 1 else target_res)
+
+	return result
 
 
-func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> void:
+func _on_combat_started(enemy_payload: Variant, _player_party: Array) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
-		if not is_instance_valid(camera_node):
-			push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
-			return
+
+	if not is_instance_valid(camera_node):
+		push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
+		return
 
 	_clear_all_enemies()
 	visible = true
 
-	var enemy_group: Array = []
-	if enemy_data_or_group is Array:
-		enemy_group = enemy_data_or_group as Array
-	elif is_instance_valid(enemy_data_or_group):
-		if "members" in enemy_data_or_group and enemy_data_or_group.get("members") is Array:
-			enemy_group = enemy_data_or_group.get("members") as Array
-		elif enemy_data_or_group is Resource:
-			enemy_group = [enemy_data_or_group as Resource]
+	var enemy_resources: Array[Resource] = _resolve_enemy_resources(enemy_payload)
 
-	for i in range(enemy_group.size()):
-		var e_data: EnemyData = enemy_group[i] as EnemyData
-		var model_scene: PackedScene = null
+	for i in range(enemy_resources.size()):
+		var e_data: Resource = enemy_resources[i]
+		if not is_instance_valid(e_data):
+			continue
 
-		if is_instance_valid(e_data):
-			model_scene = e_data.model_scene
-
-		var enemy_node: Node3D = null
+		var model_scene: PackedScene = e_data.get("model_scene") as PackedScene if "model_scene" in e_data else null
+		var enemy_node: Node3D
 		if is_instance_valid(model_scene):
 			enemy_node = model_scene.instantiate() as Node3D
-
-			# Apply external custom_material if assigned (leaves embedded GLB textures untouched)
-			var mat_to_apply: Material = e_data.custom_material if is_instance_valid(e_data) else null
-			if mat_to_apply != null:
-				_apply_material_override_recursive(enemy_node, mat_to_apply)
 		else:
 			enemy_node = _create_debug_mesh()
 
@@ -79,7 +145,7 @@ func _on_combat_started(enemy_data_or_group: Variant, _player_party: Array) -> v
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
 
-		_position_enemy(enemy_node, i, enemy_group.size())
+		_position_enemy(enemy_node, i, enemy_resources.size())
 		play_animation(enemy_node, &"idle", true)
 
 
@@ -106,6 +172,9 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 	enemy_node.rotate_object_local(Vector3.UP, PI)
 
 
+# ==============================================================================
+# 5. ANIMATION & FX
+# ==============================================================================
 func play_animation(enemy_node: Node3D, anim_name: StringName, loop: bool = true) -> void:
 	if not is_instance_valid(enemy_node):
 		return
@@ -114,12 +183,11 @@ func play_animation(enemy_node: Node3D, anim_name: StringName, loop: bool = true
 	if is_instance_valid(anim_player) and anim_player.has_animation(anim_name):
 		anim_player.play(anim_name)
 		if not loop:
-			# 🎯 Cleanly auto-disconnect using Godot 4's CONNECT_ONE_SHOT flag
 			anim_player.animation_finished.connect(
 				func(finished_anim: StringName) -> void:
 					if finished_anim != &"die" and is_instance_valid(enemy_node):
 						play_animation(enemy_node, &"idle", true),
-				CONNECT_ONE_SHOT,
+				CONNECT_ONE_SHOT
 			)
 
 
@@ -173,35 +241,6 @@ func _clear_all_enemies() -> void:
 	_spawned_enemies.clear()
 
 
-## Instantiates 3D enemy model and applies compiled texture materials
-func spawn_enemy_model(enemy_data: EnemyData) -> Node3D:
-	if not is_instance_valid(enemy_data) or enemy_data.model_scene == null:
-		return null
-
-	var model_instance := enemy_data.model_scene.instantiate() as Node3D
-	add_child(model_instance)
-	model_instance.scale = enemy_data.model_scale
-
-	var mat_to_apply: Material = enemy_data.custom_material
-	if mat_to_apply == null and not enemy_data.texture_path.is_empty():
-		var tres_path: String = enemy_data.texture_path.replace(".png", ".tres")
-		if ResourceLoader.exists(tres_path):
-			mat_to_apply = load(tres_path) as StandardMaterial3D
-
-	if mat_to_apply != null:
-		_apply_material_override_recursive(model_instance, mat_to_apply)
-
-	return model_instance
-
-
-func _apply_material_override_recursive(node: Node, mat: Material) -> void:
-	if node is MeshInstance3D:
-		(node as MeshInstance3D).material_override = mat
-
-	for child in node.get_children():
-		_apply_material_override_recursive(child, mat)
-
-## Instantiates a billboarded 2D attack overlay directly on the targeted enemy model and triggers screen shake juice
 func play_target_vfx(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: float = 0.3) -> void:
 	if not _spawned_enemies.has(enemy_id) or vfx_frames == null:
 		return
@@ -214,7 +253,7 @@ func play_target_vfx(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: 
 	vfx_sprite.sprite_frames = vfx_frames
 	vfx_sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	vfx_sprite.no_depth_test = true
-	vfx_sprite.position = Vector3(0.0, 0.8, 0.2) # Centered on model chest
+	vfx_sprite.position = Vector3(0.0, 0.8, 0.2)
 
 	enemy_node.add_child(vfx_sprite)
 
@@ -225,7 +264,6 @@ func play_target_vfx(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: 
 	else:
 		vfx_sprite.queue_free()
 
-	# Trigger camera shake juice channel
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and sb.has_signal(&"camera_shake_requested"):
 		sb.camera_shake_requested.emit(trauma_amount)

@@ -611,43 +611,6 @@ func _apply_popup_margins(is_flush: bool) -> void:
 		content_margin.add_theme_constant_override("margin_bottom", inner_pad)
 
 
-func _build_ability_info_ui(data: Dictionary) -> void:
-	var res: Resource = data.get("resource", null) as Resource
-	if not is_instance_valid(res):
-		return
-
-	var name_str: String = res.get("skill_name") if "skill_name" in res else (res.get("spell_name") if "spell_name" in res else "Ability")
-	var desc_str: String = res.get("description") if "description" in res else ""
-	var cost_val: int = res.get("energy_cost") if "energy_cost" in res else 0
-
-	var name_lbl := Label.new()
-	name_lbl.text = name_str.to_upper()
-	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_lbl.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
-	name_lbl.add_theme_font_size_override("font_size", 16)
-	content_area.add_child(name_lbl)
-
-	var info_lbl := Label.new()
-	info_lbl.text = "Energy Cost: %d EN" % cost_val
-	info_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	info_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3, 1.0))
-	content_area.add_child(info_lbl)
-
-	var desc_lbl := Label.new()
-	desc_lbl.text = desc_str
-	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content_area.add_child(desc_lbl)
-
-	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
-	close_btn.pressed.connect(_close_modal)
-
-	var btn_center := HBoxContainer.new()
-	btn_center.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn_center.add_child(close_btn)
-	content_area.add_child(btn_center)
-
-
 ## INDIVIDUAL ITEM ACTIONS MODAL (From Character Sheet)
 func _build_item_actions_ui(data: Dictionary) -> void:
 	var item: ItemData = data.get("item", null) as ItemData
@@ -666,7 +629,6 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 	content_area.add_child(name_label)
 
-	# 🎯 Target Resolution: Use passed character from payload first, fallback to GameState active cat
 	var cat: Resource = data.get("character", null) as Resource
 	if not is_instance_valid(cat) and GameState.has_method("get_active_cat"):
 		cat = GameState.get_active_cat() as Resource
@@ -694,15 +656,35 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 				var equip_action := func() -> void:
 					if is_instance_valid(cat):
 						var target_slot: String = item.get_slot_string()
-						if not target_slot.is_empty():
-							var unequipped: ItemData = cat.unequip_item(target_slot) as ItemData if cat.has_method("unequip_item") else null
-							if cat.has_method("equip_item"):
-								cat.equip_item(target_slot, item)
-							if is_instance_valid(inv):
-								if inv.has_method("remove_item"):
-									inv.remove_item(item)
-								if is_instance_valid(unequipped) and inv.has_method("add_item"):
-									inv.add_item(unequipped)
+						if target_slot.is_empty():
+							target_slot = "LEFT_HAND"
+
+						# Aggregate total quantity of matching stack items in inventory
+						var total_qty: int = 0
+						var items_to_remove: Array[ItemData] = []
+						if is_instance_valid(inv):
+							for inv_item in inv.get_items():
+								if is_instance_valid(inv_item) and (
+									(not item.item_id.is_empty() and inv_item.item_id == item.item_id) or
+									(inv_item.item_name == item.item_name)
+								):
+									total_qty += inv_item.quantity
+									items_to_remove.append(inv_item)
+
+						item.quantity = max(1, total_qty)
+
+						# Remove all matching stack instances from inventory
+						if is_instance_valid(inv):
+							for r_item in items_to_remove:
+								inv.remove_item(r_item)
+
+						# Swap equipment in loadout
+						var unequipped: ItemData = cat.unequip_item(target_slot) as ItemData if cat.has_method("unequip_item") else null
+						if cat.has_method("equip_item"):
+							cat.equip_item(target_slot, item)
+						if is_instance_valid(inv) and is_instance_valid(unequipped):
+							inv.add_item(unequipped)
+
 					_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "EQUIP", "index": slot_idx, "item": item })
 					_refresh_party_ui()
 

@@ -10,9 +10,24 @@ signal item_used(item: ItemData)
 @export var _items: Array[ItemData] = []
 
 
-func add_item(item: ItemData) -> bool:
+func add_item(item: ItemData, amount: int = 1) -> bool:
 	if not is_instance_valid(item):
 		return false
+
+	var qty_to_add: int = max(1, item.quantity) if amount == 1 else amount
+	var is_stackable: bool = (item.item_type == ItemData.ItemType.CONSUMABLE) or (item.equipment_slot == ItemData.EquipmentSlot.NONE) or ("arrow" in item.item_id.to_lower()) or ("bolt" in item.item_id.to_lower())
+
+	if is_stackable:
+		for existing in _items:
+			if is_instance_valid(existing) and (
+				(not item.item_id.is_empty() and existing.item_id == item.item_id) or
+				(existing.item_name == item.item_name)
+			):
+				existing.quantity += qty_to_add
+				item_added.emit(existing)
+				return true
+
+	item.quantity = qty_to_add
 	if _items.size() >= max_slots:
 		push_warning("Inventory full! Could not add: " + item.item_name)
 		return false

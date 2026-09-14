@@ -33,7 +33,8 @@ var _selected_action: StringName = &""
 var _is_auto_battle_on: bool = false
 var _buttons_bound: bool = false
 var current_turn_slot_index: int = -1
-
+var _enemy_max_hps: Dictionary = {}
+var _enemy_current_hps: Dictionary = {}
 
 func _ready() -> void:
 	hide()
@@ -256,10 +257,6 @@ func _on_auto_button_toggled(is_on: bool) -> void:
 		auto_button.modulate = Color.GREEN if is_on else Color.WHITE
 
 
-func _on_enemy_health_changed(_enemy_id: String, current_hp: int, max_hp: int) -> void:
-	if is_instance_valid(enemy_hp_label):
-		enemy_hp_label.text = "%d / %d" % [max(0, current_hp), max_hp]
-
 
 func _on_chevron_flash(is_player_hit: bool) -> void:
 	var flash_color: Color = Color.RED if is_player_hit else Color.ORANGE
@@ -289,30 +286,117 @@ func _initialize_portrait_slots() -> void:
 				portrait_slots[idx] = portrait
 
 
-func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> void:
+## Resolves any enemy payload variant into typed Array[Resource] for HUD initialization
+func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
+	var result: Array[Resource] = []
+
+	if payload is Array:
+		for item in (payload as Array):
+			if item is Resource:
+				result.append(item as Resource)
+			elif is_instance_valid(item) and "enemy_group" in item:
+				var group_array: Variant = item.get("enemy_group")
+				if group_array is Array:
+					for sub_item in (group_array as Array):
+						if sub_item is Resource:
+							result.append(sub_item as Resource)
+
+	elif is_instance_valid(payload):
+		if "enemy_group" in payload:
+			var group_val: Variant = payload.get("enemy_group")
+			if group_val is Array and not (group_val as Array).is_empty():
+				for item in (group_val as Array):
+					if item is Resource:
+						result.append(item as Resource)
+
+		if result.is_empty() and "members" in payload:
+			var members_val: Variant = payload.get("members")
+			if members_val is Array and not (members_val as Array).is_empty():
+				for item in (members_val as Array):
+					if item is Resource:
+						result.append(item as Resource)
+
+		if result.is_empty() and payload is Resource:
+			var target_res: Resource = payload as Resource
+			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+			if overworld_enemies.is_empty():
+				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+
+			for node in overworld_enemies:
+				if is_instance_valid(node) and ("enemy_group" in node):
+					var grp: Variant = node.get("enemy_group")
+					var n_data: Variant = node.get("data") if "data" in node else null
+					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
+
+					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
+						if grp is Array and not (grp as Array).is_empty():
+							for item in (grp as Array):
+								if item is Resource:
+									result.append(item as Resource)
+							break
+
+			if result.is_empty():
+				var count: int = 1
+				if "pack_size" in payload:
+					count = max(1, int(payload.get("pack_size")))
+				for i in range(count):
+					result.append(target_res.duplicate() if count > 1 else target_res)
+
+	return result
+
+
+func _on_combat_started(enemy_payload: Variant, player_party: Array) -> void:
 	show()
 	_reset_state()
 	_bind_action_buttons()
 	setup_party_display(player_party)
 
-	# Declare as Array[EnemyData] to satisfy static parameter typing
-	var enemy_resources: Array[EnemyData] = []
-	if enemy_data_or_group is Array:
-		for item in enemy_data_or_group:
-			if item is EnemyData:
-				enemy_resources.append(item as EnemyData)
-	elif enemy_data_or_group is EnemyData:
-		enemy_resources.append(enemy_data_or_group as EnemyData)
+	var enemy_resources: Array[Resource] = _resolve_enemy_resources(enemy_payload)
+	_enemy_max_hps.clear()
+	_enemy_current_hps.clear()
 
-	if not enemy_resources.is_empty() and is_instance_valid(enemy_resources[0]):
-		var lead_enemy: EnemyData = enemy_resources[0]
-		var raw_hp: Variant = lead_enemy.get("max_health")
-		var max_hp: int = int(raw_hp) if raw_hp != null else 30
+	var total_max_hp: int = 0
+	var base_name: String = "CYBER-ZOMBIE CAT"
 
-		if is_instance_valid(enemy_name_label):
-			update_enemy_header_display(enemy_resources)
-		if is_instance_valid(enemy_hp_label):
-			enemy_hp_label.text = "%d / %d" % [max_hp, max_hp]
+	for i in range(enemy_resources.size()):
+		var res: Resource = enemy_resources[i]
+		var e_id: String = "enemy_%d" % i
+		var hp: int = 30
+
+		if is_instance_valid(res):
+			if "enemy_name" in res and res.get("enemy_name") != null:
+				base_name = str(res.get("enemy_name"))
+			if "max_health" in res and res.get("max_health") != null:
+				hp = int(res.get("max_health"))
+
+		_enemy_max_hps[e_id] = hp
+		_enemy_current_hps[e_id] = hp
+		total_max_hp += hp
+
+	if is_instance_valid(enemy_name_label):
+		if enemy_resources.size() > 1:
+			enemy_name_label.text = "%s (x%d)" % [base_name.to_upper(), enemy_resources.size()]
+		else:
+			enemy_name_label.text = base_name.to_upper()
+
+	if is_instance_valid(enemy_hp_label):
+		enemy_hp_label.text = "%d / %d" % [total_max_hp, total_max_hp]
+
+
+## Fixed parameter signature to accept enemy_id emitted from SignalBus
+func _on_enemy_health_changed(enemy_id: String, current_hp: int, max_hp: int) -> void:
+	_enemy_current_hps[enemy_id] = current_hp
+	_enemy_max_hps[enemy_id] = max_hp
+
+	var total_current: int = 0
+	var total_max: int = 0
+
+	for id in _enemy_max_hps:
+		total_current += _enemy_current_hps.get(id, 0)
+		total_max += _enemy_max_hps.get(id, 0)
+
+	if is_instance_valid(enemy_hp_label):
+		enemy_hp_label.text = "%d / %d" % [total_current, total_max]
 
 
 func _on_combat_ended(_victory: bool) -> void:

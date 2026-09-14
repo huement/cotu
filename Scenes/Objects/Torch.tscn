@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://obtfq1vnf1h8"]
+
+[ext_resource type="Script" uid="uid://barrwhhetpd66" path="res://Scripts/Components/TorchFlickerComponent.gd" id="1_2bomy"]
+[ext_resource type="PackedScene" uid="uid://b0ucn8meu71sg" path="res://resources/DungeonParts/torch.glb" id="1_w80ut"]
+
+[node name="Torch" type="Node3D"]
+script = ExtResource("1_2bomy")
+
+[node name="TorchModel" parent="." instance=ExtResource("1_w80ut")]
+
+[node name="FlameLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.037589073, 0.62739456, 0)
+light_color = Color(1, 0.7137255, 0.54509807, 1)
+shadow_enabled = true
+omni_range = 8.0

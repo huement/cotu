@@ -30,7 +30,8 @@ enum EquipmentSlot {
 	RIGHT_HAND,
 	HEAD,
 	BOTH_HANDS,
-	ACCESSORY,
+	ACCESSORY_1,
+	ACCESSORY_2
 }
 
 enum WeaponType {
@@ -114,8 +115,10 @@ func get_slot_string() -> String:
 			return "RIGHT_HAND"
 		EquipmentSlot.HEAD:
 			return "HEAD"
-		EquipmentSlot.ACCESSORY:
-			return "ACCESSORY"
+		EquipmentSlot.ACCESSORY_1: 
+			return "ACCESSORY_1"
+		EquipmentSlot.ACCESSORY_2: 
+			return "ACCESSORY_2"
 		_:
 			return ""
 

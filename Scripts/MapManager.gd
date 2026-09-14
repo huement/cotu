@@ -54,7 +54,7 @@ func grid_to_world(grid_position: Vector3i) -> Vector3:
 
 ## Checks if a target grid cell contains a blocking wall tile or enemy at ground level.
 func is_tile_blocked(grid_position: Vector3i) -> bool:
-	GameLogger.nav('IS TILE BLOCK FIRED')
+	#GameLogger.nav('IS TILE BLOCK FIRED')
 	if not dungeon_grid:
 		return true
 
@@ -65,7 +65,7 @@ func is_tile_blocked(grid_position: Vector3i) -> bool:
 	if item_index != GridMap.INVALID_CELL_ITEM:
 		if is_instance_valid(dungeon_grid.mesh_library):
 			var item_name: String = dungeon_grid.mesh_library.get_item_name(item_index).to_lower()
-			GameLogger.nav('BLOCKED INSTANCE %s' % item_name)
+			#GameLogger.nav('BLOCKED INSTANCE %s' % item_name)
 			if item_name.contains("wall"):
 				return true # Block movement only if tile is explicitly a wall
 

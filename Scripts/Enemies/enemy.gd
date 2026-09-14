@@ -43,8 +43,9 @@ var _is_moving: bool = false
 # 3. LIFECYCLE & SETUP
 # ==============================================================================
 func _ready() -> void:
-	_setup_enemy_group()
+	add_to_group(&"world_enemies")
 	_resolve_enemy_data()
+	_setup_enemy_group()
 	_align_to_grid()
 	_instantiate_world_model()
 	_connect_trigger_signals()
@@ -54,27 +55,35 @@ func get_grid_pos() -> Vector2i:
 	return _grid_position
 
 
-## Ensures 'enemy_data' is populated if only 'data' was assigned in the Inspector
+## Ensures 'enemy_data' and 'data' are cross-resolved from assigned Inspector resources
 func _resolve_enemy_data() -> void:
-	if enemy_data == null:
-		if data is EnemyData:
-			enemy_data = data as EnemyData
-		elif not enemy_group.is_empty() and enemy_group[0] is EnemyData:
-			enemy_data = enemy_group[0] as EnemyData
+	if enemy_data == null and data is EnemyData:
+		enemy_data = data as EnemyData
+	elif data == null and enemy_data != null:
+		data = enemy_data
+	elif data == null and not enemy_group.is_empty() and enemy_group[0] is EnemyData:
+		data = enemy_group[0]
+		enemy_data = enemy_group[0] as EnemyData
 
 
-## Ensures 'enemy_group' is populated with the correct number of enemy resources
+## Ensures 'enemy_group' is populated with 'pack_size' duplicated enemy resources
 func _setup_enemy_group() -> void:
-	if enemy_group.is_empty():
-		if is_instance_valid(data):
-			for i: int in range(pack_size):
-				enemy_group.append(data)
-		else:
-			var fallback_cat: Resource = load("res://Data/Enemies/ZombieCat_Base.tres") as Resource
-			if is_instance_valid(fallback_cat):
-				data = fallback_cat
-				for i: int in range(pack_size):
-					enemy_group.append(fallback_cat)
+	var template: Resource = data
+	if not is_instance_valid(template):
+		template = enemy_data
+	if not is_instance_valid(template) and not enemy_group.is_empty():
+		template = enemy_group[0]
+
+	if not is_instance_valid(template):
+		template = load("res://Data/Enemies/ZombieCat_Base.tres") as Resource
+		data = template
+
+	# Rebuild group if empty or if it only holds a single Inspector template item
+	if enemy_group.size() < pack_size or (enemy_group.size() == 1 and pack_size > 1):
+		enemy_group.clear()
+		for i: int in range(pack_size):
+			if is_instance_valid(template):
+				enemy_group.append(template.duplicate())
 
 
 ## Converts cell coordinates into 3D world space and applies vertical floor grounding
@@ -233,8 +242,8 @@ func _connect_trigger_signals() -> void:
 			sb.combat_ended.connect(_on_combat_ended)
 
 
-func _on_body_entered(body: Node3D) -> void:
-	if body.name == "Player" or body is CharacterBody3D:
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group(&"player") or body.name == "Player" or body is CharacterBody3D or body is DungeonPlayer:
 		if is_instance_valid(GameLogger):
 			GameLogger.info("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), _grid_position])
 
@@ -251,19 +260,35 @@ func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
 		return
 
 	var is_target: bool = false
+	var extracted_resources: Array[Resource] = []
 
 	if enemy_payload is Array:
-		var payload_array: Array = enemy_payload as Array
-		if not payload_array.is_empty():
-			if is_instance_valid(data) and payload_array.has(data):
-				is_target = true
-			elif is_instance_valid(enemy_group) and payload_array.has(enemy_group):
-				is_target = true
-			elif enemy_group is Array and payload_array == (enemy_group as Array):
-				is_target = true
-	elif enemy_payload is Object:
-		if enemy_payload == data or enemy_payload == enemy_group:
+		for item in (enemy_payload as Array):
+			if item is Resource:
+				extracted_resources.append(item as Resource)
+	elif is_instance_valid(enemy_payload):
+		if enemy_payload == self or enemy_payload == data or enemy_payload == enemy_data or enemy_group.has(enemy_payload):
 			is_target = true
+		if "enemy_group" in enemy_payload:
+			var grp: Variant = enemy_payload.get("enemy_group")
+			if grp is Array:
+				for item in (grp as Array):
+					if item is Resource:
+						extracted_resources.append(item as Resource)
+		elif enemy_payload is Resource:
+			extracted_resources.append(enemy_payload as Resource)
+
+	if not is_target and not extracted_resources.is_empty():
+		for item in extracted_resources:
+			if item == data or item == enemy_data or enemy_group.has(item):
+				is_target = true
+				break
+
+	# 🎯 Use enemy_group.size() when this WorldEnemy node is matched
+	var hostile_count: int = enemy_group.size() if is_target else extracted_resources.size()
+
+	if is_instance_valid(GameLogger):
+		GameLogger.info("_on_combat_started (%d hostiles)! Target match: %s" % [hostile_count, str(is_target)])
 
 	if is_target:
 		_is_in_active_combat = true

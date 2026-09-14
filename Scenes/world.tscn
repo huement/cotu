@@ -299,6 +299,7 @@ texture = ExtResource("19_1vso6")
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
 collision_mask = 2
 script = ExtResource("1_a02cp")
+eye_height = 2.5
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
 

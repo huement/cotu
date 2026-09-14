@@ -109,7 +109,8 @@ func _create_slot_button(item: ItemData, slot_idx: int, count: int = 1) -> void:
 				SignalBus.popup_requested.emit("ITEM_ACTIONS", {
 					"item": item,
 					"index": slot_idx,
-					"count": count
+					"count": count,
+					"character": GameState.get_active_cat()
 				})
 		)
 	else:

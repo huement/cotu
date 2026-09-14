@@ -4,7 +4,7 @@ class_name CatCharacter
 
 signal equipment_changed
 
-const CharacterStatsData = preload("res://Models/character_stats.gd")
+const CharacterStatsData = preload("res://resources/character_stats.gd")
  
 @export_group("Identity")
 @export var name: String = "New Recruit"

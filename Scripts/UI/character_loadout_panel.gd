@@ -197,5 +197,9 @@ func _on_slot_pressed(slot_name: String) -> void:
 		equipped_item = _current_cat.get_equipped_item(slot_name) as ItemData
 
 	if get_tree().root.has_node("SignalBus"):
-		var bus: Node = get_tree().root.get_node("SignalBus")
-		bus.popup_requested.emit("ITEM_ACTIONS", { "slot": slot_name, "item": equipped_item, "is_equipped": true, "character": _current_cat })
+		SignalBus.popup_requested.emit("ITEM_ACTIONS", {
+			"slot": slot_name,
+			"item": equipped_item,
+			"is_equipped": true,
+			"character": _current_cat
+		})

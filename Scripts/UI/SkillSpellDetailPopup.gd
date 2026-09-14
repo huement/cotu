@@ -218,6 +218,12 @@ func _configure_bottom_bar(is_allowed: bool, meets_req: bool, is_field_usable: b
 
 ## Page 2: Target Selection Page
 func _go_to_target_page() -> void:
+	if _active_resource is SkillData:
+		var skill := _active_resource as SkillData
+		if skill.skill_id == &"sk_craft_ammo":
+			_execute_craft_ammo(skill)
+			return
+
 	if page_detail:
 		page_detail.hide()
 	if page_target:
@@ -289,9 +295,8 @@ func _execute_field_ability() -> void:
 
 func _emit_field_action_log() -> void:
 	if get_tree().root.has_node("SignalBus"):
-		var bus: Node = get_tree().root.get_node("SignalBus")
 		var action_name: String = _active_resource.spell_name if _active_resource is SpellData else _active_resource.skill_name
-		bus.log_message_emitted.emit("Casted %s on %s!" % [action_name.to_upper(), _selected_target_cat.name.to_upper()], "#00FFCC")
+		GameLogger.info("Casted %s on %s!" % [action_name.to_upper(), _selected_target_cat.name.to_upper()])
 
 
 func _hide_popup() -> void:
@@ -303,3 +308,34 @@ func _hide_popup() -> void:
 	_active_resource = null
 	_active_cat = null
 	_selected_target_cat = null
+
+
+func _execute_craft_ammo(skill: SkillData) -> void:
+	var cost: int = skill.energy_cost if "energy_cost" in skill else 0
+
+	if is_instance_valid(_active_cat) and "current_energy" in _active_cat:
+		if _active_cat.current_energy < cost:
+			if get_tree().root.has_node("SignalBus"):
+				GameLogger.info("%s does not have enough Energy!" % _active_cat.name)
+			return
+		_active_cat.current_energy -= cost
+
+	var ammo_item: ItemData = load("res://Data/Items/Consumables/IronArrow.tres") as ItemData if ResourceLoader.exists("res://Data/Items/Consumables/IronArrow.tres") else null
+
+	if not is_instance_valid(ammo_item):
+		ammo_item = ItemData.new()
+		ammo_item.item_id = "itm_iron_arrow"
+		ammo_item.item_name = "Iron Arrow"
+		ammo_item.description = "Standard iron-tipped projectile for bows."
+		ammo_item.item_type = ItemData.ItemType.EQUIPMENT
+		ammo_item.equipment_slot = ItemData.EquipmentSlot.LEFT_HAND
+
+	var amount: int = skill.effect_amount if ("effect_amount" in skill and skill.effect_amount > 0) else 10
+	
+	if "inventory" in GameState and is_instance_valid(GameState.inventory):
+		GameState.inventory.add_item(ammo_item, amount)
+
+	if get_tree().root.has_node("SignalBus"):
+		GameLogger.info("%s fabricated %d x %s!" % [_active_cat.name.to_upper(), amount, ammo_item.item_name])
+
+	_hide_popup()

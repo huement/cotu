@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://day7k6mxl84p1"]
+[gd_scene load_steps=4 format=3 uid="uid://day7k6mxl84p1"]
 
 [ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_vm1o7"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="2_kl8rm"]
+[ext_resource type="PackedScene" uid="uid://obtfq1vnf1h8" path="res://Scenes/Objects/Torch.tscn" id="3_7y88j"]
 
 [node name="GridMap3D" type="GridMap"]
 mesh_library = ExtResource("1_vm1o7")
@@ -10,12 +11,38 @@ data = {
 }
 
 [node name="SpawnPoint" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.0000001, -18, 0, 2)
+transform = Transform3D(-1.0000002, 8.742278e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, 3, 1, 48)
 
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="Enemy" parent="Enemies" instance=ExtResource("2_kl8rm")]
 transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, -18, 0, -2)
-initial_cell = Vector2i(-9, -1)
-model_scale = Vector3(1, 1, 1)
+initial_cell = Vector2i(1, 23)
+model_scale = Vector3(1.5, 1.5, 1.5)
 vertical_offset = 1.0
+
+[node name="Torches" type="Node3D" parent="."]
+
+[node name="Torch" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 4, 14.8251505)
+
+[node name="Torch4" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 3, 25.82515)
+
+[node name="Torch7" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 3, 45.82515)
+
+[node name="Torch8" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(-0.99999535, 0, 0.0030542882, 0, 1, 0, -0.0030542882, 0, -0.99999535, -5.495899, 3, 50.439667)
+
+[node name="Torch5" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -36.4959, 3, 21.82515)
+
+[node name="Torch6" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -36.4959, 3, 11.82515)
+
+[node name="Torch2" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 3, 11.212067)
+
+[node name="Torch3" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 3, 4.8201523)

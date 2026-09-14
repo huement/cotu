@@ -12,6 +12,7 @@ enum Facing {
 @onready var camera: Camera3D = $Camera3D as Camera3D
 @onready var grid_movement: GridMovementComponent = %GridMovementComponent as GridMovementComponent
 @export var initial_cell: Vector2i = Vector2i(2, 1)
+@export var initial_facing: Facing = Facing.NORTH
 @export var use_editor_spawn: bool = false
 @export var movement_duration: float = 0.2
 @export var rotation_duration: float = 0.15
@@ -53,34 +54,35 @@ func _connect_to_signal_bus() -> void:
 
 func _initialize_player() -> void:
 	var world_root: Node3D = get_parent() as Node3D
+	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	map_manager = world_root.get_node_or_null("MapManager") as MapManager
 
-	if map_manager and is_instance_valid(map_manager.dungeon_grid):
-		grid_map = map_manager.dungeon_grid
-	else:
-		grid_map = world_root.get_node_or_null("GridMap") as GridMap
-
 	if not grid_map:
-		push_error("Player: Active GridMap reference could not be resolved from MapManager!")
-		return
+		if map_manager and is_instance_valid(map_manager.dungeon_grid):
+			grid_map = map_manager.dungeon_grid
+		else:
+			push_error("Player: GridMap sibling node could not be resolved from World root!")
+			return
 
-	rotation_degrees.x = 0.0
-	rotation_degrees.z = 0.0
+	# Resolve spawn position AND facing angle from SpawnPoint node first
+	var spawn_point: Node3D = null
+	if map_manager and is_instance_valid(map_manager.active_map_instance):
+		spawn_point = map_manager.active_map_instance.get_node_or_null("SpawnPoint") as Node3D
 
-	# Fetch spawn cell from active map's SpawnPoint node if present
-	if use_editor_spawn:
+	if spawn_point:
+		current_grid_pos = _world_to_cell(spawn_point.global_position)
+		current_facing = _angle_to_facing(spawn_point.global_rotation_degrees.y)
+	elif use_editor_spawn:
 		current_grid_pos = _world_to_cell(global_position)
-	elif map_manager:
-		current_grid_pos = map_manager.get_active_spawn_grid_pos()
+		current_facing = _angle_to_facing(global_rotation_degrees.y)
 	else:
 		current_grid_pos = initial_cell
+		current_facing = initial_facing
 
 	_apply_canonical_transform()
 
 	camera.position = Vector3(0.0, eye_height, 0.0)
 	camera.rotation_degrees = Vector3.ZERO
-
-	# FORCE Godot to display this camera view on the main screen on launch!
 	camera.make_current()
 
 
@@ -238,6 +240,32 @@ func _apply_canonical_transform() -> void:
 	global_position = _cell_to_world(current_grid_pos)
 	rotation_degrees.x = 0.0
 	rotation_degrees.z = 0.0
+	rotation_degrees.y = _facing_to_angle(current_facing)
+
+func _facing_to_angle(facing: Facing) -> float:
+	match facing:
+		Facing.NORTH: return 0.0
+		Facing.WEST: return 90.0
+		Facing.SOUTH: return 180.0
+		Facing.EAST: return 270.0
+	return 0.0
+
+func _angle_to_facing(angle_deg: float) -> Facing:
+	var wrapped: float = wrapf(angle_deg, 0.0, 360.0)
+	var rounded: int = roundi(wrapped)
+	match rounded:
+		0, 360: return Facing.NORTH
+		90: return Facing.WEST
+		180: return Facing.SOUTH
+		270: return Facing.EAST
+		_:
+			var quadrant: int = posmod(roundi(angle_deg / 90.0), 4)
+			match quadrant:
+				0: return Facing.NORTH
+				1: return Facing.WEST
+				2: return Facing.SOUTH
+				3: return Facing.EAST
+	return Facing.NORTH
 
 
 func _cell_to_world(cell: Vector2i) -> Vector3:
