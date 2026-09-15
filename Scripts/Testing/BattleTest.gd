@@ -68,6 +68,8 @@ func _toggle_combat_encounter() -> void:
 		sb.combat_started.emit(enemy_pack, active_party)
 
 
+# Update _load_enemy_resource() in res://Scripts/Testing/BattleTest.gd:
+
 func _load_enemy_resource(res_path: String, fallback_name: String, fallback_hp: int, fallback_spd: float, xp: int, gold: int) -> Resource:
 	if ResourceLoader.exists(res_path):
 		return load(res_path) as Resource
@@ -78,6 +80,13 @@ func _load_enemy_resource(res_path: String, fallback_name: String, fallback_hp: 
 	fallback.set("speed", fallback_spd)
 	fallback.set("xp_value", xp)
 	fallback.set("gold_value", gold)
+
+	# Assign model_scene from base template if available
+	if ResourceLoader.exists(legacy_zombie_path):
+		var base_res: Resource = load(legacy_zombie_path) as Resource
+		if is_instance_valid(base_res) and "model_scene" in base_res:
+			fallback.set("model_scene", base_res.get("model_scene"))
+
 	return fallback
 
 

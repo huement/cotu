@@ -23,10 +23,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -160.0
-offset_right = 220.0
-offset_bottom = 160.0
+offset_left = -226.0
+offset_top = -210.0
+offset_right = 234.0
+offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -44,23 +44,22 @@ custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
 text = "XXXXXXXXXXXXXXXXXX"
-horizontal_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 visible_characters = 18
 
 [node name="Spacer" type="Control" parent="PanelContainer/MainVBox/HBoxContainer"]
-custom_minimum_size = Vector2(20, 0)
+custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="PanelContainer/MainVBox/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
 theme_override_font_sizes/font_size = 14
 text = "TACTICAL ABILITY SELECTION"
-horizontal_alignment = 1
+horizontal_alignment = 2
 
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/MainVBox"]
 layout_mode = 2

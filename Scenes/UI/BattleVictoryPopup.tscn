@@ -9,9 +9,10 @@
 [ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="6_iqjvw"]
 
 [node name="BattleVictoryPopup" type="PanelContainer"]
-custom_minimum_size = Vector2(350, 250)
-offset_right = 350.0
-offset_bottom = 250.0
+custom_minimum_size = Vector2(500, 450)
+offset_right = 500.0
+offset_bottom = 450.0
+rotation = -1.25346705e-05
 script = ExtResource("1_bswu8")
 metadata/_edit_vertical_guides_ = [188.0]
 

@@ -58,6 +58,7 @@ func _connect_to_signal_bus() -> void:
 # ==============================================================================
 # 4. SPAWNING & RESOLUTION
 # ==============================================================================
+## Resolves any enemy payload variant into a typed Array[Resource] using player proximity for single resources
 func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 	var result: Array[Resource] = []
 
@@ -87,24 +88,38 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 					if item is Resource:
 						result.append(item as Resource)
 
+		# 🎯 Proximity-based lookup: Find the closest active overworld WorldEnemy node matching the resource
 		if result.is_empty() and payload is Resource:
 			var target_res: Resource = payload as Resource
 			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
 			if overworld_enemies.is_empty():
 				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
 
+			var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+			var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
+
+			var best_node: Node3D = null
+			var min_dist: int = 9999
+
 			for node in overworld_enemies:
-				if is_instance_valid(node) and ("enemy_group" in node):
+				if is_instance_valid(node) and ("enemy_group" in node) and node.visible:
 					var grp: Variant = node.get("enemy_group")
 					var n_data: Variant = node.get("data") if "data" in node else null
 					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
 
 					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
-						if grp is Array and not (grp as Array).is_empty():
-							for item in (grp as Array):
-								if item is Resource:
-									result.append(item as Resource)
-							break
+						var n_cell: Vector2i = node.get_grid_pos() if node.has_method("get_grid_pos") else Vector2i(9999, 9999)
+						var dist: int = absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y)
+						if dist < min_dist:
+							min_dist = dist
+							best_node = node as Node3D
+
+			if is_instance_valid(best_node) and ("enemy_group" in best_node):
+				var grp: Variant = best_node.get("enemy_group")
+				if grp is Array and not (grp as Array).is_empty():
+					for item in (grp as Array):
+						if item is Resource:
+							result.append(item as Resource)
 
 			if result.is_empty():
 				var count: int = 1
@@ -115,8 +130,10 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 	return result
 
+	
+# Update _on_combat_started() in res://Scripts/3D/EnemyVisualManager.gd:
 
-func _on_combat_started(enemy_payload: Variant, _player_party: Array) -> void:
+func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
 
@@ -145,9 +162,84 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array) -> void:
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
 
+		# 🎯 Apply material override so GLB meshes render with textures rather than white
+		_apply_material_to_model(enemy_node, e_data)
+
 		_position_enemy(enemy_node, i, enemy_resources.size())
 		play_animation(enemy_node, &"idle", true)
 
+
+# Add these helper methods to res://Scripts/3D/EnemyVisualManager.gd:
+
+## Automatically resolves and applies texture materials to 3D GLB model meshes
+## Automatically resolves and applies texture materials to 3D GLB model meshes
+func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
+	if not is_instance_valid(model_node) or not is_instance_valid(e_data):
+		return
+
+	var mat: Material = null
+
+	# 1. Custom material property on EnemyData
+	if "custom_material" in e_data and is_instance_valid(e_data.get("custom_material")):
+		mat = e_data.get("custom_material") as Material
+
+	# 2. Texture path property on EnemyData
+	if mat == null and "texture_path" in e_data and not str(e_data.get("texture_path")).is_empty():
+		var tex_path: String = str(e_data.get("texture_path"))
+		var tres_path: String = tex_path.replace(".png", ".tres")
+		if ResourceLoader.exists(tres_path):
+			mat = load(tres_path) as Material
+		elif ResourceLoader.exists(tex_path):
+			var tex: Texture2D = load(tex_path) as Texture2D
+			if is_instance_valid(tex):
+				var std_mat := StandardMaterial3D.new()
+				std_mat.albedo_texture = tex
+				std_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				std_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+				mat = std_mat
+
+	# 3. Auto-resolve material from the GLB model scene directory
+	if mat == null and "model_scene" in e_data and is_instance_valid(e_data.get("model_scene")):
+		var model_scene: PackedScene = e_data.get("model_scene") as PackedScene
+		var path: String = model_scene.resource_path
+		var dir: String = path.get_base_dir()
+		var base_file: String = path.get_file().get_basename()
+		var tex_name: String = base_file.replace("character-", "texture-")
+
+		var candidates: Array[String] = [
+			dir + "/" + tex_name + ".tres",
+			dir + "/" + tex_name + ".png",
+			dir + "/texture-l.tres",
+			dir + "/texture-l.png",
+			dir + "/texture-d.png"
+		]
+
+		for cand in candidates:
+			if ResourceLoader.exists(cand):
+				if cand.ends_with(".tres"):
+					mat = load(cand) as Material
+					break
+				elif cand.ends_with(".png"):
+					var tex: Texture2D = load(cand) as Texture2D
+					if is_instance_valid(tex):
+						var std_mat := StandardMaterial3D.new()
+						std_mat.albedo_texture = tex
+						std_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+						std_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+						mat = std_mat
+						break
+
+	if is_instance_valid(mat):
+		_apply_material_override_recursive(model_node, mat)
+
+
+func _apply_material_override_recursive(node: Node, mat: Material) -> void:
+	if node is MeshInstance3D:
+		(node as MeshInstance3D).material_override = mat
+
+	for child in node.get_children():
+		_apply_material_override_recursive(child, mat)
+		
 
 func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void:
 	if not is_instance_valid(camera_node):

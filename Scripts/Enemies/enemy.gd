@@ -255,45 +255,57 @@ func _on_body_entered(body: Node) -> void:
 		SignalBus.combat_started.emit(enemy_group, party_slots)
 
 
+# Replace _on_combat_started() and add _is_player_adjacent() in res://Scripts/Enemies/enemy.gd
+
 func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
 	if not visible:
 		return
 
 	var is_target: bool = false
-	var extracted_resources: Array[Resource] = []
 
+	# 1. Array Payload (e.g. Array[Resource] passed from BattleTest or overworld triggers)
 	if enemy_payload is Array:
-		for item in (enemy_payload as Array):
-			if item is Resource:
-				extracted_resources.append(item as Resource)
-	elif is_instance_valid(enemy_payload):
-		if enemy_payload == self or enemy_payload == data or enemy_payload == enemy_data or enemy_group.has(enemy_payload):
+		var payload_array: Array = enemy_payload as Array
+		if payload_array == enemy_group:
 			is_target = true
-		if "enemy_group" in enemy_payload:
-			var grp: Variant = enemy_payload.get("enemy_group")
-			if grp is Array:
-				for item in (grp as Array):
-					if item is Resource:
-						extracted_resources.append(item as Resource)
-		elif enemy_payload is Resource:
-			extracted_resources.append(enemy_payload as Resource)
+		else:
+			var matches_resource: bool = false
+			for item in payload_array:
+				if item == self:
+					is_target = true
+					break
+				elif item == data or item == enemy_data or enemy_group.has(item):
+					matches_resource = true
 
-	if not is_target and not extracted_resources.is_empty():
-		for item in extracted_resources:
-			if item == data or item == enemy_data or enemy_group.has(item):
-				is_target = true
-				break
+			if not is_target and matches_resource:
+				is_target = _is_player_adjacent()
 
-	# 🎯 Use enemy_group.size() when this WorldEnemy node is matched
-	var hostile_count: int = enemy_group.size() if is_target else extracted_resources.size()
+	# 2. Single Object Payload (e.g. WorldEnemy Node3D or single EnemyData Resource)
+	elif enemy_payload is Object and is_instance_valid(enemy_payload):
+		if enemy_payload == self:
+			is_target = true
+		elif enemy_payload == data or enemy_payload == enemy_data or enemy_group.has(enemy_payload):
+			is_target = _is_player_adjacent()
+
+	var hostile_count: int = enemy_group.size() if is_target else 1
 
 	if is_instance_valid(GameLogger):
-		GameLogger.info("_on_combat_started (%d hostiles)! Target match: %s" % [hostile_count, str(is_target)])
+		GameLogger.info("_on_combat_started (%d hostiles)! Target match for %s at %s: %s" % [hostile_count, name, _grid_position, str(is_target)])
 
 	if is_target:
 		_is_in_active_combat = true
 		hide()
 
+
+## Helper verifying if the player is in or adjacent to this enemy's overworld cell
+func _is_player_adjacent() -> bool:
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	if is_instance_valid(player) and ("current_grid_pos" in player):
+		var p_cell: Vector2i = player.current_grid_pos
+		var dist: int = absi(_grid_position.x - p_cell.x) + absi(_grid_position.y - p_cell.y)
+		return dist <= 1
+	return true
+	
 
 func _on_combat_ended(victory: bool) -> void:
 	if not _is_in_active_combat:

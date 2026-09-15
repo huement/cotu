@@ -21,6 +21,12 @@ initial_cell = Vector2i(1, 23)
 model_scale = Vector3(1.5, 1.5, 1.5)
 vertical_offset = 1.0
 
+[node name="Enemy2" parent="Enemies" instance=ExtResource("2_kl8rm")]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, -18, 0, -2)
+initial_cell = Vector2i(-9, -1)
+model_scale = Vector3(1.5, 1.5, 1.5)
+vertical_offset = 1.0
+
 [node name="Torches" type="Node3D" parent="."]
 
 [node name="Torch" parent="Torches" instance=ExtResource("3_7y88j")]

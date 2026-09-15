@@ -129,6 +129,7 @@ class Combatant:
 		return float(get_effective_stat(&"speed", total_base_spd))
 
 
+# COMBAT MANGER STARTING
 const MAX_TURN_METER: float = 100.0
 const BASE_TICK_RATE: float = 25.0
 
@@ -338,7 +339,6 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 							result.append(sub_item as Resource)
 
 	elif is_instance_valid(payload):
-		# 1. Payload is the WorldEnemy Node3D (or object containing 'enemy_group')
 		if "enemy_group" in payload:
 			var group_val: Variant = payload.get("enemy_group")
 			if group_val is Array and not (group_val as Array).is_empty():
@@ -346,7 +346,6 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 					if item is Resource:
 						result.append(item as Resource)
 
-		# 2. Payload is an EnemyGroupData resource containing 'members'
 		if result.is_empty() and "members" in payload:
 			var members_val: Variant = payload.get("members")
 			if members_val is Array and not (members_val as Array).is_empty():
@@ -354,27 +353,38 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 					if item is Resource:
 						result.append(item as Resource)
 
-		# 3. Payload is a single EnemyData Resource: search overworld WorldEnemy nodes for a match!
 		if result.is_empty() and payload is Resource:
 			var target_res: Resource = payload as Resource
 			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
 			if overworld_enemies.is_empty():
 				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
 
+			var player: Node3D = get_tree().get_first_node_in_group(&"player")
+			var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
+
+			var best_node: Node3D = null
+			var min_dist: int = 9999
+
 			for node in overworld_enemies:
-				if is_instance_valid(node) and ("enemy_group" in node):
+				if is_instance_valid(node) and ("enemy_group" in node) and node.visible:
 					var grp: Variant = node.get("enemy_group")
 					var n_data: Variant = node.get("data") if "data" in node else null
 					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
 
 					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
-						if grp is Array and not (grp as Array).is_empty():
-							for item in (grp as Array):
-								if item is Resource:
-									result.append(item as Resource)
-							break
+						var n_cell: Vector2i = node.get_grid_pos() if node.has_method("get_grid_pos") else Vector2i(9999, 9999)
+						var dist: int = absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y)
+						if dist < min_dist:
+							min_dist = dist
+							best_node = node as Node3D
 
-			# 4. Fallback if no matching overworld WorldEnemy node was found
+			if is_instance_valid(best_node) and ("enemy_group" in best_node):
+				var grp: Variant = best_node.get("enemy_group")
+				if grp is Array and not (grp as Array).is_empty():
+					for item in (grp as Array):
+						if item is Resource:
+							result.append(item as Resource)
+
 			if result.is_empty():
 				var count: int = 1
 				if "pack_size" in payload:
