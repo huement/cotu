@@ -23,6 +23,8 @@ var current_mode: Mode = Mode.EXPLORING:
 @export var inventory: Inventory = Inventory.new()
 @export var current_floor_id: int = 1
 @export var party_gold: int = 0
+## Maps map_id -> (object_id -> state_dictionary)
+@export var environment_states: Dictionary = {}
 
 var active_character_index: int = 0
 
@@ -227,3 +229,23 @@ func _process_party_rest(rest_data: Dictionary) -> void:
 		sb.show_toast.emit(toast_msg, false)
 
 	save_game()
+
+
+## -------------------- ENVIRONMENT STUFF --------------------
+## Returns the saved state dictionary for a specific object in a map
+func get_object_state(map_id: String, object_id: String) -> Dictionary:
+	if environment_states.has(map_id) and environment_states[map_id].has(object_id):
+		return environment_states[map_id][object_id] as Dictionary
+	return {}
+
+
+## Updates or sets a state flag for an environment object
+func set_object_state_flag(map_id: String, object_id: String, flag_name: String, value: Variant) -> void:
+	if not environment_states.has(map_id):
+		environment_states[map_id] = {}
+	if not environment_states[map_id].has(object_id):
+		environment_states[map_id][object_id] = {}
+
+	var obj_dict: Dictionary = environment_states[map_id][object_id] as Dictionary
+	obj_dict[flag_name] = value
+	environment_states[map_id][object_id] = obj_dict

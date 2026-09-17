@@ -308,6 +308,9 @@ func _on_combat_ended(victory: bool) -> void:
 			"total_members": max(1, total_party_members),
 		}
 
+		# 🎯 Pause 1.0 second for final attack/death animations to complete before cleanup
+		await get_tree().create_timer(1.0).timeout
+
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
@@ -570,7 +573,8 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 
 		if is_instance_valid(target_char):
 			var weapon: Resource = null
-			if is_instance_valid(acting_char.ref):
+			# 🎯 Only resolve equipped weapon resource if actually attacking with a weapon (not UNARMED fallback)
+			if attack_type != "UNARMED" and is_instance_valid(acting_char.ref):
 				if acting_char.ref.has_method("get_equipped_weapon"):
 					weapon = acting_char.ref.get_equipped_weapon()
 				elif acting_char.ref.has_method("get_equipped_item"):

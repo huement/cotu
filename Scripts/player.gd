@@ -117,6 +117,11 @@ func _input(event: InputEvent) -> void:
 	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
 
+	# E Key or "interact" action checks the tile directly in front of the player
+	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SLASH):
+		_try_interact_facing_tile()
+		return
+
 	if event.is_action_pressed("move_forward"):
 		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
 	elif event.is_action_pressed("move_backward"):
@@ -185,6 +190,13 @@ func _execute_grid_step(input_direction: Vector3) -> void:
 	var target_grid_3d: Vector3i = Vector3i(target_grid_pos.x, 0, target_grid_pos.y)
 
 	if _is_cell_blocked(target_grid_3d):
+		# 🎯 BUMP ENCOUNTER: Check if the blocking tile contains a WorldEnemy!
+		if is_instance_valid(map_manager) and map_manager.has_method("get_enemy_at_grid_pos"):
+			var enemy_node: Node3D = map_manager.get_enemy_at_grid_pos(target_grid_3d) as Node3D
+			if is_instance_valid(enemy_node) and enemy_node.has_method("trigger_combat_encounter"):
+				enemy_node.call("trigger_combat_encounter")
+				return
+
 		print("Movement blocked by structural layout block.")
 		return
 
@@ -205,7 +217,6 @@ func _execute_grid_step(input_direction: Vector3) -> void:
 	if is_instance_valid(SignalBus):
 		SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
 
-	# Triggers enemy adjacency check & edge flash on step completion
 	_on_grid_step_completed()
 
 
@@ -356,6 +367,35 @@ func _on_component_turn_completed(_direction: Vector3) -> void:
 			current_facing = Facing.SOUTH
 		270:
 			current_facing = Facing.EAST
+
+
+## Queries MapManager for an interactable object in the facing tile or current tile
+func _try_interact_facing_tile() -> bool:
+	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
+	if not is_instance_valid(map_mgr):
+		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
+
+	if not is_instance_valid(map_mgr) or not map_mgr.has_method("get_interactable_at_grid_pos"):
+		return false
+
+	# 1. Check tile directly in front of the player (facing wall/chest)
+	var facing_offset: Vector2i = _get_movement_offset(Vector3.FORWARD)
+	var target_cell: Vector2i = current_grid_pos + facing_offset
+	var target_3d := Vector3i(target_cell.x, 0, target_cell.y)
+
+	var interactable: DungeonInteractable = map_mgr.get_interactable_at_grid_pos(target_3d) as DungeonInteractable
+	if is_instance_valid(interactable):
+		interactable.interact(self)
+		return true
+
+	# 2. Fallback check: Current standing cell (for wall objects placed on tile edge)
+	var current_3d := Vector3i(current_grid_pos.x, 0, current_grid_pos.y)
+	interactable = map_mgr.get_interactable_at_grid_pos(current_3d) as DungeonInteractable
+	if is_instance_valid(interactable):
+		interactable.interact(self)
+		return true
+
+	return false
 
 
 # player.gd (or world.tscn debug controller)

@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dbirlgdidvkiq"]
+
+[ext_resource type="Script" uid="uid://bg571iq1j2pb0" path="res://Scripts/Objects/Chest.gd" id="1_aqyya"]
+[ext_resource type="PackedScene" uid="uid://dp4dxs5ugbf1u" path="res://resources/DungeonParts/chest.glb" id="2_matv7"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e2yg2"]
+size = Vector3(3.2226028, 2.4455566, 3.6227894)
+
+[node name="Chest" type="Node3D"]
+script = ExtResource("1_aqyya")
+
+[node name="chest2" parent="." instance=ExtResource("2_matv7")]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+
+[node name="InteractionArea" type="Area3D" parent="."]
+collision_layer = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.010864e-05, 1.2225647, -0.058823586)
+shape = SubResource("BoxShape3D_e2yg2")

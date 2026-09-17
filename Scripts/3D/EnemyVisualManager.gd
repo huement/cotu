@@ -130,28 +130,31 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 	return result
 
-	
-# Update _on_combat_started() in res://Scripts/3D/EnemyVisualManager.gd:
 
-func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
+func _on_combat_started(enemy_payload: Variant, _player_party: Array) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
-
-	if not is_instance_valid(camera_node):
-		push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
-		return
+		if not is_instance_valid(camera_node):
+			push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
+			return
 
 	_clear_all_enemies()
 	visible = true
 
-	var enemy_resources: Array[Resource] = _resolve_enemy_resources(enemy_payload)
+	# 🎯 Standardize payload: handles single Resource or Array of Resources
+	var enemy_group: Array = []
+	if enemy_payload is Array:
+		enemy_group = enemy_payload as Array
+	elif enemy_payload is Resource:
+		enemy_group.append(enemy_payload)
+	
+	for i in range(enemy_group.size()):
+		var e_data: Resource = enemy_group[i] as Resource
+		var model_scene: PackedScene = null
+		
+		if is_instance_valid(e_data) and "model_scene" in e_data:
+			model_scene = e_data.get("model_scene") as PackedScene
 
-	for i in range(enemy_resources.size()):
-		var e_data: Resource = enemy_resources[i]
-		if not is_instance_valid(e_data):
-			continue
-
-		var model_scene: PackedScene = e_data.get("model_scene") as PackedScene if "model_scene" in e_data else null
 		var enemy_node: Node3D
 		if is_instance_valid(model_scene):
 			enemy_node = model_scene.instantiate() as Node3D
@@ -161,17 +164,11 @@ func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
 		var enemy_id: String = "enemy_%d" % i
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
-
-		# 🎯 Apply material override so GLB meshes render with textures rather than white
-		_apply_material_to_model(enemy_node, e_data)
-
-		_position_enemy(enemy_node, i, enemy_resources.size())
+		
+		_position_enemy(enemy_node, i, enemy_group.size())
 		play_animation(enemy_node, &"idle", true)
 
 
-# Add these helper methods to res://Scripts/3D/EnemyVisualManager.gd:
-
-## Automatically resolves and applies texture materials to 3D GLB model meshes
 ## Automatically resolves and applies texture materials to 3D GLB model meshes
 func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
 	if not is_instance_valid(model_node) or not is_instance_valid(e_data):

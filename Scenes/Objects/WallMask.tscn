@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxt4e2ktok26r"]
+
+[ext_resource type="Script" uid="uid://cxhjc8ddmrhcs" path="res://Scripts/Environment/WallMask.gd" id="1_2buoy"]
+[ext_resource type="PackedScene" uid="uid://35ttgiiulljc" path="res://resources/DungeonParts/catmask.glb" id="1_hhuw2"]
+
+[node name="WallMask" type="Node3D"]
+script = ExtResource("1_2buoy")
+
+[node name="BastetMask" parent="." instance=ExtResource("1_hhuw2")]

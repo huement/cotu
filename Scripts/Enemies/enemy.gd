@@ -16,8 +16,8 @@ extends Node3D
 ## Number of enemies to spawn when building a pack from 'data'
 @export_range(1, 6) var pack_size: int = 2
 
-## Target GridMap cell for initial positioning
-@export var initial_cell: Vector2i = Vector2i(10, 1)
+## Target GridMap cell for initial positioning (Leave at Vector2i.ZERO to auto-detect from 3D Editor placement)
+@export var initial_cell: Vector2i = Vector2i.ZERO
 
 ## Overworld scale multiplier for the lead enemy model
 @export var model_scale: Vector3 = Vector3(0.6, 0.6, 0.6)
@@ -38,21 +38,49 @@ var _is_in_active_combat: bool = false
 var _move_timer: float = 0.0
 var _ai: EnemyAI = EnemyAI.new()
 var _is_moving: bool = false
+var _is_initialized: bool = false
+var _saved_editor_pos: Vector3 = Vector3.ZERO
 
 # ==============================================================================
 # 3. LIFECYCLE & SETUP
 # ==============================================================================
 func _ready() -> void:
 	add_to_group(&"world_enemies")
+	# Cache exact 3D position placed in Editor before scene initialization
+	_saved_editor_pos = global_position
+	
 	_resolve_enemy_data()
 	_setup_enemy_group()
-	_align_to_grid()
 	_instantiate_world_model()
 	_connect_trigger_signals()
+	
+	# Defer grid alignment until MapManager & GridMap are fully ready in tree
+	call_deferred("_initialize_enemy")
+
+
+func _initialize_enemy() -> void:
+	_align_to_grid()
+	_is_initialized = true
 
 
 func get_grid_pos() -> Vector2i:
 	return _grid_position
+
+
+## Converts 2D cell coordinates to world space centered on the GridMap tile
+func _cell_to_world(cell: Vector2i) -> Vector3:
+	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
+	if not is_instance_valid(map_mgr):
+		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
+
+	if is_instance_valid(map_mgr) and "dungeon_grid" in map_mgr and is_instance_valid(map_mgr.dungeon_grid):
+		var grid: GridMap = map_mgr.dungeon_grid as GridMap
+		var cell_3d := Vector3i(cell.x, 0, cell.y)
+		var local_pos: Vector3 = grid.map_to_local(cell_3d)
+		var global_pos: Vector3 = grid.to_global(local_pos)
+		return Vector3(global_pos.x, global_pos.y + vertical_offset, global_pos.z)
+	
+	return Vector3(cell.x * 2.0 + 1.0, vertical_offset, cell.y * 2.0 + 1.0)
 
 
 ## Ensures 'enemy_data' and 'data' are cross-resolved from assigned Inspector resources
@@ -78,7 +106,6 @@ func _setup_enemy_group() -> void:
 		template = load("res://Data/Enemies/ZombieCat_Base.tres") as Resource
 		data = template
 
-	# Rebuild group if empty or if it only holds a single Inspector template item
 	if enemy_group.size() < pack_size or (enemy_group.size() == 1 and pack_size > 1):
 		enemy_group.clear()
 		for i: int in range(pack_size):
@@ -86,18 +113,32 @@ func _setup_enemy_group() -> void:
 				enemy_group.append(template.duplicate())
 
 
-## Converts cell coordinates into 3D world space and applies vertical floor grounding
+## Converts 3D Editor placement into GridMap cell space and snaps position
 func _align_to_grid() -> void:
-	_grid_position = initial_cell
 	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
-	var base_pos: Vector3 = Vector3(initial_cell.x * 2.0, 0.0, initial_cell.y * 2.0)
+	if not is_instance_valid(map_mgr):
+		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
+	var grid: GridMap = null
 	if is_instance_valid(map_mgr) and "dungeon_grid" in map_mgr and is_instance_valid(map_mgr.dungeon_grid):
-		var grid: GridMap = map_mgr.dungeon_grid as GridMap
-		var cell_3d := Vector3i(initial_cell.x, 0, initial_cell.y)
-		base_pos = grid.map_to_local(cell_3d)
+		grid = map_mgr.dungeon_grid as GridMap
 
-	global_position = Vector3(base_pos.x, base_pos.y + vertical_offset, base_pos.z)
+	if initial_cell != Vector2i.ZERO:
+		_grid_position = initial_cell
+	elif is_instance_valid(grid):
+		var local_pos: Vector3 = grid.to_local(_saved_editor_pos)
+		var map_cell: Vector3i = grid.local_to_map(local_pos)
+		_grid_position = Vector2i(map_cell.x, map_cell.z)
+		initial_cell = _grid_position
+	elif is_instance_valid(map_mgr) and map_mgr.has_method("world_to_grid"):
+		var map_cell: Vector3i = map_mgr.world_to_grid(_saved_editor_pos)
+		_grid_position = Vector2i(map_cell.x, map_cell.z)
+		initial_cell = _grid_position
+	else:
+		_grid_position = Vector2i(roundi((_saved_editor_pos.x - 1.0) / 2.0), roundi((_saved_editor_pos.z - 1.0) / 2.0))
+		initial_cell = _grid_position
+
+	global_position = _cell_to_world(_grid_position)
 
 
 ## Spawns the 3D overworld mesh representing the pack leader
@@ -143,7 +184,7 @@ var _patrol_index: int = 0
 
 
 func _process(delta: float) -> void:
-	if _is_in_active_combat or enemy_data == null or _is_moving:
+	if not _is_initialized or _is_in_active_combat or enemy_data == null or _is_moving:
 		return
 
 	var step_interval: float = maxf(0.5, enemy_data.movement_speed)
@@ -155,34 +196,34 @@ func _process(delta: float) -> void:
 
 
 func _check_pursuit_range() -> void:
-	var player: Node3D = get_tree().get_first_node_in_group(&"player")
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
 	var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
+
+	var dist_to_player: int = absi(_grid_position.x - player_cell.x) + absi(_grid_position.y - player_cell.y)
+
+	if dist_to_player <= 1:
+		trigger_combat_encounter()
+		return
 
 	var enemy_dist_from_home: int = absi(_grid_position.x - initial_cell.x) + absi(_grid_position.y - initial_cell.y)
 	var player_dist_from_home: int = absi(player_cell.x - initial_cell.x) + absi(player_cell.y - initial_cell.y)
 
-	# 1. PURSUE: Player is within territory AND enemy hasn't exceeded leash limit
 	if player_dist_from_home <= enemy_data.aggro_range_tiles and enemy_dist_from_home <= enemy_data.aggro_range_tiles:
 		_step_toward_target(player_cell)
-	# 2. RETURN HOME: Aggro lost or leash broken, walk back to initial_cell
 	elif _grid_position != initial_cell:
 		_step_toward_target(initial_cell)
-	# 3. PATROL: Idle at home cell
 	else:
 		_step_patrol()
 
 
-## Steps in a 4-tile cardinal loop when idle/unaggroed
 func _step_patrol() -> void:
 	var step_dir: Vector2i = PATROL_OFFSETS[_patrol_index]
 	var target_grid_pos: Vector2i = _grid_position + step_dir
 
-	# Check wall collisions via MapManager before stepping
 	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
 	if is_instance_valid(map_mgr) and map_mgr.has_method("is_tile_blocked"):
 		var grid_3d := Vector3i(target_grid_pos.x, 0, target_grid_pos.y)
 		if map_mgr.is_tile_blocked(grid_3d):
-			# Skip to next directional offset if wall-blocked
 			_patrol_index = (_patrol_index + 1) % PATROL_OFFSETS.size()
 			return
 
@@ -190,7 +231,6 @@ func _step_patrol() -> void:
 	_move_to_cell(target_grid_pos)
 
 
-## Navigates toward a target cell using AI wall-collision awareness
 func _step_toward_target(target_cell: Vector2i) -> void:
 	var is_blocked := func(cell: Vector2i) -> bool:
 		return _is_cell_blocked(cell)
@@ -202,7 +242,6 @@ func _step_toward_target(target_cell: Vector2i) -> void:
 	_move_to_cell(_grid_position + step_dir)
 
 
-## Helper checking MapManager tile blocking
 func _is_cell_blocked(cell: Vector2i) -> bool:
 	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
 	if is_instance_valid(map_mgr) and map_mgr.has_method("is_tile_blocked"):
@@ -210,9 +249,8 @@ func _is_cell_blocked(cell: Vector2i) -> bool:
 	return false
 
 
-## Generic grid movement interpolation helper
 func _move_to_cell(target_grid_pos: Vector2i) -> void:
-	var target_world_pos := Vector3(target_grid_pos.x * 2.0, global_position.y, target_grid_pos.y * 2.0)
+	var target_world_pos: Vector3 = _cell_to_world(target_grid_pos)
 
 	_is_moving = true
 	var tween: Tween = create_tween()
@@ -244,60 +282,52 @@ func _connect_trigger_signals() -> void:
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group(&"player") or body.name == "Player" or body is CharacterBody3D or body is DungeonPlayer:
-		if is_instance_valid(GameLogger):
-			GameLogger.info("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), _grid_position])
-
-		var party_slots: Array = []
-		if "current_party" in GameState and GameState.current_party != null:
-			if "slots" in GameState.current_party:
-				party_slots = GameState.current_party.slots
-
-		SignalBus.combat_started.emit(enemy_group, party_slots)
+		trigger_combat_encounter()
 
 
-# Replace _on_combat_started() and add _is_player_adjacent() in res://Scripts/Enemies/enemy.gd
+func trigger_combat_encounter() -> void:
+	if _is_in_active_combat or not visible:
+		return
+
+	_is_in_active_combat = true
+	hide()
+
+	if is_instance_valid(GameLogger):
+		GameLogger.info("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), _grid_position])
+
+	var party_slots: Array = []
+	if "current_party" in GameState and GameState.current_party != null:
+		if "slots" in GameState.current_party:
+			party_slots = GameState.current_party.slots
+
+	SignalBus.combat_started.emit(enemy_group, party_slots)
+
 
 func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
-	if not visible:
+	if not visible or _is_in_active_combat:
 		return
 
 	var is_target: bool = false
 
-	# 1. Array Payload (e.g. Array[Resource] passed from BattleTest or overworld triggers)
 	if enemy_payload is Array:
 		var payload_array: Array = enemy_payload as Array
 		if payload_array == enemy_group:
 			is_target = true
 		else:
-			var matches_resource: bool = false
 			for item in payload_array:
 				if item == self:
 					is_target = true
 					break
-				elif item == data or item == enemy_data or enemy_group.has(item):
-					matches_resource = true
 
-			if not is_target and matches_resource:
-				is_target = _is_player_adjacent()
-
-	# 2. Single Object Payload (e.g. WorldEnemy Node3D or single EnemyData Resource)
 	elif enemy_payload is Object and is_instance_valid(enemy_payload):
 		if enemy_payload == self:
 			is_target = true
-		elif enemy_payload == data or enemy_payload == enemy_data or enemy_group.has(enemy_payload):
-			is_target = _is_player_adjacent()
-
-	var hostile_count: int = enemy_group.size() if is_target else 1
-
-	if is_instance_valid(GameLogger):
-		GameLogger.info("_on_combat_started (%d hostiles)! Target match for %s at %s: %s" % [hostile_count, name, _grid_position, str(is_target)])
 
 	if is_target:
 		_is_in_active_combat = true
 		hide()
 
 
-## Helper verifying if the player is in or adjacent to this enemy's overworld cell
 func _is_player_adjacent() -> bool:
 	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
 	if is_instance_valid(player) and ("current_grid_pos" in player):
@@ -305,7 +335,7 @@ func _is_player_adjacent() -> bool:
 		var dist: int = absi(_grid_position.x - p_cell.x) + absi(_grid_position.y - p_cell.y)
 		return dist <= 1
 	return true
-	
+
 
 func _on_combat_ended(victory: bool) -> void:
 	if not _is_in_active_combat:

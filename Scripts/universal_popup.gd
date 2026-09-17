@@ -7,6 +7,8 @@ class_name UniversalPopup
 @onready var title_label: Label = %TitleLabel as Label
 @onready var content_area: VBoxContainer = %ContentArea as VBoxContainer
 @onready var confirm_button: TextureButton = %ConfirmButton as TextureButton
+@export var shake_interval: float = 0.35
+@export var shake_trauma_amount: float = 0.45 # Increased from 0.12 to yield noticeable camera wobble (0.45^2 = ~0.20 power)
 
 var active_action_type: StringName = &""
 var active_data: Dictionary = { }
@@ -23,6 +25,12 @@ var _items_grid_instance: CharacterInventoryGrid = null
 
 const BATTLE_VICTORY_SCENE: PackedScene = preload("res://Scenes/UI/BattleVictoryPopup.tscn")
 @export var skills_spells_popup_scene: PackedScene = preload("res://Scenes/UI/SkillsSpellsPopup.tscn")
+
+# Aura Shader & Shake Control
+var _aura_rect: ColorRect = null
+var _aura_material: ShaderMaterial = null
+var _is_aura_active: bool = false
+var _shake_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -74,6 +82,13 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		&"ALL_SKILLS", &"ALL_SPELLS", &"SPELLBOOK":
 			title_label.text = ""
 			_build_skills_spells_popup_ui(action_type, data)
+		&"CHEST_LOOT":
+			title_label.text = "CONTAINER CONTENTS"
+			_build_chest_loot_ui(data)
+		&"LORE_POPUP":
+			var title_str: String = str(data.get("title", "ARCHIVE LOG")).to_upper()
+			title_label.text = title_str
+			_build_lore_popup_ui(data)
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
@@ -100,8 +115,6 @@ func _clear_content_area() -> void:
 		confirm_button.visible = false
 	for child in content_area.get_children():
 		child.queue_free()
-
-# In res://Scripts/universal_popup.gd
 
 
 func display_popup(title_text: String, content_node: Control, options: Dictionary = { }) -> void:
@@ -143,6 +156,7 @@ func _emit_confirmation(action_type: StringName, extra_data: Dictionary) -> void
 
 
 func _close_modal() -> void:
+	_stop_aura_effect()
 	if background_dimmer:
 		background_dimmer.visible = false
 	if panel_container:
@@ -151,10 +165,49 @@ func _close_modal() -> void:
 	active_data.clear()
 
 
+# Add _build_chest_loot_ui() to res://Scripts/universal_popup.gd:
+func _build_chest_loot_ui(data: Dictionary) -> void:
+	var chest_node: Node3D = data.get("chest", null) as Node3D
+	var loot_items: Array[ItemData] = []
+	if data.has("loot") and data["loot"] is Array:
+		for item in (data["loot"] as Array):
+			if item is ItemData:
+				loot_items.append(item as ItemData)
+	var gold: int = int(data.get("gold", 0))
+
+	var loot_popup := LootPopup.new()
+	content_area.add_child(loot_popup)
+	loot_popup.setup_loot_display(chest_node, loot_items, gold)
+	loot_popup.closed.connect(_close_modal)
+
+
+# Update _build_search_ui() in res://Scripts/universal_popup.gd:
 func _build_search_ui() -> void:
 	var info_text := Label.new()
 	info_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	info_text.text = "Searching walls for hidden compartments...\nNo immediate micro-vibrations detected."
+
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	var nearby_details: Array[String] = []
+
+	if is_instance_valid(player) and "current_grid_pos" in player:
+		var p_cell: Vector2i = player.get("current_grid_pos")
+		var interactables: Array[Node] = get_tree().get_nodes_in_group(&"dungeon_interactables")
+
+		for obj in interactables:
+			if is_instance_valid(obj) and obj.has_method("get_grid_pos"):
+				var o_cell: Vector2i = obj.call("get_grid_pos") as Vector2i
+				var dist: int = absi(o_cell.x - p_cell.x) + absi(o_cell.y - p_cell.y)
+				if dist <= 2:
+					var obj_name: String = obj.name
+					if "object_id" in obj:
+						obj_name = str(obj.get("object_id")).capitalize()
+					nearby_details.append("- %s detected (%d tiles away)" % [obj_name, dist])
+
+	if nearby_details.is_empty():
+		info_text.text = "Searching corridors for hidden compartments...\nNo immediate micro-vibrations or anomalies detected."
+	else:
+		info_text.text = "SCAN RESULTS:\n" + "\n".join(nearby_details) + "\n\nFace object and press 'E' or 'SEARCH' to interact."
+
 	content_area.add_child(info_text)
 
 	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
@@ -717,7 +770,6 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 	_add_action_button("[ CANCEL ]", cancel_action)
 
 
-# res://Scripts/UI/universal_popup.gd
 func _refresh_party_ui() -> void:
 	# 🎯 Save session whenever item actions (equip, unequip, drop, use) occur!
 	if GameState.has_method("save_game"):
@@ -764,3 +816,113 @@ func _build_battle_victory_ui(data: Dictionary) -> void:
 		func() -> void:
 			_emit_confirmation(&"BATTLE_VICTORY", data),
 	)
+
+
+func _build_lore_popup_ui(data: Dictionary) -> void:
+	var body_text: String = str(data.get("body", "No legible data decoded."))
+	var aura_preset: String = str(data.get("aura_type", "bad"))
+
+	if aura_preset != "none":
+		_start_aura_effect(aura_preset)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(360, 160)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var lbl := Label.new()
+	lbl.text = body_text
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	lbl.add_theme_font_size_override("font_size", 13)
+	scroll.add_child(lbl)
+
+	content_area.add_child(scroll)
+
+	var close_btn := _create_modal_button("CLOSE", Color(0.0, 0.7, 0.8, 1.0))
+	close_btn.pressed.connect(_close_modal)
+
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_child(close_btn)
+	content_area.add_child(btn_hbox)
+	
+	
+func _process(delta: float) -> void:
+	if _is_aura_active:
+		_shake_timer += delta
+		if _shake_timer >= shake_interval:
+			_shake_timer = 0.0
+			if get_tree().root.has_node("SignalBus"):
+				SignalBus.camera_shake_requested.emit(shake_trauma_amount)
+
+
+func _configure_aura_preset(preset_type: String) -> void:
+	_ensure_aura_rect_exists()
+	if not is_instance_valid(_aura_material):
+		return
+
+	match preset_type.to_lower():
+		"good":
+			_aura_material.set_shader_parameter("albedo_color_a", Color(0.0, 0.5, 0.9, 0.85))
+			_aura_material.set_shader_parameter("albedo_color_b", Color(0.0, 0.85, 0.45, 0.85))
+			_aura_material.set_shader_parameter("emission_color", Color(0.1, 1.0, 0.8, 0.6))
+		"bad", _:
+			_aura_material.set_shader_parameter("albedo_color_a", Color(0.8, 0.05, 0.1, 0.85))
+			_aura_material.set_shader_parameter("albedo_color_b", Color(0.35, 0.0, 0.5, 0.85))
+			_aura_material.set_shader_parameter("emission_color", Color(1.0, 0.1, 0.15, 0.6))
+
+
+func _ensure_aura_rect_exists() -> void:
+	if is_instance_valid(_aura_rect):
+		_aura_rect.size = get_viewport().get_visible_rect().size
+		return
+
+	_aura_rect = ColorRect.new()
+	_aura_rect.name = "AuraOverlay"
+	_aura_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_aura_rect.position = Vector2.ZERO
+	_aura_rect.size = get_viewport().get_visible_rect().size
+	_aura_rect.modulate.a = 0.0
+
+	add_child(_aura_rect)
+	if is_instance_valid(panel_container):
+		move_child(_aura_rect, max(0, panel_container.get_index()))
+
+	var shader_res: Shader = load("res://Shaders/lore_aura_overlay.gdshader") as Shader
+	if not is_instance_valid(shader_res):
+		push_error("UniversalPopup: Could not load shader resource at 'res://Shaders/lore_aura_overlay.gdshader'. Verify file exists.")
+		return
+
+	_aura_material = ShaderMaterial.new()
+	_aura_material.shader = shader_res
+	_aura_rect.material = _aura_material
+
+
+func _start_aura_effect(preset_type: String) -> void:
+	_configure_aura_preset(preset_type)
+
+	if is_instance_valid(_aura_rect):
+		_aura_rect.size = get_viewport().get_visible_rect().size
+		_aura_rect.visible = true
+
+		var tween: Tween = create_tween()
+		tween.tween_property(_aura_rect, "modulate:a", 1.0, 0.35) \
+				.set_trans(Tween.TRANS_SINE) \
+				.set_ease(Tween.EASE_OUT)
+
+	_is_aura_active = true
+	_shake_timer = 0.0
+
+
+func _stop_aura_effect() -> void:
+	_is_aura_active = false
+	if is_instance_valid(_aura_rect):
+		var tween: Tween = create_tween()
+		tween.tween_property(_aura_rect, "modulate:a", 0.0, 0.25) \
+				.set_trans(Tween.TRANS_SINE) \
+				.set_ease(Tween.EASE_IN)
+		tween.finished.connect(func() -> void:
+			if is_instance_valid(_aura_rect) and not _is_aura_active:
+				_aura_rect.visible = false
+		)

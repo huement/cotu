@@ -11,6 +11,7 @@ class_name MapManager
 ## Maps out standard cardinal direction vectors to help calculate steps.
 const DIRECTION_MAP: Dictionary = { "NORTH": Vector3i(0, 0, -1), "SOUTH": Vector3i(0, 0, 1), "EAST": Vector3i(1, 0, 0), "WEST": Vector3i(-1, 0, 0) }
 
+var _blocked_tiles: Dictionary = {}
 
 func _ready() -> void:
 	if default_map_scene:
@@ -54,24 +55,33 @@ func grid_to_world(grid_position: Vector3i) -> Vector3:
 
 ## Checks if a target grid cell contains a blocking wall tile or enemy at ground level.
 func is_tile_blocked(grid_position: Vector3i) -> bool:
-	#GameLogger.nav('IS TILE BLOCK FIRED')
+	if _blocked_tiles.get(grid_position, false):
+		return true
+
 	if not dungeon_grid:
 		return true
 
-	var ground_cell: Vector3i = Vector3i(grid_position.x, 0, grid_position.z)
+	var ground_cell := Vector3i(grid_position.x, 0, grid_position.z)
 	var item_index: int = dungeon_grid.get_cell_item(ground_cell)
 
 	# Check for static wall geometry
 	if item_index != GridMap.INVALID_CELL_ITEM:
 		if is_instance_valid(dungeon_grid.mesh_library):
 			var item_name: String = dungeon_grid.mesh_library.get_item_name(item_index).to_lower()
-			#GameLogger.nav('BLOCKED INSTANCE %s' % item_name)
 			if item_name.contains("wall"):
-				return true # Block movement only if tile is explicitly a wall
+				return true
 
-	# Check for dynamic enemies at target grid position in active map
+	# Check for dynamic enemies
 	var enemy: Node3D = get_enemy_at_grid_pos(grid_position)
-	return is_instance_valid(enemy)
+	if is_instance_valid(enemy):
+		return true
+
+	# Check for blocking interactable objects
+	var interactable: DungeonInteractable = get_interactable_at_grid_pos(grid_position)
+	if is_instance_valid(interactable) and interactable.is_blocking:
+		return true
+
+	return false
 
 
 ## Returns an enemy node located at the specified 3D grid coordinate if present.
@@ -144,13 +154,31 @@ func switch_map(scene_path: String) -> void:
 	else:
 		dungeon_grid = active_map_instance.get_node("GridMap3D") as GridMap
 
-func _spawn_ceiling_tile(grid_pos: Vector2i) -> void:
+
+func _spawn_ceiling_tile(grid_position: Vector2i) -> void:
 	if ceiling_tile_scene == null:
 		return
 
 	var ceiling_instance: Node3D = ceiling_tile_scene.instantiate() as Node3D
-	var world_x: float = grid_pos.x * 2.0
-	var world_z: float = grid_pos.y * 2.0
+	var world_x: float = grid_position.x * 2.0
+	var world_z: float = grid_position.y * 2.0
 
 	ceiling_instance.position = Vector3(world_x, ceiling_height, world_z)
 	add_child(ceiling_instance)
+
+## Returns an interactable node located at the specified 3D grid coordinate if present.
+func get_interactable_at_grid_pos(grid_position: Vector3i) -> DungeonInteractable:
+	var target_2d := Vector2i(grid_position.x, grid_position.z)
+	var nodes: Array[Node] = get_tree().get_nodes_in_group(&"dungeon_interactables")
+
+	for node in nodes:
+		var interactable := node as DungeonInteractable
+		if is_instance_valid(interactable) and interactable.visible:
+			if interactable.get_grid_pos() == target_2d:
+				return interactable
+
+	return null
+
+
+func register_blocked_tile(grid_position: Vector3i) -> void:
+	_blocked_tiles[grid_position] = true
