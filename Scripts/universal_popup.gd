@@ -181,8 +181,12 @@ func _build_chest_loot_ui(data: Dictionary) -> void:
 	loot_popup.closed.connect(_close_modal)
 
 
-# Update _build_search_ui() in res://Scripts/universal_popup.gd:
+# When Player uses SearchButton to scan the area around them
 func _build_search_ui() -> void:
+	# Trigger search scan SFX (res://Audio/Player/search.mp3)
+	if is_instance_valid(AudioManager):
+		AudioManager.play_search_sound()
+		
 	var info_text := Label.new()
 	info_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 

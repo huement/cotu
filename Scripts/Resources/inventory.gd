@@ -75,6 +75,9 @@ func use_item(index: int, target_character: Resource) -> bool:
 
 		item_used.emit(item)
 
+		if is_instance_valid(AudioManager):
+				AudioManager.play_potion_sound()	
+
 		# Decrement stack quantity or remove item if last one
 		if item.quantity > 1:
 			item.quantity -= 1

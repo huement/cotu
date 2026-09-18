@@ -149,6 +149,9 @@ func _on_top_header_gui_input(event: InputEvent) -> void:
 
 
 func toggle_info_menu() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_button_press()
+
 	_is_info_menu_open = !_is_info_menu_open
 
 	if not is_instance_valid(_info_menu_panel):
@@ -379,6 +382,9 @@ func _on_combatant_turn_ready(combatant_id: String, slot_index: int) -> void:
 func _on_action_button_pressed(action_type: StringName, _button_name: String) -> void:
 	if _state != CombatState.AWAITING_ACTION:
 		return
+		
+	if is_instance_valid(AudioManager):
+		AudioManager.play_button_press()
 
 	match action_type:
 		&"SPELL", &"SKILL":

@@ -37,7 +37,10 @@ func _load_saved_state() -> void:
 
 func interact(_player: Node3D) -> void:
 	var map_id: String = _get_current_map_id()
-
+	
+	if is_instance_valid(AudioManager):
+		AudioManager.play_mask_sound(aura_type)
+		
 	if not is_inspected:
 		is_inspected = true
 		var gs: Node = get_tree().root.get_node_or_null("GameState")

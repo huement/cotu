@@ -1,3 +1,4 @@
+@warning_ignore("unused_signal")
 # res://Core/SignalBus.gd
 extends Node
 
@@ -64,3 +65,11 @@ signal weapon_swing_requested(anim_name: String)
 # Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)
 signal show_toast(message: String, is_error: bool)
+
+
+# AUDIO SIGNALS	
+## Emitted when player steps or turns; passes distance to nearest enemy and visibility status
+signal enemy_proximity_changed(min_grid_distance: int, current_tier: int)
+
+## Emitted when an enemy alarm or proximity clicker is triggered
+signal proximity_alert_triggered(alert_level: int) # 0 = Safe, 1 = Nearby (Clicker 1), 2 = Close (Clicker 2), 3 = Critical (Alarm)

@@ -3,6 +3,8 @@ extends Resource
 
 @export_group("Identity & Visuals")
 @export var enemy_id: String = ""
+## Base taxonomy key used for SFX matching (e.g. "zombie", "skeleton", "cat")
+@export var enemy_type: String = "zombie"
 @export var enemy_name: String = "Corrupted Bio-Unit"
 @export var model_path: String = ""
 @export var texture_path: String = ""

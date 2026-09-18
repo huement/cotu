@@ -23,11 +23,13 @@ transform = Transform3D(-1.0000002, 8.742278e-08, 0, -8.74228e-08, -1, 0, 0, 0, 
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -2)
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
+enemy_type = "zombie"
 
 [node name="Enemy2" parent="Enemies" instance=ExtResource("2_kl8rm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1, 6)
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
+enemy_type = "zombie"
 
 [node name="Torches" type="Node3D" parent="."]
 

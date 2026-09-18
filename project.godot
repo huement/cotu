@@ -22,6 +22,7 @@ GameState="*res://Core/GameState.gd"
 CombatManager="*res://Scripts/Managers/CombatManager.gd"
 GameLogger="*res://Core/GameLogger.gd"
 TargetSelectionManager="*res://Scripts/Managers/TargetSelectionManager.gd"
+AudioManager="*res://Core/AudioManager.gd"
 
 [editor_plugins]
 

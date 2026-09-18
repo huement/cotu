@@ -289,6 +289,32 @@ func _execute_field_ability() -> void:
 			var heal_amount: int = spell.calculate_potency(_active_cat.intelligence if "intelligence" in _active_cat else 10)
 			_selected_target_cat.current_hp = min(_selected_target_cat.max_hp, _selected_target_cat.current_hp + heal_amount)
 
+		if is_instance_valid(AudioManager):
+			AudioManager.play_spell_sound(spell.animation if not spell.animation.is_empty() else spell.spell_name)
+
+	elif _active_resource is SkillData:
+		var skill := _active_resource as SkillData
+		if is_instance_valid(AudioManager):
+			AudioManager.play_skill_sound(skill.skill_name)
+
+	# Determine edge flash color based on element or skill type
+	var flash_color := Color("46e689") # Default Healing / Life (Green)
+
+	if "element" in _active_resource:
+		match str(_active_resource.element).to_upper():
+			"MAGIC", "ARCANE":
+				flash_color = Color("9b59b6") # Arcane Magic (Purple)
+			"LIFE", "HEAL":
+				flash_color = Color("46e689") # Healing (Green)
+			"FIRE", "PLASMA":
+				flash_color = Color("ff5533") # Fire (Orange/Red)
+			"LOCKPICK", "UTILITY", "DEX":
+				flash_color = Color("f1c40f") # Lockpick / Utility (Gold)
+
+	# Emit the edge flash signal
+	if is_instance_valid(SignalBus):
+		SignalBus.edge_flash_requested.emit(flash_color, 0.4)
+
 	_emit_field_action_log()
 	_hide_popup()
 
@@ -319,6 +345,9 @@ func _execute_craft_ammo(skill: SkillData) -> void:
 				GameLogger.info("%s does not have enough Energy!" % _active_cat.name)
 			return
 		_active_cat.current_energy -= cost
+
+	if is_instance_valid(AudioManager):
+		AudioManager.play_skill_sound(skill.skill_name)
 
 	var ammo_item: ItemData = load("res://Data/Items/Consumables/IronArrow.tres") as ItemData if ResourceLoader.exists("res://Data/Items/Consumables/IronArrow.tres") else null
 

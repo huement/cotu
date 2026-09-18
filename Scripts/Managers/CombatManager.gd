@@ -253,7 +253,9 @@ func _on_combat_ended(victory: bool) -> void:
 	is_combat_active = false
 	is_paused_for_input = false
 
-	var victory_data: Dictionary = { }
+	var victory_data: Dictionary = {}
+	var gs: Node = get_tree().root.get_node_or_null("GameState")
+
 	if victory:
 		var total_xp: int = 0
 		var total_gold: int = 0
@@ -261,7 +263,6 @@ func _on_combat_ended(victory: bool) -> void:
 		var total_party_members: int = 0
 		var enemies_killed: int = 0
 		var items_dropped: Array[ItemData] = []
-		var gs: Node = get_tree().root.get_node_or_null("GameState")
 
 		for c: Combatant in combatants:
 			if c.is_player:
@@ -318,7 +319,6 @@ func _on_combat_ended(victory: bool) -> void:
 
 	SignalBus.combat_ended.emit(victory)
 
-	var gs: Node = get_tree().root.get_node_or_null("GameState")
 	if is_instance_valid(gs) and gs.has_method("save_game"):
 		gs.save_game()
 
@@ -690,6 +690,8 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 		SignalBus.character_mana_changed.emit(acting_char.slot_index, acting_char.current_mp, acting_char.max_mp)
 
 	if action_type == &"SKILL" and ability.has_method("roll_success_check"):
+		if is_instance_valid(AudioManager):
+			AudioManager.play_skill_sound(spell_name)
 		if not ability.roll_success_check():
 			GameLogger.combat("%s used %s, but the attack MISSED!" % [acting_char.name, spell_name])
 			if is_instance_valid(target_mgr) and target_mgr.has_method("clear_pending_ability"):
@@ -891,6 +893,8 @@ func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int)
 		var success: bool = inv.use_item(item_slot_idx, target_cat)
 
 		if success:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_potion_sound()	
 			for c: Combatant in combatants:
 				if c.ref == target_cat:
 					if "current_hp" in c.ref:
@@ -1073,6 +1077,9 @@ func _apply_damage_to_combatant(
 			_trigger_physical_impact_vfx(target.id, action_resource, 0.5)
 		else:
 			SignalBus.camera_shake_requested.emit(0.4)
+			# Fallback for unarmed / default physical hits without an action resource
+			if is_instance_valid(AudioManager):
+				AudioManager.play_attack_sound("UNARMED")
 
 	# Toast Notifications
 	var sb: Node = SignalBus
@@ -1109,6 +1116,10 @@ func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data:
 
 		GameLogger.combat("Triggering physical impact VFX for %s weapon type %s" % [target_enemy_id, type_str])
 
+		# Play dynamic weapon attack SFX
+		if is_instance_valid(AudioManager):
+			AudioManager.play_attack_sound(type_str)
+
 		if is_instance_valid(SignalBus):
 			if "BASH" in type_str:
 				SignalBus.weapon_swing_requested.emit("staff_bash")
@@ -1124,9 +1135,11 @@ func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data:
 				SignalBus.camera_shake_requested.emit(0.55)
 				GameLogger.combat("Triggered sword_swing")
 
+	# Target 2D SpriteFrames overlay animation emit
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and is_instance_valid(vfx_frames):
 		sb.target_vfx_requested.emit(target_enemy_id, vfx_frames, trauma)
+
 
 func _sync_hp_to_ref(c: Combatant) -> void:
 	if is_instance_valid(c.ref):

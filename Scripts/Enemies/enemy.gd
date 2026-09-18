@@ -27,6 +27,8 @@ extends Node3D
 
 @export var enemy_data: EnemyData
 
+@export var enemy_type: String = ""
+
 # ==============================================================================
 # 2. NODE REFERENCES & STATE
 # ==============================================================================
@@ -92,6 +94,9 @@ func _resolve_enemy_data() -> void:
 	elif data == null and not enemy_group.is_empty() and enemy_group[0] is EnemyData:
 		data = enemy_group[0]
 		enemy_data = enemy_group[0] as EnemyData
+	# Sync enemy_type fallback from resource if overworld override is empty
+	if enemy_type.is_empty() and is_instance_valid(enemy_data) and "enemy_type" in enemy_data:
+		enemy_type = enemy_data.enemy_type
 
 
 ## Ensures 'enemy_group' is populated with 'pack_size' duplicated enemy resources

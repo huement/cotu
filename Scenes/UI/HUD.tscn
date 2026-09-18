@@ -1,0 +1,279 @@
+[gd_scene load_steps=23 format=3 uid="uid://dqkr2j65k83yc"]
+
+[ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_cn5rm"]
+[ext_resource type="Texture2D" uid="uid://dn0f5ac8pbppq" path="res://ui/HUD/sidebar.png" id="2_ako3u"]
+[ext_resource type="Texture2D" uid="uid://ccjl04lnxg00i" path="res://ui/HUD/topbar.png" id="3_khvou"]
+[ext_resource type="PackedScene" uid="uid://yo001sb3lbfp" path="res://Scenes/UI/PartySlotPortrait.tscn" id="4_55bpt"]
+[ext_resource type="Texture2D" uid="uid://dte7juxkf8grr" path="res://ui/HUD/search-btn.png" id="5_yd1yt"]
+[ext_resource type="Texture2D" uid="uid://dfx0p2jk0ynh3" path="res://ui/HUD/search-hover.png" id="6_0n5r3"]
+[ext_resource type="Script" uid="uid://bismjgexijch3" path="res://Scripts/search_button.gd" id="7_5h4o4"]
+[ext_resource type="Texture2D" uid="uid://bb878wlm1bg45" path="res://ui/HUD/item-btn.png" id="8_p4bpa"]
+[ext_resource type="Texture2D" uid="uid://cvbiq0j3bvkjh" path="res://ui/HUD/item-hover.png" id="9_gcvgm"]
+[ext_resource type="Script" uid="uid://b8ywsg7wbn4ln" path="res://Scripts/item_button.gd" id="10_k3th7"]
+[ext_resource type="Texture2D" uid="uid://cl03o04pwuvpk" path="res://ui/HUD/rest-btn.png" id="11_dlptc"]
+[ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="12_cg6gh"]
+[ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="13_iub3o"]
+[ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_eedsi"]
+[ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="15_u1rxn"]
+[ext_resource type="Script" uid="uid://ckoiskavvtx6f" path="res://Scripts/minimap_camera.gd" id="16_wjwn1"]
+[ext_resource type="Texture2D" uid="uid://btil8atds3nsj" path="res://ui/minimap-indicator.png" id="17_lyj15"]
+[ext_resource type="Texture2D" uid="uid://6q4bmnpuwq3m" path="res://ui/HUD/minimap_bg_sm.png" id="18_l2igo"]
+[ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="19_ralih"]
+[ext_resource type="Texture2D" uid="uid://be14sjxl48syt" path="res://ui/HUD/edge_vignette.png" id="20_p5q14"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r0ikl"]
+shader = ExtResource("15_u1rxn")
+shader_parameter/scanline_count = 93.3010044317975
+shader_parameter/scanline_intensity = 0.330000015675
+shader_parameter/scan_speed = 0.750000035625
+shader_parameter/vignette_intensity = 0.150000007125
+
+[sub_resource type="Environment" id="Environment_r0ikl"]
+background_mode = 1
+background_color = Color(0.050980393, 0.06666667, 0.09019608, 1)
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_cn5rm")
+
+[node name="MainHUDLayout" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CockpitBackground" type="TextureRect" parent="MainHUDLayout"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 1114.0
+offset_top = 95.0
+offset_right = 1186.0
+offset_bottom = 998.0
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("2_ako3u")
+
+[node name="TopBar" type="TextureRect" parent="MainHUDLayout"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -352.0
+offset_top = 5.0
+offset_right = 242.0
+offset_bottom = 45.0
+grow_horizontal = 0
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("3_khvou")
+
+[node name="EnemyInRange" type="ColorRect" parent="MainHUDLayout"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 866.0
+offset_top = 22.0
+offset_right = 876.0
+offset_bottom = 31.0
+pivot_offset = Vector2(49, 5)
+mouse_filter = 2
+mouse_behavior_recursive = 1
+color = Color(1, 1, 0.3254902, 1)
+
+[node name="RightSidebarAnchor" type="Control" parent="MainHUDLayout"]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 1064.0
+offset_top = 86.0
+offset_right = 1146.0
+offset_bottom = 641.0
+
+[node name="PartyContainer" type="VBoxContainer" parent="MainHUDLayout/RightSidebarAnchor"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.34100002
+anchor_top = 0.063
+anchor_right = 0.34100002
+anchor_bottom = 0.063
+offset_left = 0.0379982
+offset_top = 0.034999847
+offset_right = 54.038
+offset_bottom = 520.035
+theme_override_constants/separation = 10
+
+[node name="Slot0_Portrait" parent="MainHUDLayout/RightSidebarAnchor/PartyContainer" instance=ExtResource("4_55bpt")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot1_Portrait" parent="MainHUDLayout/RightSidebarAnchor/PartyContainer" instance=ExtResource("4_55bpt")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+slot_index = 1
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot2_Portrait" parent="MainHUDLayout/RightSidebarAnchor/PartyContainer" instance=ExtResource("4_55bpt")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+slot_index = 2
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot3_Portrait" parent="MainHUDLayout/RightSidebarAnchor/PartyContainer" instance=ExtResource("4_55bpt")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+slot_index = 3
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot4_Portrait" parent="MainHUDLayout/RightSidebarAnchor/PartyContainer" instance=ExtResource("4_55bpt")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+slot_index = 4
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot5_Portrait" parent="MainHUDLayout/RightSidebarAnchor/PartyContainer" instance=ExtResource("4_55bpt")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+slot_index = 5
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="ActionBarAnchor" type="Control" parent="MainHUDLayout"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -66.0
+offset_right = 193.0
+offset_bottom = -12.0
+grow_vertical = 0
+
+[node name="ActionButtons" type="HBoxContainer" parent="MainHUDLayout/ActionBarAnchor"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = 12
+
+[node name="SearchButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("5_yd1yt")
+texture_pressed = ExtResource("6_0n5r3")
+texture_hover = ExtResource("6_0n5r3")
+script = ExtResource("7_5h4o4")
+
+[node name="ItemButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("8_p4bpa")
+texture_pressed = ExtResource("9_gcvgm")
+texture_hover = ExtResource("9_gcvgm")
+script = ExtResource("10_k3th7")
+
+[node name="RestButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("11_dlptc")
+texture_pressed = ExtResource("12_cg6gh")
+texture_hover = ExtResource("12_cg6gh")
+script = ExtResource("13_iub3o")
+
+[node name="BattleHUD" parent="MainHUDLayout" instance=ExtResource("14_eedsi")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="MinimapAnchor" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="MinimapAnchor"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_r0ikl")
+layout_mode = 0
+offset_left = 27.0
+offset_top = 25.0
+offset_right = 177.0
+offset_bottom = 175.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="MinimapAnchor/SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(150, 150)
+render_target_update_mode = 4
+
+[node name="MinimapCamera" type="Camera3D" parent="MinimapAnchor/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 15, 0)
+cull_mask = 1048573
+environment = SubResource("Environment_r0ikl")
+projection = 1
+size = 15.0
+script = ExtResource("16_wjwn1")
+
+[node name="MinimapIndicator" type="TextureRect" parent="MinimapAnchor"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 68.0
+offset_top = 58.0
+offset_right = 101.0
+offset_bottom = 91.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(16.5, 16.5)
+texture = ExtResource("17_lyj15")
+
+[node name="MinimapBackground" type="TextureRect" parent="MinimapAnchor"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 12.0
+offset_right = 205.0
+offset_bottom = 206.0
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("18_l2igo")
+
+[node name="CompassLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 968.0
+offset_top = 18.0
+offset_right = 1088.0
+offset_bottom = 41.0
+theme_override_fonts/font = ExtResource("19_ralih")
+theme_override_font_sizes/font_size = 14
+text = "NORTH"
+horizontal_alignment = 1
+clip_text = true
+text_overrun_behavior = 1
+
+[node name="EdgeFlash" type="TextureRect" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("20_p5q14")

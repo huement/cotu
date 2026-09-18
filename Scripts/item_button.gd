@@ -19,6 +19,9 @@ func _ready() -> void:
 	pressed.connect(_on_button_pressed)
 
 func _on_button_pressed() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_button_press()
+		
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
 		bus.popup_requested.emit(action_type)

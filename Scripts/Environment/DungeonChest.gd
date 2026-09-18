@@ -64,6 +64,11 @@ func interact(_player: Node3D) -> void:
 	if not is_opened:
 		_animate_open_lid()
 		is_opened = true
+
+		# Emit a bright, strong Gold edge flash (0.6s duration, 90% opacity)
+		if is_instance_valid(SignalBus):
+			SignalBus.edge_flash_requested.emit(Color(1.0, 0.84, 0.0, 0.9), 0.6)
+
 		var gs: Node = get_tree().root.get_node_or_null("GameState")
 		if is_instance_valid(gs) and gs.has_method("set_object_state_flag"):
 			gs.set_object_state_flag(map_id, object_id, "is_opened", true)
