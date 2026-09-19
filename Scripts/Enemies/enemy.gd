@@ -107,9 +107,14 @@ func _setup_enemy_group() -> void:
 	if not is_instance_valid(template) and not enemy_group.is_empty():
 		template = enemy_group[0]
 
+	# Fallback to compiled Zombie Cat resource if unassigned
 	if not is_instance_valid(template):
-		template = load("res://Data/Enemies/ZombieCat_Base.tres") as Resource
+		if ResourceLoader.exists("res://Data/Enemies/EnZombieCat.tres"):
+			template = load("res://Data/Enemies/EnZombieCat.tres") as Resource
+		else:
+			template = load("res://Data/Enemies/ZombieCat_Base.tres") as Resource
 		data = template
+		enemy_data = template as EnemyData
 
 	if enemy_group.size() < pack_size or (enemy_group.size() == 1 and pack_size > 1):
 		enemy_group.clear()
@@ -162,6 +167,7 @@ func _instantiate_world_model() -> void:
 	if is_instance_valid(model_scene):
 		var model_inst: Node3D = model_scene.instantiate() as Node3D
 		model_inst.scale = model_scale
+		_apply_material_to_model(model_inst, lead_resource)
 		model_holder.add_child(model_inst)
 	else:
 		var mesh_inst := MeshInstance3D.new()
@@ -173,6 +179,38 @@ func _instantiate_world_model() -> void:
 		mat.albedo_color = Color.RED
 		mesh_inst.material_override = mat
 		model_holder.add_child(mesh_inst)
+
+
+func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
+	if not is_instance_valid(model_node) or not is_instance_valid(e_data):
+		return
+
+	var mat: Material = null
+
+	if "custom_material" in e_data and is_instance_valid(e_data.get("custom_material")):
+		mat = e_data.get("custom_material") as Material
+
+	if mat == null and "texture_path" in e_data and not str(e_data.get("texture_path")).is_empty():
+		var tex_path: String = str(e_data.get("texture_path"))
+		if ResourceLoader.exists(tex_path):
+			var tex: Texture2D = load(tex_path) as Texture2D
+			if is_instance_valid(tex):
+				var std_mat := StandardMaterial3D.new()
+				std_mat.albedo_texture = tex
+				std_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				std_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+				mat = std_mat
+
+	if is_instance_valid(mat):
+		_apply_material_override_recursive(model_node, mat)
+
+
+func _apply_material_override_recursive(node: Node, mat: Material) -> void:
+	if node is MeshInstance3D:
+		(node as MeshInstance3D).material_override = mat
+
+	for child in node.get_children():
+		_apply_material_override_recursive(child, mat)
 
 
 # ==============================================================================

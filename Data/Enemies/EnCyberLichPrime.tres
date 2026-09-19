@@ -1,22 +1,17 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://dydjwtmdkx2fb"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://dydjwtmdkx2fb"]
 
-[ext_resource type="PackedScene" uid="uid://cym3tonljf3kt" path="res://resources/Enemies/Kenny/character-r.glb" id="1_3crfw"]
-[ext_resource type="Texture2D" uid="uid://dtv4cokd42t3k" path="res://resources/Enemies/Kenny/texture-r.png" id="1_de84u"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_de84u"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3lkpb"]
-shading_mode = 0
-albedo_texture = ExtResource("1_de84u")
-texture_filter = 0
+[ext_resource type="Material" uid="uid://j83cael1rc01" path="res://resources/Enemies/Kenny/Materials/en_cyber_lich_prime_mat.tres" id="1_de84u"]
+[ext_resource type="PackedScene" uid="uid://cym3tonljf3kt" path="res://resources/Enemies/Kenny/character-r.glb" id="2_3lkpb"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_ygym1"]
 
 [resource]
-script = ExtResource("2_de84u")
+script = ExtResource("3_ygym1")
 enemy_id = "en_cyber_lich_prime"
 enemy_name = "Cyber Lich Prime"
 model_path = "res://resources/Enemies/Kenny/character-r.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-r.png"
-model_scene = ExtResource("1_3crfw")
-custom_material = SubResource("StandardMaterial3D_3lkpb")
+model_scene = ExtResource("2_3lkpb")
+custom_material = ExtResource("1_de84u")
 base_level = 10
 max_health = 160
 current_health = 160

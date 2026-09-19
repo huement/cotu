@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://day7k6mxl84p1"]
+[gd_scene load_steps=9 format=3 uid="uid://day7k6mxl84p1"]
 
 [ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_vm1o7"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="2_kl8rm"]
 [ext_resource type="PackedScene" uid="uid://obtfq1vnf1h8" path="res://Scenes/Objects/Torch.tscn" id="3_7y88j"]
+[ext_resource type="Resource" uid="uid://bys08l4xf6vss" path="res://Data/Enemies/EnAzurianDrone.tres" id="3_bmgh2"]
 [ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="4_8wxa2"]
 [ext_resource type="PackedScene" uid="uid://bxt4e2ktok26r" path="res://Scenes/Objects/WallMask.tscn" id="5_74m5t"]
 [ext_resource type="PackedScene" uid="uid://dquxxvchp5mey" path="res://Scenes/Objects/Barrel.tscn" id="6_774x7"]
@@ -30,6 +31,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1, 6)
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
 enemy_type = "zombie"
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("2_kl8rm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, 38)
+data = ExtResource("3_bmgh2")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = 0.0
 
 [node name="Torches" type="Node3D" parent="."]
 

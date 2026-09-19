@@ -1,22 +1,17 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://cj24i5803tj43"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://cj24i5803tj43"]
 
-[ext_resource type="PackedScene" uid="uid://bxh86qkiiy5q2" path="res://resources/Enemies/Kenny/character-p.glb" id="1_8xx1g"]
-[ext_resource type="Texture2D" uid="uid://citcsesmjwfpp" path="res://resources/Enemies/Kenny/texture-p.png" id="1_td0ir"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_td0ir"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nm1jv"]
-shading_mode = 0
-albedo_texture = ExtResource("1_td0ir")
-texture_filter = 0
+[ext_resource type="Material" uid="uid://snrc4u5yijy6" path="res://resources/Enemies/Kenny/Materials/en_archanist_husk_mat.tres" id="1_td0ir"]
+[ext_resource type="PackedScene" uid="uid://bxh86qkiiy5q2" path="res://resources/Enemies/Kenny/character-p.glb" id="2_nm1jv"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_iev4n"]
 
 [resource]
-script = ExtResource("2_td0ir")
+script = ExtResource("3_iev4n")
 enemy_id = "en_archanist_husk"
 enemy_name = "Archanist Husk"
 model_path = "res://resources/Enemies/Kenny/character-p.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-p.png"
-model_scene = ExtResource("1_8xx1g")
-custom_material = SubResource("StandardMaterial3D_nm1jv")
+model_scene = ExtResource("2_nm1jv")
+custom_material = ExtResource("1_td0ir")
 base_level = 8
 max_health = 95
 current_health = 95

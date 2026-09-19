@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://dm1yu5li8xjfm"]
+
+[ext_resource type="Texture2D" uid="uid://dsr32vyuhkl2y" path="res://resources/Enemies/Kenny/texture-e.png" id="1_fdrf6"]
+[ext_resource type="PackedScene" uid="uid://li0uonfyxjgd" path="res://resources/Enemies/Kenny/character-e.glb" id="2_3o3jx"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_h8snp"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hx3fb"]
+shading_mode = 0
+albedo_texture = ExtResource("1_fdrf6")
+texture_filter = 0
+
+[resource]
+script = ExtResource("3_h8snp")
+enemy_id = "en_oculat_striker"
+enemy_name = "Oculat Striker"
+model_path = "res://resources/Enemies/Kenny/character-e.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-e.png"
+model_scene = ExtResource("2_3o3jx")
+custom_material = SubResource("StandardMaterial3D_hx3fb")
+base_level = 3
+max_health = 60
+current_health = 60
+attack_damage = 12
+defense = 12
+speed = 12.0
+attack_element = 0
+equipped_item_id = "con_health_vial"
+can_cast_spells = true
+spell_ids = Array[String](["sp_cryo_blast", "sp_plasma_dart"])
+max_mana = 200
+movement_speed = 1.5
+aggro_range_tiles = 4
+can_surprise_player = true
+xp_value = 120
+gold_value = 120
+drops_loot = false

@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bgupgq1arrqa1"]
+
+[ext_resource type="Texture2D" uid="uid://dxhifqdyl32tp" path="res://resources/Enemies/Kenny/texture-c.png" id="1_cgoab"]
+[ext_resource type="PackedScene" uid="uid://cxvj28bx34438" path="res://resources/Enemies/Kenny/character-c.glb" id="2_qj1hm"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_02w05"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8mbtl"]
+shading_mode = 0
+albedo_texture = ExtResource("1_cgoab")
+texture_filter = 0
+
+[resource]
+script = ExtResource("3_02w05")
+enemy_id = "en_rage_wraith"
+enemy_name = "Rage Wraith"
+model_path = "res://resources/Enemies/Kenny/character-c.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-c.png"
+model_scene = ExtResource("2_qj1hm")
+custom_material = SubResource("StandardMaterial3D_8mbtl")
+base_level = 2
+max_health = 42
+current_health = 42
+attack_damage = 10
+speed = 13.0
+initiative_speed = 13
+attack_element = 1
+can_cast_spells = true
+spell_ids = Array[String](["sp_plasma_dart"])
+max_mana = 100
+min_group_size = 2
+max_group_size = 4
+aggro_range_tiles = 6
+can_surprise_player = true
+can_be_surprised = false
+xp_value = 40
+gold_value = 0

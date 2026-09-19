@@ -1,22 +1,17 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bfrcj1d0d6vw7"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bfrcj1d0d6vw7"]
 
-[ext_resource type="Texture2D" uid="uid://dbcx6fllub52a" path="res://resources/Enemies/Kenny/texture-q.png" id="1_kb8sp"]
-[ext_resource type="PackedScene" uid="uid://botxyxge2vrye" path="res://resources/Enemies/Kenny/character-q.glb" id="1_vr31a"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_kb8sp"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hqre6"]
-shading_mode = 0
-albedo_texture = ExtResource("1_kb8sp")
-texture_filter = 0
+[ext_resource type="Material" uid="uid://q5mfvxkludj7" path="res://resources/Enemies/Kenny/Materials/en_dread_golem_mat.tres" id="1_kb8sp"]
+[ext_resource type="PackedScene" uid="uid://botxyxge2vrye" path="res://resources/Enemies/Kenny/character-q.glb" id="2_hqre6"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_bfgou"]
 
 [resource]
-script = ExtResource("2_kb8sp")
+script = ExtResource("3_bfgou")
 enemy_id = "en_dread_golem"
 enemy_name = "Dread Golem"
 model_path = "res://resources/Enemies/Kenny/character-q.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-q.png"
-model_scene = ExtResource("1_vr31a")
-custom_material = SubResource("StandardMaterial3D_hqre6")
+model_scene = ExtResource("2_hqre6")
+custom_material = ExtResource("1_kb8sp")
 base_level = 9
 max_health = 140
 current_health = 140

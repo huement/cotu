@@ -1,22 +1,17 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://piemm8758m1k"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://piemm8758m1k"]
 
-[ext_resource type="PackedScene" uid="uid://cr8m5m2p0bker" path="res://resources/Enemies/Kenny/character-o.glb" id="1_jc6bu"]
-[ext_resource type="Texture2D" uid="uid://jmnpgxrrg7op" path="res://resources/Enemies/Kenny/texture-o.png" id="1_r2mqx"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_r2mqx"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nn25j"]
-shading_mode = 0
-albedo_texture = ExtResource("1_r2mqx")
-texture_filter = 0
+[ext_resource type="Material" uid="uid://b34ynnumhyd3e" path="res://resources/Enemies/Kenny/Materials/en_plasma_sentinel_mat.tres" id="1_r2mqx"]
+[ext_resource type="PackedScene" uid="uid://cr8m5m2p0bker" path="res://resources/Enemies/Kenny/character-o.glb" id="2_nn25j"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_x6s6t"]
 
 [resource]
-script = ExtResource("2_r2mqx")
+script = ExtResource("3_x6s6t")
 enemy_id = "en_plasma_sentinel"
 enemy_name = "Plasma Sentinel"
 model_path = "res://resources/Enemies/Kenny/character-o.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-o.png"
-model_scene = ExtResource("1_jc6bu")
-custom_material = SubResource("StandardMaterial3D_nn25j")
+model_scene = ExtResource("2_nn25j")
+custom_material = ExtResource("1_r2mqx")
 base_level = 8
 max_health = 100
 current_health = 100

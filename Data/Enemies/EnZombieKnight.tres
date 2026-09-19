@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://b3472gtr5bafr"]
+
+[ext_resource type="Texture2D" uid="uid://qwgd0pekyiou" path="res://resources/Enemies/Kenny/texture-h.png" id="1_1fqw6"]
+[ext_resource type="PackedScene" uid="uid://khgjcdfj1u0w" path="res://resources/Enemies/Kenny/character-d.glb" id="2_iojnm"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_8axnh"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n5fwj"]
+shading_mode = 0
+albedo_texture = ExtResource("1_1fqw6")
+texture_filter = 0
+
+[resource]
+script = ExtResource("3_8axnh")
+enemy_id = "en_zombie_knight"
+enemy_name = "Corrupted Knight"
+model_path = "res://resources/Enemies/Kenny/character-d.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-h.png"
+model_scene = ExtResource("2_iojnm")
+custom_material = SubResource("StandardMaterial3D_n5fwj")
+base_level = 4
+max_health = 95
+current_health = 95
+attack_damage = 25
+defense = 15
+speed = 12.0
+initiative_speed = 13
+attack_element = 2
+equipped_weapon_id = "wpn_plasma_katana"
+max_group_size = 4
+movement_speed = 1.6
+aggro_range_tiles = 6
+can_be_surprised = false
+xp_value = 260
+gold_value = 400

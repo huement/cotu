@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bb7x20wwbb0ou"]
+
+[ext_resource type="Texture2D" uid="uid://7pws36njp15x" path="res://resources/Enemies/Kenny/texture-g.png" id="1_7eev3"]
+[ext_resource type="PackedScene" uid="uid://khgjcdfj1u0w" path="res://resources/Enemies/Kenny/character-d.glb" id="2_veatu"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_edcpl"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_15m85"]
+shading_mode = 0
+albedo_texture = ExtResource("1_7eev3")
+texture_filter = 0
+
+[resource]
+script = ExtResource("3_edcpl")
+enemy_id = "en_zombie_guard"
+enemy_name = "Corrupted Guard"
+model_path = "res://resources/Enemies/Kenny/character-d.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-g.png"
+model_scene = ExtResource("2_veatu")
+custom_material = SubResource("StandardMaterial3D_15m85")
+base_level = 4
+max_health = 75
+current_health = 75
+attack_damage = 20
+defense = 15
+initiative_speed = 13
+attack_element = 2
+equipped_weapon_id = "wpn_plasma_katana"
+max_group_size = 4
+movement_speed = 1.6
+aggro_range_tiles = 6
+can_be_surprised = false
+xp_value = 200
+gold_value = 200

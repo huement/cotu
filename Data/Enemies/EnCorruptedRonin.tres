@@ -1,22 +1,17 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://dr7jm0dfljaeh"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://dr7jm0dfljaeh"]
 
-[ext_resource type="PackedScene" uid="uid://c4i3cjpxmvrkq" path="res://resources/Enemies/Kenny/character-k.glb" id="1_7rlef"]
-[ext_resource type="Texture2D" uid="uid://d2nauxf2i8pvw" path="res://resources/Enemies/Kenny/texture-k.png" id="1_ssmvg"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_ssmvg"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wm3x1"]
-shading_mode = 0
-albedo_texture = ExtResource("1_ssmvg")
-texture_filter = 0
+[ext_resource type="Material" uid="uid://cdvx13hdil7cq" path="res://resources/Enemies/Kenny/Materials/en_corrupted_ronin_mat.tres" id="1_ssmvg"]
+[ext_resource type="PackedScene" uid="uid://c4i3cjpxmvrkq" path="res://resources/Enemies/Kenny/character-k.glb" id="2_wm3x1"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_ekprj"]
 
 [resource]
-script = ExtResource("2_ssmvg")
+script = ExtResource("3_ekprj")
 enemy_id = "en_corrupted_ronin"
 enemy_name = "Corrupted Ronin"
 model_path = "res://resources/Enemies/Kenny/character-k.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-k.png"
-model_scene = ExtResource("1_7rlef")
-custom_material = SubResource("StandardMaterial3D_wm3x1")
+model_scene = ExtResource("2_wm3x1")
+custom_material = ExtResource("1_ssmvg")
 base_level = 6
 max_health = 85
 current_health = 85

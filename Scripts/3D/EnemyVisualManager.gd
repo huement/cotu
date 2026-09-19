@@ -141,7 +141,7 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array) -> void:
 	_clear_all_enemies()
 	visible = true
 
-	# 🎯 Standardize payload: handles single Resource or Array of Resources
+	# Standardize payload: handles single Resource or Array of Resources
 	var enemy_group: Array = []
 	if enemy_payload is Array:
 		enemy_group = enemy_payload as Array
@@ -158,6 +158,8 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array) -> void:
 		var enemy_node: Node3D
 		if is_instance_valid(model_scene):
 			enemy_node = model_scene.instantiate() as Node3D
+			# 🎯 Binds custom_material / texture_path onto child MeshInstance3D nodes
+			_apply_material_to_model(enemy_node, e_data)
 		else:
 			enemy_node = _create_debug_mesh()
 

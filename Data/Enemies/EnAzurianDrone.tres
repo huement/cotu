@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bys08l4xf6vss"]
+
+[ext_resource type="Texture2D" uid="uid://d2shqsyx6eoqa" path="res://resources/Enemies/Kenny/texture-b.png" id="1_4hlk2"]
+[ext_resource type="PackedScene" uid="uid://cvxowlotjrwjk" path="res://resources/Enemies/Kenny/character-b.glb" id="2_7id4h"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_n5028"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ayc7j"]
+shading_mode = 0
+albedo_texture = ExtResource("1_4hlk2")
+texture_filter = 0
+
+[resource]
+script = ExtResource("3_n5028")
+enemy_id = "en_azurian_drone"
+enemy_name = "Azurian Drone"
+model_path = "res://resources/Enemies/Kenny/character-b.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-b.png"
+model_scene = ExtResource("2_7id4h")
+custom_material = SubResource("StandardMaterial3D_ayc7j")
+max_health = 40
+current_health = 40
+attack_damage = 15
+defense = 10
+speed = 7.0
+initiative_speed = 7
+equipped_weapon_id = "wpn_plasma_katana"
+movement_speed = 0.6
+aggro_range_tiles = 4
+xp_value = 30
+gold_value = 50
+drops_loot = false

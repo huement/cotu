@@ -1,9 +1,14 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://b8fmdf3b7jc8n"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://b8fmdf3b7jc8n"]
 
+[ext_resource type="Material" uid="uid://d37hfmbiw1ujo" path="res://resources/Enemies/Kenny/Materials/en_zombie_cat_mat.tres" id="1_ht43a"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="1_k5ssf"]
 [ext_resource type="PackedScene" uid="uid://ds6mkgkahu71e" path="res://resources/Enemies/Kenny/character-l.glb" id="1_wiw8o"]
 
 [resource]
 script = ExtResource("1_k5ssf")
+enemy_id = "zombie_cat_base"
+model_path = "res://resources/Enemies/Kenny/character-l.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-d.png"
 model_scene = ExtResource("1_wiw8o")
+custom_material = ExtResource("1_ht43a")
 metadata/_custom_type_script = "uid://cidbs10ca08v4"
