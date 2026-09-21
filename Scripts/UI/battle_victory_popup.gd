@@ -104,4 +104,6 @@ func _create_loot_card(item: ItemData) -> PanelContainer:
 
 
 func _on_confirm_pressed() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_environment("collect-loot")
 	victory_confirmed.emit()

@@ -97,22 +97,24 @@ func _setup_enemy_info_menu() -> void:
 	style.corner_radius_bottom_right = 6
 	_info_menu_panel.add_theme_stylebox_override("panel", style)
 
-	# Anchoring directly beneath TopHeader (~68px down)
+	# Anchor directly to top-center of screen (0px down) over topbar
 	_info_menu_panel.layout_mode = 1
 	_info_menu_panel.anchors_preset = Control.PRESET_CENTER_TOP
 	_info_menu_panel.offset_left = -282.0
-	_info_menu_panel.offset_top = 68.0
+	_info_menu_panel.offset_top = 0.0
 	_info_menu_panel.offset_right = 282.0
-	_info_menu_panel.offset_bottom = 68.0
 	_info_menu_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_info_menu_panel.z_index = 10
 
 	# Outer VBox containing enemy list + bottom accent image
 	var outer_vbox := VBoxContainer.new()
+	outer_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	outer_vbox.add_theme_constant_override("separation", 8)
 	_info_menu_panel.add_child(outer_vbox)
 
 	# Margin for enemy entries
 	var margin := MarginContainer.new()
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	margin.add_theme_constant_override("margin_left", 14)
 	margin.add_theme_constant_override("margin_top", 10)
 	margin.add_theme_constant_override("margin_right", 14)
@@ -120,21 +122,21 @@ func _setup_enemy_info_menu() -> void:
 	outer_vbox.add_child(margin)
 
 	_info_enemy_vbox = VBoxContainer.new()
+	_info_enemy_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_info_enemy_vbox.add_theme_constant_override("separation", 10)
 	margin.add_child(_info_enemy_vbox)
 
-	# Bottom Accent Image (hud_infomenu_btm.png)
+	# Bottom Accent Image (hud_infomenu_btm.png) - Stretched across full width
 	var btm_accent := TextureRect.new()
 	btm_accent.name = "BottomAccent"
-	btm_accent.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	btm_accent.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btm_accent.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	btm_accent.custom_minimum_size = Vector2(0, 18)
+	btm_accent.stretch_mode = TextureRect.STRETCH_SCALE
+	btm_accent.custom_minimum_size = Vector2(0, 24)
 
 	var btm_tex: Texture2D = null
 	if ResourceLoader.exists("res://ui/BATTLE/hud_infomenu_btm.png"):
 		btm_tex = load("res://ui/BATTLE/hud_infomenu_btm.png") as Texture2D
-	elif ResourceLoader.exists("res://ui/HUD/hud_infomenu_btm.png"):
-		btm_tex = load("res://ui/HUD/hud_infomenu_btm.png") as Texture2D
 
 	if is_instance_valid(btm_tex):
 		btm_accent.texture = btm_tex
@@ -150,7 +152,7 @@ func _on_top_header_gui_input(event: InputEvent) -> void:
 
 func toggle_info_menu() -> void:
 	if is_instance_valid(AudioManager):
-		AudioManager.play_button_press()
+		AudioManager.play_ui_sound("menu-slide")
 
 	_is_info_menu_open = !_is_info_menu_open
 
@@ -161,7 +163,6 @@ func toggle_info_menu() -> void:
 		_rebuild_enemy_info_rows()
 		_info_menu_panel.show()
 
-		# Calculate target expanded height
 		_info_menu_panel.custom_minimum_size.y = 0.0
 		_info_menu_panel.size.y = 0.0
 		await get_tree().process_frame
@@ -169,13 +170,14 @@ func toggle_info_menu() -> void:
 		var target_height: float = maxf(110.0, _info_menu_panel.get_combined_minimum_size().y)
 
 		var tween: Tween = create_tween()
-		tween.tween_property(_info_menu_panel, "custom_minimum_size:y", target_height, 0.25) \
-			.from(0.0) \
+		tween.tween_property(_info_menu_panel, "position:y", 0.0, 0.25) \
+			.from(-target_height) \
 			.set_trans(Tween.TRANS_QUAD) \
 			.set_ease(Tween.EASE_OUT)
 	else:
+		var current_height: float = _info_menu_panel.size.y
 		var tween: Tween = create_tween()
-		tween.tween_property(_info_menu_panel, "custom_minimum_size:y", 0.0, 0.20) \
+		tween.tween_property(_info_menu_panel, "position:y", -current_height, 0.20) \
 			.set_trans(Tween.TRANS_QUAD) \
 			.set_ease(Tween.EASE_IN)
 		tween.finished.connect(_info_menu_panel.hide, CONNECT_ONE_SHOT)
@@ -329,6 +331,8 @@ func _connect_to_signal_bus() -> void:
 
 func _on_player_action_selected(_slot_index: int, _action: StringName, _target_index: int) -> void:
 	_reset_state()
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("hud-button-press")
 
 
 func _get_alive_enemy_indices() -> Array[int]:
@@ -384,7 +388,7 @@ func _on_action_button_pressed(action_type: StringName, _button_name: String) ->
 		return
 		
 	if is_instance_valid(AudioManager):
-		AudioManager.play_button_press()
+		AudioManager.play_ui_sound("hud-button-press")
 
 	match action_type:
 		&"SPELL", &"SKILL":

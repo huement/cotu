@@ -1,13 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://b3472gtr5bafr"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://b3472gtr5bafr"]
 
-[ext_resource type="Texture2D" uid="uid://qwgd0pekyiou" path="res://resources/Enemies/Kenny/texture-h.png" id="1_1fqw6"]
+[ext_resource type="Material" uid="uid://d3jmhbtfeoc5u" path="res://resources/Enemies/Kenny/Materials/en_zombie_knight_mat.tres" id="1_1fqw6"]
 [ext_resource type="PackedScene" uid="uid://khgjcdfj1u0w" path="res://resources/Enemies/Kenny/character-d.glb" id="2_iojnm"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_8axnh"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n5fwj"]
-shading_mode = 0
-albedo_texture = ExtResource("1_1fqw6")
-texture_filter = 0
 
 [resource]
 script = ExtResource("3_8axnh")
@@ -16,7 +11,7 @@ enemy_name = "Corrupted Knight"
 model_path = "res://resources/Enemies/Kenny/character-d.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-h.png"
 model_scene = ExtResource("2_iojnm")
-custom_material = SubResource("StandardMaterial3D_n5fwj")
+custom_material = ExtResource("1_1fqw6")
 base_level = 4
 max_health = 95
 current_health = 95

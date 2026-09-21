@@ -12,6 +12,9 @@ var _sfx_3d_index: int = 0
 
 var _ambient_player: AudioStreamPlayer
 var _bgm_player: AudioStreamPlayer
+var _ui_player: AudioStreamPlayer
+var _env_player: AudioStreamPlayer
+var _enemies_player: AudioStreamPlayer
 
 # Enemy Ambient Loop Registry (EnemyType String -> AudioStreamPlayer)
 var _active_enemy_loops: Dictionary = {}
@@ -19,7 +22,13 @@ var _is_in_combat: bool = false
 
 
 func _ready() -> void:
+	_ui_player = AudioStreamPlayer.new()
+	_env_player = AudioStreamPlayer.new()
+	_enemies_player = AudioStreamPlayer.new()
 	_initialize_audio_channels()
+	add_child(_ui_player)
+	add_child(_env_player)
+	add_child(_enemies_player)
 	var bus: Node = SignalBus if is_instance_valid(SignalBus) else get_tree().root.get_node_or_null("SignalBus")
 	if is_instance_valid(bus):
 		if bus.has_signal(&"combat_started") and not bus.combat_started.is_connected(_on_combat_started):
@@ -104,6 +113,9 @@ func play_victory_sound() -> void:
 	_play_from_folder("Environment/", "win-battle")
 		
 
+func play_turn_around_sound() -> void:
+	_play_from_folder("Player/", "whoosh")
+
 # ==============================================================================
 # 2. ENEMY & DEATH SFX
 # ==============================================================================
@@ -125,6 +137,22 @@ func play_3d_enemy_sound(sound_name: String, world_pos: Vector3) -> void:
 			player3d.stream = stream
 			player3d.play()
 
+
+## Plays a specific enemy sound file directly via a dedicated Enemy AudioStreamPlayer.
+func play_enemy_sound(enemy_sound_file_name: String) -> void:
+	var clean_name: String = enemy_sound_file_name.get_basename()
+	if clean_name.is_empty():
+		clean_name = "skeleton_footstep"
+
+	var full_path: String = base_audio_dir.path_join("Enemies").path_join(clean_name + ".mp3")
+
+	if not ResourceLoader.exists(full_path):
+		full_path = base_audio_dir.path_join("Enemies").path_join("skeleton_footstep.mp3")
+
+	var stream: AudioStream = load(full_path) as AudioStream
+	if is_instance_valid(stream):
+		_enemies_player.stream = stream
+		_enemies_player.play()
 
 # ==============================================================================
 # 3. MOVEMENT & PROXIMITY ALERTS
@@ -170,6 +198,23 @@ func stop_level_sound() -> void:
 		_ambient_player.stop()
 
 
+## Plays a specific UI sound file directly via a dedicated UI AudioStreamPlayer.
+func play_ui_sound(ui_sound_file_name: String) -> void:
+	var clean_name: String = ui_sound_file_name.get_basename()
+	if clean_name.is_empty():
+		clean_name = "button-press"
+
+	var full_path: String = base_audio_dir.path_join("UI").path_join(clean_name + ".mp3")
+
+	if not ResourceLoader.exists(full_path):
+		full_path = base_audio_dir.path_join("UI").path_join("button-press.mp3")
+
+	var stream: AudioStream = load(full_path) as AudioStream
+	if is_instance_valid(stream):
+		_ui_player.stream = stream
+		_ui_player.play()
+
+
 ## Plays the default button press SFX (res://Audio/UI/button-press.mp3)
 func play_button_press() -> void:
 	_play_from_folder("UI/", "button-press")
@@ -182,6 +227,24 @@ func play_search_sound() -> void:
 
 func play_potion_sound() -> void:
 	_play_from_folder("Player/", "use-potion")
+
+
+## Plays an environmental sound effect from res://Audio/Environment/
+func play_environment(sound_name: String) -> void:
+	var clean_name: String = sound_name.get_basename()
+	if clean_name.is_empty():
+		return
+
+	var full_path: String = base_audio_dir.path_join("Environment").path_join(clean_name + ".mp3")
+
+	if not ResourceLoader.exists(full_path):
+		push_warning("AudioManager: Environmental sound not found at path: " + full_path)
+		return
+
+	var stream: AudioStream = load(full_path) as AudioStream
+	if is_instance_valid(stream):
+		_env_player.stream = stream
+		_env_player.play()
 
 
 # ==============================================================================

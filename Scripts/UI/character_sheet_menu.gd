@@ -67,6 +67,8 @@ func _ready() -> void:
 func _on_portrait_clicked(slot_index: int) -> void:
 	GameState.current_mode = GameState.Mode.MANAGEMENT
 	_current_slot_index = slot_index
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-press")
 	# 🎯 Synchronize active_character_index on GameState singleton
 	if "active_character_index" in GameState:
 		GameState.active_character_index = slot_index
@@ -167,10 +169,14 @@ func _render_character_sheet(character: CatCharacter) -> void:
 
 # --- 🎯 PAGINATION LOGIC ---
 func _on_prev_character_pressed() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-press")
 	_navigate_character(-1)
 
 
 func _on_next_character_pressed() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-press")	
 	_navigate_character(1)
 
 
@@ -226,6 +232,8 @@ func _update_paginator() -> void:
 
 # --- 🛡️ ROW TOGGLE LOGIC ---
 func _on_row_toggle_toggled(button_pressed: bool) -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-press")	
 	if not is_instance_valid(_current_character) or not GameState.current_party:
 		return
 
@@ -287,6 +295,8 @@ func _on_character_xp_changed(_slot_index: int, _current_xp: int, _max_xp: int) 
 
 
 func _on_close_button_pressed() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-confirm")
 	if overlay_panel:
 		overlay_panel.visible = false
 	GameState.current_mode = GameState.Mode.EXPLORING

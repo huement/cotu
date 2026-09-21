@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://r27b64sws508"]
+
+[ext_resource type="Material" uid="uid://5m55nlere0xe" path="res://resources/Enemies/Kenny/Materials/en_shadow_assassin_mat.tres" id="1_ickup"]
+[ext_resource type="PackedScene" uid="uid://ds6mkgkahu71e" path="res://resources/Enemies/Kenny/character-l.glb" id="2_i5176"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_5dycb"]
+
+[resource]
+script = ExtResource("3_5dycb")
+enemy_id = "en_shadow_assassin"
+enemy_name = "Shadow Assassin"
+model_path = "res://resources/Enemies/Kenny/character-l.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-l.png"
+model_scene = ExtResource("2_i5176")
+custom_material = ExtResource("1_ickup")
+base_level = 6
+max_health = 75
+current_health = 75
+attack_damage = 24
+defense = 4
+speed = 14.0
+initiative_speed = 18
+attack_element = 2
+equipped_weapon_id = "eq_rune_gauntlets"
+max_group_size = 2
+movement_speed = 1.6
+aggro_range_tiles = 5
+can_surprise_player = true
+can_be_surprised = false
+xp_value = 175
+gold_value = 90
+drops_loot = false

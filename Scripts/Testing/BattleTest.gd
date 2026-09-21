@@ -1,15 +1,16 @@
-# res://Scripts/Testing/BattleTest.gd
 class_name BattleTest
 extends Node
 
 ## Standalone Debug Controller for testing combat triggers and UI feedback FX.
 ##
 ## Hotkeys:
-##   [B] - Toggle Combat Encounter ON / OFF (Spawns 1 Scavenger Drone + 1 Zombie Cat)
-##   [H] - Test Chevron Flash Damage FX
+##   [B] - Single Tap: Toggle Scavenger/Zombie Encounter. Double Tap: Spawn Ghost Encounter.
+##   [N] - Direct Spawn Ghost Encounter.
+##   [H] - Test Chevron Flash Damage FX.
 
 @export var enemy_a_path: String = "res://Data/Enemies/EnScavengerCyclops.tres"
 @export var enemy_zombie_path: String = "res://Data/Enemies/EnZombieCat.tres"
+@export var enemy_ghost_path: String = "res://Data/Enemies/EnGhost.tres"
 @export var legacy_zombie_path: String = "res://Data/Enemies/ZombieCat_Base.tres"
 
 
@@ -21,56 +22,74 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_B:
 				_toggle_combat_encounter()
+			KEY_N:
+				_trigger_ghost_encounter()
 			KEY_H:
 				_test_chevron_flash()
 
 
 func _toggle_combat_encounter() -> void:
-	var sb: Node = SignalBus
-	if not is_instance_valid(sb):
-		return
-
-	# 1. Terminate active battle if running
-	var battle_hud: Node = get_tree().root.find_child("BattleHUD", true, false)
-	if is_instance_valid(battle_hud) and battle_hud.get("visible") == true:
-		print("BattleTest: [B Key] Ending active combat session...")
-		if sb.has_signal("combat_ended"):
-			sb.combat_ended.emit(true)
+	if _try_end_active_battle():
 		return
 
 	print("BattleTest: [B Key] Spawning Mixed Encounter (Scavenger Drone + Zombie Cat)...")
 
-	# 2. Safely fetch active party slots from GameState
-	var active_party: Array = []
-	var game_state_node: Node = get_tree().root.get_node_or_null("GameState")
-
-	if is_instance_valid(game_state_node) and "current_party" in game_state_node:
-		var party_res: Resource = game_state_node.get("current_party") as Resource
-		if is_instance_valid(party_res) and "slots" in party_res:
-			active_party = party_res.get("slots") as Array
-
-	# 3. Load Enemy A (Scavenger Drone)
+	var active_party: Array = _get_active_party()
 	var enemy1: Resource = _load_enemy_resource(enemy_a_path, "Scavenger Cyclops", 60, 8.0, 20, 10)
-
-	# 4. Load Enemy B (Zombie Cat) with fallback
 	var enemy2_path: String = enemy_zombie_path if ResourceLoader.exists(enemy_zombie_path) else legacy_zombie_path
 	var enemy2: Resource = _load_enemy_resource(enemy2_path, "Zombie Cat", 75, 7.0, 50, 25)
 
-	# 5. Attach guaranteed test loot tables
 	var test_loot_table: Resource = _build_test_loot_table(2)
 	if is_instance_valid(enemy1) and test_loot_table != null:
 		enemy1.set("loot_table", test_loot_table)
 
 	var enemy_pack: Array[Resource] = [enemy1, enemy2]
+	_broadcast_combat_start(enemy_pack, active_party)
 
-	# 6. Broadcast combat start
-	if sb.has_signal("combat_started"):
+
+func _trigger_ghost_encounter() -> void:
+	if _try_end_active_battle():
+		return
+
+	print("BattleTest: Spawning Ghost Encounter...")
+
+	var active_party: Array = _get_active_party()
+	var ghost_enemy: Resource = _load_enemy_resource(enemy_ghost_path, "Ghost", 50, 11.0, 80, 40)
+	
+	var test_loot_table: Resource = _build_test_loot_table(1)
+	if is_instance_valid(ghost_enemy) and test_loot_table != null:
+		ghost_enemy.set("loot_table", test_loot_table)
+
+	var enemy_pack: Array[Resource] = [ghost_enemy]
+	_broadcast_combat_start(enemy_pack, active_party)
+
+
+func _try_end_active_battle() -> bool:
+	var sb: Node = SignalBus
+	var battle_hud: Node = get_tree().root.find_child("BattleHUD", true, false)
+	if is_instance_valid(battle_hud) and battle_hud.get("visible") == true:
+		print("BattleTest: Ending active combat session...")
+		if is_instance_valid(sb) and sb.has_signal("combat_ended"):
+			sb.combat_ended.emit(true)
+		return true
+	return false
+
+
+func _get_active_party() -> Array:
+	var active_party: Array = []
+	var game_state_node: Node = get_tree().root.get_node_or_null("GameState")
+	if is_instance_valid(game_state_node) and "current_party" in game_state_node:
+		var party_res: Resource = game_state_node.get("current_party") as Resource
+		if is_instance_valid(party_res) and "slots" in party_res:
+			active_party = party_res.get("slots") as Array
+	return active_party
+
+
+func _broadcast_combat_start(enemy_pack: Array[Resource], active_party: Array) -> void:
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and sb.has_signal("combat_started"):
 		sb.combat_started.emit(enemy_pack, active_party)
 
-
-# Update _load_enemy_resource() in res://Scripts/Testing/BattleTest.gd:
-
-# res://Scripts/Testing/BattleTest.gd
 
 func _load_enemy_resource(res_path: String, fallback_name: String, fallback_hp: int, fallback_spd: float, xp: int, gold: int) -> Resource:
 	var enemy_res: Resource = null
@@ -85,7 +104,6 @@ func _load_enemy_resource(res_path: String, fallback_name: String, fallback_hp: 
 		fallback.set("xp_value", xp)
 		fallback.set("gold_value", gold)
 
-		# Assign model_scene and material from base template if available
 		if ResourceLoader.exists(legacy_zombie_path):
 			var base_res: Resource = load(legacy_zombie_path) as Resource
 			if is_instance_valid(base_res):
@@ -100,7 +118,6 @@ func _load_enemy_resource(res_path: String, fallback_name: String, fallback_hp: 
 	return enemy_res
 
 
-## Validates and binds albedo texture into custom_material for 3D GLB rendering
 func _ensure_material_texture(enemy_data: Resource) -> void:
 	if not is_instance_valid(enemy_data):
 		return
@@ -108,7 +125,6 @@ func _ensure_material_texture(enemy_data: Resource) -> void:
 	var custom_mat: Material = enemy_data.get("custom_material") as Material if "custom_material" in enemy_data else null
 	var tex_path: String = str(enemy_data.get("texture_path")) if "texture_path" in enemy_data else ""
 
-	# Build a StandardMaterial3D dynamically if no material exists but texture_path is valid
 	if custom_mat == null and not tex_path.is_empty() and ResourceLoader.exists(tex_path):
 		var new_mat := StandardMaterial3D.new()
 		new_mat.albedo_texture = load(tex_path) as Texture2D

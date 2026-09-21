@@ -19,6 +19,13 @@ enum Facing {
 @export var eye_height: float = 2
 @export var max_shake_offset: Vector3 = Vector3(0.15, 0.15, 0.05)
 @export var shake_decay: float = 3.0
+@export var double_tap_window: float = 0.35  # Max time (seconds) between 1st tap and 2nd press
+@export var hold_turn_threshold: float = 0.25 # Duration (seconds) 2nd press must be held to flip
+
+var _last_backward_tap_time: int = 0
+var _back_hold_start_time: int = 0
+var _is_waiting_for_back_hold: bool = false
+var _back_hold_triggered: bool = false
 
 var _trauma: float = 0.0
 
@@ -101,6 +108,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_check_back_hold_turn()
 	if _trauma > 0.0:
 		_trauma = lerpf(_trauma, 0.0, shake_decay * delta)
 		var shake_power: float = _trauma * _trauma
@@ -117,19 +125,45 @@ func _process(delta: float) -> void:
 		camera.v_offset = 0.0
 
 
+# ==============================================================================
+# MOVEMENT & INPUT HANDLING MAIN
+# ==============================================================================
 func _input(event: InputEvent) -> void:
+	# 🛑 LOCKOUT GUARD: Block forward, strafe, backward, and turning while in combat
 	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
 
-	# E Key or "interact" action checks the tile directly in front of the player
+	# / Key or "interact" action checks the tile directly in front of the player
 	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SLASH):
 		_try_interact_facing_tile()
+		return
+
+	# Release check: If 2nd press was released quickly (not held), treat as a normal 2nd backward step
+	if event.is_action_released("move_backward"):
+		if _is_waiting_for_back_hold:
+			if not _back_hold_triggered and is_instance_valid(grid_movement) and not grid_movement.is_moving:
+				grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+			_is_waiting_for_back_hold = false
+			_back_hold_triggered = false
 		return
 
 	if event.is_action_pressed("move_forward"):
 		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
 	elif event.is_action_pressed("move_backward"):
-		grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+		var current_time: int = Time.get_ticks_msec()
+		var time_diff: float = (current_time - _last_backward_tap_time) / 1000.0
+		
+		if time_diff <= double_tap_window and _last_backward_tap_time > 0:
+			# 2nd press in quick succession: Start hold timer instead of stepping immediately
+			_is_waiting_for_back_hold = true
+			_back_hold_start_time = current_time
+			_back_hold_triggered = false
+			_last_backward_tap_time = 0
+		else:
+			# 1st press or window expired: Step backward immediately
+			_last_backward_tap_time = current_time
+			_is_waiting_for_back_hold = false
+			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_left"):
 		grid_movement.try_step(self, Vector3.LEFT, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_right"):
@@ -430,7 +464,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.95)
 
 
-## Scans all active enemies in the dungeon, calculates grid distance, and triggers clickers / HUD alerts
+# Scans all active enemies in the dungeon, calculates grid distance, and triggers clickers / HUD alerts
 func _check_enemy_proximity() -> void:
 	var nearby_enemy_types: Array[String] = []
 	var min_grid_dist: int = 999
@@ -447,6 +481,10 @@ func _check_enemy_proximity() -> void:
 	for node in enemy_nodes:
 		var enemy_node := node as Node3D
 		if not is_instance_valid(enemy_node) or not enemy_node.visible:
+			continue
+
+		# 👻 GHOST EXEMPTION: Ignore invisible ambush ghosts for HUD alert meter & clickers
+		if enemy_node.has_node("GhostAmbushComponent"):
 			continue
 
 		var enemy_cell: Vector2i = Vector2i.ZERO
@@ -490,3 +528,20 @@ func _check_enemy_proximity() -> void:
 	if get_tree().root.has_node("SignalBus"):
 		GameLogger.combat("ALERT PROXIMITY %d TIER %d" % [min_grid_dist, current_tier])
 		SignalBus.enemy_proximity_changed.emit(min_grid_dist, current_tier)
+
+
+func _check_back_hold_turn() -> void:
+	if _is_waiting_for_back_hold and not _back_hold_triggered:
+		if Input.is_action_pressed("move_backward"):
+			var hold_time: float = (Time.get_ticks_msec() - _back_hold_start_time) / 1000.0
+			if hold_time >= hold_turn_threshold:
+				_back_hold_triggered = true
+				_is_waiting_for_back_hold = false
+				
+				if is_instance_valid(AudioManager):
+					if AudioManager.has_method("play_turn_around_sound"):
+						AudioManager.play_turn_around_sound()
+						
+				grid_movement.try_turn(self, 180.0)
+		else:
+			_is_waiting_for_back_hold = false

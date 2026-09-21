@@ -104,6 +104,8 @@ func _generate_loot_contents() -> void:
 
 
 func _open_loot_ui() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_environment("open-chest")
 	SignalBus.popup_requested.emit(&"CHEST_LOOT", {
 		"chest": self,
 		"loot": stored_loot,

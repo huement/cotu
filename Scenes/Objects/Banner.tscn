@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://ceks7tayr3m7r"]
+
+[ext_resource type="PackedScene" uid="uid://d3lrbuhq0mrg8" path="res://resources/DungeonParts/banner.glb" id="1_f7b26"]
+
+[node name="Banner" type="Node3D"]
+
+[node name="BannerModel" parent="." instance=ExtResource("1_f7b26")]
+transform = Transform3D(1.25, 0, 0, 0, 1.25, 0, 0, 0, 1.25, 0, 0, 0)

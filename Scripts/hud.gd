@@ -185,7 +185,7 @@ func _on_portrait_gui_input(event: InputEvent, slot_index: int) -> void:
 				if sb and sb.has_signal("portrait_clicked"):
 					sb.portrait_clicked.emit(slot_index)
 					if is_instance_valid(AudioManager):
-						AudioManager.play_button_press()
+						AudioManager.play_ui_sound("open-menu")
 
 
 ## Reads incoming roster resources and delegates rendering directly to component slots

@@ -17,3 +17,5 @@ en_plasma_sentinel,Plasma Sentinel,res://resources/Enemies/Kenny/character-o.glb
 en_archanist_husk,Archanist Husk,res://resources/Enemies/Kenny/character-p.glb,res://resources/Enemies/Kenny/texture-p.png,8,TRUE,95,18,6,12,15,BLADE,MAGIC,NONE,con_mana_vial,TRUE,sp_arcane_cataclysm|sp_static_nova,60,TRUE,1,2,1.3,6,TRUE,TRUE,280,160,FALSE
 en_dread_golem,Dread Golem,res://resources/Enemies/Kenny/character-q.glb,res://resources/Enemies/Kenny/texture-q.png,9,TRUE,140,32,12,5,6,BIO,BASH,NONE,NONE,FALSE,NONE,0,FALSE,1,1,0.6,6,FALSE,FALSE,320,180,TRUE
 en_cyber_lich_prime,Cyber Lich Prime,res://resources/Enemies/Kenny/character-r.glb,res://resources/Enemies/Kenny/texture-r.png,10,TRUE,160,25,9,13,16,LIFE,ARCANE,wpn_arcane_staff,NONE,TRUE,sp_arcane_cataclysm|sp_neurotoxin_gas,80,FALSE,1,1,1.4,6,TRUE,FALSE,400,250,FALSE
+en_ghost,Ghost,res://resources/Enemies/ghost.glb,,3,TRUE,50,12,3,11,12,BLADE,MAGIC,NONE,NONE,TRUE,sp_plasma_dart,40,TRUE,1,3,1.2,5,TRUE,"FALSE
+",80,40,TRUE

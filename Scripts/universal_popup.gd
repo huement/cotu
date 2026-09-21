@@ -101,7 +101,8 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 
 func _on_confirm_pressed() -> void:
 	var payload: Dictionary = { }
-
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-confirm")
 	if active_action_type == &"REST":
 		var slider := content_area.get_node_or_null("RestSlider") as HSlider
 		if slider:
@@ -113,8 +114,16 @@ func _on_confirm_pressed() -> void:
 func _clear_content_area() -> void:
 	if confirm_button:
 		confirm_button.visible = false
+	if title_label:
+		title_label.visible = true
+	_apply_popup_margins(false)
+	
 	for child in content_area.get_children():
+		content_area.remove_child(child)
 		child.queue_free()
+		
+	if panel_container:
+		panel_container.reset_size()
 
 
 func display_popup(title_text: String, content_node: Control, options: Dictionary = { }) -> void:
@@ -559,6 +568,8 @@ func _execute_item_use_direct(item: ItemData, inv_slot_idx: int, acting_slot_idx
 				target_cat = gs.get_active_cat()
 
 			if is_instance_valid(target_cat):
+				if is_instance_valid(AudioManager):
+					AudioManager.play_ui_sound("button-confirm")
 				var success: bool = gs.inventory.use_item(inv_slot_idx, target_cat)
 				GameLogger.info("UniversalPopup: Direct Field Item Use result = %s" % [str(success)])
 				if success and get_tree().root.has_node("SignalBus"):
@@ -742,13 +753,17 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 						if is_instance_valid(inv) and is_instance_valid(unequipped):
 							inv.add_item(unequipped)
 
-					_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "EQUIP", "index": slot_idx, "item": item })
+					_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "EQUIP", "index": slot_idx, "item": item })	
+					if is_instance_valid(AudioManager):
+						AudioManager.play_ui_sound("button-confirm")
 					_refresh_party_ui()
 
 				_add_action_button("[ EQUIP ]", equip_action)
 
 			# 🧪 USE Action (Consumables / Potions)
 			elif item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION or item.is_consumable:
+				if is_instance_valid(AudioManager):
+					AudioManager.play_potion_sound()
 				var use_action := func() -> void:
 					match item.target_type:
 						ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:

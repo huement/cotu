@@ -1,13 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bgupgq1arrqa1"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bgupgq1arrqa1"]
 
-[ext_resource type="Texture2D" uid="uid://dxhifqdyl32tp" path="res://resources/Enemies/Kenny/texture-c.png" id="1_cgoab"]
+[ext_resource type="Material" uid="uid://donolkord1605" path="res://resources/Enemies/Kenny/Materials/en_rage_wraith_mat.tres" id="1_cgoab"]
 [ext_resource type="PackedScene" uid="uid://cxvj28bx34438" path="res://resources/Enemies/Kenny/character-c.glb" id="2_qj1hm"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_02w05"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8mbtl"]
-shading_mode = 0
-albedo_texture = ExtResource("1_cgoab")
-texture_filter = 0
 
 [resource]
 script = ExtResource("3_02w05")
@@ -16,7 +11,7 @@ enemy_name = "Rage Wraith"
 model_path = "res://resources/Enemies/Kenny/character-c.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-c.png"
 model_scene = ExtResource("2_qj1hm")
-custom_material = SubResource("StandardMaterial3D_8mbtl")
+custom_material = ExtResource("1_cgoab")
 base_level = 2
 max_health = 42
 current_health = 42

@@ -1,13 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bb7x20wwbb0ou"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bb7x20wwbb0ou"]
 
-[ext_resource type="Texture2D" uid="uid://7pws36njp15x" path="res://resources/Enemies/Kenny/texture-g.png" id="1_7eev3"]
+[ext_resource type="Material" uid="uid://cpsdnur88ejrl" path="res://resources/Enemies/Kenny/Materials/en_zombie_guard_mat.tres" id="1_7eev3"]
 [ext_resource type="PackedScene" uid="uid://khgjcdfj1u0w" path="res://resources/Enemies/Kenny/character-d.glb" id="2_veatu"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_edcpl"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_15m85"]
-shading_mode = 0
-albedo_texture = ExtResource("1_7eev3")
-texture_filter = 0
 
 [resource]
 script = ExtResource("3_edcpl")
@@ -16,7 +11,7 @@ enemy_name = "Corrupted Guard"
 model_path = "res://resources/Enemies/Kenny/character-d.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-g.png"
 model_scene = ExtResource("2_veatu")
-custom_material = SubResource("StandardMaterial3D_15m85")
+custom_material = ExtResource("1_7eev3")
 base_level = 4
 max_health = 75
 current_health = 75

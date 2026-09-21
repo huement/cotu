@@ -35,6 +35,19 @@ extends Node3D
 @onready var model_holder: Node3D = $ModelHolder as Node3D
 @onready var activation_area: Area3D = $ActivationArea as Area3D
 
+# Add near the top of Section 2 (NODE REFERENCES & STATE):
+const ANIM_MAPPINGS: Dictionary = {
+	&"idle": [&"Idle", &"idle", &"IDLE", &"idle_loop", &"Idle_Loop"],
+	&"walk": [&"Walk", &"walk", &"WALK", &"walking", &"Walking", &"walk_loop", &"Walk_Loop", &"Run", &"run"]
+}
+
+const PATROL_OFFSETS: Array[Vector2i] = [
+	Vector2i(0, -1), # North
+	Vector2i(1, 0),  # East
+	Vector2i(0, 1),  # South
+	Vector2i(-1, 0)  # West
+]
+
 var _grid_position: Vector2i = Vector2i.ZERO
 var _is_in_active_combat: bool = false
 var _move_timer: float = 0.0
@@ -42,6 +55,7 @@ var _ai: EnemyAI = EnemyAI.new()
 var _is_moving: bool = false
 var _is_initialized: bool = false
 var _saved_editor_pos: Vector3 = Vector3.ZERO
+var _patrol_index: int = 0
 
 # ==============================================================================
 # 3. LIFECYCLE & SETUP
@@ -169,6 +183,7 @@ func _instantiate_world_model() -> void:
 		model_inst.scale = model_scale
 		_apply_material_to_model(model_inst, lead_resource)
 		model_holder.add_child(model_inst)
+		_play_animation(&"idle", true)
 	else:
 		var mesh_inst := MeshInstance3D.new()
 		var box := BoxMesh.new()
@@ -216,16 +231,6 @@ func _apply_material_override_recursive(node: Node, mat: Material) -> void:
 # ==============================================================================
 # 4. OVERWORLD MOVEMENT & PURSUIT
 # ==============================================================================
-const PATROL_OFFSETS: Array[Vector2i] = [
-	Vector2i(0, -1), # North
-	Vector2i(1, 0),  # East
-	Vector2i(0, 1),  # South
-	Vector2i(-1, 0)  # West
-]
-
-var _patrol_index: int = 0
-
-
 func _process(delta: float) -> void:
 	if not _is_initialized or _is_in_active_combat or enemy_data == null or _is_moving:
 		return
@@ -296,6 +301,8 @@ func _move_to_cell(target_grid_pos: Vector2i) -> void:
 	var target_world_pos: Vector3 = _cell_to_world(target_grid_pos)
 
 	_is_moving = true
+	_play_animation(&"walk", true)
+
 	var tween: Tween = create_tween()
 	tween.tween_property(self, "global_position", target_world_pos, 0.25) \
 		.set_trans(Tween.TRANS_SINE) \
@@ -304,6 +311,7 @@ func _move_to_cell(target_grid_pos: Vector2i) -> void:
 	tween.finished.connect(func() -> void:
 		_grid_position = target_grid_pos
 		_is_moving = false
+		_play_animation(&"idle", true)
 	, CONNECT_ONE_SHOT)
 
 
@@ -389,3 +397,43 @@ func _on_combat_ended(victory: bool) -> void:
 	else:
 		_is_in_active_combat = false
 		show()
+
+
+## Resolves and plays an animation on the child AnimationPlayer of the instantiated model
+func _play_animation(action_key: StringName, loop: bool = true) -> void:
+	if not is_instance_valid(model_holder):
+		return
+
+	var anim_player: AnimationPlayer = model_holder.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if not is_instance_valid(anim_player):
+		return
+
+	var resolved_anim: StringName = _resolve_animation_name(anim_player, action_key)
+	if resolved_anim.is_empty():
+		return
+
+	var anim: Animation = anim_player.get_animation(resolved_anim)
+	if is_instance_valid(anim):
+		anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+
+	anim_player.play(resolved_anim)
+
+
+func _resolve_animation_name(anim_player: AnimationPlayer, action_key: StringName) -> StringName:
+	var candidates: Array = ANIM_MAPPINGS.get(action_key, [action_key])
+
+	# 1. Exact match check
+	for candidate in candidates:
+		var cand_name := StringName(str(candidate))
+		if anim_player.has_animation(cand_name):
+			return cand_name
+
+	# 2. Substring match fallback (e.g. "walking", "Walk_Loop")
+	var available: PackedStringArray = anim_player.get_animation_list()
+	for candidate in candidates:
+		var cand_str: String = str(candidate).to_lower()
+		for anim_name in available:
+			if cand_str in anim_name.to_lower():
+				return StringName(anim_name)
+
+	return &""

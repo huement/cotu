@@ -1,13 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://bys08l4xf6vss"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bys08l4xf6vss"]
 
-[ext_resource type="Texture2D" uid="uid://d2shqsyx6eoqa" path="res://resources/Enemies/Kenny/texture-b.png" id="1_4hlk2"]
+[ext_resource type="Material" uid="uid://dpv0j8fnlkhdv" path="res://resources/Enemies/Kenny/Materials/en_azurian_drone_mat.tres" id="1_4hlk2"]
 [ext_resource type="PackedScene" uid="uid://cvxowlotjrwjk" path="res://resources/Enemies/Kenny/character-b.glb" id="2_7id4h"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_n5028"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ayc7j"]
-shading_mode = 0
-albedo_texture = ExtResource("1_4hlk2")
-texture_filter = 0
 
 [resource]
 script = ExtResource("3_n5028")
@@ -16,7 +11,7 @@ enemy_name = "Azurian Drone"
 model_path = "res://resources/Enemies/Kenny/character-b.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-b.png"
 model_scene = ExtResource("2_7id4h")
-custom_material = SubResource("StandardMaterial3D_ayc7j")
+custom_material = ExtResource("1_4hlk2")
 max_health = 40
 current_health = 40
 attack_damage = 15

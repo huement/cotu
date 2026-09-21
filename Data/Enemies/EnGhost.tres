@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://drw6qwu6guuka"]
+
+[ext_resource type="PackedScene" uid="uid://cxtuxauq6u7qk" path="res://resources/Enemies/ghost.glb" id="1_xfoff"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_m77h0"]
+
+[resource]
+script = ExtResource("2_m77h0")
+enemy_id = "en_ghost"
+enemy_name = "Ghost"
+model_path = "res://resources/Enemies/ghost.glb"
+model_scene = ExtResource("1_xfoff")
+base_level = 3
+max_health = 50
+current_health = 50
+attack_damage = 12
+defense = 3
+speed = 11.0
+weakness_element = 2
+attack_element = 1
+can_cast_spells = true
+spell_ids = Array[String](["sp_plasma_dart"])
+max_mana = 40
+movement_speed = 1.2
+aggro_range_tiles = 5
+can_surprise_player = true
+can_be_surprised = false
+xp_value = 80
+gold_value = 40
