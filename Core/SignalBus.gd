@@ -19,7 +19,7 @@ signal party_moved(new_grid_pos: Vector3i, facing: Direction)
 signal party_roster_updated(roster_slots: Array)
 
 # Combat Triggers
-signal combat_started(enemy_data_or_group: Variant, player_party: Array)
+signal combat_started(enemy_data_or_group: Variant, player_party: Array, enemy_facing: String)
 signal combat_ended(victory: bool)
 signal combat_phase_changed(new_phase: CombatPhase)
 

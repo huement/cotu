@@ -142,7 +142,7 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 	return result
 
 
-func _on_combat_started(enemy_payload: Variant, _player_party: Array) -> void:
+func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_facing: String) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
 		if not is_instance_valid(camera_node):

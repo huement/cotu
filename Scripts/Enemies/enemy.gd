@@ -56,6 +56,16 @@ var _is_moving: bool = false
 var _is_initialized: bool = false
 var _saved_editor_pos: Vector3 = Vector3.ZERO
 var _patrol_index: int = 0
+var _current_facing: Facing = Facing.SOUTH
+
+
+# Cardinal direction state tracking for retro grid exploration.
+enum Facing {
+	NORTH,
+	EAST,
+	SOUTH,
+	WEST,
+}
 
 # ==============================================================================
 # 3. LIFECYCLE & SETUP
@@ -76,6 +86,8 @@ func _ready() -> void:
 
 func _initialize_enemy() -> void:
 	_align_to_grid()
+	if is_instance_valid(model_holder):
+		model_holder.rotation_degrees.y = _facing_to_angle(_current_facing)
 	_is_initialized = true
 
 
@@ -284,10 +296,22 @@ func _step_toward_target(target_cell: Vector2i) -> void:
 		return _is_cell_blocked(cell)
 
 	var step_dir: Vector2i = _ai.get_smart_step(_grid_position, target_cell, is_blocked)
-	if step_dir == Vector2i.ZERO:
-		return
-
-	_move_to_cell(_grid_position + step_dir)
+	
+	if step_dir != Vector2i.ZERO:
+		_move_to_cell(_grid_position + step_dir)
+	else:
+		# Can't move, so just turn to face the target
+		var face_dir: Vector2i = _ai.get_step_vector(_grid_position, target_cell)
+		if face_dir != Vector2i.ZERO:
+			var new_facing: Facing = _vec_to_facing(face_dir)
+			if new_facing != _current_facing:
+				_current_facing = new_facing
+				var target_rot_y: float = _facing_to_angle(_current_facing)
+				
+				var tween: Tween = create_tween()
+				tween.tween_property(model_holder, "rotation_degrees:y", target_rot_y, 0.2) \
+					.set_trans(Tween.TRANS_SINE) \
+					.set_ease(Tween.EASE_OUT)
 
 
 func _is_cell_blocked(cell: Vector2i) -> bool:
@@ -298,21 +322,58 @@ func _is_cell_blocked(cell: Vector2i) -> bool:
 
 
 func _move_to_cell(target_grid_pos: Vector2i) -> void:
+	var move_vec: Vector2i = target_grid_pos - _grid_position
+	_current_facing = _vec_to_facing(move_vec)
+
 	var target_world_pos: Vector3 = _cell_to_world(target_grid_pos)
+	var target_rot_y: float = _facing_to_angle(_current_facing)
 
 	_is_moving = true
 	_play_animation(&"walk", true)
 
-	var tween: Tween = create_tween()
+	var tween: Tween = create_tween().set_parallel()
 	tween.tween_property(self, "global_position", target_world_pos, 0.25) \
 		.set_trans(Tween.TRANS_SINE) \
 		.set_ease(Tween.EASE_IN_OUT)
+	
+	tween.tween_property(model_holder, "rotation_degrees:y", target_rot_y, 0.2) \
+		.set_trans(Tween.TRANS_SINE) \
+		.set_ease(Tween.EASE_OUT)
 
 	tween.finished.connect(func() -> void:
 		_grid_position = target_grid_pos
 		_is_moving = false
 		_play_animation(&"idle", true)
 	, CONNECT_ONE_SHOT)
+
+
+# ==============================================================================
+# 6. DIRECTION & ROTATION HELPERS
+# ==============================================================================
+func _facing_to_angle(facing: Facing) -> float:
+	match facing:
+		Facing.NORTH: return 180.0
+		Facing.EAST: return 270.0
+		Facing.SOUTH: return 0.0
+		Facing.WEST: return 90.0
+	return 0.0
+
+
+func _vec_to_facing(vec: Vector2i) -> Facing:
+	if vec.y > 0: return Facing.SOUTH
+	if vec.y < 0: return Facing.NORTH
+	if vec.x > 0: return Facing.EAST
+	if vec.x < 0: return Facing.WEST
+	return _current_facing # No change if vector is zero
+
+
+func _get_cardinal_string() -> String:
+	match _current_facing:
+		Facing.NORTH: return "NORTH"
+		Facing.EAST: return "EAST"
+		Facing.SOUTH: return "SOUTH"
+		Facing.WEST: return "WEST"
+	return "SOUTH"
 
 
 # ==============================================================================
@@ -351,10 +412,10 @@ func trigger_combat_encounter() -> void:
 		if "slots" in GameState.current_party:
 			party_slots = GameState.current_party.slots
 
-	SignalBus.combat_started.emit(enemy_group, party_slots)
+	SignalBus.combat_started.emit(enemy_group, party_slots, _get_cardinal_string())
 
 
-func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
+func _on_combat_started(enemy_payload: Variant, _party: Array, _enemy_facing: String) -> void:
 	if not visible or _is_in_active_combat:
 		return
 

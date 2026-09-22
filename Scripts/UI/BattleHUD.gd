@@ -313,8 +313,8 @@ func _connect_to_signal_bus() -> void:
 	if not is_instance_valid(sb):
 		return
 
-	if not sb.combat_started.is_connected(_on_combat_started):
-		sb.combat_started.connect(_on_combat_started)
+	if not sb.combat_started.is_connected(on_combat_started):
+		sb.combat_started.connect(on_combat_started)
 	if not sb.combat_ended.is_connected(_on_combat_ended):
 		sb.combat_ended.connect(_on_combat_ended)
 	if not sb.combatant_turn_ready.is_connected(_on_combatant_turn_ready):
@@ -578,7 +578,7 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 	return result
 
 
-func _on_combat_started(enemy_payload: Variant, player_party: Array) -> void:
+func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facing: String) -> void:
 	show()
 	_reset_state()
 	_bind_action_buttons()

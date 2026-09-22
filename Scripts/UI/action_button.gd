@@ -32,6 +32,8 @@ func _update_icon() -> void:
 
 ## Slightly nudges the icon down 2px when pressed for tactile feedback
 func _on_button_down() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_button_press()
 	if icon_display:
 		icon_display.position.y += 2.0
 

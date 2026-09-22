@@ -50,6 +50,7 @@ func try_step(parent_node: Node3D, local_input_dir: Vector3, _current_facing: St
 			var enemy_node: Node3D = map_manager.get_enemy_at_grid_pos(target_grid_pos)
 			if is_instance_valid(enemy_node):
 				var enemy_data: Variant = enemy_node.get("data") if "data" in enemy_node else null
+				var enemy_facing: String = enemy_node.call("_get_cardinal_string") if enemy_node.has_method("_get_cardinal_string") else "SOUTH"
 
 				var party_members: Array = []
 				var gs: Node = get_tree().root.get_node_or_null("GameState")
@@ -58,7 +59,7 @@ func try_step(parent_node: Node3D, local_input_dir: Vector3, _current_facing: St
 						party_members = gs.current_party.get("slots") as Array
 
 				if is_instance_valid(SignalBus):
-					SignalBus.combat_started.emit(enemy_data, party_members)
+					SignalBus.combat_started.emit(enemy_data, party_members, enemy_facing)
 			else:
 				if is_instance_valid(SignalBus):
 					SignalBus.audio_effect_requested.emit(&"wall_bump")

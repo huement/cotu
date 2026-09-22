@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://b3w7x0f6y2w7x"]
+[gd_scene load_steps=18 format=3 uid="uid://b3w7x0f6y2w7x"]
 
 [ext_resource type="Script" uid="uid://dc51atgdj7ays" path="res://Scripts/UI/character_sheet_menu.gd" id="1_vlp1k"]
 [ext_resource type="Texture2D" uid="uid://dh25qbke4twje" path="res://ui/blue-poly.png" id="2_7h3lb"]
@@ -11,6 +11,7 @@
 [ext_resource type="FontFile" uid="uid://c1112jnjnfk4y" path="res://ui/fonts/RedditMono-Regular.ttf" id="5_pxip7"]
 [ext_resource type="PackedScene" uid="uid://c40d51j6bj8e0" path="res://Scenes/UI/SkillsSpellsPanel.tscn" id="6_abcde"]
 [ext_resource type="FontFile" uid="uid://cx1vfygfe1ymt" path="res://ui/fonts/RedditMono-Bold.ttf" id="6_op2n6"]
+[ext_resource type="Texture2D" uid="uid://d3r5u1if3q0w7" path="res://ui/HUD/status_label.png" id="8_op2n6"]
 [ext_resource type="Texture2D" uid="uid://c81ul2rggbys7" path="res://ui/buttons/arrow_basic_w_small.png" id="9_pxip7"]
 [ext_resource type="Texture2D" uid="uid://dnukx0cx6acnm" path="res://ui/buttons/arrow_basic_e_small.png" id="10_op2n6"]
 
@@ -96,7 +97,7 @@ grow_vertical = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 25
+theme_override_constants/margin_bottom = 10
 
 [node name="MainHBox" type="HBoxContainer" parent="OverlayPanel/MarginContainer"]
 layout_mode = 2
@@ -257,7 +258,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9931863, 0.40165225, 0.26637855, 1)
 theme_override_fonts/font = ExtResource("5_pxip7")
-text = "ATTACK"
+text = "ATK TYPE"
 
 [node name="AttackValLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/MarginContainer/VitalsVBox/Row2_BattleStatus/AttackType"]
 unique_name_in_owner = true
@@ -285,20 +286,31 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(400, 250)
 layout_mode = 2
 
-[node name="CurrentStatusEffects" type="Control" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn"]
-visible = false
-layout_mode = 2
-
-[node name="PaginatorSpacer" type="MarginContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn"]
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn"]
+custom_minimum_size = Vector2(0, 160)
 layout_mode = 2
 size_flags_vertical = 10
+theme_override_constants/separation = 20
+
+[node name="CurrentStatusEffects" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/CurrentStatusEffects"]
+layout_mode = 2
+texture = ExtResource("8_op2n6")
+
+[node name="PaginatorSpacer" type="MarginContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
 theme_override_constants/margin_bottom = -20
 
-[node name="HBoxContainer" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-size_flags_vertical = 4
+size_flags_vertical = 10
 
-[node name="CloseButton" type="Button" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer/HBoxContainer"]
+[node name="CloseButton" type="Button" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
@@ -307,31 +319,31 @@ theme_override_fonts/font = ExtResource("3_qfyrq")
 theme_override_font_sizes/font_size = 18
 text = "[ CLOSE ]"
 
-[node name="Control" type="Control" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer/HBoxContainer"]
+[node name="Control" type="Control" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer/HBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer/HBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/margin_top = 0
 
-[node name="CharacterToolbar" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer/HBoxContainer/MarginContainer"]
+[node name="CharacterToolbar" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer/HBoxContainer/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="PrevCharacterButton" type="TextureButton" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer/HBoxContainer/MarginContainer/CharacterToolbar"]
+[node name="PrevCharacterButton" type="TextureButton" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer/HBoxContainer/MarginContainer/CharacterToolbar"]
 unique_name_in_owner = true
 layout_mode = 2
 texture_normal = ExtResource("9_pxip7")
 
-[node name="IndexLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer/HBoxContainer/MarginContainer/CharacterToolbar"]
+[node name="IndexLabel" type="Label" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer/HBoxContainer/MarginContainer/CharacterToolbar"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "0 | 0
 "
 
-[node name="NextCharacterButton" type="TextureButton" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/PaginatorSpacer/HBoxContainer/MarginContainer/CharacterToolbar"]
+[node name="NextCharacterButton" type="TextureButton" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/PaginatorSpacer/HBoxContainer/MarginContainer/CharacterToolbar"]
 unique_name_in_owner = true
 layout_mode = 2
 texture_normal = ExtResource("10_op2n6")

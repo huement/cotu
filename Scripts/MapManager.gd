@@ -7,6 +7,7 @@ class_name MapManager
 @export var default_map_scene: PackedScene
 @export var ceiling_tile_scene: PackedScene = preload("res://Scenes/CeilingTile.tscn") 
 @export var ceiling_height: float = 2.0
+@export var default_bgm_track: String = "Environment/dungeon-creepy-quite"
 
 ## Maps out standard cardinal direction vectors to help calculate steps.
 const DIRECTION_MAP: Dictionary = { "NORTH": Vector3i(0, 0, -1), "SOUTH": Vector3i(0, 0, 1), "EAST": Vector3i(1, 0, 0), "WEST": Vector3i(-1, 0, 0) }
@@ -37,6 +38,43 @@ func switch_map_from_resource(map_resource: PackedScene) -> void:
 		dungeon_grid = active_map_instance as GridMap
 	elif active_map_instance.has_node("GridMap3D"):
 		dungeon_grid = active_map_instance.get_node("GridMap3D") as GridMap
+
+	_apply_map_audio(active_map_instance)
+
+
+func switch_map(scene_path: String) -> void:
+	var map_resource: PackedScene = load(scene_path) as PackedScene
+	if not map_resource:
+		push_error("MapManager: Failed to load map scene at " + scene_path)
+		return
+
+	if is_instance_valid(active_map_instance):
+		active_map_instance.queue_free()
+
+	active_map_instance = map_resource.instantiate() as Node3D
+	add_child(active_map_instance)
+
+	if active_map_instance is GridMap:
+		dungeon_grid = active_map_instance as GridMap
+	else:
+		dungeon_grid = active_map_instance.get_node("GridMap3D") as GridMap
+
+	GameLogger.info("SWITCH MAP FIRED. NOW STARTING AUDIO")
+	_apply_map_audio(active_map_instance)
+
+
+## Evaluates and triggers background music for the newly loaded map instance.
+func _apply_map_audio(map_instance: Node) -> void:
+	if not is_instance_valid(AudioManager):
+		return
+
+	var track_name: String = default_bgm_track
+
+	if is_instance_valid(map_instance):
+		if "bgm_track_name" in map_instance and not str(map_instance.get("bgm_track_name")).is_empty():
+			track_name = str(map_instance.get("bgm_track_name"))
+
+	AudioManager.play_bgm(track_name)
 
 
 ## Converts an absolute 3D world position into 3D GridMap integer coordinates.
@@ -135,24 +173,6 @@ func can_party_move(current_world_pos: Vector3, facing_direction: String) -> boo
 	var target_grid: Vector3i = current_grid + direction_vector
 
 	return not is_tile_blocked(target_grid)
-
-
-func switch_map(scene_path: String) -> void:
-	var map_resource: PackedScene = load(scene_path) as PackedScene
-	if not map_resource:
-		push_error("MapManager: Failed to load map scene at " + scene_path)
-		return
-
-	if is_instance_valid(active_map_instance):
-		active_map_instance.queue_free()
-
-	active_map_instance = map_resource.instantiate() as Node3D
-	add_child(active_map_instance)
-
-	if active_map_instance is GridMap:
-		dungeon_grid = active_map_instance as GridMap
-	else:
-		dungeon_grid = active_map_instance.get_node("GridMap3D") as GridMap
 
 
 func _spawn_ceiling_tile(grid_position: Vector2i) -> void:

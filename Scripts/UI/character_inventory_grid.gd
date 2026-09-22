@@ -105,6 +105,8 @@ func _create_slot_button(item: ItemData, slot_idx: int, count: int = 1) -> void:
 
 		btn.tooltip_text = "%s (x%d)\n%s" % [item.item_name, count, item.description]
 		btn.pressed.connect(func() -> void:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_ui_sound("hud-button-press")
 			if get_tree().root.has_node("SignalBus"):
 				SignalBus.popup_requested.emit("ITEM_ACTIONS", {
 					"item": item,

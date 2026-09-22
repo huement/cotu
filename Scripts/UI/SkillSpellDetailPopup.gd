@@ -38,13 +38,31 @@ func _ready() -> void:
 	_hide_popup()
 
 	if close_button and not close_button.pressed.is_connected(_hide_popup):
-		close_button.pressed.connect(_hide_popup)
+		close_button.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_ui_sound("button-close")
+				_hide_popup()
+		)
 	if cast_button and not cast_button.pressed.is_connected(_go_to_target_page):
-		cast_button.pressed.connect(_go_to_target_page)
+		cast_button.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_button_press()
+				_go_to_target_page()
+		)
 	if target_back_btn and not target_back_btn.pressed.is_connected(_go_to_detail_page):
-		target_back_btn.pressed.connect(_go_to_detail_page)
+		target_back_btn.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_button_press()
+				_go_to_detail_page()
+		)
 	if target_confirm_btn and not target_confirm_btn.pressed.is_connected(_execute_field_ability):
-		target_confirm_btn.pressed.connect(_execute_field_ability)
+		target_confirm_btn.pressed.connect(
+			func():
+				_execute_field_ability()
+		)
 
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
@@ -61,6 +79,8 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 
 ## Displays detailed specifications for a SpellData or SkillData resource
 func open_detail(res: Resource, cat: CatCharacter = null) -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("open-menu")
 	_active_resource = res
 	_active_cat = cat
 	_selected_target_cat = null
@@ -257,6 +277,8 @@ func _create_target_card(cat: CatCharacter) -> Button:
 
 	btn.pressed.connect(
 		func() -> void:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_button_press()
 			_selected_target_cat = cat
 			_highlight_target_card(btn)
 			_update_confirm_button(),

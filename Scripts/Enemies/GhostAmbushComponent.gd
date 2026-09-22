@@ -27,7 +27,7 @@ extends Node
 @export var max_interval_seconds: float = 14.0
 
 ## Subtle screen shake trauma applied periodically while inside the haunt zone
-@export_range(0.05, 0.4) var heartbeat_shake_trauma: float = 0.15
+@export_range(0.3, 0.7) var heartbeat_shake_trauma: float = 0.5
 
 # ==============================================================================
 # 2. RUNTIME STATE
@@ -71,16 +71,26 @@ func _setup_ghost_overrides() -> void:
 		_parent_enemy.activation_area.monitoring = false
 		_parent_enemy.activation_area.monitorable = false
 
+	# 4. Remove from world_enemies group so tile-stepping doesn't trigger a direct bump encounter
+	if _parent_enemy.is_in_group(&"world_enemies"):
+		_parent_enemy.remove_from_group(&"world_enemies")
+
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(_parent_enemy) or not _parent_enemy.visible:
 		return
 
-	if _parent_enemy.get("_is_in_active_combat") == true:
+	_find_player()
+
+	# Check if parent enemy or player is currently engaged in combat
+	var player_in_combat: bool = false
+	if is_instance_valid(_player_ref) and ("_is_in_combat" in _player_ref):
+		player_in_combat = _player_ref.get("_is_in_combat") as bool
+
+	if _parent_enemy.get("_is_in_active_combat") == true or player_in_combat:
 		_reset_ambush_state()
 		return
 
-	_find_player()
 	if not is_instance_valid(_player_ref):
 		return
 
@@ -98,7 +108,6 @@ func _process(delta: float) -> void:
 			_process_ambush_cooldown(delta)
 	else:
 		if _is_ambush_active:
-			# Player fled the haunt zone -> ambush avoided
 			_reset_ambush_state()
 
 
@@ -121,7 +130,17 @@ func _process_ambush_cooldown(delta: float) -> void:
 
 
 func _trigger_ambush() -> void:
-	if not is_instance_valid(_parent_enemy) or _parent_enemy.get("_is_in_active_combat") == true:
+	# 🛡️ Guard: If post-combat immunity or active combat is in progress, abort ambush.
+	if GameState.post_combat_immunity_timer > 0.0:
+		_ambush_interval_timer = get_next_ambush_interval()
+		return
+
+	var player_in_combat: bool = false
+	if is_instance_valid(_player_ref) and ("_is_in_combat" in _player_ref):
+		player_in_combat = _player_ref.get("_is_in_combat") as bool
+
+	if not is_instance_valid(_parent_enemy) or _parent_enemy.get("_is_in_active_combat") == true or player_in_combat:
+		_ambush_interval_timer = get_next_ambush_interval()
 		return
 
 	_is_ambush_active = true
@@ -130,10 +149,12 @@ func _trigger_ambush() -> void:
 	if "current_grid_pos" in _player_ref:
 		_initial_player_cell = _player_ref.get("current_grid_pos") as Vector2i
 
-	# Play ghost alert audio
+	# ⚡ 1. Flash the edge vignette BEFORE playing the alert sound
+	_flash_ghost_ambush()
+
+	# 🔊 2. Play ghost alert audio
 	if is_instance_valid(AudioManager):
-		if AudioManager.has_method("play_enemy_sound"):
-			AudioManager.play_enemy_sound(alert_sound_name)
+		AudioManager.play_enemy_sound(alert_sound_name)
 
 	if is_instance_valid(GameLogger):
 		GameLogger.info("A ghostly presence looms behind you! Turn around quickly! (Reaction time: %.1fs)" % _reaction_timer)
@@ -146,7 +167,7 @@ func _process_active_ambush(delta: float, current_player_cell: Vector2i) -> void
 	var current_yaw: float = _player_ref.rotation_degrees.y
 	var angle_diff: float = absf(wrapf(current_yaw - _initial_player_yaw, -180.0, 180.0))
 
-	# Player dodges if they rotate >= 135 degrees OR step away from the initial ambush cell
+	# Player dodges if they rotate >= 135 degrees OR step away from initial ambush cell
 	if angle_diff >= 135.0 or current_player_cell != _initial_player_cell:
 		if is_instance_valid(GameLogger):
 			GameLogger.info("Ghost ambush avoided! You turned around in time.")
@@ -156,8 +177,11 @@ func _process_active_ambush(delta: float, current_player_cell: Vector2i) -> void
 	# Timer expired -> Trigger combat
 	if _reaction_timer <= 0.0:
 		_is_ambush_active = false
+		if is_instance_valid(AudioManager):
+			AudioManager.play_enemy_sound("ghost_scream")
 		if is_instance_valid(GameLogger):
 			GameLogger.info("The ghost caught you off-guard! Combat initiated!")
+		_flash_ghost_ambush()
 		_parent_enemy.trigger_combat_encounter()
 
 
@@ -182,3 +206,32 @@ func get_effective_reaction_window() -> float:
 func get_next_ambush_interval() -> float:
 	var scale_factor: float = clampf(1.0 - ((ghost_level - 1) * 0.07), 0.3, 1.0)
 	return randf_range(min_interval_seconds, max_interval_seconds) * scale_factor
+
+
+## Emits a rapid burst of edge vignette flashes via SignalBus
+func _flash_ghost_warning() -> void:
+	var sb: Node = SignalBus
+	if not is_instance_valid(sb) or not sb.has_signal(&"edge_flash_requested"):
+		return
+	
+	# Burst Yellow
+	sb.edge_flash_requested.emit(Color("ffff53"), 0.1)
+	await get_tree().create_timer(0.2).timeout
+
+
+## Emits a rapid burst of edge vignette flashes via SignalBus
+func _flash_ghost_ambush() -> void:
+	var sb: Node = SignalBus
+	if not is_instance_valid(sb) or not sb.has_signal(&"edge_flash_requested"):
+		return
+
+	# Burst 1: red
+	sb.edge_flash_requested.emit(Color("ff1a53"), 0.2)
+	await get_tree().create_timer(0.2).timeout
+	
+	# Burst 2: Crimson red
+	sb.edge_flash_requested.emit(Color("ff1a53"), 0.2)
+	await get_tree().create_timer(0.2).timeout
+	
+	# Burst 3: Intense purple warning
+	sb.edge_flash_requested.emit(Color("a800ff"), 0.3)

@@ -1,4 +1,3 @@
-# res://Scripts/UI/battle_ability_popup.gd
 class_name BattleAbilityPopup
 extends CanvasLayer
 
@@ -49,13 +48,33 @@ func _ready() -> void:
 		spells_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SPELLS))
 
 	if is_instance_valid(page1_cancel_btn):
-		page1_cancel_btn.pressed.connect(_close_popup)
+		page1_cancel_btn.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_ui_sound("button-close")
+				_close_popup()
+		)
 	if is_instance_valid(page1_next_btn):
-		page1_next_btn.pressed.connect(_go_to_target_page)
+		page1_next_btn.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_button_press()
+				_go_to_target_page()
+		)
 	if is_instance_valid(page2_back_btn):
-		page2_back_btn.pressed.connect(_go_to_ability_page)
+		page2_back_btn.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_ui_sound("button-close")
+				_go_to_ability_page()
+		)
 	if is_instance_valid(page2_confirm_btn):
-		page2_confirm_btn.pressed.connect(_confirm_and_emit_action)
+		page2_confirm_btn.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_button_press()
+				_confirm_and_emit_action()
+		)
 
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
@@ -64,6 +83,9 @@ func _ready() -> void:
 
 
 func open_ability_menu(cat: CatCharacter, slot_index: int, combatants_data: Array) -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("open-menu")
+
 	_active_cat = cat
 	_active_slot_index = slot_index
 	_combatants_list = combatants_data
@@ -80,10 +102,11 @@ func open_ability_menu(cat: CatCharacter, slot_index: int, combatants_data: Arra
 				c_name = str(cat.get("name"))
 		character_label.text = c_name.to_upper() if not c_name.is_empty() else "UNKNOWN"
 
-	var has_skills: bool = is_instance_valid(cat) and "known_skills" in cat and not cat.known_skills.is_empty()
-	var has_spells: bool = is_instance_valid(cat) and "known_spells" in cat and not cat.known_spells.is_empty()
+	# Determine if character has valid skills or spells
+	var has_valid_skills: bool = _has_valid_abilities(cat, AbilityTab.SKILLS)
+	var has_valid_spells: bool = _has_valid_abilities(cat, AbilityTab.SPELLS)
 
-	if not has_skills and has_spells:
+	if not has_valid_skills and has_valid_spells:
 		_current_tab = AbilityTab.SPELLS
 	else:
 		_current_tab = AbilityTab.SKILLS
@@ -121,6 +144,8 @@ func _go_to_ability_page() -> void:
 
 
 func _on_tab_changed(tab: AbilityTab) -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_button_press()
 	_current_tab = tab
 	_selected_ability = null
 	_update_tab_buttons_ui()
@@ -136,6 +161,72 @@ func _update_tab_buttons_ui() -> void:
 	if is_instance_valid(spells_tab_btn):
 		spells_tab_btn.text = "[ SPELLS ]" if _current_tab == AbilityTab.SPELLS else "  SPELLS  "
 		spells_tab_btn.modulate = Color(0.0, 1.0, 0.8) if _current_tab == AbilityTab.SPELLS else Color(0.5, 0.6, 0.7, 0.5)
+
+
+func _has_valid_abilities(cat: CatCharacter, tab: AbilityTab) -> bool:
+	if not is_instance_valid(cat):
+		return false
+
+	var raw_items: Array = []
+	if tab == AbilityTab.SKILLS:
+		if "known_skills" in cat and cat.known_skills is Array:
+			raw_items = cat.known_skills
+		elif "skills" in cat and cat.skills is Array:
+			raw_items = cat.skills
+	else:
+		if "known_spells" in cat and cat.known_spells is Array:
+			raw_items = cat.known_spells
+		elif "spells" in cat and cat.spells is Array:
+			raw_items = cat.spells
+
+	for res: Variant in raw_items:
+		var ability_res := res as Resource
+		if is_instance_valid(ability_res) and _is_ability_allowed_for_character(ability_res, cat):
+			return true
+	return false
+
+
+func _is_ability_allowed_for_character(ability_res: Resource, cat: CatCharacter) -> bool:
+	if not is_instance_valid(ability_res) or not is_instance_valid(cat):
+		return false
+
+	var char_class_name: String = ""
+	var char_race_name: String = ""
+	var char_level: int = 1
+
+	if "level" in cat:
+		char_level = int(cat.get("level"))
+
+	if "profession" in cat and cat.profession:
+		char_class_name = str(cat.profession.get("profession_name")) if "profession_name" in cat.profession else ""
+	elif "character_class" in cat and cat.character_class:
+		char_class_name = str(cat.character_class.get("class_name")) if "class_name" in cat.character_class else ""
+
+	if "breed" in cat and cat.breed:
+		char_race_name = str(cat.breed.get("breed_name")) if "breed_name" in cat.breed else ""
+	elif "character_race" in cat and cat.character_race:
+		char_race_name = str(cat.character_race.get("race_name")) if "race_name" in cat.character_race else ""
+
+	if ability_res is SpellData:
+		var spell := ability_res as SpellData
+		var is_class_ok: bool = spell.is_class_allowed(char_class_name) if spell.has_method("is_class_allowed") else true
+		var req_level: int = int(spell.get("requirement")) if "requirement" in spell else (int(spell.get("tier")) if "tier" in spell else 1)
+		var meets_level: bool = char_level >= req_level
+		return is_class_ok and meets_level
+
+	if ability_res is SkillData:
+		var skill := ability_res as SkillData
+		var is_class_ok: bool = skill.is_class_allowed(char_class_name) if skill.has_method("is_class_allowed") else true
+		var is_race_ok: bool = skill.is_race_allowed(char_race_name) if skill.has_method("is_race_allowed") else true
+		var req_level: int = int(skill.get("requirement")) if "requirement" in skill else 1
+		var meets_level: bool = char_level >= req_level
+		return is_class_ok and is_race_ok and meets_level
+
+	var is_class_ok: bool = ability_res.is_class_allowed(char_class_name) if ability_res.has_method("is_class_allowed") else true
+	var is_race_ok: bool = ability_res.is_race_allowed(char_race_name) if ability_res.has_method("is_race_allowed") else true
+	var req_level: int = int(ability_res.get("requirement")) if "requirement" in ability_res else 1
+	var meets_level: bool = char_level >= req_level
+	return is_class_ok and is_race_ok and meets_level
 
 
 func _render_ability_list() -> void:
@@ -160,18 +251,23 @@ func _render_ability_list() -> void:
 		elif "spells" in _active_cat and _active_cat.spells is Array:
 			items_to_render = _active_cat.spells
 
-	if items_to_render.is_empty():
+	var valid_items: Array = []
+	for res: Variant in items_to_render:
+		var ability_res := res as Resource
+		if is_instance_valid(ability_res) and _is_ability_allowed_for_character(ability_res, _active_cat):
+			valid_items.append(ability_res)
+
+	if valid_items.is_empty():
 		var empty_lbl: Label = Label.new()
-		empty_lbl.text = "No %s registered." % ["skills" if _current_tab == AbilityTab.SKILLS else "spells"]
+		empty_lbl.text = "No %s available for this character." % ["skills" if _current_tab == AbilityTab.SKILLS else "spells"]
 		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		empty_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 		ability_scroll_list.add_child(empty_lbl)
 		return
 
-	for res: Variant in items_to_render:
-		if is_instance_valid(res as Resource):
-			var btn: Button = _create_ability_row_button(res as Resource)
-			ability_scroll_list.add_child(btn)
+	for ability_res: Resource in valid_items:
+		var btn: Button = _create_ability_row_button(ability_res)
+		ability_scroll_list.add_child(btn)
 
 
 func _create_ability_row_button(ability_res: Resource) -> Button:
@@ -230,6 +326,8 @@ func _create_ability_row_button(ability_res: Resource) -> Button:
 
 	btn.pressed.connect(
 		func() -> void:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_ui_sound("button-press")
 			_selected_ability = ability_res
 			_update_ability_preview(),
 	)
@@ -430,6 +528,8 @@ func _create_target_card_button(combatant: Object) -> Button:
 
 	btn.pressed.connect(
 		func() -> void:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_ui_sound("button-press")
 			_selected_target_id = c_id
 			_selected_target_index = c_slot
 			_highlight_target_button(btn)
@@ -461,11 +561,9 @@ func _is_ally_targeting(ability_res: Resource) -> bool:
 	if not is_instance_valid(ability_res):
 		return false
 
-	# Explicit check for Munitions Assembly / Field crafting
 	if "skill_id" in ability_res and ability_res.get("skill_id") == &"sk_craft_ammo":
 		return true
 
-	# 1. Check explicit String / StringName representation
 	var raw_type: Variant = ability_res.get("target_type") if "target_type" in ability_res else ability_res.get("target")
 	if raw_type is String or raw_type is StringName:
 		var type_str: String = str(raw_type).to_upper()
@@ -474,7 +572,6 @@ func _is_ally_targeting(ability_res: Resource) -> bool:
 		if "PARTY" in type_str or "MEMBER" in type_str or "ALLY" in type_str or "ALLIES" in type_str or "SELF" in type_str or "NONE" in type_str:
 			return true
 
-	# 2. Check effect category / type string
 	if "effect_type" in ability_res:
 		var eff_str: String = str(ability_res.get("effect_type")).to_upper()
 		if eff_str in ["HEAL", "BUFF", "RESTORE", "CRAFT_AMMO"]:
@@ -482,7 +579,6 @@ func _is_ally_targeting(ability_res: Resource) -> bool:
 		if eff_str in ["DAMAGE", "DEBUFF", "ATTACK"]:
 			return false
 
-	# 3. Check ability effect numerical properties
 	var heal_val: int = 0
 	if "heal_amount" in ability_res:
 		heal_val = int(ability_res.get("heal_amount"))
@@ -504,7 +600,6 @@ func _is_ally_targeting(ability_res: Resource) -> bool:
 	if damage_val > 0 and heal_val == 0:
 		return false
 
-	# 4. Integer Enum check (includes 2: SINGLE_ALLY, 3: ALL_PARTY, 4: SELF, 5: NONE)
 	if raw_type is int or raw_type is float:
 		var val: int = int(raw_type)
 		if "item_id" in ability_res or "equipment_slot" in ability_res:
@@ -512,7 +607,6 @@ func _is_ally_targeting(ability_res: Resource) -> bool:
 		else:
 			return val in [2, 3, 4, 5]
 
-	# 5. Name/ID Keyword Fallback
 	var ability_name: String = ""
 	if "spell_name" in ability_res:
 		ability_name = str(ability_res.get("spell_name")).to_lower()

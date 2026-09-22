@@ -236,7 +236,7 @@ func _on_game_state_changed(new_state: int) -> void:
 # ==============================================================================
 # 7. Combat Functions
 # ==============================================================================
-func on_combat_started(enemy_data_or_group: Variant = null, player_party: Array = []) -> void:
+func on_combat_started(enemy_data_or_group: Variant = null, player_party: Array = [], _enemy_facing: String = "") -> void:
 	_set_exploration_ui_visible(false)
 
 	var active_party: Array = player_party
@@ -247,7 +247,7 @@ func on_combat_started(enemy_data_or_group: Variant = null, player_party: Array 
 	if battle_hud:
 		battle_hud.show()
 		if battle_hud.has_method("on_combat_started"):
-			battle_hud.on_combat_started(enemy_data_or_group, active_party)
+			battle_hud.on_combat_started(enemy_data_or_group, active_party, _enemy_facing)
 
 
 func _on_combat_ended(_victory: bool) -> void:

@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="SaveGame" load_steps=42 format=3 uid="uid://bsvjkdtwiu4t5"]
+[gd_resource type="Resource" script_class="SaveGame" load_steps=43 format=3 uid="uid://bsvjkdtwiu4t5"]
 
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_item_data"]
 [ext_resource type="Resource" uid="uid://dpvixjinmu0jg" path="res://Data/Items/Consumables/CatnipPotion.tres" id="2_catnip"]
 [ext_resource type="Resource" uid="uid://17ikk27f56us" path="res://Data/Items/Consumables/PotHp50.tres" id="3_hp50"]
 [ext_resource type="Resource" uid="uid://dc5dglw40smg6" path="res://Data/Items/Consumables/PotMana25.tres" id="4_mp25"]
+[ext_resource type="Resource" uid="uid://hkuygmxotjkf" path="res://Data/Items/Consumables/PotRevive.tres" id="5_hl8ec"]
 [ext_resource type="Script" uid="uid://77aud25st0ns" path="res://Scripts/Resources/inventory.gd" id="5_inventory"]
 [ext_resource type="Script" uid="uid://buux6heqdb0c5" path="res://resources/Party.gd" id="6_party"]
 [ext_resource type="Script" uid="uid://b0ku5fa2jk50e" path="res://resources/CatBreed.gd" id="7_breed"]
@@ -33,7 +34,7 @@
 
 [sub_resource type="Resource" id="Resource_inv"]
 script = ExtResource("5_inventory")
-_items = Array[ExtResource("1_item_data")]([ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("4_mp25"), ExtResource("4_mp25"), ExtResource("4_mp25"), ExtResource("4_mp25"), ExtResource("4_mp25")])
+_items = Array[ExtResource("1_item_data")]([ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("2_catnip"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("3_hp50"), ExtResource("4_mp25"), ExtResource("4_mp25"), ExtResource("4_mp25"), ExtResource("4_mp25"), ExtResource("4_mp25"), ExtResource("5_hl8ec"), ExtResource("5_hl8ec")])
 
 [sub_resource type="Resource" id="Resource_breed_whiskers"]
 script = ExtResource("7_breed")

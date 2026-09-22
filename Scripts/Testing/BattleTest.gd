@@ -88,7 +88,7 @@ func _get_active_party() -> Array:
 func _broadcast_combat_start(enemy_pack: Array[Resource], active_party: Array) -> void:
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and sb.has_signal("combat_started"):
-		sb.combat_started.emit(enemy_pack, active_party)
+		sb.combat_started.emit(enemy_pack, active_party, "SOUTH")
 
 
 func _load_enemy_resource(res_path: String, fallback_name: String, fallback_hp: int, fallback_spd: float, xp: int, gold: int) -> Resource:

@@ -187,6 +187,11 @@ func _update_portrait_image(character: CatCharacter) -> void:
 	if p_rect == null:
 		return
 
+	var hp_val: int = character.get("current_hp") if "current_hp" in character else 1
+	if hp_val <= 0 and ResourceLoader.exists("res://ui/portrait-down.png"):
+		p_rect.texture = load("res://ui/portrait-down.png") as Texture2D
+		return
+
 	if "portrait" in character and character.portrait:
 		p_rect.texture = character.portrait
 	elif "portrait_texture" in character and character.portrait_texture:

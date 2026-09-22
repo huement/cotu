@@ -27,13 +27,29 @@ var current_mode: Mode = Mode.EXPLORING:
 @export var environment_states: Dictionary = {}
 
 var active_character_index: int = 0
+var post_combat_immunity_timer: float = 0.0
+
+
+func _process(delta: float) -> void:
+	if post_combat_immunity_timer > 0.0:
+		post_combat_immunity_timer -= delta
 
 
 func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> void:
 	if action_type == &"BATTLE_VICTORY":
 		_award_victory_xp(extra_data)
+		# Now that the player has dismissed the victory screen, return to the
+		# normal exploration state and start a brief post-combat immunity period
+		# to prevent instant re-engagement from lurking enemies.
+		current_mode = Mode.EXPLORING
+		start_post_combat_immunity(5.0)
 	elif action_type == &"REST":
 		_process_party_rest(extra_data)
+
+
+func start_post_combat_immunity(duration: float) -> void:
+	post_combat_immunity_timer = max(post_combat_immunity_timer, duration)
+	print("[GameState] 🛡️ Post-combat immunity initiated for %.1f seconds." % post_combat_immunity_timer)
 
 
 func get_active_cat() -> Resource:

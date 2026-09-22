@@ -1,7 +1,7 @@
 # res://Core/AudioManager.gd
 extends Node
 
-@export var sfx_pool_size: int = 12
+@export var sfx_pool_size: int = 16
 @export var sfx_3d_pool_size: int = 8
 @export var base_audio_dir: String = "res://Audio/"
 
@@ -13,22 +13,21 @@ var _sfx_3d_index: int = 0
 var _ambient_player: AudioStreamPlayer
 var _bgm_player: AudioStreamPlayer
 var _ui_player: AudioStreamPlayer
-var _env_player: AudioStreamPlayer
-var _enemies_player: AudioStreamPlayer
 
 # Enemy Ambient Loop Registry (EnemyType String -> AudioStreamPlayer)
 var _active_enemy_loops: Dictionary = {}
 var _is_in_combat: bool = false
+var _current_bgm_request: Variant = null
 
 
 func _ready() -> void:
 	_ui_player = AudioStreamPlayer.new()
-	_env_player = AudioStreamPlayer.new()
-	_enemies_player = AudioStreamPlayer.new()
-	_initialize_audio_channels()
+	_ui_player.name = "UIPlayer"
+	_ui_player.bus = &"UI" if AudioServer.get_bus_index("UI") != -1 else &"Master"
 	add_child(_ui_player)
-	add_child(_env_player)
-	add_child(_enemies_player)
+	
+	_initialize_audio_channels()
+	
 	var bus: Node = SignalBus if is_instance_valid(SignalBus) else get_tree().root.get_node_or_null("SignalBus")
 	if is_instance_valid(bus):
 		if bus.has_signal(&"combat_started") and not bus.combat_started.is_connected(_on_combat_started):
@@ -67,11 +66,84 @@ func _initialize_audio_channels() -> void:
 	_bgm_player.bus = &"Music" if AudioServer.get_bus_index("Music") != -1 else &"Master"
 	add_child(_bgm_player)
 
+	# Auto-loop any track played on the BGM player
+	_bgm_player.finished.connect(_bgm_player.play)
+
+
+# ==============================================================================
+# 0. BGM & AMBIENT MUSIC MANAGEMENT
+# ==============================================================================
+## Plays a dedicated background music track from a file path or AudioStream.
+func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true) -> void:
+	if update_saved_request:
+		_current_bgm_request = stream_or_file_name
+
+	var stream: AudioStream = null
+
+	if stream_or_file_name is AudioStream:
+		stream = stream_or_file_name
+	elif stream_or_file_name is String:
+		var raw_path: String = (stream_or_file_name as String).strip_edges()
+		if raw_path.is_empty():
+			return
+
+		var clean_rel_path: String = raw_path.get_basename() + ".mp3"
+		
+		# Build potential paths to resolve relative subfolders (e.g. "Environment/" or "Music/")
+		var candidate_paths: Array[String] = []
+		if raw_path.begins_with("res://"):
+			candidate_paths.append(raw_path)
+		else:
+			candidate_paths.append(base_audio_dir.path_join(clean_rel_path))
+			candidate_paths.append(base_audio_dir.path_join("Music").path_join(clean_rel_path.get_file()))
+			candidate_paths.append(base_audio_dir.path_join("Environment").path_join(clean_rel_path.get_file()))
+
+		var found_path: String = ""
+		for path in candidate_paths:
+			if ResourceLoader.exists(path):
+				found_path = path
+				break
+
+		if not found_path.is_empty():
+			stream = load(found_path) as AudioStream
+		else:
+			push_error("AudioManager: Could not locate BGM audio file for '%s'. Checked candidate paths: %s" % [stream_or_file_name, candidate_paths])
+			return
+
+	if is_instance_valid(stream):
+		if _bgm_player.stream != stream or not _bgm_player.is_playing():
+			_bgm_player.stream = stream
+			_bgm_player.play()
+			GameLogger.combat("BGM playing successfully: %s" % stream.resource_path)
+
+
+## Stops the currently playing background music.
+func stop_bgm() -> void:
+	if is_instance_valid(_bgm_player) and _bgm_player.is_playing():
+		_bgm_player.stop()
+
+
+## Plays looping ambient environmental audio (e.g., "ghost", "dungeon_wind") without touching BGM.
+func play_level_sound(sound_name: String) -> void:
+	var clean_name: String = sound_name.get_basename()
+	var file_path: String = base_audio_dir.path_join("Environment").path_join(clean_name + ".mp3")
+
+	if ResourceLoader.exists(file_path):
+		var stream: AudioStream = load(file_path) as AudioStream
+		if is_instance_valid(stream) and _ambient_player.stream != stream:
+			_ambient_player.stream = stream
+			_ambient_player.play()
+
+
+## Stops active environmental ambient audio.
+func stop_level_sound() -> void:
+	if is_instance_valid(_ambient_player) and _ambient_player.is_playing():
+		_ambient_player.stop()
+
 
 # ==============================================================================
 # 1. WEAPONS & COMBAT SFX
 # ==============================================================================
-## Plays an attack SFX matching the weapon type key ("BLADE", "BASH", "RANGED", "UNARMED", "PLASMA", "PHYSICAL")
 func play_attack_sound(weapon_type: String) -> void:
 	var type_upper: String = weapon_type.to_upper()
 	var filename: String = "physical.mp3"
@@ -88,47 +160,38 @@ func play_attack_sound(weapon_type: String) -> void:
 	elif "PLASMA" in type_upper:
 		filename = "plasma.mp3"
 
-	var full_path: String = base_audio_dir + "Attacks/" + filename
-	if not ResourceLoader.exists(full_path):
-		return
-
-	var stream: AudioStream = load(full_path) as AudioStream
-	if not is_instance_valid(stream):
-		return
-
-	var asp := AudioStreamPlayer.new()
-	asp.stream = stream
-	asp.bus = &"SFX" if AudioServer.get_bus_index("SFX") != -1 else &"Master"
-	add_child(asp)
-	asp.play()
-	asp.finished.connect(asp.queue_free)
+	var full_path: String = base_audio_dir.path_join("Attacks").path_join(filename)
+	_play_stream_from_path(full_path)
 
 
 func play_player_damage() -> void:
 	_play_from_folder("Player/", "damage")
 
 
-## Plays the battle victory fanfare SFX when an encounter ends in victory
 func play_victory_sound() -> void:
 	_play_from_folder("Environment/", "win-battle")
-		
+
 
 func play_turn_around_sound() -> void:
 	_play_from_folder("Player/", "whoosh")
 
+
 # ==============================================================================
 # 2. ENEMY & DEATH SFX
 # ==============================================================================
+## Plays enemy death SFX matching "<enemy_type>_death.mp3" (e.g., "zombie_death.mp3"), falling back to "death.mp3"
 func play_enemy_death_sound(enemy_type: String = "") -> void:
-	var key: String = enemy_type.to_lower()
-	if not key.is_empty() and _has_file("Enemies/", "death_" + key):
-		_play_from_folder("Enemies/", "death_" + key)
-	else:
-		_play_from_folder("Enemies/", "death")
+	var key: String = enemy_type.to_lower().strip_edges()
+	var file_name: String = "death"
+
+	if not key.is_empty() and _has_file("Enemies/", key + "_death"):
+		file_name = key + "_death"
+
+	_play_from_folder("Enemies/", file_name)
 
 
 func play_3d_enemy_sound(sound_name: String, world_pos: Vector3) -> void:
-	var file_path: String = base_audio_dir + "Enemies/" + sound_name.to_lower() + ".mp3"
+	var file_path: String = base_audio_dir.path_join("Enemies").path_join(sound_name.to_lower() + ".mp3")
 	if ResourceLoader.exists(file_path):
 		var stream: AudioStream = load(file_path) as AudioStream
 		if is_instance_valid(stream):
@@ -138,21 +201,52 @@ func play_3d_enemy_sound(sound_name: String, world_pos: Vector3) -> void:
 			player3d.play()
 
 
-## Plays a specific enemy sound file directly via a dedicated Enemy AudioStreamPlayer.
 func play_enemy_sound(enemy_sound_file_name: String) -> void:
 	var clean_name: String = enemy_sound_file_name.get_basename()
 	if clean_name.is_empty():
 		clean_name = "skeleton_footstep"
 
 	var full_path: String = base_audio_dir.path_join("Enemies").path_join(clean_name + ".mp3")
-
 	if not ResourceLoader.exists(full_path):
 		full_path = base_audio_dir.path_join("Enemies").path_join("skeleton_footstep.mp3")
 
-	var stream: AudioStream = load(full_path) as AudioStream
-	if is_instance_valid(stream):
-		_enemies_player.stream = stream
-		_enemies_player.play()
+	_play_stream_from_path(full_path)
+
+
+# ==============================================================================
+# BATTLE MUSIC OVERRIDES
+# ==============================================================================
+func play_battle_music() -> void:
+	# Pass false so _current_bgm_request is not overwritten
+	play_bgm("Environment/dungeon-battle", false)
+
+
+func stop_battle_music() -> void:
+	stop_bgm()
+
+
+# ==============================================================================
+# COMBAT SIGNAL CALLBACKS
+# ==============================================================================
+func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array, _enemy_facing: String) -> void:
+	_is_in_combat = true
+	stop_all_enemy_loops()
+	play_battle_music()
+
+
+func _on_combat_ended(victory: bool) -> void:
+	_is_in_combat = false
+	stop_battle_music()
+	if victory:
+		play_victory_sound()
+		
+	# Delay restarting standard level BGM slightly to allow victory fanfare to play out
+	await get_tree().create_timer(3.0).timeout
+	
+	# Resume standard level background music
+	if _current_bgm_request != null:
+		play_bgm(_current_bgm_request)
+
 
 # ==============================================================================
 # 3. MOVEMENT & PROXIMITY ALERTS
@@ -167,10 +261,8 @@ func play_proximity_clicker(tier: int) -> void:
 	_play_from_folder("Player/", file_name)
 
 
-# Add these methods under Section 4 in res://Core/AudioManager.gd
-
 # ==============================================================================
-# 4. ENVIRONMENT & MASK SFX
+# 4. ENVIRONMENT & ITEMS SFX
 # ==============================================================================
 func play_mask_sound(mask_type: String = "bad") -> void:
 	var file_name: String = "mask-" + mask_type.to_lower()
@@ -181,46 +273,26 @@ func play_magic_sound(element_name: String) -> void:
 	_play_from_folder("Magic/", element_name.to_lower())
 
 
-## Plays looping ambient sound or environmental track (e.g. "ghost", "thunder")
-func play_level_sound(sound_name: String) -> void:
-	var file_path: String = base_audio_dir + "Environment/" + sound_name.to_lower() + ".mp3"
-
-	if ResourceLoader.exists(file_path):
-		var stream: AudioStream = load(file_path) as AudioStream
-		if is_instance_valid(stream) and _ambient_player.stream != stream:
-			_ambient_player.stream = stream
-			_ambient_player.play()
-
-
-## Stops the active environmental ambient audio track
-func stop_level_sound() -> void:
-	if is_instance_valid(_ambient_player) and _ambient_player.is_playing():
-		_ambient_player.stop()
-
-
-## Plays a specific UI sound file directly via a dedicated UI AudioStreamPlayer.
 func play_ui_sound(ui_sound_file_name: String) -> void:
 	var clean_name: String = ui_sound_file_name.get_basename()
 	if clean_name.is_empty():
 		clean_name = "button-press"
 
 	var full_path: String = base_audio_dir.path_join("UI").path_join(clean_name + ".mp3")
-
 	if not ResourceLoader.exists(full_path):
 		full_path = base_audio_dir.path_join("UI").path_join("button-press.mp3")
 
-	var stream: AudioStream = load(full_path) as AudioStream
-	if is_instance_valid(stream):
-		_ui_player.stream = stream
-		_ui_player.play()
+	if ResourceLoader.exists(full_path):
+		var stream: AudioStream = load(full_path) as AudioStream
+		if is_instance_valid(stream):
+			_ui_player.stream = stream
+			_ui_player.play()
 
 
-## Plays the default button press SFX (res://Audio/UI/button-press.mp3)
 func play_button_press() -> void:
 	_play_from_folder("UI/", "button-press")
 
 
-## Plays the environmental area search scan SFX (res://Audio/Player/search.mp3)
 func play_search_sound() -> void:
 	_play_from_folder("Player/", "search")
 
@@ -229,22 +301,17 @@ func play_potion_sound() -> void:
 	_play_from_folder("Player/", "use-potion")
 
 
-## Plays an environmental sound effect from res://Audio/Environment/
 func play_environment(sound_name: String) -> void:
 	var clean_name: String = sound_name.get_basename()
 	if clean_name.is_empty():
 		return
 
 	var full_path: String = base_audio_dir.path_join("Environment").path_join(clean_name + ".mp3")
-
 	if not ResourceLoader.exists(full_path):
 		push_warning("AudioManager: Environmental sound not found at path: " + full_path)
 		return
 
-	var stream: AudioStream = load(full_path) as AudioStream
-	if is_instance_valid(stream):
-		_env_player.stream = stream
-		_env_player.play()
+	_play_stream_from_path(full_path)
 
 
 # ==============================================================================
@@ -252,6 +319,16 @@ func play_environment(sound_name: String) -> void:
 # ==============================================================================
 func _has_file(subfolder: String, base_name: String) -> bool:
 	return ResourceLoader.exists(base_audio_dir + subfolder + base_name + ".mp3")
+
+
+func _play_stream_from_path(full_path: String) -> void:
+	if not ResourceLoader.exists(full_path):
+		return
+	var stream: AudioStream = load(full_path) as AudioStream
+	if is_instance_valid(stream):
+		var player := _get_next_sfx_player()
+		player.stream = stream
+		player.play()
 
 
 func _play_from_folder(subfolder: String, base_name: String) -> void:
@@ -287,33 +364,19 @@ func _get_next_3d_player() -> AudioStreamPlayer3D:
 	return player
 
 
-func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array) -> void:
-	_is_in_combat = true
-	stop_all_enemy_loops()
-
-
-func _on_combat_ended(victory: bool) -> void:
-	_is_in_combat = false
-	if victory:
-		play_victory_sound()
-
-
 # ==============================================================================
 # ENEMY AMBIENT LOOP MANAGEMENT
 # ==============================================================================
-## Evaluates list of nearby enemy types, playing exactly 1 loop per type and stopping far/dead ones.
 func sync_nearby_enemy_loops(nearby_types: Array[String]) -> void:
 	if _is_in_combat:
 		stop_all_enemy_loops()
 		return
 
-	# 1. Stop loops for enemy types no longer within range
 	var active_keys: Array = _active_enemy_loops.keys()
 	for enemy_type in active_keys:
 		if not nearby_types.has(enemy_type):
 			_stop_enemy_loop(enemy_type)
 
-	# 2. Start loops for new nearby enemy types not yet playing
 	for enemy_type in nearby_types:
 		if not _active_enemy_loops.has(enemy_type):
 			_start_enemy_loop(enemy_type)
@@ -366,13 +429,12 @@ func stop_all_enemy_loops() -> void:
 
 
 # ==============================================================================
-# MAGIC SPELL AUDIO ROUTING
+# MAGIC SPELL & SKILL AUDIO ROUTING
 # ==============================================================================
 func _on_spell_vfx_requested(anim_name: String, _element: Variant = null) -> void:
 	play_spell_sound(anim_name)
 
 
-## Plays a magic spell SFX matching the animation key (supports variations like "air-2.mp3")
 func play_spell_sound(anim_name: String) -> void:
 	var key: String = anim_name.to_lower().strip_edges()
 	if key.is_empty() or key == "none":
@@ -380,7 +442,6 @@ func play_spell_sound(anim_name: String) -> void:
 
 	var candidate_files: Array[String] = _find_magic_audio_candidates(key)
 
-	# Fallback keyword extraction if key contains compound words (e.g. "fire_ball" -> "fire")
 	if candidate_files.is_empty():
 		var magic_keywords: Array[String] = ["air", "bolt", "dark", "earth", "fire", "life", "light", "smoke", "water"]
 		for kw in magic_keywords:
@@ -393,19 +454,9 @@ func play_spell_sound(anim_name: String) -> void:
 		return
 
 	var chosen_path: String = candidate_files.pick_random()
-	var stream: AudioStream = load(chosen_path) as AudioStream
-	if not is_instance_valid(stream):
-		return
-
-	var asp := AudioStreamPlayer.new()
-	asp.stream = stream
-	asp.bus = &"SFX" if AudioServer.get_bus_index("SFX") != -1 else &"Master"
-	add_child(asp)
-	asp.play()
-	asp.finished.connect(asp.queue_free)
+	_play_stream_from_path(chosen_path)
 
 
-## Auto-detects direct match and any numbered variation files (e.g. key + ".mp3", key + "-2.mp3")
 func _find_magic_audio_candidates(base_key: String) -> Array[String]:
 	var candidates: Array[String] = []
 	var path_stem: String = base_audio_dir + "Magic/" + base_key
@@ -421,10 +472,6 @@ func _find_magic_audio_candidates(base_key: String) -> Array[String]:
 	return candidates
 
 
-# ==============================================================================
-# SKILL AUDIO ROUTING
-# ==============================================================================
-## Plays a skill SFX matching the formatted skill name (e.g. "Blade Power" -> "blade-power.mp3"), falling back to "default.mp3"
 func play_skill_sound(skill_name: String) -> void:
 	var key: String = skill_name.to_lower().strip_edges().replace(" ", "-").replace("_", "-")
 	if key.is_empty():
@@ -434,16 +481,4 @@ func play_skill_sound(skill_name: String) -> void:
 	if not ResourceLoader.exists(file_path):
 		file_path = base_audio_dir + "Skills/default.mp3"
 
-	if not ResourceLoader.exists(file_path):
-		return
-
-	var stream: AudioStream = load(file_path) as AudioStream
-	if not is_instance_valid(stream):
-		return
-
-	var asp := AudioStreamPlayer.new()
-	asp.stream = stream
-	asp.bus = &"SFX" if AudioServer.get_bus_index("SFX") != -1 else &"Master"
-	add_child(asp)
-	asp.play()
-	asp.finished.connect(asp.queue_free)
+	_play_stream_from_path(file_path)

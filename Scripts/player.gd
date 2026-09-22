@@ -19,13 +19,13 @@ enum Facing {
 @export var eye_height: float = 2
 @export var max_shake_offset: Vector3 = Vector3(0.15, 0.15, 0.05)
 @export var shake_decay: float = 3.0
-@export var double_tap_window: float = 0.35  # Max time (seconds) between 1st tap and 2nd press
-@export var hold_turn_threshold: float = 0.25 # Duration (seconds) 2nd press must be held to flip
+@export var back_hold_to_turn_duration: float = 0.4 # How long to hold back to trigger a 180 turn.
 
-var _last_backward_tap_time: int = 0
-var _back_hold_start_time: int = 0
-var _is_waiting_for_back_hold: bool = false
-var _back_hold_triggered: bool = false
+# -- Back Button Hold-to-Turn State --
+var _is_back_held: bool = false
+var _back_held_start_time: float = 0.0
+var _back_turn_triggered: bool = false
+# ------------------------------------
 
 var _trauma: float = 0.0
 
@@ -65,8 +65,11 @@ func _initialize_player() -> void:
 	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	map_manager = world_root.get_node_or_null("MapManager") as MapManager
 
+	# TEMPORARY FALLBACK: Hardcoded BGM playback for testing.
+	# Necessary while launching directly into pre-loaded dungeon scenes 
+	# where MapManager.switch_map() / switch_map_from_resource() is not called.
 	if is_instance_valid(AudioManager):
-		AudioManager.play_level_sound("dungeon-creepy-quite")
+		AudioManager.play_bgm("Environment/dungeon-creepy-quite")
 		
 	if not grid_map:
 		if map_manager and is_instance_valid(map_manager.dungeon_grid):
@@ -108,7 +111,19 @@ func _physics_process(_delta: float) -> void:
 
 
 func _process(delta: float) -> void:
-	_check_back_hold_turn()
+	# -- NEW: Check for holding the back button to trigger a 180-degree turn --
+	if _is_back_held and not _back_turn_triggered:
+		var hold_time: float = (Time.get_ticks_msec() - _back_held_start_time) / 1000.0
+		if hold_time >= back_hold_to_turn_duration:
+			_back_turn_triggered = true
+			# Prevent the release from also firing a step-back command
+			_is_back_held = false
+			
+			if is_instance_valid(AudioManager) and AudioManager.has_method("play_turn_around_sound"):
+				AudioManager.play_turn_around_sound()
+			grid_movement.try_turn(self, 180.0)
+	# -------------------------------------------------------------------------
+
 	if _trauma > 0.0:
 		_trauma = lerpf(_trauma, 0.0, shake_decay * delta)
 		var shake_power: float = _trauma * _trauma
@@ -138,32 +153,28 @@ func _input(event: InputEvent) -> void:
 		_try_interact_facing_tile()
 		return
 
-	# Release check: If 2nd press was released quickly (not held), treat as a normal 2nd backward step
-	if event.is_action_released("move_backward"):
-		if _is_waiting_for_back_hold:
-			if not _back_hold_triggered and is_instance_valid(grid_movement) and not grid_movement.is_moving:
-				grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
-			_is_waiting_for_back_hold = false
-			_back_hold_triggered = false
+	# --- Simplified Hold-to-Turn Input Handling ---
+	if event.is_action_pressed("move_backward"):
+		# A turn may have already been triggered by _process if the button was held long enough.
+		# In that case, _back_turn_triggered would be true. We reset for a new press.
+		_is_back_held = true
+		_back_held_start_time = Time.get_ticks_msec()
+		_back_turn_triggered = false
 		return
+
+	if event.is_action_released("move_backward"):
+		# If the button is released and a turn hasn't happened, it was a tap. Step back.
+		if _is_back_held and not _back_turn_triggered:
+			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+		
+		# Reset state for the next press cycle
+		_is_back_held = false
+		_back_turn_triggered = false
+		return
+	# ---------------------------------------------
 
 	if event.is_action_pressed("move_forward"):
 		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
-	elif event.is_action_pressed("move_backward"):
-		var current_time: int = Time.get_ticks_msec()
-		var time_diff: float = (current_time - _last_backward_tap_time) / 1000.0
-		
-		if time_diff <= double_tap_window and _last_backward_tap_time > 0:
-			# 2nd press in quick succession: Start hold timer instead of stepping immediately
-			_is_waiting_for_back_hold = true
-			_back_hold_start_time = current_time
-			_back_hold_triggered = false
-			_last_backward_tap_time = 0
-		else:
-			# 1st press or window expired: Step backward immediately
-			_last_backward_tap_time = current_time
-			_is_waiting_for_back_hold = false
-			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_left"):
 		grid_movement.try_step(self, Vector3.LEFT, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_right"):
@@ -178,7 +189,7 @@ func _input(event: InputEvent) -> void:
 # COMBAT SIGNAL CALLBACKS
 # ==============================================================================
 ## 🎯 Updated parameter to Variant to accept both single resources and enemy arrays
-func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array) -> void:
+func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array, _enemy_facing: String) -> void:
 	_is_in_combat = true
 
 
@@ -528,20 +539,3 @@ func _check_enemy_proximity() -> void:
 	if get_tree().root.has_node("SignalBus"):
 		GameLogger.combat("ALERT PROXIMITY %d TIER %d" % [min_grid_dist, current_tier])
 		SignalBus.enemy_proximity_changed.emit(min_grid_dist, current_tier)
-
-
-func _check_back_hold_turn() -> void:
-	if _is_waiting_for_back_hold and not _back_hold_triggered:
-		if Input.is_action_pressed("move_backward"):
-			var hold_time: float = (Time.get_ticks_msec() - _back_hold_start_time) / 1000.0
-			if hold_time >= hold_turn_threshold:
-				_back_hold_triggered = true
-				_is_waiting_for_back_hold = false
-				
-				if is_instance_valid(AudioManager):
-					if AudioManager.has_method("play_turn_around_sound"):
-						AudioManager.play_turn_around_sound()
-						
-				grid_movement.try_turn(self, 180.0)
-		else:
-			_is_waiting_for_back_hold = false
