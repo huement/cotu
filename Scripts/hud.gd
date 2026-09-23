@@ -46,6 +46,12 @@ func _ready() -> void:
 	_connect_signal_bus()
 	_connect_game_state()
 
+	# Defer initial portrait update by one frame to resolve potential race
+	# conditions with GameState initialization.
+	await get_tree().process_frame
+	if "current_party" in GameState and is_instance_valid(GameState.current_party) and "slots" in GameState.current_party:
+		_update_party_portraits(GameState.current_party.slots)
+
 
 ## Initial visual defaults for HUD components
 func _initialize_ui_state() -> void:
@@ -66,10 +72,21 @@ func _connect_signal_bus() -> void:
 
 	_connect_signal_safe(sb, &"party_moved", _on_party_coordinates_changed)
 	_connect_signal_safe(sb, &"party_roster_updated", _update_party_portraits)
+	_connect_signal_safe(sb, &"character_vitals_updated", _on_character_vitals_updated)
+	_connect_signal_safe(sb, &"character_health_changed", _on_character_vitals_updated)
+	_connect_signal_safe(sb, &"character_mana_changed", _on_character_vitals_updated)
+	
 	_connect_signal_safe(sb, &"combat_started", on_combat_started)
 	_connect_signal_safe(sb, &"combat_ended", _on_combat_ended)
 	_connect_signal_safe(sb, &"edge_flash_requested", _on_edge_flash_requested)
 	_connect_signal_safe(sb, &"enemy_proximity_changed", _on_enemy_proximity_changed)
+
+
+## Responds to granular character data changes by refreshing all party portraits
+# Update signature to accept optional parameters so any signal can trigger it cleanly
+func _on_character_vitals_updated(_arg1 = null, _arg2 = null, _arg3 = null) -> void:
+	if GameState.current_party and "slots" in GameState.current_party:
+		_update_party_portraits(GameState.current_party.slots)
 
 
 ## Binds global GameState events and synchronizes initial party/mode state
@@ -82,9 +99,6 @@ func _connect_game_state() -> void:
 
 	if "current_mode" in gs:
 		_on_game_state_changed(gs.current_mode)
-
-	if "current_party" in gs and is_instance_valid(gs.current_party) and "slots" in gs.current_party:
-		_update_party_portraits(gs.current_party.slots)
 
 
 ## Helper utility to check signal presence and guard against duplicate connections

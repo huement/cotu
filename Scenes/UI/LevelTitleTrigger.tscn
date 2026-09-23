@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://ccfv6aub5jas4"]
+
+[ext_resource type="Script" uid="uid://cxmcgfr6gbt3h" path="res://Scripts/Triggers/level_title_trigger.gd" id="1_pvicc"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cv0cr"]
+size = Vector3(5.327881, 4.7451477, 6.5675354)
+
+[node name="Area3D" type="Area3D"]
+script = ExtResource("1_pvicc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.83725, 2.7400584, -3.0300279)
+shape = SubResource("BoxShape3D_cv0cr")

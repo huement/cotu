@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://day7k6mxl84p1"]
+[gd_scene load_steps=16 format=3 uid="uid://day7k6mxl84p1"]
 
 [ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_vm1o7"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="2_kl8rm"]
@@ -13,6 +13,8 @@
 [ext_resource type="PackedScene" uid="uid://d31yfbhogp3bl" path="res://Scenes/Objects/Stones.tscn" id="9_2sldw"]
 [ext_resource type="PackedScene" uid="uid://dewb58r3kqfkd" path="res://Scenes/Objects/WoodStructure.tscn" id="10_1v8oe"]
 [ext_resource type="PackedScene" uid="uid://ceks7tayr3m7r" path="res://Scenes/Objects/Banner.tscn" id="11_hrwa4"]
+[ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="14_58qwl"]
+[ext_resource type="AudioStream" uid="uid://bpdf50t4880cm" path="res://Audio/Environment/new-area.mp3" id="15_515wx"]
 
 [node name="GridMap3D" type="GridMap"]
 mesh_library = ExtResource("1_vm1o7")
@@ -21,7 +23,7 @@ data = {
 }
 
 [node name="SpawnPoint" type="Marker3D" parent="."]
-transform = Transform3D(-4.3711392e-08, 0, 0.9999999, 0, 1, 0, -1.0000001, 0, -4.3711385e-08, 31.146984, 1, -3.265943)
+transform = Transform3D(-4.3711392e-08, 0, 0.9999999, 0, 1, 0, -1.0000001, 0, -4.3711385e-08, 32.81805, 1, -3.265943)
 
 [node name="Enemies" type="Node3D" parent="."]
 
@@ -46,6 +48,28 @@ vertical_offset = 0.0
 enemy_type = "zombie"
 
 [node name="GhostAmbushComponent" type="Node" parent="Enemies/EnemyGhost"]
+script = ExtResource("3_mj35m")
+
+[node name="EnemyGhost2" parent="Enemies" instance=ExtResource("2_kl8rm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.508901, 1.1982272, 29.018486)
+data = ExtResource("3_cv0cr")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = 0.0
+enemy_type = "zombie"
+
+[node name="GhostAmbushComponent" type="Node" parent="Enemies/EnemyGhost2"]
+script = ExtResource("3_mj35m")
+
+[node name="EnemyGhost3" parent="Enemies" instance=ExtResource("2_kl8rm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.884768, 1.1982272, 29.018486)
+data = ExtResource("3_cv0cr")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = 0.0
+enemy_type = "zombie"
+
+[node name="GhostAmbushComponent" type="Node" parent="Enemies/EnemyGhost3"]
 script = ExtResource("3_mj35m")
 
 [node name="Enemy2" parent="Enemies" instance=ExtResource("2_kl8rm")]
@@ -77,7 +101,10 @@ vertical_offset = 0.0
 [node name="Torches" type="Node3D" parent="."]
 
 [node name="Torch" parent="Torches" instance=ExtResource("3_7y88j")]
-transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 4, 14.8251505)
+transform = Transform3D(0.99903595, 0, -0.043898374, 0, 1, 0, 0.043898374, 0, 0.99903595, 2.9513378, 3.8228588, 35.590885)
+
+[node name="Torch16" parent="Torches" instance=ExtResource("3_7y88j")]
+transform = Transform3D(0.9944413, 0, -0.105292164, 0, 1, 0, 0.105292164, 0, 0.9944413, 7.894933, 3.8228588, 35.590885)
 
 [node name="Torch4" parent="Torches" instance=ExtResource("3_7y88j")]
 transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 3, 25.82515)
@@ -95,7 +122,7 @@ transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.0
 transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -36.4959, 3, 11.82515)
 
 [node name="Torch2" parent="Torches" instance=ExtResource("3_7y88j")]
-transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 3, 11.212067)
+transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.412302, 3.3966055, 12.891458)
 
 [node name="Torch3" parent="Torches" instance=ExtResource("3_7y88j")]
 transform = Transform3D(0.003054332, 0, 0.99999535, 0, 1, 0, -0.99999535, 0, 0.003054332, -24.4959, 3, 4.8201523)
@@ -139,7 +166,7 @@ gold_amount = 500
 object_id = "d1_chest_start_01"
 
 [node name="WallMask" parent="." instance=ExtResource("5_74m5t")]
-transform = Transform3D(0.012, 0, 0, 0, 0.011591109, -0.0031058285, 0, 0.0031058285, 0.011591109, 3, 3, 36)
+transform = Transform3D(0.0006635096, 0.009438712, -0.64993113, -0.08362584, 0.6445312, 0.009274918, 0.64459765, 0.08360752, 0.0018722601, 5.464132, 3.1887078, 36)
 lore_title = "BASTET RUINIC FACE"
 lore_text = "Nearing the mask you feel overcome by a feeling of dread. Visions of burning fire and hellish screams fill your mind. "
 object_id = "d1_mask_wall_01"
@@ -184,10 +211,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 4)
 [node name="Columns" type="Node3D" parent="."]
 
 [node name="Column" parent="Columns" instance=ExtResource("7_lgyeg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 36)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.759993, 1, 36)
 
 [node name="Column12" parent="Columns" instance=ExtResource("7_lgyeg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.938387, 36)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.768759, 2.938387, 36)
 
 [node name="Column4" parent="Columns" instance=ExtResource("7_lgyeg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1, 38)
@@ -270,3 +297,6 @@ transform = Transform3D(-2.2499604, 0, 0.013430007, 0, 2.2499993, 0, -0.01343000
 
 [node name="Banner7" parent="Banners" instance=ExtResource("11_hrwa4")]
 transform = Transform3D(0.15655999, 0, 2.244547, 0, 2.249999, 0, -2.244547, 0, 0.15655999, -22.844059, 1.9921982, 30.935635)
+
+[node name="Area3D" parent="." instance=ExtResource("14_58qwl")]
+trigger_sound = ExtResource("15_515wx")

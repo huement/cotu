@@ -231,16 +231,20 @@ func set_active(is_active: bool) -> void:
 		h_rect.visible = is_active
 
 
-func _on_character_health_changed(target_slot: int, current_hp: int) -> void:
+func _on_character_health_changed(target_slot: int, current_hp: int, max_hp: int = -1) -> void:
 	var h_bar: ProgressBar = hp_bar if hp_bar else get_node_or_null("%HPBar") as ProgressBar
 	if target_slot == slot_index and is_instance_valid(h_bar):
+		if max_hp > 0:
+			h_bar.max_value = max_hp
 		var tween: Tween = create_tween()
 		tween.tween_property(h_bar, "value", current_hp, 0.2)
 
 
-func _on_character_mana_changed(target_slot: int, current_mp: int) -> void:
+func _on_character_mana_changed(target_slot: int, current_mp: int, max_mp: int = -1) -> void:
 	var m_bar: ProgressBar = mp_bar if mp_bar else get_node_or_null("%MPBar") as ProgressBar
 	if target_slot == slot_index and is_instance_valid(m_bar):
+		if max_mp > 0:
+			m_bar.max_value = max_mp
 		var tween: Tween = create_tween()
 		tween.tween_property(m_bar, "value", current_mp, 0.2)
 

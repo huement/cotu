@@ -149,15 +149,15 @@ func _trigger_ambush() -> void:
 	if "current_grid_pos" in _player_ref:
 		_initial_player_cell = _player_ref.get("current_grid_pos") as Vector2i
 
-	# ⚡ 1. Flash the edge vignette BEFORE playing the alert sound
-	_flash_ghost_ambush()
+	# ⚡ 1. Trigger the 2 yellow flashes
+	_flash_ghost_warning()
 
 	# 🔊 2. Play ghost alert audio
 	if is_instance_valid(AudioManager):
 		AudioManager.play_enemy_sound(alert_sound_name)
 
 	if is_instance_valid(GameLogger):
-		GameLogger.info("A ghostly presence looms behind you! Turn around quickly! (Reaction time: %.1fs)" % _reaction_timer)
+		GameLogger.combat("A ghostly presence looms behind you! Turn around quickly! (Reaction time: %.1fs)" % _reaction_timer)
 		
 
 func _process_active_ambush(delta: float, current_player_cell: Vector2i) -> void:
@@ -170,7 +170,7 @@ func _process_active_ambush(delta: float, current_player_cell: Vector2i) -> void
 	# Player dodges if they rotate >= 135 degrees OR step away from initial ambush cell
 	if angle_diff >= 135.0 or current_player_cell != _initial_player_cell:
 		if is_instance_valid(GameLogger):
-			GameLogger.info("Ghost ambush avoided! You turned around in time.")
+			GameLogger.combat("Ghost ambush avoided! You turned around in time.")
 		_reset_ambush_state()
 		return
 
@@ -180,8 +180,11 @@ func _process_active_ambush(delta: float, current_player_cell: Vector2i) -> void
 		if is_instance_valid(AudioManager):
 			AudioManager.play_enemy_sound("ghost_scream")
 		if is_instance_valid(GameLogger):
-			GameLogger.info("The ghost caught you off-guard! Combat initiated!")
+			GameLogger.combat("The ghost caught you off-guard! Combat initiated!")
 		_flash_ghost_ambush()
+		var sb: Node = SignalBus
+		if is_instance_valid(sb) and sb.has_signal(&"camera_shake_requested"):
+			sb.camera_shake_requested.emit(0.8)
 		_parent_enemy.trigger_combat_encounter()
 
 
@@ -208,15 +211,18 @@ func get_next_ambush_interval() -> float:
 	return randf_range(min_interval_seconds, max_interval_seconds) * scale_factor
 
 
-## Emits a rapid burst of edge vignette flashes via SignalBus
+## Emits 2 rapid yellow screen flashes via SignalBus for audio-free visibility
 func _flash_ghost_warning() -> void:
 	var sb: Node = SignalBus
 	if not is_instance_valid(sb) or not sb.has_signal(&"edge_flash_requested"):
 		return
-	
-	# Burst Yellow
-	sb.edge_flash_requested.emit(Color("ffff53"), 0.1)
+
+	# Flash 1: Yellow
+	sb.edge_flash_requested.emit(Color("ffff53"), 0.15)
 	await get_tree().create_timer(0.2).timeout
+
+	# Flash 2: Yellow
+	sb.edge_flash_requested.emit(Color("ffff53"), 0.15)
 
 
 ## Emits a rapid burst of edge vignette flashes via SignalBus
@@ -233,5 +239,7 @@ func _flash_ghost_ambush() -> void:
 	sb.edge_flash_requested.emit(Color("ff1a53"), 0.2)
 	await get_tree().create_timer(0.2).timeout
 	
-	# Burst 3: Intense purple warning
+	# Burst 3: Intense purple + red jump scare
 	sb.edge_flash_requested.emit(Color("a800ff"), 0.3)
+	await get_tree().create_timer(0.3).timeout
+	sb.edge_flash_requested.emit(Color("ff1a53"), 0.2)

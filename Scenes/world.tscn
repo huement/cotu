@@ -1,22 +1,16 @@
-[gd_scene load_steps=17 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=13 format=3 uid="uid://ddug86d1wuau7"]
 
-[ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_a02cp"]
 [ext_resource type="PackedScene" uid="uid://dqkr2j65k83yc" path="res://Scenes/UI/HUD.tscn" id="1_e0ngr"]
+[ext_resource type="PackedScene" uid="uid://dhvb1rt0k3ohv" path="res://Scenes/Player.tscn" id="2_ikia7"]
 [ext_resource type="PackedScene" uid="uid://day7k6mxl84p1" path="res://Scenes/dungeon_map.tscn" id="5_5ukr8"]
 [ext_resource type="Script" uid="uid://cbry5h6ur7nue" path="res://Scripts/MapManager.gd" id="5_fo5ed"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="6_5ukr8"]
 [ext_resource type="Script" uid="uid://dtnit1pwpe0ox" path="res://Scripts/3D/EnemyVisualManager.gd" id="20_hmc15"]
-[ext_resource type="Script" uid="uid://b8qk035c6nrth" path="res://Scripts/3D/CameraShake.gd" id="20_qebug"]
-[ext_resource type="PackedScene" uid="uid://d1rfhycwotsyq" path="res://Scenes/3D/weapon_animatior.tscn" id="22_opbav"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
-[ext_resource type="Script" uid="uid://lp1gjanmumd3" path="res://Scripts/Components/GridMovementComponent.gd" id="22_r0ikl"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
 [ext_resource type="PackedScene" uid="uid://bipols0hgobk7" path="res://Scenes/UI/BattleAbilityPopup.tscn" id="26_dt0r1"]
 [ext_resource type="Script" uid="uid://716h0rosm8ii" path="res://Scripts/Testing/BattleTest.gd" id="26_pt3ps"]
 [ext_resource type="Script" uid="uid://dp2c6nndb40o5" path="res://Scripts/UI/toast_notification_manager.gd" id="29_o2rbt"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pl8yv"]
-height = 1.8
 
 [sub_resource type="Environment" id="Environment_3ua1v"]
 fog_enabled = true
@@ -31,34 +25,8 @@ metadata/_edit_horizontal_guides_ = [481.0]
 
 [node name="HUD" parent="." instance=ExtResource("1_e0ngr")]
 
-[node name="Player" type="CharacterBody3D" parent="."]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
-collision_mask = 2
-script = ExtResource("1_a02cp")
-eye_height = 2.5
-
-[node name="Camera3D" type="Camera3D" parent="Player"]
-
-[node name="CollisionRayCast" type="RayCast3D" parent="Player/Camera3D"]
-
-[node name="WeaponAnimatior" parent="Player/Camera3D" instance=ExtResource("22_opbav")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("CapsuleShape3D_pl8yv")
-
-[node name="CameraShake" type="Node" parent="Player" node_paths=PackedStringArray("target_node")]
-script = ExtResource("20_qebug")
-target_node = NodePath("../Camera3D")
-
-[node name="GridMovementComponent" type="Node3D" parent="Player"]
-unique_name_in_owner = true
-script = ExtResource("22_r0ikl")
-
-[node name="RayFront" type="RayCast3D" parent="Player/GridMovementComponent"]
-unique_name_in_owner = true
-target_position = Vector3(0, -1, -2)
-collision_mask = 5
+[node name="Player" parent="." instance=ExtResource("2_ikia7")]
+transform = Transform3D(-1, 0, 1.509958e-07, 0, 1, 0, -1.509958e-07, 0, -1, 0, 0, 0)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)

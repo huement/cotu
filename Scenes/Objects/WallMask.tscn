@@ -1,9 +1,28 @@
-[gd_scene load_steps=3 format=3 uid="uid://bxt4e2ktok26r"]
+[gd_scene load_steps=5 format=3 uid="uid://bxt4e2ktok26r"]
 
 [ext_resource type="Script" uid="uid://cxhjc8ddmrhcs" path="res://Scripts/Environment/WallMask.gd" id="1_2buoy"]
 [ext_resource type="PackedScene" uid="uid://35ttgiiulljc" path="res://resources/DungeonParts/catmask.glb" id="1_hhuw2"]
+[ext_resource type="PackedScene" uid="uid://cspwymwfvj2yo" path="res://resources/DungeonParts/bastet_mask.glb" id="3_csw8e"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1gcyp"]
+height = 4.904
+radius = 1.746
 
 [node name="WallMask" type="Node3D"]
 script = ExtResource("1_2buoy")
 
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("CylinderShape3D_1gcyp")
+
 [node name="BastetMask" parent="." instance=ExtResource("1_hhuw2")]
+visible = false
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("3_csw8e")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+
+[node name="f753bffa7c71405a80c4daf1fd587219_fbx" parent="Sketchfab_Scene/Sketchfab_model" index="0"]
+transform = Transform3D(1, 0, 0, 0, -4.3711392e-08, -1, 0, 1, -4.3711392e-08, 0, 0, 2.2)
+
+[editable path="Sketchfab_Scene"]
