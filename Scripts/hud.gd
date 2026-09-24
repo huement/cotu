@@ -34,6 +34,10 @@ extends CanvasLayer
 	%Slot5_Portrait as PartySlotPortrait,
 ]
 
+# Nine HUD Voice Assistant Reference
+@onready var nine_hud: Control = %NineHud as Control
+
+var _current_enemy_tier: int = 0
 var _proximity_step_count: int = 0
 
 # ==============================================================================
@@ -80,6 +84,8 @@ func _connect_signal_bus() -> void:
 	_connect_signal_safe(sb, &"combat_ended", _on_combat_ended)
 	_connect_signal_safe(sb, &"edge_flash_requested", _on_edge_flash_requested)
 	_connect_signal_safe(sb, &"enemy_proximity_changed", _on_enemy_proximity_changed)
+	# 🎯 Intercept popup action buttons (e.g. REST, SEARCH, LOOK)
+	_connect_signal_safe(sb, &"popup_requested", _on_popup_requested)
 
 
 ## Responds to granular character data changes by refreshing all party portraits
@@ -309,8 +315,39 @@ func _on_edge_flash_requested(color: Color, duration: float = 0.4) -> void:
 
 
 func _on_enemy_proximity_changed(_min_dist: int, current_tier: int) -> void:
+	_current_enemy_tier = current_tier
 	_update_enemy_in_range_indicator(current_tier)
 	_handle_proximity_edge_flash(current_tier)
+
+
+## Handles popup requests from ActionButtons (REST, SEARCH, etc.)
+func _on_popup_requested(action_type: String) -> void:
+	if action_type == "REST":
+		if _are_monsters_nearby():
+			if is_instance_valid(nine_hud) and nine_hud.has_method("make_nine_talk"):
+				nine_hud.make_nine_talk("cant-sleep-here")
+			return
+			
+	# Proceed with opening standard popups here if allowed
+
+
+## Returns true if enemies are currently in threat range
+func _are_monsters_nearby() -> bool:
+	# 1. Primary check: Proximity tracker tier (1 = nearby 3-5 tiles, 2 = close 1-2 tiles)
+	if _current_enemy_tier > 0:
+		return true
+
+	# 2. Fallback check: 3D distance check against all nodes in "enemies" group
+	if not is_instance_valid(player):
+		return false
+
+	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	for enemy in enemies:
+		if enemy is Node3D and enemy.is_visible_in_tree():
+			if player.global_position.distance_to(enemy.global_position) <= 8.0:
+				return true
+
+	return false
 
 
 ## Triggers proportional edge vignette flashes based on current threat tier

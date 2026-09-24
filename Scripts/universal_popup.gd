@@ -22,6 +22,8 @@ var _preview_icon: TextureRect = null
 var _items_use_btn: Button = null
 var _items_drop_btn: Button = null
 
+const GALAXIA_FONT: Font = preload("res://ui/fonts/GALAXIA.otf")
+
 const BATTLE_VICTORY_SCENE: PackedScene = preload("res://Scenes/UI/BattleVictoryPopup.tscn")
 @export var skills_spells_popup_scene: PackedScene = preload("res://Scenes/UI/SkillsSpellsPopup.tscn")
 
@@ -33,6 +35,11 @@ var _shake_timer: float = 0.0
 
 
 func _ready() -> void:
+	if title_label:
+		title_label.add_theme_font_override("font", GALAXIA_FONT)
+		title_label.add_theme_font_size_override("font_size", 18) # Optional size adjustment
+		title_label.add_theme_color_override("font_color", Color(0.0, 1.0, 1.0, 1.0))
+
 	if panel_container:
 		panel_container.visible = false
 	if background_dimmer:
@@ -69,25 +76,25 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 			title_label.text = "VICTORY ACHIEVED"
 			_build_battle_victory_ui(data)
 		&"SEARCH":
-			title_label.text = "SCANNING SYSTEM CORRIDORS"
+			title_label.text = "Scanning System Corridors"
 			_build_search_ui()
 		&"REST":
-			title_label.text = "SET PURRGATORY CAMP DURATION"
+			title_label.text = "Set Purrogate Camp Duration"
 			_build_rest_ui()
 		&"ITEMS":
-			title_label.text = "USEABLE ITEMS"
+			title_label.text = "Useable Items"
 			_build_items_inventory_ui()
 		&"ITEM_ACTIONS":
-			title_label.text = "ITEM ACTION PROTOCOL"
+			title_label.text = "Item Action Protocol"
 			_build_item_actions_ui(data)
 		&"ALL_SKILLS", &"ALL_SPELLS", &"SPELLBOOK":
 			title_label.text = ""
 			_build_skills_spells_popup_ui(action_type, data)
 		&"CHEST_LOOT":
-			title_label.text = "CONTAINER CONTENTS"
+			title_label.text = "Container Contents"
 			_build_chest_loot_ui(data)
 		&"LORE_POPUP":
-			var title_str: String = str(data.get("title", "ARCHIVE LOG")).to_upper()
+			var title_str: String = str(data.get("title", "Archive Log")).to_upper()
 			title_label.text = title_str
 			_build_lore_popup_ui(data)
 		_:
@@ -309,8 +316,9 @@ func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_s
 	_clear_content_area()
 
 	var header_lbl := Label.new()
-	header_lbl.text = "SELECT TARGET FOR %s" % item.item_name.to_upper()
+	header_lbl.text = "Select Target For %s" % item.item_name
 	header_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header_lbl.add_theme_font_override("font", GALAXIA_FONT) # Applies GALAXIA font
 	header_lbl.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8, 1.0))
 	header_lbl.add_theme_font_size_override("font_size", 16)
 	content_area.add_child(header_lbl)
@@ -613,6 +621,11 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 	var slot_name: String = data.get("slot", "")
 	var slot_idx: int = data.get("index", -1)
 
+	# Top Margin Container for the label
+	var top_margin := MarginContainer.new()
+	top_margin.add_theme_constant_override("margin_top", 12) # Adjust top margin pixels as needed
+	content_area.add_child(top_margin)
+
 	var name_label := Label.new()
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
@@ -623,7 +636,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 	else:
 		name_label.text = "NO ITEM SELECTED"
 
-	content_area.add_child(name_label)
+	top_margin.add_child(name_label)
 
 	var cat: Resource = data.get("character", null) as Resource
 	if not is_instance_valid(cat) and GameState.has_method("get_active_cat"):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=430 format=3 uid="uid://ci4b8iodvo08n"]
+[gd_scene load_steps=431 format=3 uid="uid://ci4b8iodvo08n"]
 
 [ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
 [ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://bpmd16bustmsp" path="res://ui/BATTLE/playerCounterBG.png" id="10_55foo"]
 [ext_resource type="Texture2D" uid="uid://wxg36hnmjey4" path="res://ui/BATTLE/cmd_magic.png" id="10_gv3jx"]
 [ext_resource type="Texture2D" uid="uid://f7h57ejroclo" path="res://ui/BATTLE/cmd_item.png" id="11_gv3jx"]
+[ext_resource type="Texture2D" uid="uid://dt7menobwtt0h" path="res://ui/BATTLE/btnRight.png" id="12_28ab4"]
 [ext_resource type="Texture2D" uid="uid://cpl5l6wc3l6q1" path="res://ui/BATTLE/cmd_run.png" id="12_s15b2"]
 [ext_resource type="Texture2D" uid="uid://dyek5vtk5dj0r" path="res://ui/BATTLE/cmd_auto.png" id="15_lrf55"]
 [ext_resource type="Script" uid="uid://dp2c6nndb40o5" path="res://Scripts/UI/toast_notification_manager.gd" id="19_cvbxj"]
@@ -3055,17 +3056,13 @@ bar_height = 8.0
 
 [node name="ActionBar" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -40.0
-offset_right = 20.0
-grow_horizontal = 2
-grow_vertical = 0
+layout_mode = 0
+offset_left = 375.0
+offset_top = 565.0
+offset_right = 822.0
+offset_bottom = 636.0
+scale = Vector2(0.95, 0.95)
+theme_override_constants/separation = 4
 script = ExtResource("9_lrf55")
 
 [node name="AttackButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
@@ -3076,7 +3073,9 @@ icon_texture = ExtResource("8_faao3")
 [node name="DefendButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
 unique_name_in_owner = true
 layout_mode = 2
+texture_normal = ExtResource("12_28ab4")
 icon_texture = ExtResource("9_55foo")
+direction = 1
 
 [node name="MagicButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
 unique_name_in_owner = true
@@ -3087,6 +3086,7 @@ icon_texture = ExtResource("10_gv3jx")
 unique_name_in_owner = true
 layout_mode = 2
 icon_texture = ExtResource("11_gv3jx")
+direction = 1
 
 [node name="RunButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]
 unique_name_in_owner = true
@@ -3166,6 +3166,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 707.0
+offset_top = -172.0
+offset_right = 707.0
+offset_bottom = -172.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2

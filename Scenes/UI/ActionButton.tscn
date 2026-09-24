@@ -1,11 +1,19 @@
-[gd_scene load_steps=5 format=3 uid="uid://j53noahp8p12"]
+[gd_scene load_steps=7 format=3 uid="uid://j53noahp8p12"]
 
 [ext_resource type="Texture2D" uid="uid://801ss3y0hkd1" path="res://ui/BATTLE/btnLeft.png" id="1_8ndrf"]
+[ext_resource type="Shader" uid="uid://85y4hjmvh5t6" path="res://Shaders/portrait_shine.gdshader" id="1_y5bge"]
 [ext_resource type="Texture2D" uid="uid://b1j2m08oyc3fr" path="res://ui/BATTLE/btnLeftPressed.png" id="2_y5bge"]
 [ext_resource type="Texture2D" uid="uid://dthmx5byfi2i4" path="res://ui/BATTLE/btnLeftHover.png" id="3_gw1qk"]
 [ext_resource type="Script" uid="uid://cbok3hjnyvocm" path="res://Scripts/UI/action_button.gd" id="4_8c6fd"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gw1qk"]
+shader = ExtResource("1_y5bge")
+shader_parameter/shine_progress = -0.5
+shader_parameter/shine_size = 0.25
+shader_parameter/shine_color = Color(1, 1, 0.8, 0.6)
+
 [node name="ActionButton" type="TextureButton"]
+material = SubResource("ShaderMaterial_gw1qk")
 texture_normal = ExtResource("1_8ndrf")
 texture_pressed = ExtResource("2_y5bge")
 texture_hover = ExtResource("3_gw1qk")

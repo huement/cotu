@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt7menobwtt0h"
-path="res://.godot/imported/btnRight.png-ba8f88bbc504cbd954ac43994e42fd13.ctex"
+uid="uid://clnarjnkium7c"
+path="res://.godot/imported/nine_cyan.png-e8c41eb264d358f97be69f3189a11343.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui/BATTLE/btnRight.png"
-dest_files=["res://.godot/imported/btnRight.png-ba8f88bbc504cbd954ac43994e42fd13.ctex"]
+source_file="res://ui/HUD/nine_cyan.png"
+dest_files=["res://.godot/imported/nine_cyan.png-e8c41eb264d358f97be69f3189a11343.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt7menobwtt0h"
-path="res://.godot/imported/btnRight.png-ba8f88bbc504cbd954ac43994e42fd13.ctex"
+uid="uid://nmtwjyfous7b"
+path="res://.godot/imported/nine_frame.png-f0af3e977dfd03b22bf6aa5e92633571.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui/BATTLE/btnRight.png"
-dest_files=["res://.godot/imported/btnRight.png-ba8f88bbc504cbd954ac43994e42fd13.ctex"]
+source_file="res://ui/HUD/nine_frame.png"
+dest_files=["res://.godot/imported/nine_frame.png-f0af3e977dfd03b22bf6aa5e92633571.ctex"]
 
 [params]
 

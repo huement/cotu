@@ -13,6 +13,7 @@ var _sfx_3d_index: int = 0
 var _ambient_player: AudioStreamPlayer
 var _bgm_player: AudioStreamPlayer
 var _ui_player: AudioStreamPlayer
+var _voice_player: AudioStreamPlayer
 
 # Enemy Ambient Loop Registry (EnemyType String -> AudioStreamPlayer)
 var _active_enemy_loops: Dictionary = {}
@@ -25,7 +26,12 @@ func _ready() -> void:
 	_ui_player.name = "UIPlayer"
 	_ui_player.bus = &"UI" if AudioServer.get_bus_index("UI") != -1 else &"Master"
 	add_child(_ui_player)
-	
+		
+	_voice_player = AudioStreamPlayer.new()
+	_voice_player.name = "VoicePlayer"
+	_voice_player.bus = &"Voice" if AudioServer.get_bus_index("Voice") != -1 else &"Master"
+	add_child(_voice_player)
+
 	_initialize_audio_channels()
 	
 	var bus: Node = SignalBus if is_instance_valid(SignalBus) else get_tree().root.get_node_or_null("SignalBus")
@@ -482,3 +488,31 @@ func play_skill_sound(skill_name: String) -> void:
 		file_path = base_audio_dir + "Skills/default.mp3"
 
 	_play_stream_from_path(file_path)
+
+
+# ==============================================================================
+# 5. VOICE & ASSISTANT DIALOGUE
+# ==============================================================================
+## Plays dialogue audio files on the dedicated Voice bus (e.g. "nine_intro" -> res://Audio/Voice/nine_intro.mp3)
+func play_voice(sound_name: String) -> void:
+	var clean_name: String = sound_name.get_basename()
+	var full_path: String = base_audio_dir.path_join("Voice").path_join(clean_name + ".mp3")
+	
+	if not ResourceLoader.exists(full_path):
+		full_path = base_audio_dir.path_join(clean_name + ".mp3")
+
+	if ResourceLoader.exists(full_path):
+		var stream: AudioStream = load(full_path) as AudioStream
+		if is_instance_valid(stream):
+			_voice_player.stream = stream
+			_voice_player.play()
+	else:
+		push_warning("AudioManager: Voice sound file not found at path: " + full_path)
+
+
+func is_voice_playing() -> bool:
+	return is_instance_valid(_voice_player) and _voice_player.is_playing()
+
+
+func get_voice_player() -> AudioStreamPlayer:
+	return _voice_player

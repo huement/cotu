@@ -1,13 +1,16 @@
-[gd_scene load_steps=16 format=3 uid="uid://day7k6mxl84p1"]
+[gd_scene load_steps=20 format=3 uid="uid://day7k6mxl84p1"]
 
 [ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_vm1o7"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="2_kl8rm"]
 [ext_resource type="PackedScene" uid="uid://obtfq1vnf1h8" path="res://Scenes/Objects/Torch.tscn" id="3_7y88j"]
 [ext_resource type="Resource" uid="uid://bys08l4xf6vss" path="res://Data/Enemies/EnAzurianDrone.tres" id="3_bmgh2"]
 [ext_resource type="Resource" uid="uid://drw6qwu6guuka" path="res://Data/Enemies/EnGhost.tres" id="3_cv0cr"]
+[ext_resource type="Script" uid="uid://biejn7cqkavs6" path="res://Scripts/Enemies/BossEnemy.gd" id="3_hgw32"]
 [ext_resource type="Script" uid="uid://cdkuyybx3dwf0" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="3_mj35m"]
 [ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="4_8wxa2"]
 [ext_resource type="PackedScene" uid="uid://bxt4e2ktok26r" path="res://Scenes/Objects/WallMask.tscn" id="5_74m5t"]
+[ext_resource type="Resource" uid="uid://bcjsxojot82cj" path="res://Data/Enemies/EnScavengerCyclops.tres" id="5_hgw32"]
+[ext_resource type="Resource" uid="uid://bgupgq1arrqa1" path="res://Data/Enemies/EnRageWraith.tres" id="5_llvb1"]
 [ext_resource type="PackedScene" uid="uid://dquxxvchp5mey" path="res://Scenes/Objects/Barrel.tscn" id="6_774x7"]
 [ext_resource type="PackedScene" uid="uid://bqsvcn2tt1sxq" path="res://Scenes/Objects/Column.tscn" id="7_lgyeg"]
 [ext_resource type="PackedScene" uid="uid://d31yfbhogp3bl" path="res://Scenes/Objects/Stones.tscn" id="9_2sldw"]
@@ -15,6 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://ceks7tayr3m7r" path="res://Scenes/Objects/Banner.tscn" id="11_hrwa4"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="14_58qwl"]
 [ext_resource type="AudioStream" uid="uid://bpdf50t4880cm" path="res://Audio/Environment/new-area.mp3" id="15_515wx"]
+[ext_resource type="Texture2D" uid="uid://devj0vld35c7r" path="res://ui/LOGOS/smilodon.png" id="19_7dpvn"]
 
 [node name="GridMap3D" type="GridMap"]
 mesh_library = ExtResource("1_vm1o7")
@@ -23,7 +27,7 @@ data = {
 }
 
 [node name="SpawnPoint" type="Marker3D" parent="."]
-transform = Transform3D(-4.3711392e-08, 0, 0.9999999, 0, 1, 0, -1.0000001, 0, -4.3711385e-08, 32.81805, 1, -3.265943)
+transform = Transform3D(-4.3711392e-08, 0, 0.9999999, 0, 1, 0, -1.0000001, 0, -4.3711385e-08, 33.347435, 1, -2.7381024)
 
 [node name="Enemies" type="Node3D" parent="."]
 
@@ -32,6 +36,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -2)
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
 enemy_type = "zombie"
+
+[node name="EnemyBoss" parent="Enemies" instance=ExtResource("2_kl8rm")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 19.008814, 0, 41.26681)
+script = ExtResource("3_hgw32")
+default_facing = 2
+model_scale_multiplier = 1.5
+minion_data = ExtResource("5_hgw32")
+minion_count = 2
+data = ExtResource("5_llvb1")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = 0.0
 
 [node name="Enemy6" parent="Enemies" instance=ExtResource("2_kl8rm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8678656, 1.0723691, -13.297519)
@@ -299,4 +314,14 @@ transform = Transform3D(-2.2499604, 0, 0.013430007, 0, 2.2499993, 0, -0.01343000
 transform = Transform3D(0.15655999, 0, 2.244547, 0, 2.249999, 0, -2.244547, 0, 0.15655999, -22.844059, 1.9921982, 30.935635)
 
 [node name="Area3D" parent="." instance=ExtResource("14_58qwl")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 24.081873, 1.191164, -2.862204)
+level_title = "Dungeon
+Rock Btm"
 trigger_sound = ExtResource("15_515wx")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(0.49285173, 0.08424469, 0, -0.08424469, 0.49285173, 0, 0, 0, 0.5, 21.597672, 3.27591, 0.38256145)
+sorting_offset = 0.1
+modulate = Color(1, 1, 1, 0.63529414)
+shaded = true
+texture = ExtResource("19_7dpvn")

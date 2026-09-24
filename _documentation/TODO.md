@@ -73,7 +73,7 @@
   - Render the 3D dungeon view inside a windowed `SubViewportContainer` with a retro DOS/CRT shader overlay (scanlines, chromatic aberration, curvature).
 - [ ] **Terminal Dialogue & Interrogation System**
   - ANSI/ASCII-inspired dialogue interface for Guild-Corp contacts and competitive street faction NPCs.
-- [ ] **Sound Effects & Audio Signal System**
+- [x] **Sound Effects & Audio Signal System**
   - Connect audio triggers to `SignalBus.gd` for footsteps, melee swings, spell impacts, button clicks, and camera shake bursts.
 - [x] **Spell & Combat Animations**
   - Spells have their own animations

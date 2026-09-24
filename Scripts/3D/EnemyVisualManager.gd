@@ -255,9 +255,14 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 	if not is_instance_valid(camera_node):
 		return
 
+	# Dynamically tighten spacing as enemy count increases
+	var effective_spacing: float = horizontal_spacing
+	if total_enemies >= 3:
+		effective_spacing = horizontal_spacing * 0.65  # Squeezes groups of 3+ together
+
 	var horizontal_offset: float = 0.0
 	if total_enemies > 1:
-		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * horizontal_spacing
+		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * effective_spacing
 
 	var cam_transform: Transform3D = camera_node.global_transform
 

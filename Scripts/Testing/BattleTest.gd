@@ -7,6 +7,7 @@ extends Node
 ##   [B] - Single Tap: Toggle Scavenger/Zombie Encounter. Double Tap: Spawn Ghost Encounter.
 ##   [N] - Direct Spawn Ghost Encounter.
 ##   [H] - Test Chevron Flash Damage FX.
+##   [V] - Test Nine HUD Assistant Voice ("cant-sleep-here").
 
 @export var enemy_a_path: String = "res://Data/Enemies/EnScavengerCyclops.tres"
 @export var enemy_zombie_path: String = "res://Data/Enemies/EnZombieCat.tres"
@@ -26,6 +27,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_trigger_ghost_encounter()
 			KEY_H:
 				_test_chevron_flash()
+			KEY_V:
+				_test_nine_hud()
 
 
 func _toggle_combat_encounter() -> void:
@@ -140,6 +143,15 @@ func _test_chevron_flash() -> void:
 	if is_instance_valid(sb) and sb.has_signal("chevron_flash_requested"):
 		print("BattleTest: [H Key] Requesting chevron flash FX...")
 		sb.chevron_flash_requested.emit(true)
+
+
+func _test_nine_hud() -> void:
+	var nine_hud: Node = get_tree().root.find_child("NineHud", true, false)
+	if is_instance_valid(nine_hud) and nine_hud.has_method("make_nine_talk"):
+		print("BattleTest: [V Key] Triggering Nine HUD voice assistant...")
+		nine_hud.call("make_nine_talk", "cant-sleep-here")
+	else:
+		push_warning("BattleTest: Could not find NineHud node in active scene tree!")
 
 
 func _build_test_loot_table(item_count: int = 2) -> Resource:

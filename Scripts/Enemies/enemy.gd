@@ -183,7 +183,7 @@ func _instantiate_world_model() -> void:
 		return
 
 	var lead_resource: Resource = data
-	if not enemy_group.is_empty() and is_instance_valid(enemy_group[0]):
+	if not is_instance_valid(lead_resource) and not enemy_group.is_empty() and is_instance_valid(enemy_group[0]):
 		lead_resource = enemy_group[0]
 
 	var model_scene: PackedScene = null
