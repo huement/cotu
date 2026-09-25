@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=5 format=3 uid="uid://b5pcgltvaqu3y"]
+
+[ext_resource type="Texture2D" uid="uid://cuviuduatl0l8" path="res://resources/Enemies/Kenny/texture-i.png" id="1_k2g2e"]
+[ext_resource type="PackedScene" uid="uid://b8w2o1wvp8o5q" path="res://resources/Enemies/Kenny/character-i.glb" id="2_5fxjj"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_3ofdj"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_firsv"]
+shading_mode = 0
+albedo_texture = ExtResource("1_k2g2e")
+texture_filter = 0
+
+[resource]
+script = ExtResource("3_3ofdj")
+enemy_id = "en_zombie_saber"
+enemy_name = "Corruptodon"
+model_path = "res://resources/Enemies/Kenny/character-i.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-i.png"
+model_scene = ExtResource("2_5fxjj")
+custom_material = SubResource("StandardMaterial3D_firsv")
+base_level = 5
+max_health = 52
+current_health = 52
+attack_damage = 9
+defense = 3
+initiative_speed = 13
+attack_element = 2
+equipped_item_id = "con_mana_vial"
+max_group_size = 2
+movement_speed = 1.1
+aggro_range_tiles = 4
+xp_value = 120
+gold_value = 65
+drops_loot = false

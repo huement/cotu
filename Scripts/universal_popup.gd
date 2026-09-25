@@ -97,6 +97,8 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 			var title_str: String = str(data.get("title", "Archive Log")).to_upper()
 			title_label.text = title_str
 			_build_lore_popup_ui(data)
+		&"LEAVE_DUNGEON":
+			_build_leave_dungeon_ui(data)
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
@@ -189,8 +191,12 @@ func _on_cancel_pressed() -> void:
 	_close_modal()
 
 
-# Add _build_chest_loot_ui() to res://Scripts/universal_popup.gd:
+## USED with Both Chest and HypeChest
 func _build_chest_loot_ui(data: Dictionary) -> void:
+	var aura_preset: String = str(data.get("aura_type", "none"))
+	if aura_preset != "none":
+		_start_aura_effect(aura_preset)
+
 	var chest_node: Node3D = data.get("chest", null) as Node3D
 	var loot_items: Array[ItemData] = []
 	if data.has("loot") and data["loot"] is Array:
@@ -888,3 +894,39 @@ func _stop_aura_effect() -> void:
 			if is_instance_valid(_aura_rect) and not _is_aura_active:
 				_aura_rect.visible = false
 		)
+
+
+func _build_leave_dungeon_ui(data: Dictionary) -> void:
+	var prompt_text: String = str(data.get("message", "Ascend the stairs and leave the dungeon?"))
+	var target_scene: String = str(data.get("target_scene", "res://Scenes/Overworld.tscn"))
+
+	# 1. Prompt Text Label
+	var lbl := Label.new()
+	lbl.text = prompt_text
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	lbl.add_theme_font_size_override("font_size", 14)
+	content_area.add_child(lbl)
+
+	# 2. Action Buttons (Confirm & Cancel)
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_theme_constant_override("separation", 16)
+
+	# Leave / Confirm Button
+	var leave_btn := _create_modal_button("LEAVE", Color(0.8, 0.2, 0.2, 1.0))
+	leave_btn.pressed.connect(func() -> void:
+		_close_modal()
+		if not target_scene.is_empty():
+			get_tree().change_scene_to_file(target_scene)
+	)
+
+	# Cancel Button
+	var cancel_btn := _create_modal_button("CANCEL", Color(0.5, 0.5, 0.5, 1.0))
+	cancel_btn.pressed.connect(_close_modal)
+
+	btn_hbox.add_child(leave_btn)
+	btn_hbox.add_child(cancel_btn)
+	content_area.add_child(btn_hbox)

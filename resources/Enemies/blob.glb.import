@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b0ucn8meu71sg"
-path="res://.godot/imported/torch.glb-67d83ee188b6a5547ad3bbad3a8ad7f3.scn"
+uid="uid://ct3xw5fgx488s"
+path="res://.godot/imported/blob.glb-0f78562325edf0142ccb89cde3c32cfc.scn"
 
 [deps]
 
-source_file="res://resources/DungeonParts/torch.glb"
-dest_files=["res://.godot/imported/torch.glb-67d83ee188b6a5547ad3bbad3a8ad7f3.scn"]
+source_file="res://resources/Enemies/blob.glb"
+dest_files=["res://.godot/imported/blob.glb-0f78562325edf0142ccb89cde3c32cfc.scn"]
 
 [params]
 

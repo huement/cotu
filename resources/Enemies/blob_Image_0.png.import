@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://du1k0rn18xh40"
-path.s3tc="res://.godot/imported/torch_5.png-cfdc0a86a63938af9971ef5e1f883c6e.s3tc.ctex"
+uid="uid://duy1e84ahdk72"
+path.s3tc="res://.godot/imported/blob_Image_0.png-ac0f4de78dea750ad0b994d6fe6e9b27.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "a4b2c0c0606d53516827ecce245cea4b"
+"md5": "c343e1c9238de4e269b1290447a7ea36"
 }
 
 [deps]
 
-source_file="res://resources/DungeonParts/torch_5.png"
-dest_files=["res://.godot/imported/torch_5.png-cfdc0a86a63938af9971ef5e1f883c6e.s3tc.ctex"]
+source_file="res://resources/Enemies/blob_Image_0.png"
+dest_files=["res://.godot/imported/blob_Image_0.png-ac0f4de78dea750ad0b994d6fe6e9b27.s3tc.ctex"]
 
 [params]
 

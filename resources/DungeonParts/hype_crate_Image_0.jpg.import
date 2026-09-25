@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6786housu5s8"
-path.s3tc="res://.godot/imported/dungeon_chest_0.png-2122ff8644b2128bab1b41a28d50d281.s3tc.ctex"
+uid="uid://b36uwaisqduj6"
+path.s3tc="res://.godot/imported/hype_crate_Image_0.jpg-8232291084b51f460ece261aeeefb5d7.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "2e4a230a1c0e08c602114b7a9b717d1b"
+"md5": "5ccab70a81f15b7c35ecf866972aa1b9"
 }
 
 [deps]
 
-source_file="res://resources/DungeonParts/dungeon_chest_0.png"
-dest_files=["res://.godot/imported/dungeon_chest_0.png-2122ff8644b2128bab1b41a28d50d281.s3tc.ctex"]
+source_file="res://resources/DungeonParts/hype_crate_Image_0.jpg"
+dest_files=["res://.godot/imported/hype_crate_Image_0.jpg-8232291084b51f460ece261aeeefb5d7.s3tc.ctex"]
 
 [params]
 

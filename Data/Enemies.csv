@@ -7,7 +7,7 @@ en_oculat_striker,Oculat Striker,res://resources/Enemies/Kenny/character-e.glb,r
 en_zombie_savage,Savage Corrupted,res://resources/Enemies/Kenny/character-f.glb,res://resources/Enemies/Kenny/texture-f.png,3,TRUE,80,18,10,9,11,BIO,BLADE,NONE,NONE,FALSE,NONE,0,TRUE,1,5,1.5,6,FALSE,TRUE,150,0,TRUE
 en_zombie_guard,Corrupted Guard,res://resources/Enemies/Kenny/character-d.glb,res://resources/Enemies/Kenny/texture-g.png,4,TRUE,75,20,15,10,13,WATER,BLADE,wpn_plasma_katana,NONE,FALSE,NONE,0,TRUE,1,4,1.6,6,FALSE,FALSE,200,200,TRUE
 en_zombie_knight,Corrupted Knight,res://resources/Enemies/Kenny/character-d.glb,res://resources/Enemies/Kenny/texture-h.png,4,TRUE,95,25,15,12,13,WATER,BLADE,wpn_plasma_katana,NONE,FALSE,NONE,0,TRUE,1,4,1.6,6,FALSE,FALSE,260,400,TRUE
-en_psionic_adept,Psionic Adept,res://resources/Enemies/Kenny/character-i.glb,res://resources/Enemies/Kenny/texture-i.png,5,TRUE,52,9,3,10,13,BLADE,MAGIC,NONE,con_mana_vial,TRUE,sp_mind_spike|sp_static_nova,35,TRUE,1,2,1.1,4,FALSE,TRUE,120,65,FALSE
+en_zombie_saber,Corruptodon,res://resources/Enemies/Kenny/character-i.glb,res://resources/Enemies/Kenny/texture-i.png,5,TRUE,52,9,3,10,13,FIRE,BLADE,NONE,con_mana_vial,FALSE,NONE,0,TRUE,1,2,1.1,4,FALSE,TRUE,120,65,FALSE
 en_hazard_cleaner,Hazard Cleaner,res://resources/Enemies/Kenny/character-j.glb,res://resources/Enemies/Kenny/texture-j.png,5,TRUE,70,18,6,7.5,9,WATER,FIRE,NONE,NONE,FALSE,NONE,0,TRUE,1,3,0.9,5,FALSE,TRUE,135,70,TRUE
 en_corrupted_ronin,Corrupted Ronin,res://resources/Enemies/Kenny/character-k.glb,res://resources/Enemies/Kenny/texture-k.png,6,TRUE,85,22,7,11,14,BASH,BLADE,katana,NONE,FALSE,NONE,0,FALSE,1,1,1.2,5,TRUE,TRUE,160,85,FALSE
 en_shadow_assassin,Shadow Assassin,res://resources/Enemies/Kenny/character-l.glb,res://resources/Enemies/Kenny/texture-l.png,6,TRUE,75,24,4,14,18,FIRE,BLADE,eq_rune_gauntlets,NONE,FALSE,NONE,0,TRUE,1,2,1.6,5,TRUE,FALSE,175,90,FALSE
@@ -19,3 +19,4 @@ en_dread_golem,Dread Golem,res://resources/Enemies/Kenny/character-q.glb,res://r
 en_cyber_lich_prime,Cyber Lich Prime,res://resources/Enemies/Kenny/character-r.glb,res://resources/Enemies/Kenny/texture-r.png,10,TRUE,160,25,9,13,16,LIFE,ARCANE,wpn_arcane_staff,NONE,TRUE,sp_arcane_cataclysm|sp_neurotoxin_gas,80,FALSE,1,1,1.4,6,TRUE,FALSE,400,250,FALSE
 en_ghost,Ghost,res://resources/Enemies/ghost.glb,,3,TRUE,50,12,3,11,12,BLADE,MAGIC,NONE,NONE,TRUE,sp_plasma_dart,40,TRUE,1,3,1.2,5,TRUE,"FALSE
 ",80,40,TRUE
+en_blob,Pulsing Sac,res://resources/Enemies/blob.glb,,3,TRUE,60,10,10,8,10,BIO,MAGIC,NONE,gem_corrupt_emerald,TRUE,sp_cryo_blast|sp_plasma_dart,200,TRUE,1,4,1,2,FALSE,FALSE,150,0,FALSE

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dnbyn24u2w58t"
-path="res://.godot/imported/dungeon_chest.glb-e62d51d3efb39a1c6fdd9f80f775fc49.scn"
+uid="uid://cb7pjaq38oudx"
+path="res://.godot/imported/hype_crate.glb-859eb534d30351e2c1ac6dccc7f72c0c.scn"
 
 [deps]
 
-source_file="res://resources/DungeonParts/dungeon_chest.glb"
-dest_files=["res://.godot/imported/dungeon_chest.glb-e62d51d3efb39a1c6fdd9f80f775fc49.scn"]
+source_file="res://resources/DungeonParts/hype_crate.glb"
+dest_files=["res://.godot/imported/hype_crate.glb-859eb534d30351e2c1ac6dccc7f72c0c.scn"]
 
 [params]
 

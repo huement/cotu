@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bqo46twaupm7v"
-path.s3tc="res://.godot/imported/torch_2.png-91a49ac992d42c3806e81f8a9fb66c8d.s3tc.ctex"
+uid="uid://baqe7a82cb112"
+path.s3tc="res://.godot/imported/smilodon-destroyed.png-16a5dcc7e413326504377a6adaef6cc8.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "2a180f494a62f861a3bc3e96d08be4ad"
-}
 
 [deps]
 
-source_file="res://resources/DungeonParts/torch_2.png"
-dest_files=["res://.godot/imported/torch_2.png-91a49ac992d42c3806e81f8a9fb66c8d.s3tc.ctex"]
+source_file="res://ui/LOGOS/smilodon-destroyed.png"
+dest_files=["res://.godot/imported/smilodon-destroyed.png-16a5dcc7e413326504377a6adaef6cc8.s3tc.ctex"]
 
 [params]
 

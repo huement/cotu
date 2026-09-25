@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://rmuneiaru3gq"]
+
+[ext_resource type="PackedScene" uid="uid://ct3xw5fgx488s" path="res://resources/Enemies/blob.glb" id="1_uf1iu"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_x3utc"]
+
+[resource]
+script = ExtResource("2_x3utc")
+enemy_id = "en_blob"
+enemy_name = "Pulsing Sac"
+model_path = "res://resources/Enemies/blob.glb"
+model_scene = ExtResource("1_uf1iu")
+base_level = 3
+max_health = 60
+current_health = 60
+attack_damage = 10
+defense = 10
+speed = 8.0
+initiative_speed = 10
+attack_element = 1
+equipped_item_id = "gem_corrupt_emerald"
+can_cast_spells = true
+spell_ids = Array[String](["sp_cryo_blast", "sp_plasma_dart"])
+max_mana = 200
+max_group_size = 4
+aggro_range_tiles = 2
+can_be_surprised = false
+xp_value = 150
+gold_value = 0
+drops_loot = false

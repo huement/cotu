@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csq4opeacm8yi"
-path.s3tc="res://.godot/imported/dungeon_chest_1.png-50852e165345b4d261454f014b4964d2.s3tc.ctex"
+uid="uid://bje3hiqg8p7cb"
+path.s3tc="res://.godot/imported/hype_crate_Image_1.jpg-ded805b2195970a2453b66dc9aee830f.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "aa979f835a5d3c668910795b578b28cb"
+"md5": "71a081fed690544f07e093e255add6f4"
 }
 
 [deps]
 
-source_file="res://resources/DungeonParts/dungeon_chest_1.png"
-dest_files=["res://.godot/imported/dungeon_chest_1.png-50852e165345b4d261454f014b4964d2.s3tc.ctex"]
+source_file="res://resources/DungeonParts/hype_crate_Image_1.jpg"
+dest_files=["res://.godot/imported/hype_crate_Image_1.jpg-ded805b2195970a2453b66dc9aee830f.s3tc.ctex"]
 
 [params]
 
@@ -30,7 +30,7 @@ compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=8
-roughness/src_normal="res://resources/DungeonParts/dungeon_chest_2.png"
+roughness/src_normal="res://resources/DungeonParts/hype_crate_Image_2.jpg"
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2
