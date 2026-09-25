@@ -13,4 +13,4 @@ modifier_type = 6
 modifier_value = 100.0
 cured_by = "CLEANSE|VOCAL_SALVE"
 is_cleansable = true
-icon_path = "res://Data/Effects/Icons/eff_silence.png"
+icon_path = "res://Data/Effects/Icons/silence_1.png"

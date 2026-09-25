@@ -177,6 +177,8 @@ func _render_character_sheet(character: CatCharacter) -> void:
 		inventory_grid.display_inventory(GameState.inventory)
 	if skills_spells_panel:
 		skills_spells_panel.display_character_abilities(character)
+	
+	_update_status_effects_display(character)
 
 
 ## Tints and desaturates UI elements when character is downed
@@ -198,6 +200,64 @@ func _apply_downed_visual_effects(is_downed: bool) -> void:
 			breed_label.remove_theme_color_override("font_color")
 
 
+## Refreshes status effect badges inside %CurrentStatusEffects
+func _update_status_effects_display(cat_character: Resource) -> void:
+	var container: Control = %CurrentStatusEffects
+	if not is_instance_valid(container):
+		return
+		
+	# Clear previous badge instances
+	for child in container.get_children():
+		if child is StatusEffectBadge:
+			child.queue_free()
+			
+	if not is_instance_valid(cat_character):
+		return
+
+	var equipped_items: Array[Resource] = []
+	
+	# 1. Collect equipment across all storage patterns
+	if cat_character.has_method("get_all_equipped_items"):
+		var res: Variant = cat_character.call("get_all_equipped_items")
+		if res is Array:
+			for item in (res as Array):
+				if item is Resource:
+					equipped_items.append(item as Resource)
+	elif "equipment" in cat_character and cat_character.get("equipment") is Dictionary:
+		var eq_dict: Dictionary = cat_character.get("equipment") as Dictionary
+		for item in eq_dict.values():
+			if is_instance_valid(item) and item is Resource:
+				equipped_items.append(item as Resource)
+	elif cat_character.has_method("get_equipped_item"):
+		var slots: Array[String] = ["RIGHT_HAND", "LEFT_HAND", "HEAD", "BODY", "ARMS", "LEGS", "FEET", "ACCESSORY_1", "ACCESSORY_2"]
+		for slot in slots:
+			var item: Resource = cat_character.call("get_equipped_item", slot) as Resource
+			if is_instance_valid(item):
+				equipped_items.append(item)
+
+	# 2. Extract unique granted_status_effects IDs
+	var effect_ids: Array[String] = []
+	for item in equipped_items:
+		if is_instance_valid(item) and "granted_status_effects" in item:
+			var effects: Array = item.get("granted_status_effects") as Array
+			for eff_id in effects:
+				if eff_id is String and not effect_ids.has(eff_id):
+					effect_ids.append(eff_id)
+
+	# 3. Instantiate badge scenes for each granted equipment status effect
+	var badge_scene: PackedScene = load("res://Scenes/UI/StatusEffectBadge.tscn")
+	for eff_id in effect_ids:
+		var info: Dictionary = StatusEffectDatabase.get_effect_info(eff_id)
+		if not info.is_empty():
+			var badge_inst := badge_scene.instantiate() as StatusEffectBadge
+			container.add_child(badge_inst)
+			# Pass 0 so equipment status effects are recognized as permanent (no "2t" label)
+			badge_inst.setup(info, 0)
+
+
+# ==============================================================================
+# UI FUNCTIONS AND HELPERS
+# ==============================================================================
 func _on_prev_character_pressed() -> void:
 	if is_instance_valid(AudioManager):
 		AudioManager.play_ui_sound("button-press")

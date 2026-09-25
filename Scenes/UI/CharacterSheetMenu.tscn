@@ -293,12 +293,20 @@ size_flags_vertical = 10
 theme_override_constants/separation = 20
 
 [node name="CurrentStatusEffects" type="HBoxContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/CurrentStatusEffects"]
+[node name="StatusHeaderTexture" type="TextureRect" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/CurrentStatusEffects"]
 layout_mode = 2
 texture = ExtResource("8_op2n6")
+stretch_mode = 3
+
+[node name="StatusBadgeContainer" type="HFlowContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer/CurrentStatusEffects"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
 
 [node name="PaginatorSpacer" type="MarginContainer" parent="OverlayPanel/MarginContainer/MainHBox/LeftColumn/VBoxContainer"]
 layout_mode = 2

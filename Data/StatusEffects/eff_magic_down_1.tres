@@ -13,4 +13,4 @@ modifier_stat = 5
 modifier_value = -15.0
 cured_by = "CLEANSE"
 is_cleansable = true
-icon_path = "res://Data/Effects/Icons/eff_magic_down.png"
+icon_path = "res://Data/Effects/Icons/mag_down_1.png"
