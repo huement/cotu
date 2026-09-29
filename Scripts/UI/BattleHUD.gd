@@ -653,6 +653,8 @@ func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facin
 
 	update_enemy_header_display(_current_enemy_resources)
 
+	GameLogger.combat("BATTLE HUD Built for %d enemy(s)" % _current_enemy_resources.size())
+
 	if is_instance_valid(enemy_hp_label):
 		enemy_hp_label.text = "%d / %d" % [total_max_hp, total_max_hp]
 

@@ -183,9 +183,15 @@ func _render_character_sheet(character: CatCharacter) -> void:
 
 ## Tints and desaturates UI elements when character is downed
 func _apply_downed_visual_effects(is_downed: bool) -> void:
+	# Keep MainHBox at full opacity so pagination, tabs, and inventory remain interactive
 	var main_hbox: Control = $OverlayPanel/MarginContainer/MainHBox as Control
 	if is_instance_valid(main_hbox):
-		main_hbox.modulate = Color(0.4, 0.4, 0.4, 1.0) if is_downed else Color.WHITE
+		main_hbox.modulate = Color.WHITE
+
+	# Toggle the downed alert TextureRect overlay over the stats
+	var downed_alert: TextureRect = %DownedAlertTexture as TextureRect # Adjust node path or Scene Unique Node name
+	if is_instance_valid(downed_alert):
+		downed_alert.visible = is_downed
 
 	if hp_val_label:
 		if is_downed:

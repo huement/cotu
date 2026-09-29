@@ -162,13 +162,16 @@ func _process(delta: float) -> void:
 
 
 func _on_combat_started(enemy_data_or_group: Variant, player_party: Array, _enemy_facing: String) -> void:
+	if is_combat_active:
+		return
+
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
 	guarding_characters.clear()
 
 	# 🔍 DIAGNOSTIC LOG: Print exact runtime type and value received
-	print("[DEBUG CombatManager] combat_started payload type: ", typeof(enemy_data_or_group), " | Value: ", enemy_data_or_group)
+	GameLogger.combat("[DEBUG CombatManager] combat_started payload type: %s | Value: %s" % [typeof(enemy_data_or_group), enemy_data_or_group])
 	
 	var registered_cats: int = 0
 	for i in range(player_party.size()):
@@ -397,6 +400,7 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 	return result
 	
+
 func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
 	if not is_instance_valid(enemy_ref):
 		return _generate_fallback_loot()
@@ -1070,6 +1074,7 @@ func _apply_damage_to_combatant(
 	attacker_name: String = "", 
 	action_resource: Resource = null
 ) -> void:
+	
 	if not is_instance_valid(target) or target.current_hp <= 0 or damage <= 0:
 		return
 

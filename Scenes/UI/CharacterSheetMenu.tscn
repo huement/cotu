@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://b3w7x0f6y2w7x"]
+[gd_scene load_steps=19 format=3 uid="uid://b3w7x0f6y2w7x"]
 
 [ext_resource type="Script" uid="uid://dc51atgdj7ays" path="res://Scripts/UI/character_sheet_menu.gd" id="1_vlp1k"]
 [ext_resource type="Texture2D" uid="uid://dh25qbke4twje" path="res://ui/blue-poly.png" id="2_7h3lb"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://d3r5u1if3q0w7" path="res://ui/HUD/status_label.png" id="8_op2n6"]
 [ext_resource type="Texture2D" uid="uid://c81ul2rggbys7" path="res://ui/buttons/arrow_basic_w_small.png" id="9_pxip7"]
 [ext_resource type="Texture2D" uid="uid://dnukx0cx6acnm" path="res://ui/buttons/arrow_basic_e_small.png" id="10_op2n6"]
+[ext_resource type="Texture2D" uid="uid://dotmxsmumrixb" path="res://ui/HUD/downed_display.png" id="15_2nv42"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7h3lb"]
 bg_color = Color(0.03137255, 0.0627451, 0.078431375, 1)
@@ -382,3 +383,14 @@ size_flags_vertical = 3
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="DownedAlertTexture" type="TextureRect" parent="OverlayPanel"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 161.0
+offset_top = -1.0
+offset_right = 596.0
+offset_bottom = 229.0
+mouse_filter = 2
+texture = ExtResource("15_2nv42")

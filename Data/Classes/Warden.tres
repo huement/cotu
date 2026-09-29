@@ -13,3 +13,5 @@ req_speed = 8
 req_personality = 8
 spellbook_type = "Maester"
 level_spells_unlock = 3
+skill_points_per_level = 1
+spell_points_per_level = 4

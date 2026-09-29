@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://1usiusfgotnq"]
 
-[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_5jjcn"]
+[ext_resource type="Script" uid="uid://cxqd4v884enk8" path="res://resources/ProfessionData.gd" id="1_5jjcn"]
 
 [resource]
 script = ExtResource("1_5jjcn")
@@ -15,3 +15,5 @@ req_speed = 0
 req_personality = 0
 spellbook_type = "Maester"
 level_spells_unlock = 1
+skill_points_per_level = 1
+spell_points_per_level = 4

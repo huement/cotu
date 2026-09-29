@@ -152,12 +152,8 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 	_clear_all_enemies()
 	visible = true
 
-	# Standardize payload: handles single Resource or Array of Resources
-	var enemy_group: Array = []
-	if enemy_payload is Array:
-		enemy_group = enemy_payload as Array
-	elif enemy_payload is Resource:
-		enemy_group.append(enemy_payload)
+	# 🎯 Resolve payload into full pack array (handles pack_size & overworld group lookup)
+	var enemy_group: Array[Resource] = _resolve_enemy_resources(enemy_payload)
 	
 	for i in range(enemy_group.size()):
 		var e_data: Resource = enemy_group[i] as Resource

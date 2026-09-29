@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://carw5hlpjaf4t"
-path="res://.godot/imported/texture-h.png-2d95174e8f5c1e1ec25717e627603426.ctex"
+uid="uid://dotmxsmumrixb"
+path="res://.godot/imported/downed_display.png-6c16eb9c71e6527067266ab44aa10d17.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/Enemies/Kenny/texture-h.png"
-dest_files=["res://.godot/imported/texture-h.png-2d95174e8f5c1e1ec25717e627603426.ctex"]
+source_file="res://ui/HUD/downed_display.png"
+dest_files=["res://.godot/imported/downed_display.png-6c16eb9c71e6527067266ab44aa10d17.ctex"]
 
 [params]
 

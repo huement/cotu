@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://cci0edvjecyyt"]
 
-[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_meymv"]
+[ext_resource type="Script" uid="uid://cxqd4v884enk8" path="res://resources/ProfessionData.gd" id="1_meymv"]
 
 [resource]
 script = ExtResource("1_meymv")
@@ -15,3 +15,6 @@ req_speed = 9
 req_personality = 14
 spellbook_type = "Soulwright"
 level_spells_unlock = 3
+stat_points_per_level = 4
+skill_points_per_level = 4
+spell_points_per_level = 2

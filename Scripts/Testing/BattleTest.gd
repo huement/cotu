@@ -29,6 +29,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_test_chevron_flash()
 			KEY_V:
 				_test_nine_hud()
+			KEY_L:
+				_simulate_level_up()
 
 
 func _toggle_combat_encounter() -> void:
@@ -193,3 +195,64 @@ func _build_test_loot_table(item_count: int = 2) -> Resource:
 		loot_table.add_item(loot_item2)
 
 	return loot_table
+
+
+func _simulate_level_up() -> void:
+	var active_party: Array = _get_active_party()
+	if active_party.is_empty():
+		push_warning("BattleTest: Cannot simulate level up — active party is empty!")
+		return
+
+	print("BattleTest: [L Key] Simulating level-up for all %d active party members..." % active_party.size())
+
+	const FIGHTER_CLASSES: Array[String] = ["Spartan", "Crusader", "Ghostblade", "Ronin", "Amazon"]
+
+	for i in range(active_party.size()):
+		var cat: Resource = active_party[i] as Resource
+		if not is_instance_valid(cat):
+			continue
+
+		var cat_name: String = str(cat.get("name")) if cat.get("name") != null else "Cat %d" % (i + 1)
+		var prof_name: String = ""
+
+		# 1. Resolve Class / Profession Name
+		if "profession" in cat and is_instance_valid(cat.get("profession")):
+			var prof: Resource = cat.get("profession") as Resource
+			if "profession_name" in prof and prof.get("profession_name") != null:
+				prof_name = str(prof.get("profession_name"))
+
+		if prof_name.is_empty() and "profession_name" in cat and cat.get("profession_name") != null:
+			prof_name = str(cat.get("profession_name"))
+
+		# 2. Check Fighter Class Match
+		var is_fighter: bool = false
+		for f_class in FIGHTER_CLASSES:
+			if prof_name.nocasecmp_to(f_class) == 0:
+				is_fighter = true
+				break
+
+		# 3. Configure Archetype Stat Distribution
+		var stat_distribution: Dictionary = {}
+		if is_fighter:
+			# Fighter allocation (STR, VIT, DEX, SPD)
+			stat_distribution = {
+				"strength": 2,
+				"vitality": 1,
+				"dexterity": 1,
+				"speed": 1
+			}
+		else:
+			# Magic User / Caster allocation (INT, PIE, VIT, SPD)
+			stat_distribution = {
+				"intelligence": 2,
+				"piety": 1,
+				"vitality": 1,
+				"speed": 1
+			}
+
+		var test_options: Dictionary = {
+			"stat_points": stat_distribution
+		}
+
+		print("BattleTest: Leveling up slot %d: %s (Class: '%s')..." % [i, cat_name, prof_name if not prof_name.is_empty() else "Unknown"])
+		LevelManager.level_player(cat, test_options)

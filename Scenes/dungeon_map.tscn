@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://day7k6mxl84p1"]
+[gd_scene load_steps=41 format=3 uid="uid://day7k6mxl84p1"]
 
 [ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_vm1o7"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="2_kl8rm"]
@@ -14,6 +14,7 @@
 [ext_resource type="Resource" uid="uid://bcjsxojot82cj" path="res://Data/Enemies/EnScavengerCyclops.tres" id="5_hgw32"]
 [ext_resource type="Resource" uid="uid://bgupgq1arrqa1" path="res://Data/Enemies/EnRageWraith.tres" id="5_llvb1"]
 [ext_resource type="PackedScene" uid="uid://dquxxvchp5mey" path="res://Scenes/Objects/Barrel.tscn" id="6_774x7"]
+[ext_resource type="Resource" uid="uid://b5pcgltvaqu3y" path="res://Data/Enemies/EnZombieSaber.tres" id="7_dfj45"]
 [ext_resource type="PackedScene" uid="uid://bqsvcn2tt1sxq" path="res://Scenes/Objects/Column.tscn" id="7_lgyeg"]
 [ext_resource type="PackedScene" uid="uid://d31yfbhogp3bl" path="res://Scenes/Objects/Stones.tscn" id="9_2sldw"]
 [ext_resource type="PackedScene" uid="uid://dewb58r3kqfkd" path="res://Scenes/Objects/WoodStructure.tscn" id="10_1v8oe"]
@@ -70,8 +71,10 @@ model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
 
 [node name="Enemy6" parent="Enemies" instance=ExtResource("2_kl8rm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8678656, 1.0723691, -13.297519)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.015123, 1.0723691, -6.291097)
 data = ExtResource("5_hgw32")
+enemy_group = Array[Resource]([ExtResource("5_hgw32"), ExtResource("7_dfj45")])
+pack_size = 1
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
 enemy_type = "zombie"
@@ -82,7 +85,7 @@ data = ExtResource("3_cv0cr")
 pack_size = 1
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
-enemy_type = "zombie"
+enemy_type = "ghost"
 
 [node name="GhostAmbushComponent" type="Node" parent="Enemies/EnemyGhost"]
 script = ExtResource("3_mj35m")
@@ -93,7 +96,7 @@ data = ExtResource("3_cv0cr")
 pack_size = 1
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
-enemy_type = "zombie"
+enemy_type = "ghost"
 
 [node name="GhostAmbushComponent" type="Node" parent="Enemies/EnemyGhost2"]
 script = ExtResource("3_mj35m")
@@ -104,14 +107,15 @@ data = ExtResource("3_cv0cr")
 pack_size = 1
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
-enemy_type = "zombie"
+enemy_type = "ghost"
 
 [node name="GhostAmbushComponent" type="Node" parent="Enemies/EnemyGhost3"]
 script = ExtResource("3_mj35m")
 
 [node name="Enemy2" parent="Enemies" instance=ExtResource("2_kl8rm")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1, 6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3366685, 1, 21.52049)
 data = ExtResource("3_5c1re")
+pack_size = 1
 model_scale = Vector3(1, 1, 1)
 vertical_offset = 0.0
 enemy_type = "zombie"

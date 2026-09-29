@@ -29,13 +29,14 @@ extends Node3D
 
 @export var enemy_type: String = ""
 
+@export var hasSpottedPlayer: bool = false
+
 # ==============================================================================
 # 2. NODE REFERENCES & STATE
 # ==============================================================================
 @onready var model_holder: Node3D = $ModelHolder as Node3D
 @onready var activation_area: Area3D = $ActivationArea as Area3D
 
-# Add near the top of Section 2 (NODE REFERENCES & STATE):
 const ANIM_MAPPINGS: Dictionary = {
 	&"idle": [&"Idle", &"idle", &"IDLE", &"idle_loop", &"Idle_Loop"],
 	&"walk": [&"Walk", &"walk", &"WALK", &"walking", &"Walking", &"walk_loop", &"Walk_Loop", &"Run", &"run"]
@@ -72,7 +73,6 @@ enum Facing {
 # ==============================================================================
 func _ready() -> void:
 	add_to_group(&"world_enemies")
-	# Cache exact 3D position placed in Editor before scene initialization
 	_saved_editor_pos = global_position
 	
 	_resolve_enemy_data()
@@ -80,7 +80,6 @@ func _ready() -> void:
 	_instantiate_world_model()
 	_connect_trigger_signals()
 	
-	# Defer grid alignment until MapManager & GridMap are fully ready in tree
 	call_deferred("_initialize_enemy")
 
 
@@ -95,7 +94,6 @@ func get_grid_pos() -> Vector2i:
 	return _grid_position
 
 
-## Converts 2D cell coordinates to world space centered on the GridMap tile
 func _cell_to_world(cell: Vector2i) -> Vector3:
 	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
 	if not is_instance_valid(map_mgr):
@@ -111,7 +109,6 @@ func _cell_to_world(cell: Vector2i) -> Vector3:
 	return Vector3(cell.x * 2.0 + 1.0, vertical_offset, cell.y * 2.0 + 1.0)
 
 
-## Ensures 'enemy_data' and 'data' are cross-resolved from assigned Inspector resources
 func _resolve_enemy_data() -> void:
 	if enemy_data == null and data is EnemyData:
 		enemy_data = data as EnemyData
@@ -120,12 +117,11 @@ func _resolve_enemy_data() -> void:
 	elif data == null and not enemy_group.is_empty() and enemy_group[0] is EnemyData:
 		data = enemy_group[0]
 		enemy_data = enemy_group[0] as EnemyData
-	# Sync enemy_type fallback from resource if overworld override is empty
+
 	if enemy_type.is_empty() and is_instance_valid(enemy_data) and "enemy_type" in enemy_data:
 		enemy_type = enemy_data.enemy_type
 
 
-## Ensures 'enemy_group' is populated with 'pack_size' duplicated enemy resources
 func _setup_enemy_group() -> void:
 	var template: Resource = data
 	if not is_instance_valid(template):
@@ -133,7 +129,6 @@ func _setup_enemy_group() -> void:
 	if not is_instance_valid(template) and not enemy_group.is_empty():
 		template = enemy_group[0]
 
-	# Fallback to compiled Zombie Cat resource if unassigned
 	if not is_instance_valid(template):
 		if ResourceLoader.exists("res://Data/Enemies/EnZombieCat.tres"):
 			template = load("res://Data/Enemies/EnZombieCat.tres") as Resource
@@ -146,10 +141,20 @@ func _setup_enemy_group() -> void:
 		enemy_group.clear()
 		for i: int in range(pack_size):
 			if is_instance_valid(template):
-				enemy_group.append(template.duplicate())
+				var dup: Resource = template.duplicate(true)
+				
+				if "resource_path" in template and not template.resource_path.is_empty():
+					dup.resource_path = template.resource_path
+				if "model_scene" in template and template.get("model_scene") != null:
+					dup.set("model_scene", template.get("model_scene"))
+				if "custom_material" in template and template.get("custom_material") != null:
+					dup.set("custom_material", template.get("custom_material"))
+				if "texture_path" in template and not str(template.get("texture_path")).is_empty():
+					dup.set("texture_path", template.get("texture_path"))
+				
+				enemy_group.append(dup)
 
 
-## Converts 3D Editor placement into GridMap cell space and snaps position
 func _align_to_grid() -> void:
 	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
 	if not is_instance_valid(map_mgr):
@@ -177,7 +182,6 @@ func _align_to_grid() -> void:
 	global_position = _cell_to_world(_grid_position)
 
 
-## Spawns the 3D overworld mesh representing the pack leader
 func _instantiate_world_model() -> void:
 	if not is_instance_valid(model_holder):
 		return
@@ -265,10 +269,10 @@ func _check_pursuit_range() -> void:
 		trigger_combat_encounter()
 		return
 
-	var enemy_dist_from_home: int = absi(_grid_position.x - initial_cell.x) + absi(_grid_position.y - initial_cell.y)
-	var player_dist_from_home: int = absi(player_cell.x - initial_cell.x) + absi(player_cell.y - initial_cell.y)
+	if not hasSpottedPlayer and _can_see_player(player_cell):
+		hasSpottedPlayer = true
 
-	if player_dist_from_home <= enemy_data.aggro_range_tiles and enemy_dist_from_home <= enemy_data.aggro_range_tiles:
+	if hasSpottedPlayer:
 		_step_toward_target(player_cell)
 	elif _grid_position != initial_cell:
 		_step_toward_target(initial_cell)
@@ -284,10 +288,13 @@ func _step_patrol() -> void:
 	if is_instance_valid(map_mgr) and map_mgr.has_method("is_tile_blocked"):
 		var grid_3d := Vector3i(target_grid_pos.x, 0, target_grid_pos.y)
 		if map_mgr.is_tile_blocked(grid_3d):
-			_patrol_index = (_patrol_index + 1) % PATROL_OFFSETS.size()
+			_patrol_index = randi() % PATROL_OFFSETS.size()
+			_turn_to_facing(_vec_to_facing(PATROL_OFFSETS[_patrol_index]))
 			return
 
-	_patrol_index = (_patrol_index + 1) % PATROL_OFFSETS.size()
+	if randf() < 0.3:
+		_patrol_index = randi() % PATROL_OFFSETS.size()
+
 	_move_to_cell(target_grid_pos)
 
 
@@ -300,7 +307,6 @@ func _step_toward_target(target_cell: Vector2i) -> void:
 	if step_dir != Vector2i.ZERO:
 		_move_to_cell(_grid_position + step_dir)
 	else:
-		# Can't move, so just turn to face the target
 		var face_dir: Vector2i = _ai.get_step_vector(_grid_position, target_cell)
 		if face_dir != Vector2i.ZERO:
 			var new_facing: Facing = _vec_to_facing(face_dir)
@@ -353,18 +359,26 @@ func _move_to_cell(target_grid_pos: Vector2i) -> void:
 func _facing_to_angle(facing: Facing) -> float:
 	match facing:
 		Facing.NORTH: return 180.0
-		Facing.EAST: return 270.0
+		Facing.EAST: return 90.0
 		Facing.SOUTH: return 0.0
-		Facing.WEST: return 90.0
+		Facing.WEST: return 270.0
 	return 0.0
 
 
 func _vec_to_facing(vec: Vector2i) -> Facing:
-	if vec.y > 0: return Facing.SOUTH
-	if vec.y < 0: return Facing.NORTH
-	if vec.x > 0: return Facing.EAST
-	if vec.x < 0: return Facing.WEST
-	return _current_facing # No change if vector is zero
+	if vec == Vector2i.ZERO:
+		return _current_facing
+
+	if abs(vec.x) > abs(vec.y):
+		if vec.x > 0:
+			return Facing.EAST
+		else:
+			return Facing.WEST
+	else:
+		if vec.y > 0:
+			return Facing.SOUTH
+		else:
+			return Facing.NORTH
 
 
 func _get_cardinal_string() -> String:
@@ -379,6 +393,42 @@ func _get_cardinal_string() -> String:
 # ==============================================================================
 # 5. COMBAT TRIGGERING
 # ==============================================================================
+func _on_combat_started(enemy_payload: Variant, _party: Array, _enemy_facing: String) -> void:
+	if not visible or _is_in_active_combat:
+		return
+
+	var is_target: bool = false
+
+	if enemy_payload is Array:
+		var payload_array: Array = enemy_payload as Array
+		if payload_array == enemy_group:
+			is_target = true
+		else:
+			for item in payload_array:
+				if item == self or enemy_group.has(item) or (is_instance_valid(data) and item == data) or (is_instance_valid(enemy_data) and item == enemy_data):
+					is_target = true
+					break
+
+	elif enemy_payload is Object and is_instance_valid(enemy_payload):
+		if enemy_payload == self or enemy_group.has(enemy_payload) or (is_instance_valid(data) and enemy_payload == data) or (is_instance_valid(enemy_data) and enemy_payload == enemy_data):
+			is_target = true
+
+	if is_target:
+		_is_in_active_combat = true
+		hide()
+
+
+func _on_combat_ended(victory: bool) -> void:
+	if not _is_in_active_combat:
+		return
+
+	if victory:
+		queue_free()
+	else:
+		_is_in_active_combat = false
+		show()
+
+
 func _connect_trigger_signals() -> void:
 	if is_instance_valid(activation_area):
 		if not activation_area.body_entered.is_connected(_on_body_entered):
@@ -397,15 +447,30 @@ func _on_body_entered(body: Node) -> void:
 		trigger_combat_encounter()
 
 
+func _get_ambush_component() -> GhostAmbushComponent:
+	
+	for child in get_children():
+		if child is GhostAmbushComponent:
+			GameLogger.combat("FOUND AMBUSH COMPONENT")
+			return child as GhostAmbushComponent
+	return null
+
+
 func trigger_combat_encounter() -> void:
-	if _is_in_active_combat or not visible:
+	if _is_in_active_combat:
+		return
+
+	# 👻 GHOST AMBUSH GUARD: If this enemy is an ambush ghost, block direct combat unless the ambush failed
+	var ambush_comp: GhostAmbushComponent = _get_ambush_component()
+	GameLogger.combat("IS GHOST AMBUSH: %s" % [is_instance_valid(ambush_comp)])
+	if is_instance_valid(ambush_comp) and not ambush_comp.can_trigger_combat():
 		return
 
 	_is_in_active_combat = true
 	hide()
 
 	if is_instance_valid(GameLogger):
-		GameLogger.info("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), _grid_position])
+		GameLogger.combat("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), _grid_position])
 
 	var party_slots: Array = []
 	if "current_party" in GameState and GameState.current_party != null:
@@ -413,31 +478,6 @@ func trigger_combat_encounter() -> void:
 			party_slots = GameState.current_party.slots
 
 	SignalBus.combat_started.emit(enemy_group, party_slots, _get_cardinal_string())
-
-
-func _on_combat_started(enemy_payload: Variant, _party: Array, _enemy_facing: String) -> void:
-	if not visible or _is_in_active_combat:
-		return
-
-	var is_target: bool = false
-
-	if enemy_payload is Array:
-		var payload_array: Array = enemy_payload as Array
-		if payload_array == enemy_group:
-			is_target = true
-		else:
-			for item in payload_array:
-				if item == self:
-					is_target = true
-					break
-
-	elif enemy_payload is Object and is_instance_valid(enemy_payload):
-		if enemy_payload == self:
-			is_target = true
-
-	if is_target:
-		_is_in_active_combat = true
-		hide()
 
 
 func _is_player_adjacent() -> bool:
@@ -449,18 +489,6 @@ func _is_player_adjacent() -> bool:
 	return true
 
 
-func _on_combat_ended(victory: bool) -> void:
-	if not _is_in_active_combat:
-		return
-
-	if victory:
-		queue_free()
-	else:
-		_is_in_active_combat = false
-		show()
-
-
-## Resolves and plays an animation on the child AnimationPlayer of the instantiated model
 func _play_animation(action_key: StringName, loop: bool = true) -> void:
 	if not is_instance_valid(model_holder):
 		return
@@ -483,13 +511,11 @@ func _play_animation(action_key: StringName, loop: bool = true) -> void:
 func _resolve_animation_name(anim_player: AnimationPlayer, action_key: StringName) -> StringName:
 	var candidates: Array = ANIM_MAPPINGS.get(action_key, [action_key])
 
-	# 1. Exact match check
 	for candidate in candidates:
 		var cand_name := StringName(str(candidate))
 		if anim_player.has_animation(cand_name):
 			return cand_name
 
-	# 2. Substring match fallback (e.g. "walking", "Walk_Loop")
 	var available: PackedStringArray = anim_player.get_animation_list()
 	for candidate in candidates:
 		var cand_str: String = str(candidate).to_lower()
@@ -498,3 +524,34 @@ func _resolve_animation_name(anim_player: AnimationPlayer, action_key: StringNam
 				return StringName(anim_name)
 
 	return &""
+
+
+func _can_see_player(player_cell: Vector2i) -> bool:
+	var delta: Vector2i = player_cell - _grid_position
+	var dist: int = absi(delta.x) + absi(delta.y)
+	var vision_range: int = enemy_data.aggro_range_tiles if is_instance_valid(enemy_data) else 4
+
+	if dist <= 0 or dist > vision_range:
+		return false
+
+	match _current_facing:
+		Facing.NORTH:
+			return delta.y < 0 and absi(delta.x) <= absi(delta.y)
+		Facing.SOUTH:
+			return delta.y > 0 and absi(delta.x) <= absi(delta.y)
+		Facing.EAST:
+			return delta.x > 0 and absi(delta.y) <= absi(delta.x)
+		Facing.WEST:
+			return delta.x < 0 and absi(delta.y) <= absi(delta.x)
+
+	return false
+
+
+func _turn_to_facing(new_facing: Facing) -> void:
+	if new_facing != _current_facing:
+		_current_facing = new_facing
+		var target_rot_y: float = _facing_to_angle(_current_facing)
+		var tween: Tween = create_tween()
+		tween.tween_property(model_holder, "rotation_degrees:y", target_rot_y, 0.2) \
+			.set_trans(Tween.TRANS_SINE) \
+			.set_ease(Tween.EASE_OUT)
