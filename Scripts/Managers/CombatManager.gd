@@ -137,6 +137,8 @@ const BASE_TICK_RATE: float = 25.0
 @export var is_paused_for_input: bool = false
 @export var base_flee_chance: float = 0.60
 
+
+var is_transitioning_out: bool = false
 var combatants: Array[Combatant] = []
 var turn_queue: Array[Combatant] = []
 var active_combatant: Combatant = null
@@ -249,12 +251,17 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array, _enem
 
 
 func _on_combat_ended(victory: bool) -> void:
-	if not is_combat_active:
+	if not is_combat_active or is_transitioning_out:
 		return
 
 	GameLogger.combat("BATTLE ENDED!")
-	is_combat_active = false
-	is_paused_for_input = false
+	
+	# Block input and flag the transition, but KEEP is_combat_active = true 
+	# to block new encounters from interrupting the fade out.
+	is_transitioning_out = true
+	is_paused_for_input = true
+	# is_combat_active = false
+	# is_paused_for_input = false
 
 	var victory_data: Dictionary = {}
 	var gs: Node = get_tree().root.get_node_or_null("GameState")
@@ -319,6 +326,11 @@ func _on_combat_ended(victory: bool) -> void:
 	turn_queue.clear()
 	active_combatant = null
 	guarding_characters.clear()
+
+	# Fully release combat locks now that the transition is done
+	is_combat_active = false
+	is_transitioning_out = false
+	is_paused_for_input = false
 
 	SignalBus.combat_ended.emit(victory)
 

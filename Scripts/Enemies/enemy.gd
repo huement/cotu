@@ -419,8 +419,15 @@ func _on_combat_started(enemy_payload: Variant, _party: Array, _enemy_facing: St
 		hide()
 
 
+# 2. Update _on_combat_ended to catch the player if they are overlapping after a fight
 func _on_combat_ended(victory: bool) -> void:
 	if not _is_in_active_combat:
+		# If the player stepped into this enemy while another battle was ending, safely trigger it now
+		if is_instance_valid(activation_area) and visible:
+			for body in activation_area.get_overlapping_bodies():
+				if body.is_in_group(&"player") or body.name == "Player" or body is CharacterBody3D or body.get_class() == "DungeonPlayer":
+					call_deferred("trigger_combat_encounter")
+					break
 		return
 
 	if victory:
@@ -457,9 +464,16 @@ func _get_ambush_component() -> GhostAmbushComponent:
 	return null
 
 
+# 1. Update the combat trigger to abort if combat is active or transitioning
 func trigger_combat_encounter() -> void:
 	if _is_in_active_combat:
 		return
+
+	# Prevent triggering a new battle if the Combat Manager is busy
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	if is_instance_valid(cm):
+		if cm.get("is_combat_active") or ("is_transitioning_out" in cm and cm.get("is_transitioning_out")):
+			return
 
 	# 👻 GHOST AMBUSH GUARD: If this enemy is an ambush ghost, block direct combat unless the ambush failed
 	var ambush_comp: GhostAmbushComponent = _get_ambush_component()
