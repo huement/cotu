@@ -13,4 +13,4 @@ modifier_stat = 4
 modifier_value = -15.0
 cured_by = "CLEANSE"
 is_cleansable = true
-icon_path = "res://Data/Effects/Icons/eff_dexterity_down.png"
+icon_path = "res://Data/Effects/Icons/dex_down_1.png"

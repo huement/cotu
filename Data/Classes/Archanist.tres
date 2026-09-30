@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ProfessionData" load_steps=2 format=3 uid="uid://dk88mg6q6cgnd"]
 
-[ext_resource type="Script" uid="uid://bydy5aayflqpt" path="res://resources/ProfessionData.gd" id="1_dntqf"]
+[ext_resource type="Script" uid="uid://cxqd4v884enk8" path="res://resources/ProfessionData.gd" id="1_dntqf"]
 
 [resource]
 script = ExtResource("1_dntqf")
@@ -15,3 +15,5 @@ req_speed = 0
 req_personality = 0
 spellbook_type = "Archanist"
 level_spells_unlock = 1
+stat_points_per_level = 4
+spell_points_per_level = 4

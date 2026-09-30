@@ -14,4 +14,4 @@ modifier_type = 5
 modifier_value = 100.0
 cured_by = "CLEANSE"
 is_cleansable = true
-icon_path = "res://Data/Effects/Icons/eff_stun.png"
+icon_path = "res://Data/Effects/Icons/stun_2.png"

@@ -13,4 +13,4 @@ modifier_type = 2
 modifier_value = 10.0
 cured_by = "DISPEL"
 is_dispellable = true
-icon_path = "res://Data/Effects/Icons/eff_shield.png"
+icon_path = "res://Data/Effects/Icons/shield_1.png"

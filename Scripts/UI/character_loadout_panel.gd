@@ -192,6 +192,9 @@ func _get_fallback_slot_title(slot_name: String) -> String:
 
 
 func _on_slot_pressed(slot_name: String) -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-click")
+
 	var equipped_item: ItemData = null
 	if is_instance_valid(_current_cat):
 		equipped_item = _current_cat.get_equipped_item(slot_name) as ItemData

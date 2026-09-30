@@ -1,15 +1,49 @@
-[gd_scene load_steps=3 format=3 uid="uid://obtfq1vnf1h8"]
+[gd_scene load_steps=8 format=3 uid="uid://obtfq1vnf1h8"]
 
 [ext_resource type="Script" uid="uid://barrwhhetpd66" path="res://Scripts/Components/TorchFlickerComponent.gd" id="1_2bomy"]
-[ext_resource type="PackedScene" uid="uid://b0ucn8meu71sg" path="res://resources/DungeonParts/torch.glb" id="1_w80ut"]
+[ext_resource type="PackedScene" uid="uid://ccvch7cscuhq" path="res://resources/DungeonParts/torch-lp.glb" id="2_2bomy"]
+
+[sub_resource type="Curve" id="Curve_2bomy"]
+_data = [Vector2(0, 0.20091736), 0.0, 0.0, 0, 0, Vector2(0.5061729, 1), 0.05250215, 0.05250215, 0, 0, Vector2(0.99506164, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_ak37a"]
+curve = SubResource("Curve_2bomy")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gn6qy"]
+initial_velocity_min = 0.19999999
+initial_velocity_max = 0.39999998
+gravity = Vector3(0, 2.3, 0)
+scale_curve = SubResource("CurveTexture_ak37a")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_52pco"]
+transparency = 1
+albedo_color = Color(1, 0.53333336, 0, 1)
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_7grhn"]
+material = SubResource("StandardMaterial3D_52pco")
+size = Vector2(0.2, 0.2)
 
 [node name="Torch" type="Node3D"]
 script = ExtResource("1_2bomy")
 
-[node name="TorchModel" parent="." instance=ExtResource("1_w80ut")]
+[node name="TorchModel" parent="." instance=ExtResource("2_2bomy")]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 0, 0.15315002)
 
 [node name="FlameLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.037589073, 0.62739456, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.021419406, 0.75296783, 0.27635044)
 light_color = Color(1, 0.7137255, 0.54509807, 1)
 shadow_enabled = true
 omni_range = 8.0
+
+[node name="FlameParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.01612994, 0.7627637, 0.2645519)
+amount = 23
+lifetime = 0.5
+fract_delta = false
+process_material = SubResource("ParticleProcessMaterial_gn6qy")
+draw_pass_1 = SubResource("QuadMesh_7grhn")

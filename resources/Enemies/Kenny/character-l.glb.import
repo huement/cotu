@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ds6mkgkahu71e"
+uid="uid://c7uv1yulj8oks"
 path="res://.godot/imported/character-l.glb-9e449cbd01e4b17c0e4e17edb02786ba.scn"
 
 [deps]
@@ -34,9 +34,9 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-materials/extract=2
+materials/extract=0
 materials/extract_format=0
-materials/extract_path="res://resources/Enemies/Kenny"
+materials/extract_path=""
 _subresources={}
 gltf/naming_version=2
 gltf/embedded_image_handling=1

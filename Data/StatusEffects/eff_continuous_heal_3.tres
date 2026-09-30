@@ -16,4 +16,4 @@ modifier_value = 15.0
 max_stacks = 5
 cured_by = "DISPEL"
 is_dispellable = true
-icon_path = "res://Data/Effects/Icons/eff_continuous_heal.png"
+icon_path = "res://Data/Effects/Icons/heal_3.png"

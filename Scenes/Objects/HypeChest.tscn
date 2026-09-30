@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://2127642vdpqo"]
+
+[ext_resource type="Script" uid="uid://dgain4v6p65m5" path="res://Scripts/Environment/DungeonChest.gd" id="1_sjc6i"]
+[ext_resource type="PackedScene" uid="uid://bihitcunpfcvf" path="res://resources/DungeonParts/hype_crate.glb" id="2_sjc6i"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e2yg2"]
+size = Vector3(1.8105469, 2.4455566, 2.2148438)
+
+[node name="HypeChest" type="Node3D"]
+script = ExtResource("1_sjc6i")
+
+[node name="HypeModel" parent="." instance=ExtResource("2_sjc6i")]
+
+[node name="InteractionArea" type="Area3D" parent="."]
+collision_layer = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.010864e-05, 1.2225647, -0.058823586)
+shape = SubResource("BoxShape3D_e2yg2")

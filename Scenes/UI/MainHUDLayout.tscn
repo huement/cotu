@@ -1,0 +1,167 @@
+[gd_scene load_steps=14 format=3 uid="uid://ctgavwwddt67b"]
+
+[ext_resource type="Texture2D" uid="uid://dn0f5ac8pbppq" path="res://ui/HUD/sidebar.png" id="1_6dweb"]
+[ext_resource type="Texture2D" uid="uid://ccjl04lnxg00i" path="res://ui/HUD/topbar.png" id="2_hhp8q"]
+[ext_resource type="PackedScene" uid="uid://yo001sb3lbfp" path="res://Scenes/UI/PartySlotPortrait.tscn" id="3_do6a6"]
+[ext_resource type="Texture2D" uid="uid://dte7juxkf8grr" path="res://ui/HUD/search-btn.png" id="4_l5c7i"]
+[ext_resource type="Texture2D" uid="uid://dfx0p2jk0ynh3" path="res://ui/HUD/search-hover.png" id="5_fx13c"]
+[ext_resource type="Script" uid="uid://bismjgexijch3" path="res://Scripts/search_button.gd" id="6_228sc"]
+[ext_resource type="Texture2D" uid="uid://bb878wlm1bg45" path="res://ui/HUD/item-btn.png" id="7_mce83"]
+[ext_resource type="Texture2D" uid="uid://cvbiq0j3bvkjh" path="res://ui/HUD/item-hover.png" id="8_scf0m"]
+[ext_resource type="Script" uid="uid://b8ywsg7wbn4ln" path="res://Scripts/item_button.gd" id="9_d4i15"]
+[ext_resource type="Texture2D" uid="uid://cl03o04pwuvpk" path="res://ui/HUD/rest-btn.png" id="10_nk2le"]
+[ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="11_xvp3u"]
+[ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="12_lpjnv"]
+[ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="13_vholc"]
+
+[node name="MainHUDLayout" type="Control"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CockpitBackground" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 1114.0
+offset_top = 95.0
+offset_right = 1186.0
+offset_bottom = 998.0
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("1_6dweb")
+
+[node name="TopBar" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -352.0
+offset_top = 5.0
+offset_right = 242.0
+offset_bottom = 45.0
+grow_horizontal = 0
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("2_hhp8q")
+
+[node name="RightSidebarAnchor" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 1064.0
+offset_top = 86.0
+offset_right = 1146.0
+offset_bottom = 641.0
+
+[node name="PartyContainer" type="VBoxContainer" parent="RightSidebarAnchor"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.34100002
+anchor_top = 0.063
+anchor_right = 0.34100002
+anchor_bottom = 0.063
+offset_left = 0.0379982
+offset_top = 0.034999847
+offset_right = 54.038
+offset_bottom = 520.035
+theme_override_constants/separation = 10
+
+[node name="Slot0_Portrait" parent="RightSidebarAnchor/PartyContainer" instance=ExtResource("3_do6a6")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot1_Portrait" parent="RightSidebarAnchor/PartyContainer" instance=ExtResource("3_do6a6")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+slot_index = 1
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot2_Portrait" parent="RightSidebarAnchor/PartyContainer" instance=ExtResource("3_do6a6")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+slot_index = 2
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot3_Portrait" parent="RightSidebarAnchor/PartyContainer" instance=ExtResource("3_do6a6")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+slot_index = 3
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot4_Portrait" parent="RightSidebarAnchor/PartyContainer" instance=ExtResource("3_do6a6")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+slot_index = 4
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="Slot5_Portrait" parent="RightSidebarAnchor/PartyContainer" instance=ExtResource("3_do6a6")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 62)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+slot_index = 5
+portrait_size = Vector2(54, 54)
+show_atb_bar = false
+
+[node name="ActionBarAnchor" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -66.0
+offset_right = 193.0
+offset_bottom = -12.0
+grow_vertical = 0
+
+[node name="ActionButtons" type="HBoxContainer" parent="ActionBarAnchor"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = 12
+
+[node name="SearchButton" type="TextureButton" parent="ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("4_l5c7i")
+texture_pressed = ExtResource("5_fx13c")
+texture_hover = ExtResource("5_fx13c")
+script = ExtResource("6_228sc")
+
+[node name="ItemButton" type="TextureButton" parent="ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("7_mce83")
+texture_pressed = ExtResource("8_scf0m")
+texture_hover = ExtResource("8_scf0m")
+script = ExtResource("9_d4i15")
+
+[node name="RestButton" type="TextureButton" parent="ActionBarAnchor/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("10_nk2le")
+texture_pressed = ExtResource("11_xvp3u")
+texture_hover = ExtResource("11_xvp3u")
+script = ExtResource("12_lpjnv")
+
+[node name="BattleHUD" parent="." instance=ExtResource("13_vholc")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1

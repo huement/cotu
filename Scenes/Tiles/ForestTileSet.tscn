@@ -1,0 +1,50 @@
+[gd_scene load_steps=10 format=3 uid="uid://bm8nuj8evtqdj"]
+
+[ext_resource type="Material" uid="uid://butiqv4iqltbj" path="res://Materials/M_GrassGreen.tres" id="1_up5yb"]
+[ext_resource type="Material" uid="uid://jrw01hohjwdi" path="res://Materials/M_GrassMid.tres" id="2_nv86r"]
+[ext_resource type="Material" uid="uid://bkf6o8mdu5fmr" path="res://Materials/M_GrassWorn.tres" id="3_270jn"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_w470a"]
+material = ExtResource("1_up5yb")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_lc535"]
+points = PackedVector3Array(-1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_h68tk"]
+material = ExtResource("2_nv86r")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3ix6i"]
+points = PackedVector3Array(-1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_tyw7x"]
+material = ExtResource("3_270jn")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_w471r"]
+points = PackedVector3Array(-1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1)
+
+[node name="ForestTileSet" type="Node3D"]
+
+[node name="GrassTile" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_w470a")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="GrassTile"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GrassTile/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_lc535")
+
+[node name="MidGrassTile" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0039795637)
+mesh = SubResource("PlaneMesh_h68tk")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MidGrassTile"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MidGrassTile/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_3ix6i")
+
+[node name="WornGrassTile" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_tyw7x")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="WornGrassTile"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WornGrassTile/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_w471r")

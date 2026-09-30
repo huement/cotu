@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://d31yfbhogp3bl"]
+
+[ext_resource type="PackedScene" uid="uid://b4uqoqsmytyu2" path="res://resources/DungeonParts/stones.glb" id="1_0vmrb"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_lbydw"]
+radius = 0.8
+
+[node name="Stones" type="Node3D"]
+
+[node name="StonesModels" parent="." instance=ExtResource("1_0vmrb")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("CylinderShape3D_lbydw")

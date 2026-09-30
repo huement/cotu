@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://dquxxvchp5mey"]
+
+[ext_resource type="Script" uid="uid://buxnnep7tr2jl" path="res://Scripts/3D/GridObstacle.gd" id="1_j5rov"]
+[ext_resource type="PackedScene" uid="uid://dxjj4be8kuxg5" path="res://resources/DungeonParts/barrel.glb" id="1_socom"]
+[ext_resource type="Shape3D" uid="uid://b6p1sxyyu3gc8" path="res://Scenes/Objects/Barrel_Shape.tres" id="2_j5rov"]
+
+[node name="Barrel" type="Node3D"]
+script = ExtResource("1_j5rov")
+
+[node name="BarrelModel" parent="." instance=ExtResource("1_socom")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = ExtResource("2_j5rov")

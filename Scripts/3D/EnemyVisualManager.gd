@@ -22,10 +22,21 @@ extends Node3D
 ## Horizontal spacing when multiple enemies are spawned.
 @export var horizontal_spacing: float = 1.2
 
+
+## Fallback animation candidate aliases for various 3D model formats (e.g. Ghost, Kenny, Mixamo)
 # ==============================================================================
-# 2. RUNTIME STATE
+# 2. RUNTIME STATE & ANIMATION MAPPINGS
 # ==============================================================================
 var _spawned_enemies: Dictionary = {}
+
+## Fallback animation candidate aliases for various 3D model formats
+const ANIM_MAPPINGS: Dictionary = {
+	&"idle": [&"Idle", &"idle", &"IDLE", &"idle_loop", &"Idle_Loop"],
+	&"attack": [&"CastSpell", &"attack-melee-left", &"Attack", &"attack", &"Cast", &"cast", &"SpellCast"],
+	&"damage": [&"TakeDamage", &"interact-left", &"Hit", &"hit", &"Damage", &"damage", &"GetHit"],
+	&"die": [&"Die", &"die", &"Death", &"death", &"Dead", &"dead"]
+}
+
 
 # ==============================================================================
 # 3. LIFECYCLE & INITIALIZATION
@@ -130,48 +141,43 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 	return result
 
-	
-# Update _on_combat_started() in res://Scripts/3D/EnemyVisualManager.gd:
 
-func _on_combat_started(enemy_payload: Variant, _party: Array) -> void:
+func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_facing: String) -> void:
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
-
-	if not is_instance_valid(camera_node):
-		push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
-		return
+		if not is_instance_valid(camera_node):
+			push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
+			return
 
 	_clear_all_enemies()
 	visible = true
 
-	var enemy_resources: Array[Resource] = _resolve_enemy_resources(enemy_payload)
+	# 🎯 Resolve payload into full pack array (handles pack_size & overworld group lookup)
+	var enemy_group: Array[Resource] = _resolve_enemy_resources(enemy_payload)
+	
+	for i in range(enemy_group.size()):
+		var e_data: Resource = enemy_group[i] as Resource
+		var model_scene: PackedScene = null
+		
+		if is_instance_valid(e_data) and "model_scene" in e_data:
+			model_scene = e_data.get("model_scene") as PackedScene
 
-	for i in range(enemy_resources.size()):
-		var e_data: Resource = enemy_resources[i]
-		if not is_instance_valid(e_data):
-			continue
-
-		var model_scene: PackedScene = e_data.get("model_scene") as PackedScene if "model_scene" in e_data else null
 		var enemy_node: Node3D
 		if is_instance_valid(model_scene):
 			enemy_node = model_scene.instantiate() as Node3D
+			# 🎯 Binds custom_material / texture_path onto child MeshInstance3D nodes
+			_apply_material_to_model(enemy_node, e_data)
 		else:
 			enemy_node = _create_debug_mesh()
 
 		var enemy_id: String = "enemy_%d" % i
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
-
-		# 🎯 Apply material override so GLB meshes render with textures rather than white
-		_apply_material_to_model(enemy_node, e_data)
-
-		_position_enemy(enemy_node, i, enemy_resources.size())
+		
+		_position_enemy(enemy_node, i, enemy_group.size())
 		play_animation(enemy_node, &"idle", true)
 
 
-# Add these helper methods to res://Scripts/3D/EnemyVisualManager.gd:
-
-## Automatically resolves and applies texture materials to 3D GLB model meshes
 ## Automatically resolves and applies texture materials to 3D GLB model meshes
 func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
 	if not is_instance_valid(model_node) or not is_instance_valid(e_data):
@@ -245,9 +251,14 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 	if not is_instance_valid(camera_node):
 		return
 
+	# Dynamically tighten spacing as enemy count increases
+	var effective_spacing: float = horizontal_spacing
+	if total_enemies >= 3:
+		effective_spacing = horizontal_spacing * 0.65  # Squeezes groups of 3+ together
+
 	var horizontal_offset: float = 0.0
 	if total_enemies > 1:
-		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * horizontal_spacing
+		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * effective_spacing
 
 	var cam_transform: Transform3D = camera_node.global_transform
 
@@ -267,20 +278,84 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void
 # ==============================================================================
 # 5. ANIMATION & FX
 # ==============================================================================
-func play_animation(enemy_node: Node3D, anim_name: StringName, loop: bool = true) -> void:
+## Plays an animation for the model based on abstract action key (&"idle", &"attack", &"damage", &"die")
+func play_animation(enemy_node: Node3D, action_key: StringName, loop: bool = true) -> void:
 	if not is_instance_valid(enemy_node):
 		return
 
 	var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	if is_instance_valid(anim_player) and anim_player.has_animation(anim_name):
-		anim_player.play(anim_name)
-		if not loop:
-			anim_player.animation_finished.connect(
-				func(finished_anim: StringName) -> void:
-					if finished_anim != &"die" and is_instance_valid(enemy_node):
-						play_animation(enemy_node, &"idle", true),
-				CONNECT_ONE_SHOT
-			)
+	if not is_instance_valid(anim_player):
+		return
+
+	var resolved_anim: StringName = _resolve_animation_name(anim_player, action_key)
+	if resolved_anim.is_empty():
+		return
+
+	# Explicitly set Godot Animation loop mode on the Animation resource
+	var anim: Animation = anim_player.get_animation(resolved_anim)
+	if is_instance_valid(anim):
+		anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+
+	anim_player.play(resolved_anim)
+
+	# Non-looping actions (attack / damage) return to idle upon completion
+	if not loop and action_key != &"die":
+		anim_player.animation_finished.connect(
+			func(_finished_anim: StringName) -> void:
+				if is_instance_valid(enemy_node):
+					play_animation(enemy_node, &"idle", true),
+			CONNECT_ONE_SHOT
+		)
+
+
+## Resolves action state (&"idle", &"attack", &"damage", &"die") to actual animation clip names in the model's AnimationPlayer
+func _resolve_animation_name(anim_player: AnimationPlayer, action_key: StringName) -> StringName:
+	if not is_instance_valid(anim_player):
+		return &""
+
+	var candidates: Array = ANIM_MAPPINGS.get(action_key, [action_key])
+
+	# 1. Exact match check
+	for candidate in candidates:
+		var cand_name := StringName(str(candidate))
+		if anim_player.has_animation(cand_name):
+			return cand_name
+
+	# 2. Substring match fallback
+	var available: PackedStringArray = anim_player.get_animation_list()
+	for candidate in candidates:
+		var cand_str: String = str(candidate).to_lower()
+		for anim_name in available:
+			if cand_str in anim_name.to_lower():
+				return StringName(anim_name)
+
+	return &""
+
+
+func _on_enemy_attack_started(enemy_id: String) -> void:
+	if _spawned_enemies.has(enemy_id):
+		play_animation(_spawned_enemies[enemy_id], &"attack", false)
+
+
+func _on_enemy_damaged(enemy_id: String, _damage: int) -> void:
+	if _spawned_enemies.has(enemy_id):
+		play_animation(_spawned_enemies[enemy_id], &"damage", false)
+
+
+func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -> void:
+	if current_hp <= 0 and _spawned_enemies.has(enemy_id):
+		var enemy_node: Node3D = _spawned_enemies[enemy_id]
+		play_animation(enemy_node, &"die", false)
+
+		var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		if is_instance_valid(anim_player):
+			var resolved_die: StringName = _resolve_animation_name(anim_player, &"die")
+			if not resolved_die.is_empty() and anim_player.has_animation(resolved_die):
+				await anim_player.animation_finished
+
+		if is_instance_valid(enemy_node):
+			enemy_node.queue_free()
+		_spawned_enemies.erase(enemy_id)
 
 
 func _create_debug_mesh() -> Node3D:
@@ -295,30 +370,6 @@ func _create_debug_mesh() -> Node3D:
 	mesh_inst.material_override = mat
 	container.add_child(mesh_inst)
 	return container
-
-
-func _on_enemy_attack_started(enemy_id: String) -> void:
-	if _spawned_enemies.has(enemy_id):
-		play_animation(_spawned_enemies[enemy_id], &"attack-melee-left", false)
-
-
-func _on_enemy_damaged(enemy_id: String, _damage: int) -> void:
-	if _spawned_enemies.has(enemy_id):
-		play_animation(_spawned_enemies[enemy_id], &"interact-left", false)
-
-
-func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -> void:
-	if current_hp <= 0 and _spawned_enemies.has(enemy_id):
-		var enemy_node: Node3D = _spawned_enemies[enemy_id]
-		play_animation(enemy_node, &"die", false)
-
-		var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
-		if is_instance_valid(anim_player) and anim_player.has_animation(&"die"):
-			await anim_player.animation_finished
-
-		if is_instance_valid(enemy_node):
-			enemy_node.queue_free()
-		_spawned_enemies.erase(enemy_id)
 
 
 func _on_combat_ended(_victory: bool) -> void:

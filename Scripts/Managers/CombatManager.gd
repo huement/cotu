@@ -137,6 +137,8 @@ const BASE_TICK_RATE: float = 25.0
 @export var is_paused_for_input: bool = false
 @export var base_flee_chance: float = 0.60
 
+
+var is_transitioning_out: bool = false
 var combatants: Array[Combatant] = []
 var turn_queue: Array[Combatant] = []
 var active_combatant: Combatant = null
@@ -161,14 +163,17 @@ func _process(delta: float) -> void:
 	_tick_turn_meters(delta)
 
 
-func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> void:
+func _on_combat_started(enemy_data_or_group: Variant, player_party: Array, _enemy_facing: String) -> void:
+	if is_combat_active:
+		return
+
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
 	guarding_characters.clear()
 
 	# 🔍 DIAGNOSTIC LOG: Print exact runtime type and value received
-	print("[DEBUG CombatManager] combat_started payload type: ", typeof(enemy_data_or_group), " | Value: ", enemy_data_or_group)
+	GameLogger.combat("[DEBUG CombatManager] combat_started payload type: %s | Value: %s" % [typeof(enemy_data_or_group), enemy_data_or_group])
 	
 	var registered_cats: int = 0
 	for i in range(player_party.size()):
@@ -246,14 +251,21 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array) -> vo
 
 
 func _on_combat_ended(victory: bool) -> void:
-	if not is_combat_active:
+	if not is_combat_active or is_transitioning_out:
 		return
 
 	GameLogger.combat("BATTLE ENDED!")
-	is_combat_active = false
-	is_paused_for_input = false
+	
+	# Block input and flag the transition, but KEEP is_combat_active = true 
+	# to block new encounters from interrupting the fade out.
+	is_transitioning_out = true
+	is_paused_for_input = true
+	# is_combat_active = false
+	# is_paused_for_input = false
 
-	var victory_data: Dictionary = { }
+	var victory_data: Dictionary = {}
+	var gs: Node = get_tree().root.get_node_or_null("GameState")
+
 	if victory:
 		var total_xp: int = 0
 		var total_gold: int = 0
@@ -261,7 +273,6 @@ func _on_combat_ended(victory: bool) -> void:
 		var total_party_members: int = 0
 		var enemies_killed: int = 0
 		var items_dropped: Array[ItemData] = []
-		var gs: Node = get_tree().root.get_node_or_null("GameState")
 
 		for c: Combatant in combatants:
 			if c.is_player:
@@ -308,14 +319,21 @@ func _on_combat_ended(victory: bool) -> void:
 			"total_members": max(1, total_party_members),
 		}
 
+		# 🎯 Pause 1.0 second for final attack/death animations to complete before cleanup
+		await get_tree().create_timer(1.0).timeout
+
 	combatants.clear()
 	turn_queue.clear()
 	active_combatant = null
 	guarding_characters.clear()
 
+	# Fully release combat locks now that the transition is done
+	is_combat_active = false
+	is_transitioning_out = false
+	is_paused_for_input = false
+
 	SignalBus.combat_ended.emit(victory)
 
-	var gs: Node = get_tree().root.get_node_or_null("GameState")
 	if is_instance_valid(gs) and gs.has_method("save_game"):
 		gs.save_game()
 
@@ -394,6 +412,7 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 	return result
 	
+
 func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
 	if not is_instance_valid(enemy_ref):
 		return _generate_fallback_loot()
@@ -570,7 +589,8 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 
 		if is_instance_valid(target_char):
 			var weapon: Resource = null
-			if is_instance_valid(acting_char.ref):
+			# 🎯 Only resolve equipped weapon resource if actually attacking with a weapon (not UNARMED fallback)
+			if attack_type != "UNARMED" and is_instance_valid(acting_char.ref):
 				if acting_char.ref.has_method("get_equipped_weapon"):
 					weapon = acting_char.ref.get_equipped_weapon()
 				elif acting_char.ref.has_method("get_equipped_item"):
@@ -686,6 +706,8 @@ func _execute_ability_use_in_combat(acting_char: Combatant, action_type: StringN
 		SignalBus.character_mana_changed.emit(acting_char.slot_index, acting_char.current_mp, acting_char.max_mp)
 
 	if action_type == &"SKILL" and ability.has_method("roll_success_check"):
+		if is_instance_valid(AudioManager):
+			AudioManager.play_skill_sound(spell_name)
 		if not ability.roll_success_check():
 			GameLogger.combat("%s used %s, but the attack MISSED!" % [acting_char.name, spell_name])
 			if is_instance_valid(target_mgr) and target_mgr.has_method("clear_pending_ability"):
@@ -887,6 +909,8 @@ func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int)
 		var success: bool = inv.use_item(item_slot_idx, target_cat)
 
 		if success:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_potion_sound()	
 			for c: Combatant in combatants:
 				if c.ref == target_cat:
 					if "current_hp" in c.ref:
@@ -941,6 +965,8 @@ func execute_run_action(caster_speed: int, enemy_avg_speed: int) -> void:
 			sb.show_toast.emit("Escape failed! The enemies block your retreat!", true)
 
 
+# res://Scripts/Managers/CombatManager.gd
+
 func _execute_enemy_ai(enemy: Combatant) -> void:
 	if not is_instance_valid(enemy) or enemy.current_hp <= 0 or not is_combat_active:
 		return
@@ -954,18 +980,182 @@ func _execute_enemy_ai(enemy: Combatant) -> void:
 
 	if not alive_party.is_empty():
 		var target: Combatant = alive_party.pick_random()
-		var enemy_attack_type: String = "BLADE"
-		if is_instance_valid(enemy.ref) and enemy.ref.has_method("get_attack_type_string"):
-			enemy_attack_type = enemy.ref.get_attack_type_string()
+		var spell_to_cast: Resource = _resolve_enemy_spell(enemy.ref)
 
-		var damage: int = _calculate_physical_damage(enemy, target, enemy_attack_type)
-		_apply_damage_to_combatant(target, damage, enemy.name, enemy.ref)
+		if is_instance_valid(spell_to_cast):
+			var spell_name: String = str(spell_to_cast.get("spell_name")) if "spell_name" in spell_to_cast else (str(spell_to_cast.get("name")) if "name" in spell_to_cast else "Spell")
+			var base_amt: int = int(spell_to_cast.get("base_amount")) if "base_amount" in spell_to_cast else 10
+			GameLogger.combat("%s cast %s on %s dealing %d damage!" % [enemy.name, spell_name, target.name, base_amt])
+			_apply_damage_to_combatant(target, base_amt, enemy.name, spell_to_cast)
+		else:
+			var enemy_attack_type: String = "BLADE"
+			if is_instance_valid(enemy.ref) and enemy.ref.has_method("get_attack_type_string"):
+				enemy_attack_type = enemy.ref.get_attack_type_string()
+
+			var damage: int = _calculate_physical_damage(enemy, target, enemy_attack_type)
+			GameLogger.combat("%s physically attacked %s with %s dealing %d damage!" % [enemy.name, target.name, enemy_attack_type, damage])
+			_apply_damage_to_combatant(target, damage, enemy.name, enemy.ref)
 
 		if _check_battle_state():
 			return
 
 	_reset_combatant_meter(enemy)
 	call_deferred("_unpause_and_continue")
+
+
+## Inspects all standard and custom property keys on an enemy resource to extract a spell or ability.
+func _resolve_enemy_spell(enemy_ref: Resource) -> Resource:
+	if not is_instance_valid(enemy_ref):
+		GameLogger.combat("[AI DEBUG] enemy_ref is invalid!")
+		return null
+
+	var spell_candidates: Array[Resource] = []
+
+	# Expanded property key list including 'spell_ids'
+	var possible_keys: Array[String] = [
+		"spell_ids", "spells", "spell", "abilities", "ability", 
+		"special_attacks", "equipped_spells", "spell_list", 
+		"known_spells", "skills", "actions"
+	]
+
+	for key in possible_keys:
+		if key in enemy_ref:
+			var val: Variant = enemy_ref.get(key)
+			if val is Array:
+				for item in (val as Array):
+					if item is Resource:
+						spell_candidates.append(item as Resource)
+					elif item is String and not str(item).strip_edges().is_empty():
+						var loaded_res: Resource = _load_spell_by_id(str(item))
+						if is_instance_valid(loaded_res):
+							spell_candidates.append(loaded_res)
+			elif val is Resource:
+				spell_candidates.append(val as Resource)
+			elif val is String and not str(val).strip_edges().is_empty():
+				var loaded_res: Resource = _load_spell_by_id(str(val))
+				if is_instance_valid(loaded_res):
+					spell_candidates.append(loaded_res)
+
+	if not spell_candidates.is_empty():
+		var selected_spell: Resource = spell_candidates.pick_random()
+		var path_str: String = selected_spell.resource_path.get_file() if not selected_spell.resource_path.is_empty() else "Unsaved Resource"
+		GameLogger.combat("[AI DEBUG] %s resolved spell candidate: %s" % [enemy_ref.get_class(), path_str])
+		return selected_spell
+
+	GameLogger.combat("[AI DEBUG] No spells found on %s." % enemy_ref.get_class())
+	return null
+
+
+## Resolves a spell String ID (e.g. "sp_plasma_dart") into a loaded SpellData Resource.
+func _load_spell_by_id(spell_id: String) -> Resource:
+	if spell_id.begins_with("res://") and ResourceLoader.exists(spell_id):
+		return load(spell_id) as Resource
+
+	var clean_id: String = spell_id.trim_prefix("sp_").to_lower()
+	var candidate_paths: Array[String] = [
+		"res://Data/Spells/" + spell_id + ".tres",
+		"res://Data/Spells/" + clean_id + ".tres",
+		"res://Data/Spells/PlasmaDart.tres"
+	]
+
+	for path in candidate_paths:
+		if ResourceLoader.exists(path):
+			return load(path) as Resource
+
+	# Directory scan fallback
+	var dir := DirAccess.open("res://Data/Spells/")
+	if dir:
+		dir.list_dir_begin()
+		var file_name := dir.get_next()
+		while file_name != "":
+			if not dir.current_is_dir() and file_name.ends_with(".tres"):
+				var full_path := "res://Data/Spells/".path_join(file_name)
+				var res := load(full_path) as Resource
+				if is_instance_valid(res):
+					var res_id: String = str(res.get("spell_id")) if "spell_id" in res else ""
+					if res_id == spell_id or file_name.get_basename().to_snake_case() == clean_id:
+						return res
+			file_name = dir.get_next()
+
+	return null
+
+
+func _apply_damage_to_combatant(
+	target: Combatant, 
+	damage: int, 
+	attacker_name: String = "", 
+	action_resource: Resource = null
+) -> void:
+	
+	if not is_instance_valid(target) or target.current_hp <= 0 or damage <= 0:
+		return
+
+	var was_alive: bool = target.current_hp > 0
+	target.current_hp = max(0, target.current_hp - damage)
+	_sync_hp_to_ref(target)
+
+	# Update HUD Vitals & Visual FX
+	if target.is_player:
+		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
+		SignalBus.chevron_flash_requested.emit(true)
+
+		# Check if incoming damage source is a spell or ability with a custom animation key
+		var anim_name: String = str(action_resource.get("animation")) if is_instance_valid(action_resource) and "animation" in action_resource else "NONE"
+		if anim_name != "NONE" and not anim_name.is_empty():
+			var spell_element: ItemData.ElementalBase = action_resource.get("element") as ItemData.ElementalBase if "element" in action_resource else ItemData.ElementalBase.NONE
+			SignalBus.spell_vfx_requested.emit(anim_name, spell_element)
+			SignalBus.camera_shake_requested.emit(0.65)
+		else:
+			SignalBus.screen_slice_requested.emit()
+			SignalBus.camera_shake_requested.emit(0.85)
+	else:
+		SignalBus.enemy_damaged_visual.emit(target.id, damage)
+		SignalBus.enemy_health_changed.emit(target.id, target.current_hp, target.max_hp)
+		SignalBus.chevron_flash_requested.emit(false)
+
+		if is_instance_valid(action_resource):
+			_trigger_physical_impact_vfx(target.id, action_resource, 0.5)
+		else:
+			SignalBus.camera_shake_requested.emit(0.4)
+			if is_instance_valid(AudioManager):
+				AudioManager.play_attack_sound("UNARMED")
+
+	# Toast Notifications & Combat Log
+	var verb: String = _get_attack_verb(action_resource)
+	if target.is_player:
+		var damage_msg: String = "⚡ %s took %d damage!" % [target.name, damage]
+		GameLogger.combat(damage_msg)
+		if is_instance_valid(SignalBus) and SignalBus.has_signal(&"show_toast"):
+			SignalBus.show_toast.emit(damage_msg, true)
+	else:
+		var damage_msg: String = "💥 %s took %d damage!" % [target.name, damage]
+		if not attacker_name.is_empty():
+			damage_msg = "💥 %s %s %s for %d damage!" % [attacker_name, verb, target.name, damage]
+		GameLogger.combat(damage_msg)
+		if is_instance_valid(SignalBus) and SignalBus.has_signal(&"show_toast"):
+			SignalBus.show_toast.emit(damage_msg, false)
+
+	if was_alive and target.current_hp <= 0:
+		if target.is_player:
+			var death_msg: String = "💀 %s HAS FALLEN IN BATTLE!" % target.name.to_upper()
+			GameLogger.combat(death_msg)
+			if is_instance_valid(SignalBus) and SignalBus.has_signal(&"show_toast"):
+				SignalBus.show_toast.emit(death_msg, true)
+		else:
+			var death_msg: String = "☠️ %s HAS BEEN DEFEATED!" % target.name.to_upper()
+			GameLogger.combat(death_msg)
+			if is_instance_valid(SignalBus) and SignalBus.has_signal(&"show_toast"):
+				SignalBus.show_toast.emit(death_msg, false)
+
+			var e_type: String = ""
+			if is_instance_valid(target.ref):
+				if "enemy_type" in target.ref and not str(target.ref.get("enemy_type")).is_empty():
+					e_type = str(target.ref.get("enemy_type"))
+				elif "enemy_id" in target.ref:
+					e_type = str(target.ref.get("enemy_id"))
+
+			if is_instance_valid(AudioManager):
+				AudioManager.play_enemy_death_sound(e_type)
 
 
 func _calculate_physical_damage(
@@ -1039,60 +1229,6 @@ func _get_attack_verb(action_resource: Resource) -> String:
 	return "hit"
 
 
-func _apply_damage_to_combatant(
-	target: Combatant, 
-	damage: int, 
-	attacker_name: String = "", 
-	action_resource: Resource = null
-) -> void:
-	if not is_instance_valid(target) or target.current_hp <= 0 or damage <= 0:
-		return
-
-	var was_alive: bool = target.current_hp > 0
-	target.current_hp = max(0, target.current_hp - damage)
-	_sync_hp_to_ref(target)
-
-	# Update HUD Vitals & Visual FX
-	if target.is_player:
-		SignalBus.character_health_changed.emit(target.slot_index, target.current_hp)
-		SignalBus.chevron_flash_requested.emit(true)
-		# Always trigger screen slice overlay and severe camera shake when the player is hit
-		SignalBus.screen_slice_requested.emit()
-		SignalBus.camera_shake_requested.emit(0.85)
-	else:
-		SignalBus.enemy_damaged_visual.emit(target.id, damage)
-		SignalBus.enemy_health_changed.emit(target.id, target.current_hp, target.max_hp)
-		SignalBus.chevron_flash_requested.emit(false)
-		
-		# Trigger target-overlay VFX or baseline camera shake
-		if is_instance_valid(action_resource):
-			_trigger_physical_impact_vfx(target.id, action_resource, 0.5)
-		else:
-			SignalBus.camera_shake_requested.emit(0.4)
-
-	# Toast Notifications
-	var sb: Node = SignalBus
-	if is_instance_valid(sb) and sb.has_signal(&"show_toast"):
-		var verb: String = _get_attack_verb(action_resource)
-		
-		if target.is_player:
-			var damage_msg: String = "⚡ %s took %d damage!" % [target.name, damage]
-			sb.show_toast.emit(damage_msg, true)
-		else:
-			var damage_msg: String = "💥 %s took %d damage!" % [target.name, damage]
-			if not attacker_name.is_empty():
-				damage_msg = "💥 %s %s %s for %d damage!" % [attacker_name, verb, target.name, damage]
-			sb.show_toast.emit(damage_msg, false)
-
-		if was_alive and target.current_hp <= 0:
-			if target.is_player:
-				var death_msg: String = "💀 %s HAS FALLEN IN BATTLE!" % target.name.to_upper()
-				sb.show_toast.emit(death_msg, true)
-			else:
-				var death_msg: String = "☠️ %s HAS BEEN DEFEATED!" % target.name.to_upper()
-				sb.show_toast.emit(death_msg, false)
-
-
 ## Emits target-centered 2D overlay animation, screen slice shader, and trauma for physical hits
 func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data: Resource, trauma: float = 0.3) -> void:
 	var vfx_frames: SpriteFrames = null
@@ -1104,6 +1240,10 @@ func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data:
 			vfx_frames = weapon_or_skill_data.get("attack_vfx") as SpriteFrames
 
 		GameLogger.combat("Triggering physical impact VFX for %s weapon type %s" % [target_enemy_id, type_str])
+
+		# Play dynamic weapon attack SFX
+		if is_instance_valid(AudioManager):
+			AudioManager.play_attack_sound(type_str)
 
 		if is_instance_valid(SignalBus):
 			if "BASH" in type_str:
@@ -1120,9 +1260,11 @@ func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data:
 				SignalBus.camera_shake_requested.emit(0.55)
 				GameLogger.combat("Triggered sword_swing")
 
+	# Target 2D SpriteFrames overlay animation emit
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and is_instance_valid(vfx_frames):
 		sb.target_vfx_requested.emit(target_enemy_id, vfx_frames, trauma)
+
 
 func _sync_hp_to_ref(c: Combatant) -> void:
 	if is_instance_valid(c.ref):

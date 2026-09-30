@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://ccfv6aub5jas4"]
+
+[ext_resource type="Script" uid="uid://cxmcgfr6gbt3h" path="res://Scripts/Triggers/level_title_trigger.gd" id="1_pvicc"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cv0cr"]
+size = Vector3(10, 5, 4)
+
+[node name="Area3D" type="Area3D"]
+script = ExtResource("1_pvicc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_cv0cr")
+debug_color = Color(0, 0.5137255, 0.6039216, 0.7137255)

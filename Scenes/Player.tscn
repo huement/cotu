@@ -1,0 +1,53 @@
+[gd_scene load_steps=8 format=3 uid="uid://dhvb1rt0k3ohv"]
+
+[ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_dewec"]
+[ext_resource type="PackedScene" uid="uid://d1rfhycwotsyq" path="res://Scenes/3D/weapon_animatior.tscn" id="2_5ixxa"]
+[ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="3_52ee3"]
+[ext_resource type="Script" uid="uid://b8qk035c6nrth" path="res://Scripts/3D/CameraShake.gd" id="3_nn08x"]
+[ext_resource type="Script" uid="uid://lp1gjanmumd3" path="res://Scripts/Components/GridMovementComponent.gd" id="4_52ee3"]
+[ext_resource type="Script" uid="uid://d0mrci8mwhb23" path="res://Scripts/UI/level_hud_label.gd" id="4_bhhdu"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pl8yv"]
+height = 1.8
+
+[node name="Player" type="CharacterBody3D"]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
+collision_mask = 2
+script = ExtResource("1_dewec")
+eye_height = 2.5
+
+[node name="Camera3D" type="Camera3D" parent="."]
+
+[node name="CollisionRayCast" type="RayCast3D" parent="Camera3D"]
+
+[node name="WeaponAnimatior" parent="Camera3D" instance=ExtResource("2_5ixxa")]
+
+[node name="LevelHUDLabel" type="Label3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 0.99939084, 0.034899496, 0, -0.034899496, 0.99939084, 0, 0.15, -1.2)
+pixel_size = 0.002
+no_depth_test = true
+modulate = Color(0.48306477, 0.96518797, 0.99999994, 1)
+text = "DUNGEON
+Level 01"
+font = ExtResource("3_52ee3")
+font_size = 128
+outline_size = 16
+uppercase = true
+script = ExtResource("4_bhhdu")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_pl8yv")
+
+[node name="CameraShake" type="Node" parent="." node_paths=PackedStringArray("target_node")]
+script = ExtResource("3_nn08x")
+target_node = NodePath("../Camera3D")
+
+[node name="GridMovementComponent" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_52ee3")
+
+[node name="RayFront" type="RayCast3D" parent="GridMovementComponent"]
+unique_name_in_owner = true
+target_position = Vector3(0, -1, -2)
+collision_mask = 5

@@ -12,3 +12,6 @@ req_dexterity = 0
 req_speed = 0
 req_personality = 0
 level_spells_unlock = 5
+stat_points_per_level = 4
+skill_points_per_level = 6
+spell_points_per_level = 0

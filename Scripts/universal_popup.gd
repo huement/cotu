@@ -7,6 +7,8 @@ class_name UniversalPopup
 @onready var title_label: Label = %TitleLabel as Label
 @onready var content_area: VBoxContainer = %ContentArea as VBoxContainer
 @onready var confirm_button: TextureButton = %ConfirmButton as TextureButton
+@export var shake_interval: float = 0.35
+@export var shake_trauma_amount: float = 0.45 # Increased from 0.12 to yield noticeable camera wobble (0.45^2 = ~0.20 power)
 
 var active_action_type: StringName = &""
 var active_data: Dictionary = { }
@@ -19,13 +21,25 @@ var _preview_desc_label: Label = null
 var _preview_icon: TextureRect = null
 var _items_use_btn: Button = null
 var _items_drop_btn: Button = null
-var _items_grid_instance: CharacterInventoryGrid = null
+
+const GALAXIA_FONT: Font = preload("res://ui/fonts/GALAXIA.otf")
 
 const BATTLE_VICTORY_SCENE: PackedScene = preload("res://Scenes/UI/BattleVictoryPopup.tscn")
 @export var skills_spells_popup_scene: PackedScene = preload("res://Scenes/UI/SkillsSpellsPopup.tscn")
 
+# Aura Shader & Shake Control
+var _aura_rect: ColorRect = null
+var _aura_material: ShaderMaterial = null
+var _is_aura_active: bool = false
+var _shake_timer: float = 0.0
+
 
 func _ready() -> void:
+	if title_label:
+		title_label.add_theme_font_override("font", GALAXIA_FONT)
+		title_label.add_theme_font_size_override("font_size", 18) # Optional size adjustment
+		title_label.add_theme_color_override("font_color", Color(0.0, 1.0, 1.0, 1.0))
+
 	if panel_container:
 		panel_container.visible = false
 	if background_dimmer:
@@ -42,6 +56,8 @@ func _ready() -> void:
 
 ## Catches incoming event requests and builds custom menus on the fly
 func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> void:
+	print("[DEBUG] UniversalPopup: Received request for action: ", action_type)
+
 	# 🎯 Guard: Ignore ABILITY_INFO so UniversalPopup does not destroy its content
 	if action_type == &"ABILITY_INFO":
 		return
@@ -60,20 +76,29 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 			title_label.text = "VICTORY ACHIEVED"
 			_build_battle_victory_ui(data)
 		&"SEARCH":
-			title_label.text = "SCANNING SYSTEM CORRIDORS"
+			title_label.text = "Scanning System Corridors"
 			_build_search_ui()
 		&"REST":
-			title_label.text = "SET PURRGATORY CAMP DURATION"
+			title_label.text = "Set Purrogate Camp Duration"
 			_build_rest_ui()
 		&"ITEMS":
-			title_label.text = "USEABLE ITEMS"
+			title_label.text = "Useable Items"
 			_build_items_inventory_ui()
 		&"ITEM_ACTIONS":
-			title_label.text = "ITEM ACTION PROTOCOL"
+			title_label.text = "Item Action Protocol"
 			_build_item_actions_ui(data)
 		&"ALL_SKILLS", &"ALL_SPELLS", &"SPELLBOOK":
 			title_label.text = ""
 			_build_skills_spells_popup_ui(action_type, data)
+		&"CHEST_LOOT":
+			title_label.text = "Container Contents"
+			_build_chest_loot_ui(data)
+		&"LORE_POPUP":
+			var title_str: String = str(data.get("title", "Archive Log")).to_upper()
+			title_label.text = title_str
+			_build_lore_popup_ui(data)
+		&"LEAVE_DUNGEON":
+			_build_leave_dungeon_ui(data)
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
@@ -82,11 +107,14 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		background_dimmer.visible = true
 	if panel_container:
 		panel_container.visible = true
+		print("[DEBUG] UniversalPopup: Panel container visible.")
+		_center_popup()
 
 
 func _on_confirm_pressed() -> void:
 	var payload: Dictionary = { }
-
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-confirm")
 	if active_action_type == &"REST":
 		var slider := content_area.get_node_or_null("RestSlider") as HSlider
 		if slider:
@@ -98,10 +126,13 @@ func _on_confirm_pressed() -> void:
 func _clear_content_area() -> void:
 	if confirm_button:
 		confirm_button.visible = false
+	if title_label:
+		title_label.visible = true
+	_apply_popup_margins(false)
+	
 	for child in content_area.get_children():
+		content_area.remove_child(child)
 		child.queue_free()
-
-# In res://Scripts/universal_popup.gd
 
 
 func display_popup(title_text: String, content_node: Control, options: Dictionary = { }) -> void:
@@ -132,6 +163,8 @@ func display_popup(title_text: String, content_node: Control, options: Dictionar
 	# var content_area := %ContentArea as VBoxContainer
 	if content_area and content_node:
 		content_area.add_child(content_node)
+		_center_popup()
+		call_deferred("_center_popup")
 
 
 func _emit_confirmation(action_type: StringName, extra_data: Dictionary) -> void:
@@ -143,6 +176,7 @@ func _emit_confirmation(action_type: StringName, extra_data: Dictionary) -> void
 
 
 func _close_modal() -> void:
+	_stop_aura_effect()
 	if background_dimmer:
 		background_dimmer.visible = false
 	if panel_container:
@@ -151,14 +185,67 @@ func _close_modal() -> void:
 	active_data.clear()
 
 
+func _on_cancel_pressed() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-close")
+	_close_modal()
+
+
+## USED with Both Chest and HypeChest
+func _build_chest_loot_ui(data: Dictionary) -> void:
+	var aura_preset: String = str(data.get("aura_type", "none"))
+	if aura_preset != "none":
+		_start_aura_effect(aura_preset)
+
+	var chest_node: Node3D = data.get("chest", null) as Node3D
+	var loot_items: Array[ItemData] = []
+	if data.has("loot") and data["loot"] is Array:
+		for item in (data["loot"] as Array):
+			if item is ItemData:
+				loot_items.append(item as ItemData)
+	var gold: int = int(data.get("gold", 0))
+
+	var loot_popup := LootPopup.new()
+	content_area.add_child(loot_popup)
+	loot_popup.setup_loot_display(chest_node, loot_items, gold)
+	loot_popup.closed.connect(_close_modal)
+
+
+# When Player uses SearchButton to scan the area around them
 func _build_search_ui() -> void:
+	# Trigger search scan SFX (res://Audio/Player/search.mp3)
+	if is_instance_valid(AudioManager):
+		AudioManager.play_search_sound()
+		
 	var info_text := Label.new()
 	info_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	info_text.text = "Searching walls for hidden compartments...\nNo immediate micro-vibrations detected."
+
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	var nearby_details: Array[String] = []
+
+	if is_instance_valid(player) and "current_grid_pos" in player:
+		var p_cell: Vector2i = player.get("current_grid_pos")
+		var interactables: Array[Node] = get_tree().get_nodes_in_group(&"dungeon_interactables")
+
+		for obj in interactables:
+			if is_instance_valid(obj) and obj.has_method("get_grid_pos"):
+				var o_cell: Vector2i = obj.call("get_grid_pos") as Vector2i
+				var dist: int = absi(o_cell.x - p_cell.x) + absi(o_cell.y - p_cell.y)
+				if dist <= 2:
+					var obj_name: String = obj.name
+					if "object_id" in obj:
+						obj_name = str(obj.get("object_id")).capitalize()
+					nearby_details.append("- %s detected (%d tiles away)" % [obj_name, dist])
+
+	if nearby_details.is_empty():
+		info_text.text = "Searching corridors for hidden compartments...\nNo immediate micro-vibrations or anomalies detected."
+	else:
+		info_text.text = "SCAN RESULTS:\n" + "\n".join(nearby_details) + "\n\nFace object and press 'E' or 'SEARCH' to interact."
+
 	content_area.add_child(info_text)
 
 	var close_btn := _create_modal_button("CLOSE", Color(0.5, 0.5, 0.5, 1.0))
-	close_btn.pressed.connect(_close_modal)
+	close_btn.pressed.connect(_on_cancel_pressed)
 
 	var btn_center := HBoxContainer.new()
 	btn_center.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -203,103 +290,23 @@ func _build_rest_ui() -> void:
 	)
 
 	var cancel_btn := _create_modal_button("CANCEL", Color(0.5, 0.5, 0.5, 1.0))
-	cancel_btn.pressed.connect(_close_modal)
+	cancel_btn.pressed.connect(_on_cancel_pressed)
 
 	btn_hbox.add_child(rest_btn)
 	btn_hbox.add_child(cancel_btn)
 	content_area.add_child(btn_hbox)
 
+	call_deferred("_center_popup")
+
 
 func _build_items_inventory_ui() -> void:
-	_selected_item = null
-	_selected_slot_index = -1
-
-	var preview_hbox := HBoxContainer.new()
-	preview_hbox.custom_minimum_size = Vector2(0, 80)
-	preview_hbox.add_theme_constant_override("separation", 16)
-
-	var icon_box := PanelContainer.new()
-	icon_box.custom_minimum_size = Vector2(72, 72)
-	var icon_style := StyleBoxFlat.new()
-	icon_style.bg_color = Color(0.04, 0.08, 0.1, 0.9)
-	icon_style.border_width_left = 1
-	icon_style.border_width_top = 1
-	icon_style.border_width_right = 1
-	icon_style.border_width_bottom = 1
-	icon_style.border_color = Color(0.0, 0.8, 0.7, 0.8)
-	icon_box.add_theme_stylebox_override("panel", icon_style)
-
-	_preview_icon = TextureRect.new()
-	_preview_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_preview_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_preview_icon.set_anchors_preset(Control.PRESET_FULL_RECT)
-	icon_box.add_child(_preview_icon)
-	preview_hbox.add_child(icon_box)
-
-	var text_vbox := VBoxContainer.new()
-	text_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	_preview_title_label = Label.new()
-	_preview_title_label.text = "SELECT AN ITEM"
-	_preview_title_label.add_theme_color_override("font_color", Color(0.0, 0.9, 0.8, 1.0))
-	_preview_title_label.add_theme_font_size_override("font_size", 16)
-	text_vbox.add_child(_preview_title_label)
-
-	_preview_desc_label = Label.new()
-	_preview_desc_label.text = "Click any item in the grid below to inspect its details or use it."
-	_preview_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_preview_desc_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8, 0.9))
-	_preview_desc_label.add_theme_font_size_override("font_size", 12)
-	text_vbox.add_child(_preview_desc_label)
-
-	preview_hbox.add_child(text_vbox)
-	content_area.add_child(preview_hbox)
-
-	var sep := HSeparator.new()
-	content_area.add_child(sep)
-
-	var inventory_grid_scene: PackedScene = preload("res://Scenes/UI/CharacterInventoryGrid.tscn")
-	_items_grid_instance = inventory_grid_scene.instantiate() as CharacterInventoryGrid
-	content_area.add_child(_items_grid_instance)
-
-	if "inventory" in GameState:
-		_items_grid_instance.display_inventory(GameState.inventory)
-
-	var footer_hbox := HBoxContainer.new()
-	footer_hbox.alignment = BoxContainer.ALIGNMENT_BEGIN
-	footer_hbox.add_theme_constant_override("separation", 12)
-
-	_items_use_btn = _create_modal_button("USE", Color(0.0, 0.9, 0.9, 1.0))
-	_items_drop_btn = _create_modal_button("DROP", Color(0.0, 0.8, 0.7, 1.0))
-	var close_btn := _create_modal_button("CANCEL" if active_action_type == &"BATTLE_ITEMS" else "CLOSE", Color(0.5, 0.5, 0.5, 1.0))
-
-	_items_use_btn.disabled = true
-	_items_drop_btn.disabled = true
-
-	footer_hbox.add_child(_items_use_btn)
-	footer_hbox.add_child(_items_drop_btn)
-
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	footer_hbox.add_child(spacer)
-	footer_hbox.add_child(close_btn)
-
-	content_area.add_child(footer_hbox)
-
-	close_btn.pressed.connect(_close_modal)
-
-	_items_use_btn.pressed.connect(
-		func() -> void:
-			if not is_instance_valid(_selected_item) or _selected_slot_index < 0:
-				return
-
-			var item_to_use: ItemData = _selected_item
-			var inv_slot_idx: int = _selected_slot_index
-			var in_battle: bool = (active_action_type == &"BATTLE_ITEMS")
-			var acting_slot_idx: int = active_data.get("slot_index", -1) if in_battle else -1
-
-			GameLogger.info("UniversalPopup: USE clicked for %s (Slot %d, Acting Slot %d)" % [item_to_use.item_name, inv_slot_idx, acting_slot_idx])
-
+	var popup_instance := ItemsInventoryPopup.new()
+	content_area.add_child(popup_instance)
+	popup_instance.setup(active_action_type, active_data)
+	
+	popup_instance.close_requested.connect(_on_cancel_pressed)
+	popup_instance.target_selection_requested.connect(
+		func(item_to_use: ItemData, inv_slot_idx: int, acting_slot_idx: int) -> void:
 			match item_to_use.target_type:
 				ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:
 					_execute_item_use_direct(item_to_use, inv_slot_idx, acting_slot_idx, -1)
@@ -308,21 +315,16 @@ func _build_items_inventory_ui() -> void:
 					_build_item_target_selection_ui(item_to_use, inv_slot_idx, acting_slot_idx)
 	)
 
-	_items_drop_btn.pressed.connect(
-		func() -> void:
-			if is_instance_valid(_selected_item) and "inventory" in GameState:
-				GameState.inventory.remove_item(_selected_item)
-				_items_grid_instance.display_inventory(GameState.inventory)
-				_reset_items_preview(),
-	)
+	call_deferred("_center_popup")
 
 
 func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_slot_idx: int) -> void:
 	_clear_content_area()
 
 	var header_lbl := Label.new()
-	header_lbl.text = "SELECT TARGET FOR %s" % item.item_name.to_upper()
+	header_lbl.text = "Select Target For %s" % item.item_name
 	header_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header_lbl.add_theme_font_override("font", GALAXIA_FONT) # Applies GALAXIA font
 	header_lbl.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8, 1.0))
 	header_lbl.add_theme_font_size_override("font_size", 16)
 	content_area.add_child(header_lbl)
@@ -398,7 +400,7 @@ func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_s
 					grid.add_child(btn)
 
 	var cancel_btn := _create_modal_button("CANCEL", Color(0.5, 0.5, 0.5, 1.0))
-	cancel_btn.pressed.connect(_close_modal)
+	cancel_btn.pressed.connect(_on_cancel_pressed)
 
 	var btn_hbox := HBoxContainer.new()
 	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -502,6 +504,8 @@ func _execute_item_use_direct(item: ItemData, inv_slot_idx: int, acting_slot_idx
 				target_cat = gs.get_active_cat()
 
 			if is_instance_valid(target_cat):
+				if is_instance_valid(AudioManager):
+					AudioManager.play_ui_sound("button-confirm")
 				var success: bool = gs.inventory.use_item(inv_slot_idx, target_cat)
 				GameLogger.info("UniversalPopup: Direct Field Item Use result = %s" % [str(success)])
 				if success and get_tree().root.has_node("SignalBus"):
@@ -515,28 +519,9 @@ func _update_items_preview(data: Dictionary) -> void:
 	var item: ItemData = data.get("item", null) as ItemData
 	var slot_idx: int = data.get("index", -1)
 
-	if is_instance_valid(item):
-		_selected_item = item
-		_selected_slot_index = slot_idx
-
-		if _preview_title_label:
-			_preview_title_label.text = item.item_name.to_upper()
-		if _preview_desc_label:
-			_preview_desc_label.text = item.description
-		if _preview_icon:
-			_preview_icon.texture = item.icon if "icon" in item else null
-
-		var in_combat: bool = (active_action_type == &"BATTLE_ITEMS")
-		var is_usable: bool = (
-			item.can_be_used(in_combat)
-			if item.has_method("can_be_used")
-			else (item.is_consumable or item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION)
-		)
-
-		if _items_use_btn:
-			_items_use_btn.disabled = not is_usable
-		if _items_drop_btn:
-			_items_drop_btn.disabled = in_combat
+	for child in content_area.get_children():
+		if child is ItemsInventoryPopup:
+			(child as ItemsInventoryPopup).update_preview(item, slot_idx)
 
 
 func _reset_items_preview() -> void:
@@ -594,6 +579,31 @@ func _build_skills_spells_popup_ui(action_type: StringName, data: Dictionary) ->
 		popup_instance.closed.connect(_close_modal)
 
 
+func _center_popup() -> void:
+	if not is_instance_valid(panel_container):
+		return
+
+	panel_container.reset_size()
+
+	# Set center anchor point
+	panel_container.anchor_left = 0.5
+	panel_container.anchor_top = 0.5
+	panel_container.anchor_right = 0.5
+	panel_container.anchor_bottom = 0.5
+
+	# Grow symmetrically from the anchor point
+	panel_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel_container.grow_vertical = Control.GROW_DIRECTION_BOTH
+
+	# Zero out stale offsets so GROW_DIRECTION_BOTH handles centering
+	panel_container.offset_left = 0
+	panel_container.offset_top = 0
+	panel_container.offset_right = 0
+	panel_container.offset_bottom = 0
+
+	print("[DEBUG] UniversalPopup Centered -> Position: ", panel_container.position, " | Size: ", panel_container.size)
+
+		
 ## Helper method to adjust container margins for standard vs flush modals
 func _apply_popup_margins(is_flush: bool) -> void:
 	var main_margin := $PanelContainer/MarginContainer as MarginContainer
@@ -617,6 +627,11 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 	var slot_name: String = data.get("slot", "")
 	var slot_idx: int = data.get("index", -1)
 
+	# Top Margin Container for the label
+	var top_margin := MarginContainer.new()
+	top_margin.add_theme_constant_override("margin_top", 12) # Adjust top margin pixels as needed
+	content_area.add_child(top_margin)
+
 	var name_label := Label.new()
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
@@ -627,7 +642,7 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 	else:
 		name_label.text = "NO ITEM SELECTED"
 
-	content_area.add_child(name_label)
+	top_margin.add_child(name_label)
 
 	var cat: Resource = data.get("character", null) as Resource
 	if not is_instance_valid(cat) and GameState.has_method("get_active_cat"):
@@ -685,13 +700,17 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 						if is_instance_valid(inv) and is_instance_valid(unequipped):
 							inv.add_item(unequipped)
 
-					_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "EQUIP", "index": slot_idx, "item": item })
+					_emit_confirmation(&"ITEM_ACTIONS", { "sub_action": "EQUIP", "index": slot_idx, "item": item })	
+					if is_instance_valid(AudioManager):
+						AudioManager.play_ui_sound("button-confirm")
 					_refresh_party_ui()
 
 				_add_action_button("[ EQUIP ]", equip_action)
 
 			# 🧪 USE Action (Consumables / Potions)
 			elif item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION or item.is_consumable:
+				if is_instance_valid(AudioManager):
+					AudioManager.play_ui_sound("hud-button-press")
 				var use_action := func() -> void:
 					match item.target_type:
 						ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:
@@ -712,12 +731,13 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 			_add_action_button("[ DROP ]", drop_action)
 
 	var cancel_action := func() -> void:
-		_close_modal()
+		_on_cancel_pressed()
 
 	_add_action_button("[ CANCEL ]", cancel_action)
 
+	call_deferred("_center_popup")
 
-# res://Scripts/UI/universal_popup.gd
+
 func _refresh_party_ui() -> void:
 	# 🎯 Save session whenever item actions (equip, unequip, drop, use) occur!
 	if GameState.has_method("save_game"):
@@ -764,3 +784,149 @@ func _build_battle_victory_ui(data: Dictionary) -> void:
 		func() -> void:
 			_emit_confirmation(&"BATTLE_VICTORY", data),
 	)
+
+
+func _build_lore_popup_ui(data: Dictionary) -> void:
+	var body_text: String = str(data.get("body", "No legible data decoded."))
+	var aura_preset: String = str(data.get("aura_type", "bad"))
+
+	if aura_preset != "none":
+		_start_aura_effect(aura_preset)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(360, 160)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var lbl := Label.new()
+	lbl.text = body_text
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	lbl.add_theme_font_size_override("font_size", 13)
+	scroll.add_child(lbl)
+
+	content_area.add_child(scroll)
+
+	var close_btn := _create_modal_button("CLOSE", Color(0.0, 0.7, 0.8, 1.0))
+	close_btn.pressed.connect(_close_modal)
+
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_child(close_btn)
+	content_area.add_child(btn_hbox)
+	
+	
+func _process(delta: float) -> void:
+	if _is_aura_active:
+		_shake_timer += delta
+		if _shake_timer >= shake_interval:
+			_shake_timer = 0.0
+			if get_tree().root.has_node("SignalBus"):
+				SignalBus.camera_shake_requested.emit(shake_trauma_amount)
+
+
+func _configure_aura_preset(preset_type: String) -> void:
+	_ensure_aura_rect_exists()
+	if not is_instance_valid(_aura_material):
+		return
+
+	match preset_type.to_lower():
+		"good":
+			_aura_material.set_shader_parameter("albedo_color_a", Color(0.0, 0.5, 0.9, 0.85))
+			_aura_material.set_shader_parameter("albedo_color_b", Color(0.0, 0.85, 0.45, 0.85))
+			_aura_material.set_shader_parameter("emission_color", Color(0.1, 1.0, 0.8, 0.6))
+		"bad", _:
+			_aura_material.set_shader_parameter("albedo_color_a", Color(0.8, 0.05, 0.1, 0.85))
+			_aura_material.set_shader_parameter("albedo_color_b", Color(0.35, 0.0, 0.5, 0.85))
+			_aura_material.set_shader_parameter("emission_color", Color(1.0, 0.1, 0.15, 0.6))
+
+
+func _ensure_aura_rect_exists() -> void:
+	if is_instance_valid(_aura_rect):
+		_aura_rect.size = get_viewport().get_visible_rect().size
+		return
+
+	_aura_rect = ColorRect.new()
+	_aura_rect.name = "AuraOverlay"
+	_aura_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_aura_rect.position = Vector2.ZERO
+	_aura_rect.size = get_viewport().get_visible_rect().size
+	_aura_rect.modulate.a = 0.0
+
+	add_child(_aura_rect)
+	if is_instance_valid(panel_container):
+		move_child(_aura_rect, max(0, panel_container.get_index()))
+
+	var shader_res: Shader = load("res://Shaders/lore_aura_overlay.gdshader") as Shader
+	if not is_instance_valid(shader_res):
+		push_error("UniversalPopup: Could not load shader resource at 'res://Shaders/lore_aura_overlay.gdshader'. Verify file exists.")
+		return
+
+	_aura_material = ShaderMaterial.new()
+	_aura_material.shader = shader_res
+	_aura_rect.material = _aura_material
+
+
+func _start_aura_effect(preset_type: String) -> void:
+	_configure_aura_preset(preset_type)
+
+	if is_instance_valid(_aura_rect):
+		_aura_rect.size = get_viewport().get_visible_rect().size
+		_aura_rect.visible = true
+
+		var tween: Tween = create_tween()
+		tween.tween_property(_aura_rect, "modulate:a", 1.0, 0.35) \
+				.set_trans(Tween.TRANS_SINE) \
+				.set_ease(Tween.EASE_OUT)
+
+	_is_aura_active = true
+	_shake_timer = 0.0
+
+
+func _stop_aura_effect() -> void:
+	_is_aura_active = false
+	if is_instance_valid(_aura_rect):
+		var tween: Tween = create_tween()
+		tween.tween_property(_aura_rect, "modulate:a", 0.0, 0.25) \
+				.set_trans(Tween.TRANS_SINE) \
+				.set_ease(Tween.EASE_IN)
+		tween.finished.connect(func() -> void:
+			if is_instance_valid(_aura_rect) and not _is_aura_active:
+				_aura_rect.visible = false
+		)
+
+
+func _build_leave_dungeon_ui(data: Dictionary) -> void:
+	var prompt_text: String = str(data.get("message", "Ascend the stairs and leave the dungeon?"))
+	var target_scene: String = str(data.get("target_scene", "res://Scenes/Overworld.tscn"))
+
+	# 1. Prompt Text Label
+	var lbl := Label.new()
+	lbl.text = prompt_text
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	lbl.add_theme_font_size_override("font_size", 14)
+	content_area.add_child(lbl)
+
+	# 2. Action Buttons (Confirm & Cancel)
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_theme_constant_override("separation", 16)
+
+	# Leave / Confirm Button
+	var leave_btn := _create_modal_button("LEAVE", Color(0.8, 0.2, 0.2, 1.0))
+	leave_btn.pressed.connect(func() -> void:
+		_close_modal()
+		if not target_scene.is_empty():
+			get_tree().change_scene_to_file(target_scene)
+	)
+
+	# Cancel Button
+	var cancel_btn := _create_modal_button("CANCEL", Color(0.5, 0.5, 0.5, 1.0))
+	cancel_btn.pressed.connect(_close_modal)
+
+	btn_hbox.add_child(leave_btn)
+	btn_hbox.add_child(cancel_btn)
+	content_area.add_child(btn_hbox)

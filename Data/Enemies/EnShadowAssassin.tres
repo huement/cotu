@@ -1,12 +1,13 @@
 [gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://r27b64sws508"]
 
 [ext_resource type="Material" uid="uid://5m55nlere0xe" path="res://resources/Enemies/Kenny/Materials/en_shadow_assassin_mat.tres" id="1_ickup"]
-[ext_resource type="PackedScene" uid="uid://ds6mkgkahu71e" path="res://resources/Enemies/Kenny/character-l.glb" id="2_i5176"]
+[ext_resource type="PackedScene" uid="uid://c7uv1yulj8oks" path="res://resources/Enemies/Kenny/character-l.glb" id="2_i5176"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_5dycb"]
 
 [resource]
 script = ExtResource("3_5dycb")
 enemy_id = "en_shadow_assassin"
+enemy_type = "smilodon"
 enemy_name = "Shadow Assassin"
 model_path = "res://resources/Enemies/Kenny/character-l.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-l.png"

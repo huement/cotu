@@ -15,4 +15,4 @@ modifier_type = 5
 modifier_value = 100.0
 cured_by = "CLEANSE|THAW"
 is_cleansable = true
-icon_path = "res://Data/Effects/Icons/eff_freeze.png"
+icon_path = "res://Data/Effects/Icons/freeze_2.png"

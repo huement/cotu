@@ -23,15 +23,33 @@ var current_mode: Mode = Mode.EXPLORING:
 @export var inventory: Inventory = Inventory.new()
 @export var current_floor_id: int = 1
 @export var party_gold: int = 0
+## Maps map_id -> (object_id -> state_dictionary)
+@export var environment_states: Dictionary = {}
 
 var active_character_index: int = 0
+var post_combat_immunity_timer: float = 0.0
+
+
+func _process(delta: float) -> void:
+	if post_combat_immunity_timer > 0.0:
+		post_combat_immunity_timer -= delta
 
 
 func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> void:
 	if action_type == &"BATTLE_VICTORY":
 		_award_victory_xp(extra_data)
+		# Now that the player has dismissed the victory screen, return to the
+		# normal exploration state and start a brief post-combat immunity period
+		# to prevent instant re-engagement from lurking enemies.
+		current_mode = Mode.EXPLORING
+		start_post_combat_immunity(5.0)
 	elif action_type == &"REST":
 		_process_party_rest(extra_data)
+
+
+func start_post_combat_immunity(duration: float) -> void:
+	post_combat_immunity_timer = max(post_combat_immunity_timer, duration)
+	print("[GameState] 🛡️ Post-combat immunity initiated for %.1f seconds." % post_combat_immunity_timer)
 
 
 func get_active_cat() -> Resource:
@@ -227,3 +245,23 @@ func _process_party_rest(rest_data: Dictionary) -> void:
 		sb.show_toast.emit(toast_msg, false)
 
 	save_game()
+
+
+## -------------------- ENVIRONMENT STUFF --------------------
+## Returns the saved state dictionary for a specific object in a map
+func get_object_state(map_id: String, object_id: String) -> Dictionary:
+	if environment_states.has(map_id) and environment_states[map_id].has(object_id):
+		return environment_states[map_id][object_id] as Dictionary
+	return {}
+
+
+## Updates or sets a state flag for an environment object
+func set_object_state_flag(map_id: String, object_id: String, flag_name: String, value: Variant) -> void:
+	if not environment_states.has(map_id):
+		environment_states[map_id] = {}
+	if not environment_states[map_id].has(object_id):
+		environment_states[map_id][object_id] = {}
+
+	var obj_dict: Dictionary = environment_states[map_id][object_id] as Dictionary
+	obj_dict[flag_name] = value
+	environment_states[map_id][object_id] = obj_dict

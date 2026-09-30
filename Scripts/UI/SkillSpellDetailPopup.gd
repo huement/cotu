@@ -38,13 +38,31 @@ func _ready() -> void:
 	_hide_popup()
 
 	if close_button and not close_button.pressed.is_connected(_hide_popup):
-		close_button.pressed.connect(_hide_popup)
+		close_button.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_ui_sound("button-close")
+				_hide_popup()
+		)
 	if cast_button and not cast_button.pressed.is_connected(_go_to_target_page):
-		cast_button.pressed.connect(_go_to_target_page)
+		cast_button.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_button_press()
+				_go_to_target_page()
+		)
 	if target_back_btn and not target_back_btn.pressed.is_connected(_go_to_detail_page):
-		target_back_btn.pressed.connect(_go_to_detail_page)
+		target_back_btn.pressed.connect(
+			func():
+				if is_instance_valid(AudioManager):
+					AudioManager.play_button_press()
+				_go_to_detail_page()
+		)
 	if target_confirm_btn and not target_confirm_btn.pressed.is_connected(_execute_field_ability):
-		target_confirm_btn.pressed.connect(_execute_field_ability)
+		target_confirm_btn.pressed.connect(
+			func():
+				_execute_field_ability()
+		)
 
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
@@ -61,6 +79,8 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 
 ## Displays detailed specifications for a SpellData or SkillData resource
 func open_detail(res: Resource, cat: CatCharacter = null) -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("open-menu")
 	_active_resource = res
 	_active_cat = cat
 	_selected_target_cat = null
@@ -257,6 +277,8 @@ func _create_target_card(cat: CatCharacter) -> Button:
 
 	btn.pressed.connect(
 		func() -> void:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_button_press()
 			_selected_target_cat = cat
 			_highlight_target_card(btn)
 			_update_confirm_button(),
@@ -289,6 +311,32 @@ func _execute_field_ability() -> void:
 			var heal_amount: int = spell.calculate_potency(_active_cat.intelligence if "intelligence" in _active_cat else 10)
 			_selected_target_cat.current_hp = min(_selected_target_cat.max_hp, _selected_target_cat.current_hp + heal_amount)
 
+		if is_instance_valid(AudioManager):
+			AudioManager.play_spell_sound(spell.animation if not spell.animation.is_empty() else spell.spell_name)
+
+	elif _active_resource is SkillData:
+		var skill := _active_resource as SkillData
+		if is_instance_valid(AudioManager):
+			AudioManager.play_skill_sound(skill.skill_name)
+
+	# Determine edge flash color based on element or skill type
+	var flash_color := Color("46e689") # Default Healing / Life (Green)
+
+	if "element" in _active_resource:
+		match str(_active_resource.element).to_upper():
+			"MAGIC", "ARCANE":
+				flash_color = Color("9b59b6") # Arcane Magic (Purple)
+			"LIFE", "HEAL":
+				flash_color = Color("46e689") # Healing (Green)
+			"FIRE", "PLASMA":
+				flash_color = Color("ff5533") # Fire (Orange/Red)
+			"LOCKPICK", "UTILITY", "DEX":
+				flash_color = Color("f1c40f") # Lockpick / Utility (Gold)
+
+	# Emit the edge flash signal
+	if is_instance_valid(SignalBus):
+		SignalBus.edge_flash_requested.emit(flash_color, 0.4)
+
 	_emit_field_action_log()
 	_hide_popup()
 
@@ -319,6 +367,9 @@ func _execute_craft_ammo(skill: SkillData) -> void:
 				GameLogger.info("%s does not have enough Energy!" % _active_cat.name)
 			return
 		_active_cat.current_energy -= cost
+
+	if is_instance_valid(AudioManager):
+		AudioManager.play_skill_sound(skill.skill_name)
 
 	var ammo_item: ItemData = load("res://Data/Items/Consumables/IronArrow.tres") as ItemData if ResourceLoader.exists("res://Data/Items/Consumables/IronArrow.tres") else null
 

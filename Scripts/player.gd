@@ -19,6 +19,13 @@ enum Facing {
 @export var eye_height: float = 2
 @export var max_shake_offset: Vector3 = Vector3(0.15, 0.15, 0.05)
 @export var shake_decay: float = 3.0
+@export var back_hold_to_turn_duration: float = 0.4 # How long to hold back to trigger a 180 turn.
+
+# -- Back Button Hold-to-Turn State --
+var _is_back_held: bool = false
+var _back_held_start_time: float = 0.0
+var _back_turn_triggered: bool = false
+# ------------------------------------
 
 var _trauma: float = 0.0
 
@@ -30,6 +37,7 @@ var current_facing: Facing = Facing.NORTH
 var is_moving: bool = false
 var _is_in_combat: bool = false
 
+var _last_proximity_tier: int = 0
 
 func _ready() -> void:
 	add_to_group(&"player") # Ensures WorldEnemy can locate player's current_grid_pos
@@ -57,6 +65,12 @@ func _initialize_player() -> void:
 	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	map_manager = world_root.get_node_or_null("MapManager") as MapManager
 
+	# TEMPORARY FALLBACK: Hardcoded BGM playback for testing.
+	# Necessary while launching directly into pre-loaded dungeon scenes 
+	# where MapManager.switch_map() / switch_map_from_resource() is not called.
+	if is_instance_valid(AudioManager):
+		AudioManager.play_bgm("Environment/dungeon-creepy-quite")
+		
 	if not grid_map:
 		if map_manager and is_instance_valid(map_manager.dungeon_grid):
 			grid_map = map_manager.dungeon_grid
@@ -97,6 +111,19 @@ func _physics_process(_delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	# -- NEW: Check for holding the back button to trigger a 180-degree turn --
+	if _is_back_held and not _back_turn_triggered:
+		var hold_time: float = (Time.get_ticks_msec() - _back_held_start_time) / 1000.0
+		if hold_time >= back_hold_to_turn_duration:
+			_back_turn_triggered = true
+			# Prevent the release from also firing a step-back command
+			_is_back_held = false
+			
+			if is_instance_valid(AudioManager) and AudioManager.has_method("play_turn_around_sound"):
+				AudioManager.play_turn_around_sound()
+			grid_movement.try_turn(self, 180.0)
+	# -------------------------------------------------------------------------
+
 	if _trauma > 0.0:
 		_trauma = lerpf(_trauma, 0.0, shake_decay * delta)
 		var shake_power: float = _trauma * _trauma
@@ -113,14 +140,41 @@ func _process(delta: float) -> void:
 		camera.v_offset = 0.0
 
 
+# ==============================================================================
+# MOVEMENT & INPUT HANDLING MAIN
+# ==============================================================================
 func _input(event: InputEvent) -> void:
+	# 🛑 LOCKOUT GUARD: Block forward, strafe, backward, and turning while in combat
 	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
 
+	# / Key or "interact" action checks the tile directly in front of the player
+	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SLASH):
+		_try_interact_facing_tile()
+		return
+
+	# --- Simplified Hold-to-Turn Input Handling ---
+	if event.is_action_pressed("move_backward"):
+		# A turn may have already been triggered by _process if the button was held long enough.
+		# In that case, _back_turn_triggered would be true. We reset for a new press.
+		_is_back_held = true
+		_back_held_start_time = Time.get_ticks_msec()
+		_back_turn_triggered = false
+		return
+
+	if event.is_action_released("move_backward"):
+		# If the button is released and a turn hasn't happened, it was a tap. Step back.
+		if _is_back_held and not _back_turn_triggered:
+			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+		
+		# Reset state for the next press cycle
+		_is_back_held = false
+		_back_turn_triggered = false
+		return
+	# ---------------------------------------------
+
 	if event.is_action_pressed("move_forward"):
 		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
-	elif event.is_action_pressed("move_backward"):
-		grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_left"):
 		grid_movement.try_step(self, Vector3.LEFT, _get_cardinal_string())
 	elif event.is_action_pressed("strafe_right"):
@@ -135,7 +189,7 @@ func _input(event: InputEvent) -> void:
 # COMBAT SIGNAL CALLBACKS
 # ==============================================================================
 ## 🎯 Updated parameter to Variant to accept both single resources and enemy arrays
-func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array) -> void:
+func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array, _enemy_facing: String) -> void:
 	_is_in_combat = true
 
 
@@ -185,6 +239,13 @@ func _execute_grid_step(input_direction: Vector3) -> void:
 	var target_grid_3d: Vector3i = Vector3i(target_grid_pos.x, 0, target_grid_pos.y)
 
 	if _is_cell_blocked(target_grid_3d):
+		# 🎯 BUMP ENCOUNTER: Check if the blocking tile contains a WorldEnemy!
+		if is_instance_valid(map_manager) and map_manager.has_method("get_enemy_at_grid_pos"):
+			var enemy_node: Node3D = map_manager.get_enemy_at_grid_pos(target_grid_3d) as Node3D
+			if is_instance_valid(enemy_node) and enemy_node.has_method("trigger_combat_encounter"):
+				enemy_node.call("trigger_combat_encounter")
+				return
+
 		print("Movement blocked by structural layout block.")
 		return
 
@@ -205,7 +266,6 @@ func _execute_grid_step(input_direction: Vector3) -> void:
 	if is_instance_valid(SignalBus):
 		SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
 
-	# Triggers enemy adjacency check & edge flash on step completion
 	_on_grid_step_completed()
 
 
@@ -242,6 +302,7 @@ func _apply_canonical_transform() -> void:
 	rotation_degrees.z = 0.0
 	rotation_degrees.y = _facing_to_angle(current_facing)
 
+
 func _facing_to_angle(facing: Facing) -> float:
 	match facing:
 		Facing.NORTH: return 0.0
@@ -249,6 +310,7 @@ func _facing_to_angle(facing: Facing) -> float:
 		Facing.SOUTH: return 180.0
 		Facing.EAST: return 270.0
 	return 0.0
+
 
 func _angle_to_facing(angle_deg: float) -> Facing:
 	var wrapped: float = wrapf(angle_deg, 0.0, 360.0)
@@ -330,7 +392,15 @@ func _is_enemy_adjacent() -> bool:
 
 ## Called when the player finishes stepping to a new grid cell
 func _on_grid_step_completed() -> void:
+	# 1. Play player footstep sound
+	if Engine.has_singleton("AudioManager") or is_instance_valid(AudioManager):
+		AudioManager.play_walking_sound("dungeon")
+
+	# 2. Check nearby enemy distance and evaluate proximity alerts
+	_check_enemy_proximity()
+
 	if _is_enemy_adjacent():
+		GameLogger.combat("_is_enemy_adjacent")
 		SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.35)
 
 
@@ -358,6 +428,35 @@ func _on_component_turn_completed(_direction: Vector3) -> void:
 			current_facing = Facing.EAST
 
 
+## Queries MapManager for an interactable object in the facing tile or current tile
+func _try_interact_facing_tile() -> bool:
+	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
+	if not is_instance_valid(map_mgr):
+		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
+
+	if not is_instance_valid(map_mgr) or not map_mgr.has_method("get_interactable_at_grid_pos"):
+		return false
+
+	# 1. Check tile directly in front of the player (facing wall/chest)
+	var facing_offset: Vector2i = _get_movement_offset(Vector3.FORWARD)
+	var target_cell: Vector2i = current_grid_pos + facing_offset
+	var target_3d := Vector3i(target_cell.x, 0, target_cell.y)
+
+	var interactable: DungeonInteractable = map_mgr.get_interactable_at_grid_pos(target_3d) as DungeonInteractable
+	if is_instance_valid(interactable):
+		interactable.interact(self)
+		return true
+
+	# 2. Fallback check: Current standing cell (for wall objects placed on tile edge)
+	var current_3d := Vector3i(current_grid_pos.x, 0, current_grid_pos.y)
+	interactable = map_mgr.get_interactable_at_grid_pos(current_3d) as DungeonInteractable
+	if is_instance_valid(interactable):
+		interactable.interact(self)
+		return true
+
+	return false
+
+
 # player.gd (or world.tscn debug controller)
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.is_echo():
@@ -374,3 +473,69 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_Y: # Press 'Y' to test WATER VFX & Shake
 				SignalBus.camera_shake_requested.emit(1)
 				SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.95)
+
+
+# Scans all active enemies in the dungeon, calculates grid distance, and triggers clickers / HUD alerts
+func _check_enemy_proximity() -> void:
+	var nearby_enemy_types: Array[String] = []
+	var min_grid_dist: int = 999
+
+	var enemy_nodes: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+	if enemy_nodes.is_empty():
+		_last_proximity_tier = 0
+		if is_instance_valid(AudioManager):
+			AudioManager.sync_nearby_enemy_loops(nearby_enemy_types)
+		if get_tree().root.has_node("SignalBus"):
+			SignalBus.enemy_proximity_changed.emit(999, 0)
+		return
+
+	for node in enemy_nodes:
+		var enemy_node := node as Node3D
+		if not is_instance_valid(enemy_node) or not enemy_node.visible:
+			continue
+
+		# 👻 GHOST EXEMPTION: Ignore invisible ambush ghosts for HUD alert meter & clickers
+		if enemy_node.has_node("GhostAmbushComponent"):
+			continue
+
+		var enemy_cell: Vector2i = Vector2i.ZERO
+		if enemy_node.has_method("get_grid_pos"):
+			enemy_cell = enemy_node.get_grid_pos()
+		else:
+			enemy_cell = _world_to_cell(enemy_node.global_position)
+
+		var grid_dist: int = absi(enemy_cell.x - current_grid_pos.x) + absi(enemy_cell.y - current_grid_pos.y)
+
+		if grid_dist < min_grid_dist:
+			min_grid_dist = grid_dist
+
+		# Collect unique enemy_type keys within hearing range (<= 6 tiles)
+		if grid_dist <= 6:
+			var e_type: String = ""
+			if "enemy_type" in enemy_node and not str(enemy_node.get("enemy_type")).is_empty():
+				e_type = str(enemy_node.get("enemy_type")).to_lower()
+			elif "enemy_data" in enemy_node and is_instance_valid(enemy_node.get("enemy_data")):
+				e_type = str(enemy_node.get("enemy_data").get("enemy_type")).to_lower()
+
+			if not e_type.is_empty() and not nearby_enemy_types.has(e_type):
+				nearby_enemy_types.append(e_type)
+
+	# Proximity Alert Tiers (Clickers & Alarms)
+	var current_tier: int = 0
+	if min_grid_dist <= 2:
+		current_tier = 2
+	elif min_grid_dist <= 5:
+		current_tier = 1
+
+	if current_tier != _last_proximity_tier:
+		_last_proximity_tier = current_tier
+		if current_tier > 0 and is_instance_valid(AudioManager):
+			AudioManager.play_proximity_clicker(current_tier)
+
+	# Sync single-instance ambient loop per enemy type
+	if is_instance_valid(AudioManager):
+		AudioManager.sync_nearby_enemy_loops(nearby_enemy_types)
+
+	if get_tree().root.has_node("SignalBus"):
+		GameLogger.combat("ALERT PROXIMITY %d TIER %d" % [min_grid_dist, current_tier])
+		SignalBus.enemy_proximity_changed.emit(min_grid_dist, current_tier)

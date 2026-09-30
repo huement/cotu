@@ -101,8 +101,8 @@ func _update_all_stats() -> void:
 
 	# --- FIGHT Column (Derived Combat Metrics) ---
 	# Accuracy: (DEX + PER) / 2
-	var base_acc_bonus: int = (base_dex + base_per) / 2
-	var eff_acc_bonus: int = (eff_dex + eff_per) / 2
+	var base_acc_bonus: int = floori((base_dex + base_per) / 2.0)
+	var eff_acc_bonus: int = floori((eff_dex + eff_per) / 2.0)
 	if fight_acc:
 		fight_acc.text = "%d%%" % (80 + eff_acc_bonus)
 		_apply_bonus_color(fight_acc, eff_acc_bonus - base_acc_bonus)
@@ -110,7 +110,7 @@ func _update_all_stats() -> void:
 	# Left Hand Damage
 	var left_weapon: ItemData = _get_equipped_item_in_slot(_current_cat, "LEFT_HAND")
 	if fight_lh:
-		var base_lh_dmg: int = max(1, eff_str / 2)
+		var base_lh_dmg: int = max(1, floori(eff_str / 2.0))
 		if is_instance_valid(left_weapon) and left_weapon.attack_bonus > 0:
 			fight_lh.text = "1d%d (+%d)" % [base_lh_dmg, left_weapon.attack_bonus]
 			fight_lh.add_theme_color_override("font_color", COLOR_BONUS)
@@ -123,7 +123,7 @@ func _update_all_stats() -> void:
 	if right_weapon == null:
 		right_weapon = _get_equipped_item_in_slot(_current_cat, "BOTH_HANDS")
 	if fight_rh:
-		var base_rh_dmg: int = max(1, eff_str / 2)
+		var base_rh_dmg: int = max(1, floori(eff_str / 2.0))
 		if is_instance_valid(right_weapon) and right_weapon.attack_bonus > 0:
 			fight_rh.text = "1d%d (+%d)" % [base_rh_dmg, right_weapon.attack_bonus]
 			fight_rh.add_theme_color_override("font_color", COLOR_BONUS)
@@ -132,8 +132,8 @@ func _update_all_stats() -> void:
 			fight_rh.add_theme_color_override("font_color", COLOR_NEUTRAL)
 
 	# Critical Chance: 5 + ((DEX + SPD) / 2) / 4
-	var base_crit: int = 5 + ((base_dex + base_spd) / 2) / 4
-	var eff_crit: int = 5 + ((eff_dex + eff_spd) / 2) / 4
+	var base_crit: int = 5 + floori(((base_dex + base_spd) / 2.0) / 4.0)
+	var eff_crit: int = 5 + floori(((eff_dex + eff_spd) / 2.0) / 4.0)
 	if fight_crt:
 		fight_crt.text = "%d%%" % eff_crit
 		_apply_bonus_color(fight_crt, eff_crit - base_crit)

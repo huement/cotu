@@ -16,8 +16,8 @@ sp_neurotoxin_gas,Neurotoxin Gas,Maester,2,7,DARK,ALL_ENEMY,DAMAGE,12,0.4,INT,PO
 sp_stimulant_mist,Stimulant Mist,Maester,2,6,LIFE,SINGLE_ALLY,HEAL,15,0.3,INT,NONE,2,1,FALSE,Releases airborne restoratives to patch up an ally's HP and Energy.,res://Data/Spells/Icons/stimulant_mist.png,LIFE
 sp_smoke_screen,Smoke Screen,Maester,3,8,NONE,ALL_ALLY,BUFF,20,0.2,INT,NONE,3,1,TRUE,Blankets the party in thermal smoke to boost evasion against attacks.,res://Data/Spells/Icons/smoke_screen.png,SMOKE
 sp_molecular_dissolve,Molecular Dissolve,Maester,4,13,DARK,SINGLE_ENEMY,DAMAGE,40,0.5,INT,NONE,1,1,TRUE,Breaks down a single target at the molecular level for massive damage.,res://Data/Spells/Icons/molecular_dissolve.png,DARK
-sp_mind_spike,Mind Spike,Psynic,1,4,DARK,SINGLE_ENEMY,DAMAGE,14,0.5,PER,NONE,1,1,FALSE,Pierces an enemy's consciousness with a sharp psionic shockwave.,res://Data/Spells/Icons/mind_spike.png,DARK
-sp_feedback_glitch,Feedback Glitch,Psynic,2,6,BOLT,SINGLE_ENEMY,DEBUFF,10,0.3,PER,NONE,3,1,FALSE,Drains energy from an opponent and disrupts their spellcasting.,res://Data/Spells/Icons/feedback_glitch.png,BOLT
-sp_psychic_wave,Psychic Wave,Psynic,2,8,BOLT,ALL_ENEMY,DAMAGE,12,0.4,PER,STUN,1,1,FALSE,Emits a mental concussive pulse that can stun all hostiles.,res://Data/Spells/Icons/psychic_wave.png,BOLT
-sp_synapse_overload,Synapse Overload,Psynic,3,11,BOLT,SINGLE_ENEMY,DAMAGE,30,0.6,PER,NONE,1,1,TRUE,Overloads a target's neural network to inflict devastating damage.,res://Data/Spells/Icons/synapse_overload.png,BOLT
-sp_neural_distortion,Neural Distortion,Psynic,3,9,DARK,ALL_ENEMY,DEBUFF,15,0.3,PER,NONE,3,1,TRUE,Scrambles enemy sensors reducing their attack accuracy.,res://Data/Spells/Icons/neural_distortion.png,DARK
+sp_mind_spike,Mind Spike,Psykana,1,4,DARK,SINGLE_ENEMY,DAMAGE,14,0.5,PER,NONE,1,1,FALSE,Pierces an enemy's consciousness with a sharp psionic shockwave.,res://Data/Spells/Icons/mind_spike.png,DARK
+sp_feedback_glitch,Feedback Glitch,Psykana,2,6,BOLT,SINGLE_ENEMY,DEBUFF,10,0.3,PER,NONE,3,1,FALSE,Drains energy from an opponent and disrupts their spellcasting.,res://Data/Spells/Icons/feedback_glitch.png,BOLT
+sp_psychic_wave,Psychic Wave,Psykana,2,8,BOLT,ALL_ENEMY,DAMAGE,12,0.4,PER,STUN,1,1,FALSE,Emits a mental concussive pulse that can stun all hostiles.,res://Data/Spells/Icons/psychic_wave.png,BOLT
+sp_synapse_overload,Synapse Overload,Psykana,3,11,BOLT,SINGLE_ENEMY,DAMAGE,30,0.6,PER,NONE,1,1,TRUE,Overloads a target's neural network to inflict devastating damage.,res://Data/Spells/Icons/synapse_overload.png,BOLT
+sp_neural_distortion,Neural Distortion,Psykana,3,9,DARK,ALL_ENEMY,DEBUFF,15,0.3,PER,NONE,3,1,TRUE,Scrambles enemy sensors reducing their attack accuracy.,res://Data/Spells/Icons/neural_distortion.png,DARK

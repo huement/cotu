@@ -16,4 +16,4 @@ modifier_type = 4
 modifier_value = 6.0
 cured_by = "CLEANSE|BURN_SALVE"
 is_cleansable = true
-icon_path = "res://Data/Effects/Icons/eff_hp_burn.png"
+icon_path = "res://Data/Effects/Icons/hp_burn_2.png"

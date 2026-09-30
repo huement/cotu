@@ -13,4 +13,4 @@ modifier_stat = 3
 modifier_value = 30.0
 cured_by = "DISPEL"
 is_dispellable = true
-icon_path = "res://Data/Effects/Icons/eff_accuracy_up.png"
+icon_path = "res://Data/Effects/Icons/acc_up_2.png"

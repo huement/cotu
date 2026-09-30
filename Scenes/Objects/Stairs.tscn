@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://lkr5mvu3lf2y"]
+
+[ext_resource type="Script" uid="uid://ybxghefvi58c" path="res://Scripts/Objects/Stairs.gd" id="1_sthl1"]
+[ext_resource type="PackedScene" uid="uid://d3rfnwhf84gvw" path="res://resources/DungeonParts/stairs.glb" id="2_a05b3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vmvh7"]
+size = Vector3(2.3974457, 2.8586044, 2.6300964)
+
+[node name="Stairs" type="Node3D"]
+script = ExtResource("1_sthl1")
+
+[node name="StairsModel" parent="." instance=ExtResource("2_a05b3")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="InteractionArea" type="Area3D" parent="."]
+collision_layer = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.011329651, 1.2093468, -0.10932922)
+shape = SubResource("BoxShape3D_vmvh7")

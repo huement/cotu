@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://ckuqgesrygqgq" path="res://ui/BATTLE/portraitFrame.png" id="2_eysv2"]
 [ext_resource type="Shader" uid="uid://85y4hjmvh5t6" path="res://Shaders/portrait_shine.gdshader" id="3_eysv2"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_5i4px"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eysv2"]
 shader = ExtResource("3_eysv2")
 shader_parameter/shine_progress = -0.5
 shader_parameter/shine_size = 0.25
@@ -49,7 +49,7 @@ stretch_mode = 5
 
 [node name="PortraitTexture" type="TextureRect" parent="ContentVBox/PortraitFrame"]
 unique_name_in_owner = true
-material = SubResource("ShaderMaterial_5i4px")
+material = SubResource("ShaderMaterial_eysv2")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

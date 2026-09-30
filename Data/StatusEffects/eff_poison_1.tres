@@ -16,4 +16,4 @@ modifier_value = 2.5
 max_stacks = 10
 cured_by = "CLEANSE|ANTIDOTE"
 is_cleansable = true
-icon_path = "res://Data/Effects/Icons/eff_poison.png"
+icon_path = "res://Data/Effects/Icons/poison_1.png"
