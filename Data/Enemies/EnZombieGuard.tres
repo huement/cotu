@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_edcpl")
 enemy_id = "en_zombie_guard"
+enemy_type = "zombie"
 enemy_name = "Corrupted Guard"
 model_path = "res://resources/Enemies/Kenny/character-d.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-g.png"

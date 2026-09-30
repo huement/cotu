@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_vjs05")
 enemy_id = "en_hazard_cleaner"
+enemy_type = "smilodon"
 enemy_name = "Hazard Cleaner"
 model_path = "res://resources/Enemies/Kenny/character-j.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-j.png"

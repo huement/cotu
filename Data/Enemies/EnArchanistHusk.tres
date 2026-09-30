@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_iev4n")
 enemy_id = "en_archanist_husk"
+enemy_type = "cyclops"
 enemy_name = "Archanist Husk"
 model_path = "res://resources/Enemies/Kenny/character-p.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-p.png"

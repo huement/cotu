@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_bfgou")
 enemy_id = "en_dread_golem"
+enemy_type = "azurian"
 enemy_name = "Dread Golem"
 model_path = "res://resources/Enemies/Kenny/character-q.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-q.png"

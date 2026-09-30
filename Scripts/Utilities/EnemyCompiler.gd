@@ -1,8 +1,9 @@
+# res://Scripts/Utilities/EnemyCompiler.gd
 @tool
 extends EditorScript
 class_name EnemyCompiler
 
-const CSV_PATHS: Array[String] = ["res://Enemies.csv", "res://Data/Enemies.csv", "res://Data/Enemies/Enemies.csv"]
+const CSV_PATHS: Array[String] = ["res://Data/Enemies.csv"]
 const OUTPUT_DIR: String = "res://Data/Enemies/"
 const MATERIAL_DIR: String = "res://resources/Enemies/Kenny/Materials/"
 
@@ -62,6 +63,10 @@ func compile_enemies() -> void:
 		enemy.xp_value = int(line[25])
 		enemy.gold_value = int(line[26])
 		enemy.drops_loot = line[27].strip_edges().to_lower() == "true"
+
+		# Parse 29th column (index 28): enemy_type
+		if line.size() > 28:
+			enemy.enemy_type = line[28].strip_edges()
 
 		# Load 3D GLB mesh
 		if not enemy.model_path.is_empty() and ResourceLoader.exists(enemy.model_path):

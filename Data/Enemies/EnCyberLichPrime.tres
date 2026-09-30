@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_ygym1")
 enemy_id = "en_cyber_lich_prime"
+enemy_type = "occulat"
 enemy_name = "Cyber Lich Prime"
 model_path = "res://resources/Enemies/Kenny/character-r.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-r.png"

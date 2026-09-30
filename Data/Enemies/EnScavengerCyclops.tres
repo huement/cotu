@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_dsujw")
 enemy_id = "en_scavenger_cyclops"
+enemy_type = "cyclops"
 enemy_name = "Scavenger Cyclops"
 model_path = "res://resources/Enemies/Kenny/character-a.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-a.png"

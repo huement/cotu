@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("2_m77h0")
 enemy_id = "en_ghost"
+enemy_type = "ghost"
 enemy_name = "Ghost"
 model_path = "res://resources/Enemies/ghost.glb"
 model_scene = ExtResource("1_xfoff")

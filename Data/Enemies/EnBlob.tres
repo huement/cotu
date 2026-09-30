@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("2_x3utc")
 enemy_id = "en_blob"
+enemy_type = "fear"
 enemy_name = "Pulsing Sac"
 model_path = "res://resources/Enemies/blob.glb"
 model_scene = ExtResource("1_uf1iu")

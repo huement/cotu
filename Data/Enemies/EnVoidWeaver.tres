@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_5a63p")
 enemy_id = "en_void_weaver"
+enemy_type = "smilodon"
 enemy_name = "Void Weaver"
 model_path = "res://resources/Enemies/Kenny/character-m.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-m.png"

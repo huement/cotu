@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_dqqm2")
 enemy_id = "en_zombie_savage"
+enemy_type = "zombie"
 enemy_name = "Savage Corrupted"
 model_path = "res://resources/Enemies/Kenny/character-f.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-f.png"

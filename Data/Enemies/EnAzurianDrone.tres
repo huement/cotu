@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_n5028")
 enemy_id = "en_azurian_drone"
+enemy_type = "azurian"
 enemy_name = "Azurian Drone"
 model_path = "res://resources/Enemies/Kenny/character-b.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-b.png"

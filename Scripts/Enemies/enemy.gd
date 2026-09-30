@@ -118,6 +118,7 @@ func _resolve_enemy_data() -> void:
 		data = enemy_group[0]
 		enemy_data = enemy_group[0] as EnemyData
 
+	# If enemy_type is left empty in the Godot Inspector, pull from compiled CSV resource
 	if enemy_type.is_empty() and is_instance_valid(enemy_data) and "enemy_type" in enemy_data:
 		enemy_type = enemy_data.enemy_type
 

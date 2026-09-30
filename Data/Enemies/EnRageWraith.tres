@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("3_02w05")
 enemy_id = "en_rage_wraith"
+enemy_type = "ghost"
 enemy_name = "Rage Wraith"
 model_path = "res://resources/Enemies/Kenny/character-c.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-c.png"
