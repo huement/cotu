@@ -5,14 +5,40 @@ const GRID_PLANE_SUBDIVISIONS: int = 9
 const GRID_PLANE_SIZE: Vector2 = Vector2(64.0, 64.0)
 const CEILING_HEIGHT: float = 2.0
 
+@export_group("Generation Options")
+@export var align_gridmap: bool = false
+@export var create_floor: bool = true
+@export var create_ceiling: bool = true
+
+@export_group("Environment & Lighting")
+@export var setup_dark_retro_environment: bool = true
+@export var attach_torch_to_player: bool = true
+
+@export_group("Ambient Particles")
+@export var enable_dust_particles: bool = true
+@export var particle_amount: int = 180
+@export var particle_color: Color = Color(0.85, 0.9, 1.0, 0.4)
+@export var particle_extents: Vector3 = Vector3(8.0, 2.0, 8.0)
+
 func _ready() -> void:
 	var world_root: Node3D = get_parent() as Node3D
 	if world_root != null:
-		_align_gridmap_to_player_grid(world_root)
-		_add_floor(world_root)
-		_add_ceiling(world_root)
-		_setup_retro_environment(world_root)
-		_setup_dust_particles(world_root)
+		if align_gridmap:
+			_align_gridmap_to_player_grid(world_root)
+		
+		if create_floor:
+			_add_floor(world_root)
+		if create_ceiling:
+			_add_ceiling(world_root)
+			
+		if setup_dark_retro_environment:
+			_setup_retro_environment(world_root)
+		elif attach_torch_to_player:
+			_attach_player_torch(world_root)
+			
+		if enable_dust_particles:
+			_setup_dust_particles(world_root)
+			
 		_verify_scene_dependencies()
 	else:
 		push_error("[SceneInitializerModule]: Parent must be a Node3D root!")
@@ -32,6 +58,8 @@ func _verify_scene_dependencies() -> void:
 func _align_gridmap_to_player_grid(root: Node3D) -> void:
 	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
 	if gm == null:
+		gm = root.get_node_or_null("FloorMap") as GridMap
+	if gm == null:
 		return
 
 	var x_offset: float = -gm.cell_size.x * 0.5 if gm.cell_center_x else 0.0
@@ -40,31 +68,29 @@ func _align_gridmap_to_player_grid(root: Node3D) -> void:
 
 ## Programmatically injects ambient space lighting and a player-centered torch
 func _setup_retro_environment(root: Node3D) -> void:
-	# 1. Spawn a WorldEnvironment to break up solid zero-value black shadows
 	var world_env: WorldEnvironment = WorldEnvironment.new()
 	world_env.name = "GeneratedWorldEnvironment"
 	
 	var env: Environment = Environment.new()
-	
-	# Setup Ambient Light: Forces unlit wall faces to retain a faint, deep-space glow
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.06, 0.08, 0.12) # Deep, atmospheric sci-fi charcoal blue
+	env.ambient_light_color = Color(0.06, 0.08, 0.12)
 	env.ambient_light_energy = 0.25
 	
-	# Setup Classic Distance Falloff Fog: Smoothly vignettes remote corridors into the darkness
 	env.fog_enabled = true
 	env.fog_light_color = Color.BLACK
-	env.fog_density = 0.0 # Bypasses modern volumetric fog for authentic retro rendering
+	env.fog_density = 0.0
 	env.fog_depth_begin = 5.0
-	env.fog_depth_end = 15.0 # Cutoff threshold matching your grid visibility array
+	env.fog_depth_end = 15.0
 	
 	world_env.environment = env
 	root.add_child.call_deferred(world_env)
 	
-	# 2. Automatically locate the Player camera and attach a flashlight spell/torch node
+	if attach_torch_to_player:
+		_attach_player_torch(root)
+
+func _attach_player_torch(root: Node3D) -> void:
 	var player: Node3D = root.get_node_or_null("Player") as Node3D
 	if player:
-		# Search child nodes for your primary viewing camera perspective
 		var camera: Camera3D = player.get_node_or_null("Camera3D") as Camera3D
 		if not camera:
 			for child in player.get_children():
@@ -72,31 +98,29 @@ func _setup_retro_environment(root: Node3D) -> void:
 					camera = child as Camera3D
 					break
 		
-		# If the camera is resolved, mount a localized exploration torch light directly to it
 		if camera and not camera.has_node("FelineTorch"):
 			var torch: OmniLight3D = OmniLight3D.new()
 			torch.name = "FelineTorch"
 			torch.light_energy = 0.85
-			torch.omni_range = 14.0       # Extends down a couple of structural grid segments
-			torch.omni_attenuation = 1.6  # Smoothly drops off light intensity over distance
+			torch.omni_range = 14.0
+			torch.omni_attenuation = 1.6
 			camera.add_child.call_deferred(torch)
 			print("SceneInitializerModule: Tactical torch successfully mounted to Player Camera3D.")
 
-## Programmatically mounts floating cavern dust particles around the player
+## Programmatically mounts floating dust/pollen particles around the player
 func _setup_dust_particles(root: Node3D) -> void:
 	var player: Node3D = root.get_node_or_null("Player") as Node3D
 	var parent_node: Node3D = player if player != null else root
 
 	var particles: GPUParticles3D = GPUParticles3D.new()
 	particles.name = "AmbientDustParticles"
-	particles.amount = 180
+	particles.amount = particle_amount
 	particles.lifetime = 6.0
 	particles.visibility_aabb = AABB(Vector3(-10.0, -3.0, -10.0), Vector3(20.0, 6.0, 20.0))
 
-	# Configure Particle Process Material
 	var p_mat: ParticleProcessMaterial = ParticleProcessMaterial.new()
 	p_mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	p_mat.emission_box_extents = Vector3(8.0, 2.0, 8.0)
+	p_mat.emission_box_extents = particle_extents
 	p_mat.direction = Vector3(0.05, -0.1, 0.05)
 	p_mat.spread = 180.0
 	p_mat.initial_velocity_min = 0.02
@@ -105,14 +129,13 @@ func _setup_dust_particles(root: Node3D) -> void:
 	p_mat.scale_min = 0.015
 	p_mat.scale_max = 0.035
 
-	# Smooth Alpha Fade In / Fade Out Ramp
 	var color_ramp: Gradient = Gradient.new()
 	color_ramp.offsets = PackedFloat32Array([0.0, 0.2, 0.8, 1.0])
 	color_ramp.colors = PackedColorArray([
-		Color(1.0, 1.0, 1.0, 0.0),
-		Color(0.8, 0.85, 0.95, 0.35),
-		Color(0.8, 0.85, 0.95, 0.35),
-		Color(1.0, 1.0, 1.0, 0.0)
+		Color(particle_color.r, particle_color.g, particle_color.b, 0.0),
+		particle_color,
+		particle_color,
+		Color(particle_color.r, particle_color.g, particle_color.b, 0.0)
 	])
 
 	var ramp_tex: GradientTexture1D = GradientTexture1D.new()
@@ -121,21 +144,19 @@ func _setup_dust_particles(root: Node3D) -> void:
 
 	particles.process_material = p_mat
 
-	# Draw Pass Quad Mesh
 	var quad_mesh: QuadMesh = QuadMesh.new()
 	quad_mesh.size = Vector2(0.04, 0.04)
 
 	var pass_mat: StandardMaterial3D = StandardMaterial3D.new()
 	pass_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	pass_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED # Fixed enum name for Godot 4
+	pass_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	pass_mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	pass_mat.albedo_color = Color(0.85, 0.9, 1.0, 0.4)
+	pass_mat.albedo_color = particle_color
 
 	quad_mesh.material = pass_mat
 	particles.draw_pass_1 = quad_mesh
 
 	parent_node.add_child.call_deferred(particles)
-
 
 func _add_floor(root: Node3D) -> void:
 	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
@@ -179,7 +200,6 @@ func _add_ceiling(root: Node3D) -> void:
 	mat.texture_repeat = 1
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.uv1_scale = _uv_scale_for_grid(root, plane.size)
-	# Set to CULL_BACK so top-down minimap cameras ignore the back face
 	mat.cull_mode = BaseMaterial3D.CULL_BACK
 	mesh_instance.material_override = mat
 
@@ -218,6 +238,8 @@ func _make_ceiling_texture() -> ImageTexture:
 func _get_grid_visual_offset(root: Node3D) -> Vector3:
 	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
 	if gm == null:
+		gm = root.get_node_or_null("FloorMap") as GridMap
+	if gm == null:
 		return Vector3.ZERO
 
 	var x_offset: float = -gm.cell_size.x * 0.5 if gm.cell_center_x else 0.0
@@ -226,6 +248,8 @@ func _get_grid_visual_offset(root: Node3D) -> Vector3:
 
 func _uv_scale_for_grid(root: Node3D, plane_size: Vector2) -> Vector3:
 	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
+	if gm == null:
+		gm = root.get_node_or_null("FloorMap") as GridMap
 	if gm == null:
 		return Vector3(plane_size.x, plane_size.y, 1.0)
 

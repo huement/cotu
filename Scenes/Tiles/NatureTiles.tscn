@@ -5086,6 +5086,7 @@ shadow_mesh = SubResource("ArrayMesh_vo02y")
 data = PackedVector3Array(0.5, 0, -0.25, 0.5, 0, 0.25, 0.5, 0.049999997, 0.25, 0.5, 0.049999997, 0.25, 0.5, 0.049999997, -0.25, 0.5, 0, -0.25, 0.1432, 0.024999999, -0.2446, 0.1432, 0, -0.2446, 0.32979998, 0, -0.2547, 0.32979998, 0, -0.2547, 0.32979998, 0.024999999, -0.2547, 0.1432, 0.024999999, -0.2446, 0.32979998, 0, -0.2547, 0.3568, 0, 0.2446, 0.3568, 0.012499999, 0.2446, 0.3568, 0.012499999, 0.2446, 0.32979998, 0.024999999, -0.2547, 0.32979998, 0, -0.2547, 0.0713, 0.049999997, 0.2572, 0.0713, 0, 0.2572, -0.1148, 0, 0.2409, -0.1148, 0, 0.2409, -0.1148, 0.049999997, 0.2409, 0.0713, 0.049999997, 0.2572, -0.0713, 0.024999999, -0.2572, -0.1148, 0.049999997, 0.2409, -0.1148, 0, 0.2409, -0.1148, 0, 0.2409, -0.0713, 0, -0.2572, -0.0713, 0.024999999, -0.2572, 0.5, 0, -0.25, 0.4066, 0, -0.25, 0.4066, 0, 0.25, 0.4066, 0, 0.25, 0.5, 0, 0.25, 0.5, 0, -0.25, -0.0713, 0.024999999, -0.2572, -0.0713, 0, -0.2572, 0.1148, 0, -0.2409, 0.1148, 0, -0.2409, 0.1148, 0.024999999, -0.2409, -0.0713, 0.024999999, -0.2572, 0.4066, 0.049999997, -0.25, 0.4066, 0.049999997, 0.25, 0.4066, 0, 0.25, 0.4066, 0, 0.25, 0.4066, 0, -0.25, 0.4066, 0.049999997, -0.25, 0.5, 0.049999997, 0.25, 0.5, 0, 0.25, 0.4066, 0, 0.25, 0.4066, 0, 0.25, 0.4066, 0.049999997, 0.25, 0.5, 0.049999997, 0.25, 0.4066, 0.049999997, -0.25, 0.4066, 0, -0.25, 0.5, 0, -0.25, 0.5, 0, -0.25, 0.5, 0.049999997, -0.25, 0.4066, 0.049999997, -0.25, 0.1148, 0, -0.2409, 0.0713, 0, 0.2572, 0.0713, 0.049999997, 0.2572, 0.0713, 0.049999997, 0.2572, 0.1148, 0.024999999, -0.2409, 0.1148, 0, -0.2409, 0.3568, 0.012499999, 0.2446, 0.3568, 0, 0.2446, 0.17019999, 0, 0.2547, 0.17019999, 0, 0.2547, 0.17019999, 0.012499999, 0.2547, 0.3568, 0.012499999, 0.2446, 0.1432, 0.024999999, -0.2446, 0.17019999, 0.012499999, 0.2547, 0.17019999, 0, 0.2547, 0.17019999, 0, 0.2547, 0.1432, 0, -0.2446, 0.1432, 0.024999999, -0.2446, 0.32979998, 0, -0.2547, 0.1432, 0, -0.2446, 0.17019999, 0, 0.2547, 0.17019999, 0, 0.2547, 0.3568, 0, 0.2446, 0.32979998, 0, -0.2547, -0.0713, 0, -0.2572, -0.1148, 0, 0.2409, 0.0713, 0, 0.2572, 0.0713, 0, 0.2572, 0.1148, 0, -0.2409, -0.0713, 0, -0.2572, 0.5, 0.049999997, 0.25, 0.4066, 0.049999997, 0.25, 0.4066, 0.049999997, -0.25, 0.4066, 0.049999997, -0.25, 0.5, 0.049999997, -0.25, 0.5, 0.049999997, 0.25, 0.0713, 0.049999997, 0.2572, -0.1148, 0.049999997, 0.2409, -0.0713, 0.024999999, -0.2572, -0.0713, 0.024999999, -0.2572, 0.1148, 0.024999999, -0.2409, 0.0713, 0.049999997, 0.2572, 0.17019999, 0.012499999, 0.2547, 0.1432, 0.024999999, -0.2446, 0.32979998, 0.024999999, -0.2547, 0.32979998, 0.024999999, -0.2547, 0.3568, 0.012499999, 0.2446, 0.17019999, 0.012499999, 0.2547)
 
 [node name="NatureTiles" type="Node3D"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="ground_pathBend2" type="Node3D" parent="."]
 
@@ -5101,7 +5102,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_b1c80")
 
 [node name="ground_grass2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
 
 [node name="ground_grass" type="MeshInstance3D" parent="ground_grass2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5115,7 +5116,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_3wrp4")
 
 [node name="ground_pathBendBank2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 0)
 
 [node name="ground_pathBendBank" type="MeshInstance3D" parent="ground_pathBendBank2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5129,7 +5130,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_vgtrb")
 
 [node name="ground_pathCorner2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 0)
 
 [node name="ground_pathCorner" type="MeshInstance3D" parent="ground_pathCorner2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5143,7 +5144,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_514pa")
 
 [node name="ground_pathCornerSmall2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 0)
 
 [node name="ground_pathCornerSmall" type="MeshInstance3D" parent="ground_pathCornerSmall2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5157,7 +5158,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_u2glk")
 
 [node name="ground_pathCross2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 0)
 
 [node name="ground_pathCross" type="MeshInstance3D" parent="ground_pathCross2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5171,7 +5172,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_mt28h")
 
 [node name="ground_pathEnd2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 16)
 
 [node name="ground_pathEnd" type="MeshInstance3D" parent="ground_pathEnd2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5185,7 +5186,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_7fma1")
 
 [node name="ground_pathEndClosed2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 16)
 
 [node name="ground_pathEndClosed" type="MeshInstance3D" parent="ground_pathEndClosed2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5199,7 +5200,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_x0yjt")
 
 [node name="ground_pathOpen2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 16)
 
 [node name="ground_pathOpen" type="MeshInstance3D" parent="ground_pathOpen2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5213,7 +5214,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_o4fsh")
 
 [node name="ground_pathRocks2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 16)
 
 [node name="ground_pathRocks" type="MeshInstance3D" parent="ground_pathRocks2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5227,7 +5228,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_d8hdi")
 
 [node name="ground_pathSide2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 16)
 
 [node name="ground_pathSide" type="MeshInstance3D" parent="ground_pathSide2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5241,7 +5242,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_ax813")
 
 [node name="ground_pathSideOpen2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 16)
 
 [node name="ground_pathSideOpen" type="MeshInstance3D" parent="ground_pathSideOpen2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5255,7 +5256,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_7jhmf")
 
 [node name="ground_pathSplit2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 32)
 
 [node name="ground_pathSplit" type="MeshInstance3D" parent="ground_pathSplit2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5269,10 +5270,10 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_wcx1u")
 
 [node name="ground_pathStraight2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 18)
 
 [node name="ground_pathStraight" type="MeshInstance3D" parent="ground_pathStraight2"]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 11.5)
 gi_mode = 2
 mesh = SubResource("ArrayMesh_2c8le")
 skeleton = NodePath("")
@@ -5283,7 +5284,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_giv7r")
 
 [node name="ground_pathTile2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 32)
 
 [node name="ground_pathTile" type="MeshInstance3D" parent="ground_pathTile2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5297,7 +5298,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_ldxx3")
 
 [node name="ground_riverBend2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 32)
 
 [node name="ground_riverBend" type="MeshInstance3D" parent="ground_riverBend2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5311,7 +5312,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_auumd")
 
 [node name="ground_riverBendBank2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 32)
 
 [node name="ground_riverBendBank" type="MeshInstance3D" parent="ground_riverBendBank2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5325,7 +5326,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_e5dnc")
 
 [node name="ground_riverCorner2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 32)
 
 [node name="ground_riverCorner" type="MeshInstance3D" parent="ground_riverCorner2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5339,7 +5340,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_2qwfb")
 
 [node name="ground_riverCornerSmall2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 48)
 
 [node name="ground_riverCornerSmall" type="MeshInstance3D" parent="ground_riverCornerSmall2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5353,7 +5354,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_3pxp3")
 
 [node name="ground_riverCross2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 48)
 
 [node name="ground_riverCross" type="MeshInstance3D" parent="ground_riverCross2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5367,7 +5368,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_35jon")
 
 [node name="ground_riverEnd2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 48)
 
 [node name="ground_riverEnd" type="MeshInstance3D" parent="ground_riverEnd2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5381,7 +5382,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_icsn2")
 
 [node name="ground_riverEndClosed2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 48)
 
 [node name="ground_riverEndClosed" type="MeshInstance3D" parent="ground_riverEndClosed2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5395,7 +5396,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_yjg6s")
 
 [node name="ground_riverOpen2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 48)
 
 [node name="ground_riverOpen" type="MeshInstance3D" parent="ground_riverOpen2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5409,7 +5410,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_k43so")
 
 [node name="ground_riverRocks2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 48)
 
 [node name="ground_riverRocks" type="MeshInstance3D" parent="ground_riverRocks2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5423,7 +5424,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_250m6")
 
 [node name="ground_riverSide2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 64)
 
 [node name="ground_riverSide" type="MeshInstance3D" parent="ground_riverSide2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5437,7 +5438,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_44k64")
 
 [node name="ground_riverSideOpen2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 64)
 
 [node name="ground_riverSideOpen" type="MeshInstance3D" parent="ground_riverSideOpen2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5451,7 +5452,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_clw1j")
 
 [node name="ground_riverSplit2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 64)
 
 [node name="ground_riverSplit" type="MeshInstance3D" parent="ground_riverSplit2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5465,7 +5466,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_kf4ff")
 
 [node name="ground_riverStraight2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 64)
 
 [node name="ground_riverStraight" type="MeshInstance3D" parent="ground_riverStraight2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5479,7 +5480,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_3xr5v")
 
 [node name="ground_riverTile2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 64)
 
 [node name="ground_riverTile" type="MeshInstance3D" parent="ground_riverTile2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5493,7 +5494,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_k1cpv")
 
 [node name="bridge_center_stone2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 64)
 
 [node name="bridge_center_stone" type="MeshInstance3D" parent="bridge_center_stone2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5507,7 +5508,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_84bmg")
 
 [node name="bridge_center_stoneRound2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 80)
 
 [node name="bridge_center_stoneRound" type="MeshInstance3D" parent="bridge_center_stoneRound2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5521,7 +5522,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_kbn83")
 
 [node name="bridge_center_wood2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 80)
 
 [node name="bridge_center_wood" type="MeshInstance3D" parent="bridge_center_wood2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5535,7 +5536,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_0n7pc")
 
 [node name="bridge_center_woodRound2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 80)
 
 [node name="bridge_center_woodRound" type="MeshInstance3D" parent="bridge_center_woodRound2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5549,7 +5550,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_d74r1")
 
 [node name="bridge_side_stone2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 80)
 
 [node name="bridge_side_stone" type="MeshInstance3D" parent="bridge_side_stone2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5563,7 +5564,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_7npqj")
 
 [node name="bridge_side_stoneRound2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 80)
 
 [node name="bridge_side_stoneRound" type="MeshInstance3D" parent="bridge_side_stoneRound2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5577,7 +5578,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_ynw44")
 
 [node name="bridge_side_wood2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 80)
 
 [node name="bridge_side_wood" type="MeshInstance3D" parent="bridge_side_wood2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5591,7 +5592,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_53tbg")
 
 [node name="bridge_side_woodRound2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 48)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 96)
 
 [node name="bridge_side_woodRound" type="MeshInstance3D" parent="bridge_side_woodRound2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5605,7 +5606,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_0hjky")
 
 [node name="bridge_stone2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 48)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 96)
 
 [node name="bridge_stone" type="MeshInstance3D" parent="bridge_stone2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5619,7 +5620,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_afcml")
 
 [node name="bridge_stoneNarrow2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 48)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 96)
 
 [node name="bridge_stoneNarrow" type="MeshInstance3D" parent="bridge_stoneNarrow2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5633,7 +5634,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_o6tca")
 
 [node name="bridge_stoneRound2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 48)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 96)
 
 [node name="bridge_stoneRound" type="MeshInstance3D" parent="bridge_stoneRound2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5647,7 +5648,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_gsfq1")
 
 [node name="bridge_stoneRoundNarrow2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 48)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 96)
 
 [node name="bridge_stoneRoundNarrow" type="MeshInstance3D" parent="bridge_stoneRoundNarrow2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5661,7 +5662,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_pq0q6")
 
 [node name="bridge_wood2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 48)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 96)
 
 [node name="bridge_wood" type="MeshInstance3D" parent="bridge_wood2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5675,7 +5676,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_a7a2p")
 
 [node name="bridge_woodNarrow2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 112)
 
 [node name="bridge_woodNarrow" type="MeshInstance3D" parent="bridge_woodNarrow2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5689,7 +5690,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_i4w1x")
 
 [node name="bridge_woodRound2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 112)
 
 [node name="bridge_woodRound" type="MeshInstance3D" parent="bridge_woodRound2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5703,7 +5704,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_6wmty")
 
 [node name="bridge_woodRoundNarrow2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 112)
 
 [node name="bridge_woodRoundNarrow" type="MeshInstance3D" parent="bridge_woodRoundNarrow2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5717,7 +5718,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_7qe26")
 
 [node name="platform_beach2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 112)
 
 [node name="platform_beach" type="MeshInstance3D" parent="platform_beach2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5731,7 +5732,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_vos3x")
 
 [node name="platform_grass2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 112)
 
 [node name="platform_grass" type="MeshInstance3D" parent="platform_grass2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5745,7 +5746,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_ppla6")
 
 [node name="platform_stone2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 112)
 
 [node name="platform_stone" type="MeshInstance3D" parent="platform_stone2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5759,7 +5760,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_i53td")
 
 [node name="path_stone2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 128)
 
 [node name="path_stone" type="MeshInstance3D" parent="path_stone2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5773,7 +5774,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_hlkum")
 
 [node name="path_stoneCircle2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 128)
 
 [node name="path_stoneCircle" type="MeshInstance3D" parent="path_stoneCircle2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5787,7 +5788,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_fbve7")
 
 [node name="path_stoneCorner2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 128)
 
 [node name="path_stoneCorner" type="MeshInstance3D" parent="path_stoneCorner2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5801,7 +5802,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_86k8f")
 
 [node name="path_stoneEnd2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 128)
 
 [node name="path_stoneEnd" type="MeshInstance3D" parent="path_stoneEnd2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5815,7 +5816,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_lfcpb")
 
 [node name="path_wood2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 128)
 
 [node name="path_wood" type="MeshInstance3D" parent="path_wood2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5829,7 +5830,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_wdo0m")
 
 [node name="path_woodCorner2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 128)
 
 [node name="path_woodCorner" type="MeshInstance3D" parent="path_woodCorner2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)
@@ -5843,7 +5844,7 @@ skeleton = NodePath("")
 shape = SubResource("ConcavePolygonShape3D_2h2fb")
 
 [node name="path_woodEnd2" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 72)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 144)
 
 [node name="path_woodEnd" type="MeshInstance3D" parent="path_woodEnd2"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.05, 0)

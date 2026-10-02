@@ -1,10 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=12 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="PackedScene" uid="uid://dqkr2j65k83yc" path="res://Scenes/UI/HUD.tscn" id="1_e0ngr"]
 [ext_resource type="PackedScene" uid="uid://dhvb1rt0k3ohv" path="res://Scenes/Player.tscn" id="2_ikia7"]
-[ext_resource type="PackedScene" uid="uid://day7k6mxl84p1" path="res://Scenes/dungeon_map.tscn" id="5_5ukr8"]
 [ext_resource type="Script" uid="uid://cbry5h6ur7nue" path="res://Scripts/MapManager.gd" id="5_fo5ed"]
-[ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="6_5ukr8"]
+[ext_resource type="PackedScene" uid="uid://bo4mhc5u2lpss" path="res://Scenes/FeroShaw.tscn" id="5_ikia7"]
 [ext_resource type="Script" uid="uid://dtnit1pwpe0ox" path="res://Scripts/3D/EnemyVisualManager.gd" id="20_hmc15"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
@@ -37,10 +36,7 @@ forward_distance = 1.0
 
 [node name="MapManager" type="Node3D" parent="."]
 script = ExtResource("5_fo5ed")
-default_map_scene = ExtResource("5_5ukr8")
-
-[node name="SceneInitializerModule" type="Node" parent="."]
-script = ExtResource("6_5ukr8")
+default_map_scene = ExtResource("5_ikia7")
 
 [node name="Popup" parent="." instance=ExtResource("22_pyn1s")]
 

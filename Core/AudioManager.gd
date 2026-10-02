@@ -20,6 +20,7 @@ var _active_enemy_loops: Dictionary = {}
 var _is_in_combat: bool = false
 var _current_bgm_request: Variant = null
 
+var _is_left_foot: bool = true
 
 func _ready() -> void:
 	_ui_player = AudioStreamPlayer.new()
@@ -257,9 +258,38 @@ func _on_combat_ended(victory: bool) -> void:
 # ==============================================================================
 # 3. MOVEMENT & PROXIMITY ALERTS
 # ==============================================================================
-func play_walking_sound(floor_type: String = "dungeon") -> void:
-	var key: String = "footsteps_" + floor_type.to_lower()
-	_play_from_folder("Player/", key)
+func play_walking_sound(map_type: String = "forest", surface_type: String = "") -> void:
+	# Toggle step foot for alternating audio files
+	_is_left_foot = !_is_left_foot
+	var step_suffix: String = "-2" if not _is_left_foot else ""
+	
+	map_type = map_type.to_lower()
+	surface_type = surface_type.to_lower()
+	
+	# Build the primary key (e.g., "footsteps_forest-ground_grass")
+	var base_key: String = "footsteps_" + map_type
+	if surface_type != "":
+		base_key += "-" + surface_type
+		
+	var target_key: String = base_key + step_suffix
+	
+	# Fallback sequence if exact file doesn't exist
+	if not _has_sound("Player/", target_key):
+		if _has_sound("Player/", base_key):
+			target_key = base_key
+		elif step_suffix != "" and _has_sound("Player/", "footsteps_" + map_type + step_suffix):
+			target_key = "footsteps_" + map_type + step_suffix
+		elif _has_sound("Player/", "footsteps_" + map_type):
+			target_key = "footsteps_" + map_type
+		else:
+			target_key = "footsteps_dungeon"
+
+	_play_from_folder("Player/", target_key)
+
+
+func _has_sound(folder: String, sound_key: String) -> bool:
+	var base_path: String = "res://Audio/" + folder + sound_key
+	return ResourceLoader.exists(base_path + ".mp3")
 
 
 func play_proximity_clicker(tier: int) -> void:

@@ -29,6 +29,7 @@ var _back_turn_triggered: bool = false
 
 var _trauma: float = 0.0
 
+#var grid_map: GridMap
 var grid_map: GridMap
 var map_manager: MapManager
 
@@ -62,26 +63,50 @@ func _connect_to_signal_bus() -> void:
 
 func _initialize_player() -> void:
 	var world_root: Node3D = get_parent() as Node3D
-	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	map_manager = world_root.get_node_or_null("MapManager") as MapManager
 
-	# TEMPORARY FALLBACK: Hardcoded BGM playback for testing.
-	# Necessary while launching directly into pre-loaded dungeon scenes 
-	# where MapManager.switch_map() / switch_map_from_resource() is not called.
-	if is_instance_valid(AudioManager):
-		AudioManager.play_bgm("Environment/dungeon-creepy-quite")
-		
+	# 1. Resolve GridMap across all scene structures
+	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	if not grid_map:
-		if map_manager and is_instance_valid(map_manager.dungeon_grid):
-			grid_map = map_manager.dungeon_grid
+		grid_map = world_root.get_node_or_null("FloorMap") as GridMap
+	if not grid_map and map_manager and is_instance_valid(map_manager.dungeon_grid):
+		grid_map = map_manager.dungeon_grid
+	if not grid_map and map_manager and is_instance_valid(map_manager.floor_grid):
+		grid_map = map_manager.floor_grid
+	if not grid_map and map_manager and is_instance_valid(map_manager.active_map_instance):
+		var active_map: Node3D = map_manager.active_map_instance
+		if active_map is GridMap:
+			grid_map = active_map as GridMap
 		else:
-			push_error("Player: GridMap sibling node could not be resolved from World root!")
-			return
+			grid_map = active_map.get_node_or_null("%FloorMap") as GridMap
+			if not grid_map:
+				grid_map = active_map.get_node_or_null("%WallMap") as GridMap
+			if not grid_map:
+				grid_map = active_map.get_node_or_null("FloorMap") as GridMap
+			if not grid_map:
+				grid_map = active_map.get_node_or_null("GridMap") as GridMap
+
+	# Fallback search if GridMap is nested or named differently
+	if not grid_map:
+		var found_gridmaps: Array[Node] = world_root.find_children("*", "GridMap", true, false)
+		if not found_gridmaps.is_empty():
+			grid_map = found_gridmaps[0] as GridMap
+
+	# Guard: Stop early if no GridMap node is present in the scene tree
+	if not is_instance_valid(grid_map):
+		push_error("Player: GridMap could not be resolved from World or MapManager!")
+		return
+
+	# TEMPORARY FALLBACK: Hardcoded BGM playback for testing.
+	if is_instance_valid(AudioManager):
+		AudioManager.play_bgm("Environment/forest-creepy")
 
 	# Resolve spawn position AND facing angle from SpawnPoint node first
 	var spawn_point: Node3D = null
 	if map_manager and is_instance_valid(map_manager.active_map_instance):
 		spawn_point = map_manager.active_map_instance.get_node_or_null("SpawnPoint") as Node3D
+	else:
+		spawn_point = world_root.get_node_or_null("SpawnPoint") as Node3D
 
 	if spawn_point:
 		current_grid_pos = _world_to_cell(spawn_point.global_position)
@@ -94,8 +119,28 @@ func _initialize_player() -> void:
 		current_facing = initial_facing
 
 	_apply_canonical_transform()
+	_eye_height_setup(spawn_point, world_root)
 
-	camera.position = Vector3(0.0, eye_height, 0.0)
+
+# Determine eye height dynamically per map (checking metadata AND script properties)
+func _eye_height_setup(spawn_point: Node3D, world_root: Node3D) -> void:
+	var active_height: float = eye_height # Default fallback
+	if spawn_point:
+		if spawn_point.has_meta("eye_height"):
+			active_height = float(spawn_point.get_meta("eye_height"))
+		elif "eye_height" in spawn_point:
+			active_height = float(spawn_point.get("eye_height"))
+	elif map_manager and is_instance_valid(map_manager.active_map_instance):
+		var active_map: Node3D = map_manager.active_map_instance
+		if active_map.has_meta("eye_height"):
+			active_height = float(active_map.get_meta("eye_height"))
+		elif "eye_height" in active_map:
+			active_height = float(active_map.get("eye_height"))
+	elif world_root.has_meta("eye_height"):
+		active_height = float(world_root.get_meta("eye_height"))
+
+	GameLogger.info("Player: SpawnPoint eye_height: %s" % active_height)
+	camera.position = Vector3(0.0, active_height, 0.0)
 	camera.rotation_degrees = Vector3.ZERO
 	camera.make_current()
 
@@ -183,6 +228,23 @@ func _input(event: InputEvent) -> void:
 		grid_movement.try_turn(self, 90.0)
 	elif event.is_action_pressed("turn_right"):
 		grid_movement.try_turn(self, -90.0)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.is_echo():
+		match event.keycode:
+			KEY_M: # Press 'M' to switch between Main Dungeon and Testbed
+				if map_manager:
+					var testbed_scene: PackedScene = load("res://Scenes/dungeon_testbed.tscn")
+					map_manager.switch_map_from_resource(testbed_scene)
+					grid_map = map_manager.dungeon_grid
+					print("Map swapped to Testbed!")
+			KEY_T: # Press 'T' to test FIRE VFX & Shake
+				SignalBus.camera_shake_requested.emit(0.5)
+				SignalBus.edge_flash_requested.emit(Color(0.15, 1.0, 0.15), 0.35)
+			KEY_Y: # Press 'Y' to test WATER VFX & Shake
+				SignalBus.camera_shake_requested.emit(1)
+				SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.95)
 
 
 # ==============================================================================
@@ -331,23 +393,53 @@ func _angle_to_facing(angle_deg: float) -> Facing:
 
 
 func _cell_to_world(cell: Vector2i) -> Vector3:
+	if not is_instance_valid(grid_map):
+		return Vector3(cell.x * 2.0, 0.0, cell.y * 2.0)
 	var local_pos: Vector3 = grid_map.map_to_local(Vector3i(cell.x, 0, cell.y))
 	local_pos.y = 0.0
 	return grid_map.to_global(local_pos)
 
 
 func _world_to_cell(world_pos: Vector3) -> Vector2i:
+	if not is_instance_valid(grid_map):
+		return Vector2i.ZERO
 	var local_pos: Vector3 = grid_map.to_local(world_pos)
 	var map_pos: Vector3i = grid_map.local_to_map(local_pos)
 	return Vector2i(map_pos.x, map_pos.z)
 
 
 func _is_cell_blocked(grid_pos: Vector3i) -> bool:
-	if map_manager:
-		return map_manager.is_tile_blocked(grid_pos)
+	# 1. Check if MapManager or GridMap reports a structural wall tile
+	if map_manager and map_manager.is_tile_blocked(grid_pos):
+		return true
 
-	var item_index: int = grid_map.get_cell_item(grid_pos)
-	return item_index != GridMap.INVALID_CELL_ITEM
+	if is_instance_valid(grid_map):
+		var item_index: int = grid_map.get_cell_item(grid_pos)
+		if item_index != GridMap.INVALID_CELL_ITEM:
+			return true
+
+	# 2. 3D Physics Volume Query: Detect instantiated StaticBody3D obstacles (BigTimber trees, props)
+	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	if not space_state:
+		return false
+
+	var target_world_pos: Vector3 = _cell_to_world(Vector2i(grid_pos.x, grid_pos.z))
+
+	var shape_query := PhysicsShapeQueryParameters3D.new()
+	var box_shape := BoxShape3D.new()
+	# Check a 1.6 x 2.0 x 1.6 volume centered in the target cell
+	box_shape.size = Vector3(1.6, 2.0, 1.6)
+	shape_query.shape = box_shape
+	shape_query.transform = Transform3D(Basis.IDENTITY, target_world_pos + Vector3(0.0, 1.0, 0.0))
+	shape_query.collision_mask = 1 # Layer 1 for StaticBody3D objects
+
+	var hits: Array[Dictionary] = space_state.intersect_shape(shape_query)
+	for hit: Dictionary in hits:
+		var collider: Object = hit.get("collider")
+		if collider and collider != self:
+			return true
+
+	return false
 
 
 func _get_cardinal_string() -> String:
@@ -391,10 +483,25 @@ func _is_enemy_adjacent() -> bool:
 
 
 ## Called when the player finishes stepping to a new grid cell
-func _on_grid_step_completed() -> void:
-	# 1. Play player footstep sound
-	if Engine.has_singleton("AudioManager") or is_instance_valid(AudioManager):
-		AudioManager.play_walking_sound("dungeon")
+func _on_component_step_completed(world_position: Vector3) -> void:
+	var grid_3d: Vector3i = Vector3i.ZERO
+	if map_manager:
+		grid_3d = map_manager.world_to_grid(world_position)
+		current_grid_pos = Vector2i(grid_3d.x, grid_3d.z)
+
+	if is_instance_valid(SignalBus):
+		SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+	_on_grid_step_completed(grid_3d)
+
+
+## Called when the player finishes stepping to a new grid cell
+func _on_grid_step_completed(grid_3d: Vector3i = Vector3i.ZERO) -> void:
+	# 1. Detect surface and play dynamic footstep sound
+	if is_instance_valid(AudioManager):
+		var current_map_type: String = map_manager.get_current_map_type() if is_instance_valid(map_manager) else "dungeon"
+		var surface_type: String = _get_surface_type_at_position(grid_3d)
+		AudioManager.play_walking_sound(current_map_type, surface_type)
 
 	# 2. Check nearby enemy distance and evaluate proximity alerts
 	_check_enemy_proximity()
@@ -404,15 +511,11 @@ func _on_grid_step_completed() -> void:
 		SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.35)
 
 
-func _on_component_step_completed(world_position: Vector3) -> void:
-	if map_manager:
-		var grid_3d: Vector3i = map_manager.world_to_grid(world_position)
-		current_grid_pos = Vector2i(grid_3d.x, grid_3d.z)
-
-	if is_instance_valid(SignalBus):
-		SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
-
-	_on_grid_step_completed()
+func _on_step_completed(target_grid_pos: Vector3i) -> void:
+	var map_type: String = map_manager.get_current_map_type() if map_manager else "dungeon"
+	var surface_type: String = _get_surface_type_at_position(target_grid_pos)
+	GameLogger.info("_on_step_completed surface_type: " + surface_type	)
+	AudioManager.play_walking_sound(map_type, surface_type)
 
 
 func _on_component_turn_completed(_direction: Vector3) -> void:
@@ -457,22 +560,45 @@ func _try_interact_facing_tile() -> bool:
 	return false
 
 
-# player.gd (or world.tscn debug controller)
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.is_echo():
-		match event.keycode:
-			KEY_M: # Press 'M' to switch between Main Dungeon and Testbed
-				if map_manager:
-					var testbed_scene: PackedScene = load("res://Scenes/dungeon_testbed.tscn")
-					map_manager.switch_map_from_resource(testbed_scene)
-					grid_map = map_manager.dungeon_grid
-					print("Map swapped to Testbed!")
-			KEY_T: # Press 'T' to test FIRE VFX & Shake
-				SignalBus.camera_shake_requested.emit(0.5)
-				SignalBus.edge_flash_requested.emit(Color(0.15, 1.0, 0.15), 0.35)
-			KEY_Y: # Press 'Y' to test WATER VFX & Shake
-				SignalBus.camera_shake_requested.emit(1)
-				SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.95)
+func _get_surface_type_at_position(grid_pos: Vector3i) -> String:
+	if not is_instance_valid(map_manager):
+		return ""
+		
+	# Floor tiles sit on floor_grid; fallback to dungeon_grid if floor_grid isn't separate
+	var target_grid: GridMap = map_manager.floor_grid if is_instance_valid(map_manager.floor_grid) else map_manager.dungeon_grid
+	if not is_instance_valid(target_grid):
+		return ""
+		
+	var cell_item: int = target_grid.get_cell_item(grid_pos)
+	
+	# If no item on floor_grid at this position, check dungeon_grid
+	if cell_item == GridMap.INVALID_CELL_ITEM and is_instance_valid(map_manager.dungeon_grid) and target_grid != map_manager.dungeon_grid:
+		target_grid = map_manager.dungeon_grid
+		cell_item = target_grid.get_cell_item(grid_pos)
+		
+	if cell_item == GridMap.INVALID_CELL_ITEM:
+		return ""
+		
+	var mesh_library: MeshLibrary = target_grid.mesh_library
+	if not is_instance_valid(mesh_library):
+		return ""
+		
+	var item_name: String = mesh_library.get_item_name(cell_item).to_lower()
+	
+	# Match tile GLB mesh names to audio surface keys
+	if "bridge" in item_name or "path_wood" in item_name or "path_stone" in item_name:
+		if "stone" in item_name:
+			return "bridge_stone"
+		elif "wood" in item_name:
+			return "bridge_wood"
+		return "bridge_wood"
+		
+	if "grass" in item_name:
+		return "ground_grass"
+	elif "path" in item_name:
+		return "ground_path"
+		
+	return ""
 
 
 # Scans all active enemies in the dungeon, calculates grid distance, and triggers clickers / HUD alerts

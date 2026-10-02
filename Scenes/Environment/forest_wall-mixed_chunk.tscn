@@ -1,0 +1,35 @@
+[gd_scene load_steps=7 format=3 uid="uid://byharx27g08l2"]
+
+[ext_resource type="Script" uid="uid://bsmw5cfmjmcu1" path="res://Scripts/Environment/forest_wall-mixed_generator.gd" id="2_6sbor"]
+[ext_resource type="ArrayMesh" uid="uid://xfkca0ve80md" path="res://resources/meshes/tree_oak.res" id="3_amgl2"]
+[ext_resource type="ArrayMesh" uid="uid://b1jlxajmkm2ag" path="res://resources/meshes/tree_pine-re.res" id="9_0c251"]
+
+[sub_resource type="MultiMesh" id="MultiMesh_nbfhd"]
+transform_format = 1
+instance_count = 2
+mesh = ExtResource("3_amgl2")
+buffer = PackedFloat32Array(-1.444861, 0, -3.29292, 0.84258884, 0, 3.5959625, 0, 0, 3.29292, 0, -1.444861, 0.49037448, -3.057858, 0, 2.8325024, 0.80209845, 0, 4.168161, 0, 0, -2.8325024, 0, -3.057858, -0.10642328)
+
+[sub_resource type="MultiMesh" id="MultiMesh_7hson"]
+transform_format = 1
+instance_count = 1
+mesh = ExtResource("9_0c251")
+buffer = PackedFloat32Array(36.121536, 50.213913, 0.16, 0.55, 0.96, 1.5543357, 37.371536, 50.213913, 0.16, 0.55, 0.96, 0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6qbev"]
+size = Vector3(4, 4, 4)
+
+[node name="ForestWallMixedChunk" type="Node3D"]
+script = ExtResource("2_6sbor")
+
+[node name="MultiMeshOak" type="MultiMeshInstance3D" parent="."]
+multimesh = SubResource("MultiMesh_nbfhd")
+
+[node name="MultiMeshPine" type="MultiMeshInstance3D" parent="."]
+multimesh = SubResource("MultiMesh_7hson")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("BoxShape3D_6qbev")

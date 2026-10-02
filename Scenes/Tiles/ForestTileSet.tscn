@@ -25,6 +25,7 @@ points = PackedVector3Array(-1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1)
 [node name="ForestTileSet" type="Node3D"]
 
 [node name="GrassTile" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 mesh = SubResource("PlaneMesh_w470a")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="GrassTile"]
@@ -33,7 +34,7 @@ mesh = SubResource("PlaneMesh_w470a")
 shape = SubResource("ConvexPolygonShape3D_lc535")
 
 [node name="MidGrassTile" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0039795637)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.9960204)
 mesh = SubResource("PlaneMesh_h68tk")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MidGrassTile"]
