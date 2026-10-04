@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bpn2rvnvip8cv"
-path="res://.godot/imported/low_poly_cloud-2.glb-ff943b430b20c344e9a18e9ea7688e01.scn"
+uid="uid://4d2ruhree1x5"
+path="res://.godot/imported/windmill-512.glb-644a6c701d87133d85dcdc3871439078.scn"
 
 [deps]
 
-source_file="res://resources/OutdoorParts/low_poly_cloud-2.glb"
-dest_files=["res://.godot/imported/low_poly_cloud-2.glb-ff943b430b20c344e9a18e9ea7688e01.scn"]
+source_file="res://resources/OutdoorParts/windmill-512.glb"
+dest_files=["res://.godot/imported/windmill-512.glb-644a6c701d87133d85dcdc3871439078.scn"]
 
 [params]
 

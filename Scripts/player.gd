@@ -665,3 +665,13 @@ func _check_enemy_proximity() -> void:
 	if get_tree().root.has_node("SignalBus"):
 		GameLogger.combat("ALERT PROXIMITY %d TIER %d" % [min_grid_dist, current_tier])
 		SignalBus.enemy_proximity_changed.emit(min_grid_dist, current_tier)
+
+
+## Re-initializes GridMap references, spawn point, facing, and camera eye height when a map changes.
+func refresh_for_new_map() -> void:
+	_initialize_player()
+	
+	# Sync grid movement component if present
+	var grid_comp: Node = get_node_or_null("%GridMovementComponent")
+	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
+		grid_comp.set("current_grid_pos", current_grid_pos)

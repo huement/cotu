@@ -99,6 +99,10 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 			_build_lore_popup_ui(data)
 		&"LEAVE_DUNGEON":
 			_build_leave_dungeon_ui(data)
+		&"CONFIRMATION":
+			var title_str: String = str(data.get("title", ""))
+			title_label.text = title_str.to_upper() if not title_str.is_empty() else "CONFIRM"
+			_build_confirmation_ui(data)
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
@@ -240,7 +244,7 @@ func _build_search_ui() -> void:
 	if nearby_details.is_empty():
 		info_text.text = "Searching corridors for hidden compartments...\nNo immediate micro-vibrations or anomalies detected."
 	else:
-		info_text.text = "SCAN RESULTS:\n" + "\n".join(nearby_details) + "\n\nFace object and press 'E' or 'SEARCH' to interact."
+		info_text.text = "SCAN RESULTS:\n" + "\n".join(nearby_details) + "\n\nFace object and press '/' on keyboard or the 'SEARCH' HUD icon to interact."
 
 	content_area.add_child(info_text)
 
@@ -930,3 +934,48 @@ func _build_leave_dungeon_ui(data: Dictionary) -> void:
 	btn_hbox.add_child(leave_btn)
 	btn_hbox.add_child(cancel_btn)
 	content_area.add_child(btn_hbox)
+
+
+func _build_confirmation_ui(data: Dictionary) -> void:
+	var prompt_text: String = str(data.get("message", "Are you sure?"))
+	var confirm_str: String = str(data.get("confirm_text", "YES")).to_upper()
+	var cancel_str: String = str(data.get("cancel_text", "NO")).to_upper()
+	var on_confirm_cb: Callable = data.get("on_confirm", Callable())
+	var on_cancel_cb: Callable = data.get("on_cancel", Callable())
+
+	# 1. Prompt Text Label
+	var lbl := Label.new()
+	lbl.text = prompt_text
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	lbl.add_theme_font_size_override("font_size", 14)
+	content_area.add_child(lbl)
+
+	# 2. Action Buttons (Yes / No)
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_theme_constant_override("separation", 16)
+
+	# Confirm / Yes Button
+	var confirm_btn := _create_modal_button(confirm_str, Color(0.0, 0.8, 0.4, 1.0))
+	confirm_btn.pressed.connect(func() -> void:
+		if on_confirm_cb.is_valid():
+			on_confirm_cb.call()
+		_emit_confirmation(&"CONFIRMATION", data)
+	)
+
+	# Cancel / No Button
+	var cancel_btn := _create_modal_button(cancel_str, Color(0.5, 0.5, 0.5, 1.0))
+	cancel_btn.pressed.connect(func() -> void:
+		if on_cancel_cb.is_valid():
+			on_cancel_cb.call()
+		_on_cancel_pressed()
+	)
+
+	btn_hbox.add_child(confirm_btn)
+	btn_hbox.add_child(cancel_btn)
+	content_area.add_child(btn_hbox)
+
+	call_deferred("_center_popup")

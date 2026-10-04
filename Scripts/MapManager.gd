@@ -47,6 +47,7 @@ func switch_map_from_resource(map_resource: PackedScene) -> void:
 	add_child(active_map_instance)
 
 	_resolve_dungeon_grid(active_map_instance)
+	_notify_player_map_changed()
 	_apply_map_audio(active_map_instance)
 
 
@@ -63,8 +64,15 @@ func switch_map(scene_path: String) -> void:
 	add_child(active_map_instance)
 
 	_resolve_dungeon_grid(active_map_instance)
+	_notify_player_map_changed()
 	GameLogger.info("SWITCH MAP FIRED. NOW STARTING AUDIO")
 	_apply_map_audio(active_map_instance)
+
+
+func _notify_player_map_changed() -> void:
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	if is_instance_valid(player) and player.has_method("refresh_for_new_map"):
+		player.call("refresh_for_new_map")
 
 
 ## Helper method to resolve dungeon_grid and floor_grid across level scene structures
@@ -91,6 +99,16 @@ func _resolve_dungeon_grid(map_instance: Node3D) -> void:
 		floor_grid = map_instance.get_node("FloorMap") as GridMap
 	else:
 		floor_grid = null
+
+	# Update active map_type for audio/footsteps
+	if "map_type" in map_instance and not str(map_instance.get("map_type")).is_empty():
+		map_type = str(map_instance.get("map_type"))
+	elif map_instance.has_meta("map_type"):
+		map_type = str(map_instance.get_meta("map_type"))
+	elif "dungeon" in map_instance.name.to_lower():
+		map_type = "dungeon"
+	else:
+		map_type = "forest"
 
 
 ## Evaluates and triggers background music for the newly loaded map instance.

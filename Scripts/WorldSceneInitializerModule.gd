@@ -88,8 +88,15 @@ func _setup_retro_environment(root: Node3D) -> void:
 	if attach_torch_to_player:
 		_attach_player_torch(root)
 
+
+# ==============================================================================
+# LEVEL CUSTOMIZATIONS
+# ==============================================================================
 func _attach_player_torch(root: Node3D) -> void:
 	var player: Node3D = root.get_node_or_null("Player") as Node3D
+	if not player:
+		player = get_tree().get_first_node_in_group(&"player") as Node3D
+
 	if player:
 		var camera: Camera3D = player.get_node_or_null("Camera3D") as Camera3D
 		if not camera:
@@ -107,9 +114,11 @@ func _attach_player_torch(root: Node3D) -> void:
 			camera.add_child.call_deferred(torch)
 			print("SceneInitializerModule: Tactical torch successfully mounted to Player Camera3D.")
 
-## Programmatically mounts floating dust/pollen particles around the player
 func _setup_dust_particles(root: Node3D) -> void:
 	var player: Node3D = root.get_node_or_null("Player") as Node3D
+	if not player:
+		player = get_tree().get_first_node_in_group(&"player") as Node3D
+
 	var parent_node: Node3D = player if player != null else root
 
 	var particles: GPUParticles3D = GPUParticles3D.new()
@@ -157,6 +166,35 @@ func _setup_dust_particles(root: Node3D) -> void:
 	particles.draw_pass_1 = quad_mesh
 
 	parent_node.add_child.call_deferred(particles)
+
+func _get_grid_visual_offset(root: Node3D) -> Vector3:
+	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
+	if gm == null:
+		gm = root.get_node_or_null("FloorMap") as GridMap
+	if gm == null and root is GridMap:
+		gm = root as GridMap
+	if gm == null:
+		return Vector3.ZERO
+
+	var x_offset: float = -gm.cell_size.x * 0.5 if gm.cell_center_x else 0.0
+	var z_offset: float = -gm.cell_size.z * 0.5 if gm.cell_center_z else 0.0
+	return Vector3(x_offset, 0.0, z_offset)
+
+func _uv_scale_for_grid(root: Node3D, plane_size: Vector2) -> Vector3:
+	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
+	if gm == null:
+		gm = root.get_node_or_null("FloorMap") as GridMap
+	if gm == null and root is GridMap:
+		gm = root as GridMap
+	if gm == null:
+		return Vector3(plane_size.x, plane_size.y, 1.0)
+
+	var cell_x: float = max(0.001, gm.cell_size.x)
+	var cell_z: float = max(0.001, gm.cell_size.z)
+	var tiles_x: float = plane_size.x / cell_x
+	var tiles_y: float = plane_size.y / cell_z
+	return Vector3(tiles_x, tiles_y, 1.0)
+
 
 func _add_floor(root: Node3D) -> void:
 	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
@@ -234,27 +272,3 @@ func _make_ceiling_texture() -> ImageTexture:
 				img.set_pixel(x, y, Color(0.28, 0.28, 0.28))
 
 	return ImageTexture.create_from_image(img)
-
-func _get_grid_visual_offset(root: Node3D) -> Vector3:
-	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
-	if gm == null:
-		gm = root.get_node_or_null("FloorMap") as GridMap
-	if gm == null:
-		return Vector3.ZERO
-
-	var x_offset: float = -gm.cell_size.x * 0.5 if gm.cell_center_x else 0.0
-	var z_offset: float = -gm.cell_size.z * 0.5 if gm.cell_center_z else 0.0
-	return Vector3(x_offset, 0.0, z_offset)
-
-func _uv_scale_for_grid(root: Node3D, plane_size: Vector2) -> Vector3:
-	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
-	if gm == null:
-		gm = root.get_node_or_null("FloorMap") as GridMap
-	if gm == null:
-		return Vector3(plane_size.x, plane_size.y, 1.0)
-
-	var cell_x: float = max(0.001, gm.cell_size.x)
-	var cell_z: float = max(0.001, gm.cell_size.z)
-	var tiles_x: float = plane_size.x / cell_x
-	var tiles_y: float = plane_size.y / cell_z
-	return Vector3(tiles_x, tiles_y, 1.0)

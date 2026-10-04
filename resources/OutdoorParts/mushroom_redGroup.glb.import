@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bpn2rvnvip8cv"
-path="res://.godot/imported/low_poly_cloud-2.glb-ff943b430b20c344e9a18e9ea7688e01.scn"
+uid="uid://ddbj3enqfdgc2"
+path="res://.godot/imported/mushroom_redGroup.glb-5434b997f8e66f4d7f38730e11dbc1ba.scn"
 
 [deps]
 
-source_file="res://resources/OutdoorParts/low_poly_cloud-2.glb"
-dest_files=["res://.godot/imported/low_poly_cloud-2.glb-ff943b430b20c344e9a18e9ea7688e01.scn"]
+source_file="res://resources/OutdoorParts/mushroom_redGroup.glb"
+dest_files=["res://.godot/imported/mushroom_redGroup.glb-5434b997f8e66f4d7f38730e11dbc1ba.scn"]
 
 [params]
 
