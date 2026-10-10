@@ -1,3 +1,4 @@
+# res://Scripts/search_button.gd
 extends TextureButton
 
 ## 🎯 THE DECOUPLED SIGNAL IDENTIFIER
@@ -40,6 +41,7 @@ func _on_button_pressed() -> void:
 		print("ActionButton: Requested modal window transformation for: ", action_type)
 	else:
 		push_error("ActionButton: Core SignalBus singleton could not be resolved from tree root!")
+
 
 
 # =============================================================================

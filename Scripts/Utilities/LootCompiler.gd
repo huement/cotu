@@ -137,7 +137,7 @@ func _parse_equipment_slot(s: String) -> ItemData.EquipmentSlot:
 		"BOTH_HANDS":
 			return ItemData.EquipmentSlot.BOTH_HANDS
 		"ACCESSORY":
-			return ItemData.EquipmentSlot.ACCESSORY
+			return ItemData.EquipmentSlot.ACCESSORY_1
 		_:
 			return ItemData.EquipmentSlot.NONE
 

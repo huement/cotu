@@ -115,7 +115,7 @@ func _parse_equip_slot(slot_str: String) -> ItemData.EquipmentSlot:
 		"RIGHT_HAND": return ItemData.EquipmentSlot.RIGHT_HAND
 		"LEFT_HAND": return ItemData.EquipmentSlot.LEFT_HAND
 		"BOTH_HANDS": return ItemData.EquipmentSlot.BOTH_HANDS
-		"ACCESSORY": return ItemData.EquipmentSlot.ACCESSORY
+		"ACCESSORY": return ItemData.EquipmentSlot.ACCESSORY_1
 		_: return ItemData.EquipmentSlot.NONE
 
 func _parse_weapon_type(wp_str: String) -> ItemData.WeaponType:

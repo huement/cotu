@@ -20,12 +20,20 @@ enum Facing {
 @export var max_shake_offset: Vector3 = Vector3(0.15, 0.15, 0.05)
 @export var shake_decay: float = 3.0
 @export var back_hold_to_turn_duration: float = 0.4 # How long to hold back to trigger a 180 turn.
+@export var sprint_duration_multiplier: float = 0.6 ## Speed multiplier when holding Shift (0.6 = 40% faster)
+@export var forward_hold_to_run_delay: float = 0.3 # Time in seconds to wait before auto-repeating forward movement.
 
 # -- Back Button Hold-to-Turn State --
 var _is_back_held: bool = false
 var _back_held_start_time: float = 0.0
 var _back_turn_triggered: bool = false
 # ------------------------------------
+
+# -- Forward Button Hold-to-Run State --
+var _is_forward_held: bool = false
+var _forward_held_start_time: float = 0.0
+# ------------------------------------
+
 
 var _trauma: float = 0.0
 
@@ -155,18 +163,68 @@ func _physics_process(_delta: float) -> void:
 		_apply_canonical_transform()
 
 
+# ==============================================================================
+# MOVEMENT & INPUT HANDLING MAIN
+# ==============================================================================
+func _input(event: InputEvent) -> void:
+	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
+		return
+
+	# Ignore OS auto-repeat key echo events
+	if event.is_echo():
+		return
+
+	# / Key or "interact" action checks the tile directly in front of the player
+	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and event.keycode == KEY_SLASH):
+		_try_interact_facing_tile()
+		return
+
+	# --- Forward Step Initiator ---
+	if event.is_action_pressed("move_forward"):
+		_forward_held_start_time = Time.get_ticks_msec()
+		if "step_duration" in grid_movement:
+			grid_movement.step_duration = movement_duration
+		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
+		return
+
+	# --- Back Button Hold-to-Turn ---
+	if event.is_action_pressed("move_backward"):
+		_is_back_held = true
+		_back_held_start_time = Time.get_ticks_msec()
+		_back_turn_triggered = false
+		return
+
+	if event.is_action_released("move_backward"):
+		if _is_back_held and not _back_turn_triggered:
+			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+		_is_back_held = false
+		_back_turn_triggered = false
+		return
+	# ---------------------------------------------
+
+	# Rotations remain on discrete button presses
+	if event.is_action_pressed("turn_left"):
+		grid_movement.try_turn(self, 90.0)
+	elif event.is_action_pressed("turn_right"):
+		grid_movement.try_turn(self, -90.0)
+
+
 func _process(delta: float) -> void:
-	# -- NEW: Check for holding the back button to trigger a 180-degree turn --
+	_check_continuous_movement()
+
+	# -- Check for holding the back button to trigger a 180-degree turn --
 	if _is_back_held and not _back_turn_triggered:
-		var hold_time: float = (Time.get_ticks_msec() - _back_held_start_time) / 1000.0
-		if hold_time >= back_hold_to_turn_duration:
-			_back_turn_triggered = true
-			# Prevent the release from also firing a step-back command
+		if not Input.is_action_pressed("move_backward"):
 			_is_back_held = false
-			
-			if is_instance_valid(AudioManager) and AudioManager.has_method("play_turn_around_sound"):
-				AudioManager.play_turn_around_sound()
-			grid_movement.try_turn(self, 180.0)
+		else:
+			var hold_time: float = (Time.get_ticks_msec() - _back_held_start_time) / 1000.0
+			if hold_time >= back_hold_to_turn_duration:
+				_back_turn_triggered = true
+				_is_back_held = false
+				
+				if is_instance_valid(AudioManager) and AudioManager.has_method("play_turn_around_sound"):
+					AudioManager.play_turn_around_sound()
+				grid_movement.try_turn(self, 180.0)
 	# -------------------------------------------------------------------------
 
 	if _trauma > 0.0:
@@ -185,49 +243,23 @@ func _process(delta: float) -> void:
 		camera.v_offset = 0.0
 
 
-# ==============================================================================
-# MOVEMENT & INPUT HANDLING MAIN
-# ==============================================================================
-func _input(event: InputEvent) -> void:
-	# 🛑 LOCKOUT GUARD: Block forward, strafe, backward, and turning while in combat
+## Polls hardware input for continuous tile movement and hold-to-dash acceleration.
+func _check_continuous_movement() -> void:
 	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
 
-	# / Key or "interact" action checks the tile directly in front of the player
-	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SLASH):
-		_try_interact_facing_tile()
-		return
-
-	# --- Simplified Hold-to-Turn Input Handling ---
-	if event.is_action_pressed("move_backward"):
-		# A turn may have already been triggered by _process if the button was held long enough.
-		# In that case, _back_turn_triggered would be true. We reset for a new press.
-		_is_back_held = true
-		_back_held_start_time = Time.get_ticks_msec()
-		_back_turn_triggered = false
-		return
-
-	if event.is_action_released("move_backward"):
-		# If the button is released and a turn hasn't happened, it was a tap. Step back.
-		if _is_back_held and not _back_turn_triggered:
-			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+	if Input.is_action_pressed("move_forward"):
+		var hold_time: float = (Time.get_ticks_msec() - _forward_held_start_time) / 1000.0
+		var is_dashing: bool = hold_time >= forward_hold_to_run_delay or Input.is_key_pressed(KEY_SHIFT)
 		
-		# Reset state for the next press cycle
-		_is_back_held = false
-		_back_turn_triggered = false
-		return
-	# ---------------------------------------------
-
-	if event.is_action_pressed("move_forward"):
+		if "step_duration" in grid_movement:
+			grid_movement.step_duration = movement_duration * (sprint_duration_multiplier if is_dashing else 1.0)
+			
 		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
-	elif event.is_action_pressed("strafe_left"):
+	elif Input.is_action_pressed("strafe_left"):
 		grid_movement.try_step(self, Vector3.LEFT, _get_cardinal_string())
-	elif event.is_action_pressed("strafe_right"):
+	elif Input.is_action_pressed("strafe_right"):
 		grid_movement.try_step(self, Vector3.RIGHT, _get_cardinal_string())
-	elif event.is_action_pressed("turn_left"):
-		grid_movement.try_turn(self, 90.0)
-	elif event.is_action_pressed("turn_right"):
-		grid_movement.try_turn(self, -90.0)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -531,31 +563,65 @@ func _on_component_turn_completed(_direction: Vector3) -> void:
 			current_facing = Facing.EAST
 
 
-## Queries MapManager for an interactable object in the facing tile or current tile
+## Queries MapManager and 3D physics for an interactable object in the facing tile or current tile
 func _try_interact_facing_tile() -> bool:
-	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
-	if not is_instance_valid(map_mgr):
-		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
-
-	if not is_instance_valid(map_mgr) or not map_mgr.has_method("get_interactable_at_grid_pos"):
-		return false
-
-	# 1. Check tile directly in front of the player (facing wall/chest)
 	var facing_offset: Vector2i = _get_movement_offset(Vector3.FORWARD)
 	var target_cell: Vector2i = current_grid_pos + facing_offset
 	var target_3d := Vector3i(target_cell.x, 0, target_cell.y)
 
-	var interactable: DungeonInteractable = map_mgr.get_interactable_at_grid_pos(target_3d) as DungeonInteractable
-	if is_instance_valid(interactable):
-		interactable.interact(self)
-		return true
+	# 1. Check MapManager registered tile interactables
+	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
+	if not is_instance_valid(map_mgr):
+		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
-	# 2. Fallback check: Current standing cell (for wall objects placed on tile edge)
-	var current_3d := Vector3i(current_grid_pos.x, 0, current_grid_pos.y)
-	interactable = map_mgr.get_interactable_at_grid_pos(current_3d) as DungeonInteractable
-	if is_instance_valid(interactable):
-		interactable.interact(self)
-		return true
+	if is_instance_valid(map_mgr) and map_mgr.has_method("get_interactable_at_grid_pos"):
+		var interactable: Object = map_mgr.get_interactable_at_grid_pos(target_3d)
+		if is_instance_valid(interactable):
+			if interactable.has_method(&"interact"):
+				interactable.call("interact", self)
+				return true
+			elif interactable.has_method(&"inspect"):
+				interactable.call("inspect", self)
+				return true
+
+	# 2. Check 3D Physics Volume in facing cell (detects placed 3D objects like Windmill & Masoleum)
+	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	if space_state:
+		var target_world_pos: Vector3 = _cell_to_world(target_cell)
+		var shape_query := PhysicsShapeQueryParameters3D.new()
+		var box_shape := BoxShape3D.new()
+		box_shape.size = Vector3(1.6, 2.0, 1.6)
+		shape_query.shape = box_shape
+		shape_query.transform = Transform3D(Basis.IDENTITY, target_world_pos + Vector3(0.0, 1.0, 0.0))
+		shape_query.collision_mask = 1
+		shape_query.collide_with_bodies = true
+		shape_query.collide_with_areas = true
+
+		var hits: Array[Dictionary] = space_state.intersect_shape(shape_query)
+		for hit: Dictionary in hits:
+			var collider: Object = hit.get("collider") as Object
+			if is_instance_valid(collider) and collider != self:
+				var candidate: Node = collider as Node
+				while is_instance_valid(candidate) and candidate != get_tree().current_scene:
+					if candidate.has_method(&"interact"):
+						candidate.call("interact", self)
+						return true
+					elif candidate.has_method(&"inspect"):
+						candidate.call("inspect", self)
+						return true
+					candidate = candidate.get_parent()
+
+	# 3. Fallback check: Current standing cell
+	if is_instance_valid(map_mgr) and map_mgr.has_method("get_interactable_at_grid_pos"):
+		var current_3d := Vector3i(current_grid_pos.x, 0, current_grid_pos.y)
+		var interactable: Object = map_mgr.get_interactable_at_grid_pos(current_3d)
+		if is_instance_valid(interactable):
+			if interactable.has_method(&"interact"):
+				interactable.call("interact", self)
+				return true
+			elif interactable.has_method(&"inspect"):
+				interactable.call("inspect", self)
+				return true
 
 	return false
 

@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://ds0e4strnirl4"]
+
+[ext_resource type="PackedScene" uid="uid://dtrr51qyapt3t" path="res://resources/tile_sets/nature/grass_leafs.glb" id="1_nbskg"]
+[ext_resource type="ArrayMesh" uid="uid://c7ybxyljir8sb" path="res://resources/meshes/grass_tuft.tres" id="2_w6t8p"]
+
+[node name="grass_leafs2" instance=ExtResource("1_nbskg")]
+
+[node name="grass_leafs" parent="." index="0"]
+mesh = ExtResource("2_w6t8p")
