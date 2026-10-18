@@ -30,15 +30,16 @@ var _spawned_enemies: Dictionary = {}
 
 ## Fallback animation candidate aliases for various 3D model formats (including Minotaur GLB)
 const ANIM_MAPPINGS: Dictionary = {
-	&"idle": [&"IDLE", &"Idle", &"idle", &"Armature|idle", &"idle_loop", &"Idle_Loop"],
+	&"idle": [&"IDLE", &"Idle", &"idle", &"Armature|idle", &"idle_loop", &"Idle_Loop", &"ArmatureAction", &"Armature|ArmatureAction"],
 	&"walk": [&"WALK", &"Walk", &"walk", &"Armature|Walk", &"walk_loop", &"Walk_Loop"],
-	&"attack": [&"ATTACK_1", &"Attack", &"attack", &"Armature|Attack", &"CastSpell", &"attack-melee-left", &"Cast", &"cast"],
+	&"attack": [&"ATTACK_1", &"Attack", &"attack", &"Armature|Attack", &"CastSpell", &"attack-melee-left", &"Cast", &"cast", &"ArmatureAction", &"Armature|ArmatureAction"],
 	&"attack_special": [&"ATTACK_SPECIAL", &"Armature|Attack Double", &"Attack Double", &"attack_double", &"SpecialAttack"],
 	&"attack_jump": [&"ATTACK_JUMP", &"Armature|Jump", &"Jump", &"jump", &"JumpAttack"],
 	&"damage": [&"TakeDamage", &"interact-left", &"Hit", &"hit", &"Damage", &"damage", &"GetHit"],
 	&"die": [&"DEATH", &"Die", &"die", &"Death", &"death", &"Armature|Death", &"Dead", &"dead"]
 }
 
+var enemy_group: Array[Resource]
 
 # ==============================================================================
 # 3. LIFECYCLE & INITIALIZATION
@@ -102,29 +103,7 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 		if result.is_empty() and payload is Resource:
 			var target_res: Resource = payload as Resource
-			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
-			if overworld_enemies.is_empty():
-				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
-				overworld_enemies.append_array(get_tree().root.find_children("*", "OutdoorEnemy", true, false))
-
-			var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
-			var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
-
-			var best_node: Node3D = null
-			var min_dist: int = 9999
-
-			for node in overworld_enemies:
-				if is_instance_valid(node) and ("enemy_group" in node) and node.visible:
-					var grp: Variant = node.get("enemy_group")
-					var n_data: Variant = node.get("data") if "data" in node else null
-					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
-
-					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
-						var n_cell: Vector2i = node.get_grid_pos() if node.has_method("get_grid_pos") else Vector2i(9999, 9999)
-						var dist: int = absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y)
-						if dist < min_dist:
-							min_dist = dist
-							best_node = node as Node3D
+			var best_node: Node3D = _find_nearest_world_enemy(target_res)
 
 			if is_instance_valid(best_node) and ("enemy_group" in best_node):
 				var grp: Variant = best_node.get("enemy_group")
@@ -135,17 +114,69 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 			if result.is_empty():
 				var count: int = 1
-				if "pack_size" in payload:
+				if is_instance_valid(best_node) and "pack_size" in best_node:
+					count = max(1, int(best_node.get("pack_size")))
+				elif "pack_size" in payload:
 					count = max(1, int(payload.get("pack_size")))
 				for i in range(count):
-					result.append(target_res.duplicate() if count > 1 else target_res)
+					result.append(target_res.duplicate(true) if count > 1 else target_res)
 
 	return result
 
 
+func _find_nearest_world_enemy(target_res: Resource) -> Node3D:
+	var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+	if overworld_enemies.is_empty():
+		overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+		overworld_enemies.append_array(get_tree().root.find_children("*", "OutdoorEnemy", true, false))
+		overworld_enemies.append_array(get_tree().root.find_children("*", "TentacleEnemyController", true, false))
+
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	var player_pos: Vector3 = player.global_position if is_instance_valid(player) else Vector3.ZERO
+	var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
+
+	var best_node: Node3D = null
+	var min_dist: float = INF
+
+	for node in overworld_enemies:
+		if not is_instance_valid(node) or not (node is Node3D):
+			continue
+		var enemy_node: Node3D = node as Node3D
+		if not enemy_node.visible and not ("_is_in_active_combat" in enemy_node and bool(enemy_node.get("_is_in_active_combat"))):
+			continue
+
+		var grp: Variant = enemy_node.get("enemy_group") if "enemy_group" in enemy_node else null
+		var n_data: Variant = enemy_node.get("data") if "data" in enemy_node else null
+		var n_edata: Variant = enemy_node.get("enemy_data") if "enemy_data" in enemy_node else null
+
+		var matches: bool = n_data == target_res or n_edata == target_res
+		if not matches and grp is Array:
+			matches = (grp as Array).has(target_res)
+
+		if not matches:
+			continue
+
+		var dist: float = enemy_node.global_position.distance_to(player_pos)
+		if enemy_node.has_method("get_grid_pos") and player_cell != Vector2i(-9999, -9999):
+			var n_cell: Vector2i = enemy_node.get_grid_pos()
+			dist = float(absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y))
+
+		if dist < min_dist:
+			min_dist = dist
+			best_node = enemy_node
+
+	return best_node
+
+
 func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_facing: String) -> void:
+	# 1. Resolve Camera3D safely without typos
 	if not is_instance_valid(camera_node):
 		camera_node = get_viewport().get_camera_3d()
+		if not is_instance_valid(camera_node):
+			var player_node: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+			if is_instance_valid(player_node):
+				camera_node = player_node.find_child("Camera3D", true, false) as Camera3D
+
 		if not is_instance_valid(camera_node):
 			push_error("[EnemyVisualManager] ERROR: Could not find an active Camera3D in Scene Tree.")
 			return
@@ -153,8 +184,10 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 	_clear_all_enemies()
 	visible = true
 
-	var enemy_group: Array[Resource] = _resolve_enemy_resources(enemy_payload)
-	
+	enemy_group = _resolve_enemy_resources(enemy_payload)
+	if is_instance_valid(GameLogger):
+		GameLogger.combat("EnemyVisualManager spawning %d combat model(s)" % enemy_group.size())
+
 	for i in range(enemy_group.size()):
 		var e_data: Resource = enemy_group[i] as Resource
 		var model_scene: PackedScene = null
@@ -193,26 +226,35 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int, e_data:
 	if is_instance_valid(e_data) and "vertical_offset" in e_data:
 		v_offset = float(e_data.get("vertical_offset"))
 
+	# Renamed from 'scale' to avoid shadowing Node3D.scale warning
+	var target_scale: Vector3 = model_scale
+	if is_instance_valid(e_data) and "model_scale" in e_data and e_data.get("model_scale") != Vector3.ZERO:
+		target_scale = e_data.get("model_scale") as Vector3
+
+	var cam_distance: float = forward_distance
+	if is_instance_valid(e_data) and "combat_forward_distance" in e_data:
+		var custom_dist: float = float(e_data.get("combat_forward_distance"))
+		if custom_dist > 0.0:
+			cam_distance = custom_dist
+
 	var cam_transform: Transform3D = camera_node.global_transform
 
 	var spawn_pos: Vector3 = cam_transform.origin \
-			- (cam_transform.basis.z * forward_distance) \
+			- (cam_transform.basis.z * cam_distance) \
 			+ (cam_transform.basis.x * horizontal_offset) \
 			+ (cam_transform.basis.y * v_offset)
 
 	enemy_node.global_position = spawn_pos
-
-	var target_scale: Vector3 = model_scale
-	if is_instance_valid(e_data):
-		if "model_scale" in e_data and e_data.get("model_scale") != Vector3.ZERO:
-			target_scale = e_data.get("model_scale") as Vector3
-
 	enemy_node.scale = target_scale
 
 	var target_look_at: Vector3 = Vector3(cam_transform.origin.x, enemy_node.global_position.y, cam_transform.origin.z)
 	enemy_node.look_at(target_look_at, Vector3.UP)
-	enemy_node.rotate_object_local(Vector3.UP, PI)
-
+	var yaw_offset_deg: float = 180.0
+	if is_instance_valid(e_data) and "combat_yaw_offset_degrees" in e_data:
+		yaw_offset_deg = float(e_data.get("combat_yaw_offset_degrees"))
+	if not is_zero_approx(yaw_offset_deg):
+		enemy_node.rotate_object_local(Vector3.UP, deg_to_rad(yaw_offset_deg))
+	
 
 func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
 	if not is_instance_valid(model_node) or not is_instance_valid(e_data):
@@ -273,9 +315,14 @@ func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
 
 func _apply_material_override_recursive(node: Node, mat: Material) -> void:
 	if node is MeshInstance3D:
-		(node as MeshInstance3D).material_override = mat
+		var mesh_inst: MeshInstance3D = node as MeshInstance3D
+		# If the mesh has multiple material surfaces (like a mouth + body), 
+		# do not stomp them with a single global material_override.
+		if mesh_inst.mesh and mesh_inst.mesh.get_surface_count() > 1:
+			return
+		mesh_inst.material_override = mat
 
-	for child in node.get_children():
+	for child: Node in node.get_children():
 		_apply_material_override_recursive(child, mat)
 
 
@@ -286,20 +333,36 @@ func play_animation(enemy_node: Node3D, action_key: StringName, loop: bool = tru
 	if not is_instance_valid(enemy_node):
 		return
 
+	# 1. Procedural juice fallback for models without dedicated hit animations
+	if action_key == &"damage":
+		var juice: Node = enemy_node.find_child("VisualJuice", true, false)
+		if is_instance_valid(juice) and juice.has_method("play_hit_shake"):
+			juice.call("play_hit_shake")
+		elif enemy_node.has_method("on_take_hit"):
+			enemy_node.call("on_take_hit")
+
+	# 2. Locate AnimationPlayer
 	var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if not is_instance_valid(anim_player):
 		return
 
+	# 3. Resolve animation name against ANIM_MAPPINGS
 	var resolved_anim: StringName = _resolve_animation_name(anim_player, action_key)
 	if resolved_anim.is_empty():
 		return
 
+	# 4. Do not restart if already looping the requested animation
+	if loop and anim_player.current_animation == resolved_anim and anim_player.is_playing():
+		return
+
+	# 5. Enforce loop mode on the Animation resource in Godot 4
 	var anim: Animation = anim_player.get_animation(resolved_anim)
 	if is_instance_valid(anim):
 		anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
 
 	anim_player.play(resolved_anim)
 
+	# 6. Automatically return to idle once a one-shot attack or interaction finishes
 	if not loop and action_key != &"die":
 		anim_player.animation_finished.connect(
 			func(_finished_anim: StringName) -> void:
@@ -327,6 +390,9 @@ func _resolve_animation_name(anim_player: AnimationPlayer, action_key: StringNam
 			if cand_str in anim_name.to_lower():
 				return StringName(anim_name)
 
+	if available.size() > 0:
+		return StringName(available[0])
+
 	return &""
 
 
@@ -343,13 +409,20 @@ func _on_enemy_damaged(enemy_id: String, _damage: int) -> void:
 func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -> void:
 	if current_hp <= 0 and _spawned_enemies.has(enemy_id):
 		var enemy_node: Node3D = _spawned_enemies[enemy_id]
-		play_animation(enemy_node, &"die", false)
-
-		var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
-		if is_instance_valid(anim_player):
-			var resolved_die: StringName = _resolve_animation_name(anim_player, &"die")
-			if not resolved_die.is_empty() and anim_player.has_animation(resolved_die):
-				await anim_player.animation_finished
+		
+		# Check for procedural sink first
+		var juice: Node = enemy_node.find_child("VisualJuice", true, false)
+		if is_instance_valid(juice) and juice.has_method("play_death_sink"):
+			juice.call("play_death_sink")
+			var sink_time: float = float(juice.get("sink_depth")) / maxf(0.1, float(juice.get("sink_speed")))
+			await get_tree().create_timer(sink_time).timeout
+		else:
+			play_animation(enemy_node, &"die", false)
+			var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
+			if is_instance_valid(anim_player):
+				var resolved_die: StringName = _resolve_animation_name(anim_player, &"die")
+				if not resolved_die.is_empty() and anim_player.has_animation(resolved_die):
+					await anim_player.animation_finished
 
 		if is_instance_valid(enemy_node):
 			enemy_node.queue_free()

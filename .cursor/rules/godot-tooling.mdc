@@ -1,0 +1,14 @@
+---
+description: Godot 4.5 tooling paths, MCP, docs, and run/test commands for Shards
+alwaysApply: true
+---
+
+# Godot tooling
+
+- Engine: Godot **4.5.1** at `/Applications/Godot.app/Contents/MacOS/Godot` (also `godot` on PATH).
+- Docs: Context7 library `/godotengine/godot-docs` (prefer version `__branch__4.5`). Engine source: `/godotengine/godot`.
+- MCP `godot` (`@coding-solo/godot-mcp`): launch editor, run project, read debug output, inspect/create scenes and nodes, UID helpers.
+- Run/look loop: `node /Users/eris/.claude/skills/game-development/game.mjs` from the repo root (`run`, `logs --errors`, `shot`, `stop`). Manifest: `.codegpt-game.json`.
+- Headless smoke: `godot --path . --headless --quit-after 2`
+- GUT: `godot --path . --headless -s addons/gut/gut_cmdln.gd`
+- Do not guess visual bugs from source — run the game and read the log or a screenshot.

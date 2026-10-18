@@ -11,6 +11,10 @@ extends Resource
 @export var model_scene: PackedScene
 @export var custom_material: StandardMaterial3D
 @export var model_scale: Vector3 = Vector3(0.5, 0.5, 0.5)
+## If greater than 0, overrides EnemyVisualManager camera distance for this enemy.
+@export var combat_forward_distance: float = 0.0
+## Yaw applied after look_at. 180 faces most GLBs at the camera; 0 if the mesh already faces +Z.
+@export var combat_yaw_offset_degrees: float = 180.0
 
 @export_group("Base Stats & Scaling")
 @export var base_level: int = 1

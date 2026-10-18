@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://bd26cxwugr8yw"]
+
+[ext_resource type="PackedScene" uid="uid://ducdapohkcbxi" path="res://resources/Enemies/sea_monster.glb" id="1_model"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_lake_monster"
+enemy_type = "creature"
+enemy_name = "Sea Monster"
+model_path = "res://resources/Enemies/sea_monster.glb"
+model_scene = ExtResource("1_model")
+model_scale = Vector3(0.016, 0.016, 0.016)
+combat_forward_distance = 5.0
+combat_yaw_offset_degrees = 0.0
+base_level = 5
+max_health = 230
+current_health = 230
+attack_damage = 20
+defense = 10
+initiative_speed = 10
+weakness_element = 1
+attack_element = 2
+movement_speed = 0.0
+aggro_range_tiles = 2
+xp_value = 800
+gold_value = 200

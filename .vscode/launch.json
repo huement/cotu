@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Godot: Launch",
+      "type": "godot",
+      "request": "launch",
+      "project": "${workspaceFolder}",
+      "editor_path": "/Applications/Godot.app/Contents/MacOS/Godot"
+    }
+  ]
+}

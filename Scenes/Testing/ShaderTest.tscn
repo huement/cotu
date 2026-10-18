@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqe64avdrolu4"]
+
+[ext_resource type="Shader" uid="uid://bc0ssq1s0cst" path="res://Shaders/water_slice.gdshader" id="1_3fnna"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e2415"]
+shader = ExtResource("1_3fnna")
+shader_parameter/progress = 0.4930000234175
+shader_parameter/line_width = 0.08
+shader_parameter/line_color = Color(0.8, 0.95, 1, 1)
+shader_parameter/water_color = Color(0.1, 0.5, 0.9, 0.85)
+shader_parameter/bubble_density = 25.0
+shader_parameter/bubble_speed = 2.0
+
+[node name="ShaderTest" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_e2415")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

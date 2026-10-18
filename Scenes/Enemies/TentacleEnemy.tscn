@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://dnrs8i4otu1bk"]
+[gd_scene load_steps=5 format=3 uid="uid://dnrs8i4otu1bk"]
 
 [ext_resource type="Script" path="res://Scripts/Enemies/TentacleEnemyController.gd" id="1_controller"]
 [ext_resource type="PackedScene" path="res://resources/Enemies/tentacle.glb" id="2_model"]
 [ext_resource type="Script" path="res://Scripts/3D/WaterBossJuice.gd" id="3_juice"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tent"]
+size = Vector3(3, 4, 3)
 
 [node name="TentacleEnemy" type="Node3D"]
 script = ExtResource("1_controller")
@@ -15,3 +18,10 @@ sink_speed = 2.0
 sink_depth = 4.0
 
 [node name="ModelInstance" parent="VisualJuice" instance=ExtResource("2_model")]
+
+[node name="ActivationArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ActivationArea"]
+shape = SubResource("BoxShape3D_tent")

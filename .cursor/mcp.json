@@ -1,10 +1,12 @@
 {
   "mcpServers": {
     "godot": {
-      "command": "npx",
+      "type": "stdio",
+      "command": "/Users/eris/.nvm/versions/node/v20.19.4/bin/npx",
       "args": ["-y", "@coding-solo/godot-mcp"],
       "env": {
-        "GODOT_PATH": "/Applications/Godot.app/Contents/MacOS/Godot"
+        "GODOT_PATH": "/Applications/Godot.app/Contents/MacOS/Godot",
+        "PATH": "/Users/eris/.nvm/versions/node/v20.19.4/bin:/usr/bin:/bin:/usr/sbin:/sbin"
       }
     }
   }

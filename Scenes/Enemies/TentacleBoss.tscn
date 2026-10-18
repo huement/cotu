@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://b5sxvyjc45bjm"]
+
+[ext_resource type="Script" uid="uid://doi2ukeu8qq04" path="res://Scripts/Enemies/TentacleBossController.gd" id="1_72vvm"]
+[ext_resource type="Script" uid="uid://by52ctvw8ea2f" path="res://Scripts/3D/WaterBossJuice.gd" id="2_3uult"]
+[ext_resource type="PackedScene" uid="uid://ducdapohkcbxi" path="res://resources/Enemies/sea_monster.glb" id="3_72vvm"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tent"]
+size = Vector3(12.973999, 4, 12.920868)
+
+[node name="TentacleBoss" type="Node3D"]
+visible = false
+script = ExtResource("1_72vvm")
+
+[node name="VisualJuice" type="Node3D" parent="."]
+script = ExtResource("2_3uult")
+shake_intensity = 0.2
+shake_duration = 0.35
+sink_speed = 2.0
+sink_depth = 4.0
+
+[node name="Sketchfab_Scene" parent="VisualJuice" instance=ExtResource("3_72vvm")]
+transform = Transform3D(0.028, 0, 0, 0, 0.028, 0, 0, 0, 0.028, 0, 0, 0)
+
+[node name="ActivationArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 8
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ActivationArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1038208, 0, -1.1334076)
+shape = SubResource("BoxShape3D_tent")

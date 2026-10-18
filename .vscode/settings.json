@@ -1,4 +1,14 @@
 {
-  "godotTools.editorPath.godot4": "/Applications/Godot.app",
-  "cSpell.words": ["elif"]
+  "godotTools.editorPath.godot4": "/Applications/Godot.app/Contents/MacOS/Godot",
+  "godotTools.lsp.headless": true,
+  "cSpell.words": ["elif"],
+  "files.associations": {
+    "*.gd": "gdscript",
+    "*.tscn": "godot-scene",
+    "*.tres": "godot-resource",
+    "*.godot": "ini"
+  },
+  "search.exclude": {
+    "**/.godot": true
+  }
 }

@@ -374,28 +374,7 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 		if result.is_empty() and payload is Resource:
 			var target_res: Resource = payload as Resource
-			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
-			if overworld_enemies.is_empty():
-				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
-
-			var player: Node3D = get_tree().get_first_node_in_group(&"player")
-			var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
-
-			var best_node: Node3D = null
-			var min_dist: int = 9999
-
-			for node in overworld_enemies:
-				if is_instance_valid(node) and ("enemy_group" in node) and node.visible:
-					var grp: Variant = node.get("enemy_group")
-					var n_data: Variant = node.get("data") if "data" in node else null
-					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
-
-					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
-						var n_cell: Vector2i = node.get_grid_pos() if node.has_method("get_grid_pos") else Vector2i(9999, 9999)
-						var dist: int = absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y)
-						if dist < min_dist:
-							min_dist = dist
-							best_node = node as Node3D
+			var best_node: Node3D = _find_nearest_world_enemy(target_res)
 
 			if is_instance_valid(best_node) and ("enemy_group" in best_node):
 				var grp: Variant = best_node.get("enemy_group")
@@ -406,13 +385,56 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 			if result.is_empty():
 				var count: int = 1
-				if "pack_size" in payload:
+				if is_instance_valid(best_node) and "pack_size" in best_node:
+					count = max(1, int(best_node.get("pack_size")))
+				elif "pack_size" in payload:
 					count = max(1, int(payload.get("pack_size")))
 				for i in range(count):
-					result.append(target_res.duplicate() if count > 1 else target_res)
+					result.append(target_res.duplicate(true) if count > 1 else target_res)
 
 	return result
-	
+
+
+func _find_nearest_world_enemy(target_res: Resource) -> Node3D:
+	var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+	if overworld_enemies.is_empty():
+		overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	var player_pos: Vector3 = player.global_position if is_instance_valid(player) else Vector3.ZERO
+	var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
+
+	var best_node: Node3D = null
+	var min_dist: float = INF
+
+	for node in overworld_enemies:
+		if not is_instance_valid(node) or not (node is Node3D):
+			continue
+		var enemy_node: Node3D = node as Node3D
+		if not enemy_node.visible and not ("_is_in_active_combat" in enemy_node and bool(enemy_node.get("_is_in_active_combat"))):
+			continue
+
+		var grp: Variant = enemy_node.get("enemy_group") if "enemy_group" in enemy_node else null
+		var n_data: Variant = enemy_node.get("data") if "data" in enemy_node else null
+		var n_edata: Variant = enemy_node.get("enemy_data") if "enemy_data" in enemy_node else null
+
+		var matches: bool = n_data == target_res or n_edata == target_res
+		if not matches and grp is Array:
+			matches = (grp as Array).has(target_res)
+		if not matches:
+			continue
+
+		var dist: float = enemy_node.global_position.distance_to(player_pos)
+		if enemy_node.has_method("get_grid_pos") and player_cell != Vector2i(-9999, -9999):
+			var n_cell: Vector2i = enemy_node.get_grid_pos()
+			dist = float(absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y))
+
+		if dist < min_dist:
+			min_dist = dist
+			best_node = enemy_node
+
+	return best_node
+
 
 func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
 	if not is_instance_valid(enemy_ref):
@@ -1256,15 +1278,28 @@ func _trigger_physical_impact_vfx(target_enemy_id: String, weapon_or_skill_data:
 				SignalBus.camera_shake_requested.emit(0.40)
 				GameLogger.combat("Triggered bow_shot")
 			elif "BLADE" in type_str or "SLASH" in type_str:
-				SignalBus.screen_slice_requested.emit()
 				SignalBus.weapon_swing_requested.emit("sword_swing")
 				SignalBus.camera_shake_requested.emit(0.55)
 				GameLogger.combat("Triggered sword_swing")
+
+			if _is_water_combat() or "BLADE" in type_str or "SLASH" in type_str:
+				SignalBus.screen_slice_requested.emit()
 
 	# Target 2D SpriteFrames overlay animation emit
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and is_instance_valid(vfx_frames):
 		sb.target_vfx_requested.emit(target_enemy_id, vfx_frames, trauma)
+
+
+func _is_water_combat() -> bool:
+	for c: Combatant in combatants:
+		if c.is_player or not is_instance_valid(c.ref):
+			continue
+		if "enemy_id" in c.ref:
+			var e_id: String = str(c.ref.get("enemy_id"))
+			if e_id == "en_lake_tentacle" or e_id == "en_lake_monster":
+				return true
+	return false
 
 
 func _sync_hp_to_ref(c: Combatant) -> void:

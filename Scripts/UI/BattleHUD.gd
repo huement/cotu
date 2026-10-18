@@ -26,6 +26,13 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var edge_flash: Control = %EdgeFlash as Control if has_node("%EdgeFlash") else null
 @onready var slice_overlay: ColorRect = %SliceOverlay as ColorRect if has_node("%SliceOverlay") else null
 
+const WATER_ENEMY_IDS: Array[String] = ["en_lake_tentacle", "en_lake_monster"]
+const WATER_SLICE_SHADER: Shader = preload("res://Shaders/water_slice.gdshader")
+
+var _default_slice_material: ShaderMaterial = null
+var _water_slice_material: ShaderMaterial = null
+var _is_water_encounter: bool = false
+
 var portrait_slots: Array[Node] = []
 var _state: CombatState = CombatState.IDLE
 var _active_slot_index: int = -1
@@ -63,9 +70,13 @@ func _ready() -> void:
 		elemental_vfx.hide()
 		if not elemental_vfx.animation_finished.is_connected(_on_vfx_animation_finished):
 			elemental_vfx.animation_finished.connect(_on_vfx_animation_finished)
-	if is_instance_valid(SignalBus) and SignalBus.has_signal(&"screen_slice_requested"):
-		if not SignalBus.screen_slice_requested.is_connected(play_screen_slice):
+	_setup_slice_overlay()
+
+	if is_instance_valid(SignalBus):
+		if SignalBus.has_signal(&"screen_slice_requested") and not SignalBus.screen_slice_requested.is_connected(play_screen_slice):
 			SignalBus.screen_slice_requested.connect(play_screen_slice)
+		if SignalBus.has_signal(&"enemy_attack_started") and not SignalBus.enemy_attack_started.is_connected(_on_enemy_attack_started_slice):
+			SignalBus.enemy_attack_started.connect(_on_enemy_attack_started_slice)
 
 
 # ==============================================================================
@@ -593,31 +604,66 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 		if result.is_empty() and payload is Resource:
 			var target_res: Resource = payload as Resource
-			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
-			if overworld_enemies.is_empty():
-				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+			var best_node: Node3D = _find_nearest_world_enemy(target_res)
 
-			for node in overworld_enemies:
-				if is_instance_valid(node) and ("enemy_group" in node):
-					var grp: Variant = node.get("enemy_group")
-					var n_data: Variant = node.get("data") if "data" in node else null
-					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
-
-					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
-						if grp is Array and not (grp as Array).is_empty():
-							for item in (grp as Array):
-								if item is Resource:
-									result.append(item as Resource)
-							break
+			if is_instance_valid(best_node) and ("enemy_group" in best_node):
+				var grp: Variant = best_node.get("enemy_group")
+				if grp is Array and not (grp as Array).is_empty():
+					for item in (grp as Array):
+						if item is Resource:
+							result.append(item as Resource)
 
 			if result.is_empty():
 				var count: int = 1
-				if "pack_size" in payload:
+				if is_instance_valid(best_node) and "pack_size" in best_node:
+					count = max(1, int(best_node.get("pack_size")))
+				elif "pack_size" in payload:
 					count = max(1, int(payload.get("pack_size")))
 				for i in range(count):
-					result.append(target_res.duplicate() if count > 1 else target_res)
+					result.append(target_res.duplicate(true) if count > 1 else target_res)
 
 	return result
+
+
+func _find_nearest_world_enemy(target_res: Resource) -> Node3D:
+	var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+	if overworld_enemies.is_empty():
+		overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	var player_pos: Vector3 = player.global_position if is_instance_valid(player) else Vector3.ZERO
+	var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
+
+	var best_node: Node3D = null
+	var min_dist: float = INF
+
+	for node in overworld_enemies:
+		if not is_instance_valid(node) or not (node is Node3D):
+			continue
+		var enemy_node: Node3D = node as Node3D
+		if not enemy_node.visible and not ("_is_in_active_combat" in enemy_node and bool(enemy_node.get("_is_in_active_combat"))):
+			continue
+
+		var grp: Variant = enemy_node.get("enemy_group") if "enemy_group" in enemy_node else null
+		var n_data: Variant = enemy_node.get("data") if "data" in enemy_node else null
+		var n_edata: Variant = enemy_node.get("enemy_data") if "enemy_data" in enemy_node else null
+
+		var matches: bool = n_data == target_res or n_edata == target_res
+		if not matches and grp is Array:
+			matches = (grp as Array).has(target_res)
+		if not matches:
+			continue
+
+		var dist: float = enemy_node.global_position.distance_to(player_pos)
+		if enemy_node.has_method("get_grid_pos") and player_cell != Vector2i(-9999, -9999):
+			var n_cell: Vector2i = enemy_node.get_grid_pos()
+			dist = float(absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y))
+
+		if dist < min_dist:
+			min_dist = dist
+			best_node = enemy_node
+
+	return best_node
 
 
 func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facing: String) -> void:
@@ -633,6 +679,7 @@ func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facin
 		_info_menu_panel.hide()
 
 	_current_enemy_resources = _resolve_enemy_resources(enemy_payload)
+	_is_water_encounter = _detect_water_encounter(_current_enemy_resources)
 	_enemy_max_hps.clear()
 	_enemy_current_hps.clear()
 
@@ -764,9 +811,15 @@ func _on_vfx_animation_finished() -> void:
 func _on_combat_ended(_victory: bool) -> void:
 	hide()
 	_reset_state()
+	_is_water_encounter = false
 	_is_info_menu_open = false
 	if is_instance_valid(_info_menu_panel):
 		_info_menu_panel.hide()
+	if is_instance_valid(slice_overlay) and is_instance_valid(_default_slice_material):
+		slice_overlay.material = _default_slice_material
+		_default_slice_material.set_shader_parameter("progress", 0.0)
+	if is_instance_valid(_water_slice_material):
+		_water_slice_material.set_shader_parameter("progress", 0.0)
 
 
 func setup_party_display(party_members: Array) -> void:
@@ -786,20 +839,74 @@ func setup_party_display(party_members: Array) -> void:
 				slot_node.call("setup_slot", null)
 
 
+func _setup_slice_overlay() -> void:
+	if not is_instance_valid(slice_overlay):
+		slice_overlay = ColorRect.new()
+		slice_overlay.name = "SliceOverlay"
+		add_child(slice_overlay)
+
+	slice_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	slice_overlay.offset_left = 0.0
+	slice_overlay.offset_top = 0.0
+	slice_overlay.offset_right = 0.0
+	slice_overlay.offset_bottom = 0.0
+	slice_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slice_overlay.z_index = 128
+	slice_overlay.color = Color.WHITE
+
+	_default_slice_material = slice_overlay.material as ShaderMaterial
+	_water_slice_material = ShaderMaterial.new()
+	_water_slice_material.shader = WATER_SLICE_SHADER
+	_water_slice_material.set_shader_parameter("progress", 0.0)
+	_water_slice_material.set_shader_parameter("line_width", 0.12)
+
+
+func _detect_water_encounter(enemy_pack: Array[Resource]) -> bool:
+	for res: Resource in enemy_pack:
+		if not is_instance_valid(res):
+			continue
+		var e_id: String = str(res.get("enemy_id")) if "enemy_id" in res else ""
+		var e_name: String = str(res.get("enemy_name")).to_lower() if "enemy_name" in res else ""
+		var e_path: String = str(res.get("model_path")).to_lower() if "model_path" in res else ""
+		if WATER_ENEMY_IDS.has(e_id) or "tentacle" in e_name or "sea monster" in e_name or "tentacle" in e_path or "sea_monster" in e_path:
+			return true
+	return false
+
+
+func _on_enemy_attack_started_slice(_enemy_id: String) -> void:
+	if _is_water_encounter:
+		play_screen_slice()
+
+
 func play_screen_slice() -> void:
-	if not is_instance_valid(slice_overlay) or slice_overlay.material == null:
+	if not is_instance_valid(slice_overlay):
+		_setup_slice_overlay()
+	if not is_instance_valid(slice_overlay):
 		return
 
-	var mat := slice_overlay.material as ShaderMaterial
+	var mat: ShaderMaterial = _default_slice_material
+	if _is_water_encounter and is_instance_valid(_water_slice_material):
+		mat = _water_slice_material
+
 	if mat == null:
 		return
 
+	slice_overlay.visible = true
+	slice_overlay.move_to_front()
+	slice_overlay.material = mat
+	mat.set_shader_parameter("progress", 0.0)
+
 	var tween: Tween = create_tween()
-	tween.tween_property(mat, "shader_parameter/progress", 1.0, 0.22) \
-		.from(0.0) \
-		.set_trans(Tween.TRANS_QUAD) \
-		.set_ease(Tween.EASE_OUT)
+	tween.tween_method(
+		func(value: float) -> void:
+			if is_instance_valid(mat):
+				mat.set_shader_parameter("progress", value),
+		0.0,
+		1.0,
+		0.45
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	tween.finished.connect(func() -> void:
-		mat.set_shader_parameter("progress", 0.0)
+		if is_instance_valid(mat):
+			mat.set_shader_parameter("progress", 0.0)
 	, CONNECT_ONE_SHOT)
