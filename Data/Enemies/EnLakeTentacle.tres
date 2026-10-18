@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://ctct8cxtmvu8y"]
+
+[ext_resource type="PackedScene" uid="uid://cmftm1fl21nh0" path="res://resources/Enemies/tentacle.glb" id="1_model"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_lake_tentacle"
+enemy_type = "creature"
+enemy_name = "Lurking Tentacle"
+model_path = "res://resources/Enemies/tentacle.glb"
+texture_path = "res://resources/Enemies/tentacle_tentacle.png"
+model_scene = ExtResource("1_model")
+model_scale = Vector3(0.4, 0.4, 0.4)
+base_level = 3
+max_health = 60
+current_health = 60
+attack_damage = 12
+defense = 6
+speed = 4.0
+initiative_speed = 5
+weakness_element = 1
+attack_element = 2
+movement_speed = 0.0
+aggro_range_tiles = 2
+can_surprise_player = true
+xp_value = 220
+gold_value = 40

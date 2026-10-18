@@ -25,7 +25,12 @@ var current_mode: Mode = Mode.EXPLORING:
 @export var party_gold: int = 0
 ## Maps map_id -> (object_id -> state_dictionary)
 @export var environment_states: Dictionary = {}
-
+@export var current_time_period: String = "MORNING":
+	set(value):
+		if current_time_period != value:
+			current_time_period = value
+			SignalBus.emit_signal("time_period_changed", current_time_period)
+			
 var active_character_index: int = 0
 var post_combat_immunity_timer: float = 0.0
 
@@ -220,6 +225,7 @@ func _process_party_rest(rest_data: Dictionary) -> void:
 
 	print("[GameState] 🏕️ Party resting for %d hours..." % hours)
 
+	# @TODO: Display hp and energy recovered amount!@
 	var total_hp_recovered: int = 0
 	var total_energy_recovered: int = 0
 	var party_slots: Array = current_party.slots

@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://dqkr2j65k83yc"]
+[gd_scene load_steps=25 format=3 uid="uid://dqkr2j65k83yc"]
 
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_cn5rm"]
 [ext_resource type="Texture2D" uid="uid://dn0f5ac8pbppq" path="res://ui/HUD/sidebar.png" id="2_ako3u"]
@@ -17,10 +17,11 @@
 [ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="15_u1rxn"]
 [ext_resource type="Script" uid="uid://ckoiskavvtx6f" path="res://Scripts/minimap_camera.gd" id="16_wjwn1"]
 [ext_resource type="Texture2D" uid="uid://btil8atds3nsj" path="res://ui/minimap-indicator.png" id="17_lyj15"]
-[ext_resource type="Texture2D" uid="uid://6q4bmnpuwq3m" path="res://ui/HUD/minimap_bg_sm.png" id="18_l2igo"]
+[ext_resource type="Texture2D" uid="uid://btj1qk47hrys6" path="res://ui/HUD/mini-map-cover.png" id="18_ako3u"]
 [ext_resource type="PackedScene" uid="uid://c7djkhvfbkv60" path="res://Scenes/UI/NineHUD.tscn" id="19_ako3u"]
 [ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="19_ralih"]
 [ext_resource type="Texture2D" uid="uid://be14sjxl48syt" path="res://ui/HUD/edge_vignette.png" id="20_p5q14"]
+[ext_resource type="FontFile" uid="uid://cx1vfygfe1ymt" path="res://ui/fonts/RedditMono-Bold.ttf" id="21_khvou"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r0ikl"]
 shader = ExtResource("15_u1rxn")
@@ -211,10 +212,10 @@ offset_bottom = 40.0
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_r0ikl")
 layout_mode = 0
-offset_left = 27.0
-offset_top = 25.0
-offset_right = 177.0
-offset_bottom = 175.0
+offset_left = 23.0
+offset_top = 19.0
+offset_right = 173.0
+offset_bottom = 169.0
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="MinimapAnchor/SubViewportContainer"]
@@ -238,12 +239,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 68.0
-offset_top = 58.0
-offset_right = 101.0
-offset_bottom = 91.0
+offset_left = 62.0
+offset_top = 55.0
+offset_right = 95.0
+offset_bottom = 88.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.8, 0.8)
 pivot_offset = Vector2(16.5, 16.5)
 texture = ExtResource("17_lyj15")
 
@@ -254,23 +256,38 @@ offset_top = 12.0
 offset_right = 205.0
 offset_bottom = 206.0
 scale = Vector2(0.9, 0.9)
-texture = ExtResource("18_l2igo")
+texture = ExtResource("18_ako3u")
 
 [node name="NineHud" parent="." instance=ExtResource("19_ako3u")]
 unique_name_in_owner = true
 
 [node name="CompassLabel" type="Label" parent="."]
 unique_name_in_owner = true
-offset_left = 968.0
-offset_top = 18.0
-offset_right = 1088.0
-offset_bottom = 41.0
+offset_left = 14.0
+offset_top = 156.0
+offset_right = 134.0
+offset_bottom = 180.0
 theme_override_fonts/font = ExtResource("19_ralih")
-theme_override_font_sizes/font_size = 14
-text = "NORTH"
+theme_override_font_sizes/font_size = 20
+text = "N"
 horizontal_alignment = 1
 clip_text = true
 text_overrun_behavior = 1
+
+[node name="DaytimeLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -140.0
+offset_top = 16.0
+offset_right = -100.0
+offset_bottom = 39.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("21_khvou")
+theme_override_font_sizes/font_size = 16
+text = "MORN"
 
 [node name="EdgeFlash" type="TextureRect" parent="."]
 unique_name_in_owner = true

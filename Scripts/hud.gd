@@ -20,6 +20,7 @@ extends CanvasLayer
 @onready var action_bar_anchor: Control = %ActionBarAnchor as Control
 @onready var edge_flash: TextureRect = %EdgeFlash as TextureRect
 @onready var enemy_in_range: ColorRect = %EnemyInRange as ColorRect
+@onready var time_label: Label = %DaytimeLabel
 
 # Strongly-typed reference to the player grid-walker
 @onready var player: Node3D = get_node("../Player") as Node3D
@@ -50,6 +51,9 @@ func _ready() -> void:
 	_connect_signal_bus()
 	_connect_game_state()
 
+	SignalBus.time_period_changed.connect(_on_time_period_changed)
+	_update_time_display(GameState.current_time_period)
+	
 	# Defer initial portrait update by one frame to resolve potential race
 	# conditions with GameState initialization.
 	await get_tree().process_frame
@@ -145,15 +149,15 @@ func _update_compass_text(direction: String) -> void:
 
 	match direction.to_upper():
 		"NORTH":
-			compass_label.text = "NORTH"
+			compass_label.text = "N"
 		"WEST":
-			compass_label.text = "WEST"
+			compass_label.text = "W"
 		"SOUTH":
-			compass_label.text = "SOUTH"
+			compass_label.text = "S"
 		"EAST":
-			compass_label.text = "EAST"
+			compass_label.text = "E"
 		_:
-			compass_label.text = "UNKWN"
+			compass_label.text = "?"
 
 
 func _update_minimap_pointer(direction: String) -> void:
@@ -380,3 +384,12 @@ func _trigger_edge_flash(color: Color, duration: float = 0.4, max_alpha: float =
 		.set_trans(Tween.TRANS_SINE) \
 		.set_ease(Tween.EASE_OUT)
 	tween.tween_callback(edge_flash.hide)
+
+
+func _on_time_period_changed(new_period: String) -> void:
+	_update_time_display(new_period)
+
+
+func _update_time_display(period_text: String) -> void:
+	if time_label:
+		time_label.text = period_text

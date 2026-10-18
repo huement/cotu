@@ -23,18 +23,20 @@ extends Node3D
 @export var horizontal_spacing: float = 1.2
 
 
-## Fallback animation candidate aliases for various 3D model formats (e.g. Ghost, Kenny, Mixamo)
 # ==============================================================================
 # 2. RUNTIME STATE & ANIMATION MAPPINGS
 # ==============================================================================
 var _spawned_enemies: Dictionary = {}
 
-## Fallback animation candidate aliases for various 3D model formats
+## Fallback animation candidate aliases for various 3D model formats (including Minotaur GLB)
 const ANIM_MAPPINGS: Dictionary = {
-	&"idle": [&"Idle", &"idle", &"IDLE", &"idle_loop", &"Idle_Loop"],
-	&"attack": [&"CastSpell", &"attack-melee-left", &"Attack", &"attack", &"Cast", &"cast", &"SpellCast"],
+	&"idle": [&"IDLE", &"Idle", &"idle", &"Armature|idle", &"idle_loop", &"Idle_Loop"],
+	&"walk": [&"WALK", &"Walk", &"walk", &"Armature|Walk", &"walk_loop", &"Walk_Loop"],
+	&"attack": [&"ATTACK_1", &"Attack", &"attack", &"Armature|Attack", &"CastSpell", &"attack-melee-left", &"Cast", &"cast"],
+	&"attack_special": [&"ATTACK_SPECIAL", &"Armature|Attack Double", &"Attack Double", &"attack_double", &"SpecialAttack"],
+	&"attack_jump": [&"ATTACK_JUMP", &"Armature|Jump", &"Jump", &"jump", &"JumpAttack"],
 	&"damage": [&"TakeDamage", &"interact-left", &"Hit", &"hit", &"Damage", &"damage", &"GetHit"],
-	&"die": [&"Die", &"die", &"Death", &"death", &"Dead", &"dead"]
+	&"die": [&"DEATH", &"Die", &"die", &"Death", &"death", &"Armature|Death", &"Dead", &"dead"]
 }
 
 
@@ -69,7 +71,6 @@ func _connect_to_signal_bus() -> void:
 # ==============================================================================
 # 4. SPAWNING & RESOLUTION
 # ==============================================================================
-## Resolves any enemy payload variant into a typed Array[Resource] using player proximity for single resources
 func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 	var result: Array[Resource] = []
 
@@ -99,12 +100,12 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 					if item is Resource:
 						result.append(item as Resource)
 
-		# 🎯 Proximity-based lookup: Find the closest active overworld WorldEnemy node matching the resource
 		if result.is_empty() and payload is Resource:
 			var target_res: Resource = payload as Resource
 			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
 			if overworld_enemies.is_empty():
 				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+				overworld_enemies.append_array(get_tree().root.find_children("*", "OutdoorEnemy", true, false))
 
 			var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
 			var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
@@ -152,7 +153,6 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 	_clear_all_enemies()
 	visible = true
 
-	# 🎯 Resolve payload into full pack array (handles pack_size & overworld group lookup)
 	var enemy_group: Array[Resource] = _resolve_enemy_resources(enemy_payload)
 	
 	for i in range(enemy_group.size()):
@@ -165,7 +165,6 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 		var enemy_node: Node3D
 		if is_instance_valid(model_scene):
 			enemy_node = model_scene.instantiate() as Node3D
-			# 🎯 Binds custom_material / texture_path onto child MeshInstance3D nodes
 			_apply_material_to_model(enemy_node, e_data)
 		else:
 			enemy_node = _create_debug_mesh()
@@ -174,22 +173,56 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 		_spawned_enemies[enemy_id] = enemy_node
 		add_child(enemy_node)
 		
-		_position_enemy(enemy_node, i, enemy_group.size())
+		_position_enemy(enemy_node, i, enemy_group.size(), e_data)
 		play_animation(enemy_node, &"idle", true)
 
 
-## Automatically resolves and applies texture materials to 3D GLB model meshes
+func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int, e_data: Resource = null) -> void:
+	if not is_instance_valid(camera_node):
+		return
+
+	var effective_spacing: float = horizontal_spacing
+	if total_enemies >= 3:
+		effective_spacing = horizontal_spacing * 0.65
+
+	var horizontal_offset: float = 0.0
+	if total_enemies > 1:
+		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * effective_spacing
+
+	var v_offset: float = -0.45
+	if is_instance_valid(e_data) and "vertical_offset" in e_data:
+		v_offset = float(e_data.get("vertical_offset"))
+
+	var cam_transform: Transform3D = camera_node.global_transform
+
+	var spawn_pos: Vector3 = cam_transform.origin \
+			- (cam_transform.basis.z * forward_distance) \
+			+ (cam_transform.basis.x * horizontal_offset) \
+			+ (cam_transform.basis.y * v_offset)
+
+	enemy_node.global_position = spawn_pos
+
+	var target_scale: Vector3 = model_scale
+	if is_instance_valid(e_data):
+		if "model_scale" in e_data and e_data.get("model_scale") != Vector3.ZERO:
+			target_scale = e_data.get("model_scale") as Vector3
+
+	enemy_node.scale = target_scale
+
+	var target_look_at: Vector3 = Vector3(cam_transform.origin.x, enemy_node.global_position.y, cam_transform.origin.z)
+	enemy_node.look_at(target_look_at, Vector3.UP)
+	enemy_node.rotate_object_local(Vector3.UP, PI)
+
+
 func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
 	if not is_instance_valid(model_node) or not is_instance_valid(e_data):
 		return
 
 	var mat: Material = null
 
-	# 1. Custom material property on EnemyData
 	if "custom_material" in e_data and is_instance_valid(e_data.get("custom_material")):
 		mat = e_data.get("custom_material") as Material
 
-	# 2. Texture path property on EnemyData
 	if mat == null and "texture_path" in e_data and not str(e_data.get("texture_path")).is_empty():
 		var tex_path: String = str(e_data.get("texture_path"))
 		var tres_path: String = tex_path.replace(".png", ".tres")
@@ -204,7 +237,6 @@ func _apply_material_to_model(model_node: Node3D, e_data: Resource) -> void:
 				std_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 				mat = std_mat
 
-	# 3. Auto-resolve material from the GLB model scene directory
 	if mat == null and "model_scene" in e_data and is_instance_valid(e_data.get("model_scene")):
 		var model_scene: PackedScene = e_data.get("model_scene") as PackedScene
 		var path: String = model_scene.resource_path
@@ -245,40 +277,11 @@ func _apply_material_override_recursive(node: Node, mat: Material) -> void:
 
 	for child in node.get_children():
 		_apply_material_override_recursive(child, mat)
-		
-
-func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int) -> void:
-	if not is_instance_valid(camera_node):
-		return
-
-	# Dynamically tighten spacing as enemy count increases
-	var effective_spacing: float = horizontal_spacing
-	if total_enemies >= 3:
-		effective_spacing = horizontal_spacing * 0.65  # Squeezes groups of 3+ together
-
-	var horizontal_offset: float = 0.0
-	if total_enemies > 1:
-		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * effective_spacing
-
-	var cam_transform: Transform3D = camera_node.global_transform
-
-	var spawn_pos: Vector3 = cam_transform.origin \
-			- (cam_transform.basis.z * forward_distance) \
-			+ (cam_transform.basis.x * horizontal_offset) \
-			+ (cam_transform.basis.y * vertical_offset)
-
-	enemy_node.global_position = spawn_pos
-	enemy_node.scale = model_scale
-
-	var target_look_at: Vector3 = Vector3(cam_transform.origin.x, enemy_node.global_position.y, cam_transform.origin.z)
-	enemy_node.look_at(target_look_at, Vector3.UP)
-	enemy_node.rotate_object_local(Vector3.UP, PI)
 
 
 # ==============================================================================
 # 5. ANIMATION & FX
 # ==============================================================================
-## Plays an animation for the model based on abstract action key (&"idle", &"attack", &"damage", &"die")
 func play_animation(enemy_node: Node3D, action_key: StringName, loop: bool = true) -> void:
 	if not is_instance_valid(enemy_node):
 		return
@@ -291,14 +294,12 @@ func play_animation(enemy_node: Node3D, action_key: StringName, loop: bool = tru
 	if resolved_anim.is_empty():
 		return
 
-	# Explicitly set Godot Animation loop mode on the Animation resource
 	var anim: Animation = anim_player.get_animation(resolved_anim)
 	if is_instance_valid(anim):
 		anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
 
 	anim_player.play(resolved_anim)
 
-	# Non-looping actions (attack / damage) return to idle upon completion
 	if not loop and action_key != &"die":
 		anim_player.animation_finished.connect(
 			func(_finished_anim: StringName) -> void:
@@ -308,20 +309,17 @@ func play_animation(enemy_node: Node3D, action_key: StringName, loop: bool = tru
 		)
 
 
-## Resolves action state (&"idle", &"attack", &"damage", &"die") to actual animation clip names in the model's AnimationPlayer
 func _resolve_animation_name(anim_player: AnimationPlayer, action_key: StringName) -> StringName:
 	if not is_instance_valid(anim_player):
 		return &""
 
 	var candidates: Array = ANIM_MAPPINGS.get(action_key, [action_key])
 
-	# 1. Exact match check
 	for candidate in candidates:
 		var cand_name := StringName(str(candidate))
 		if anim_player.has_animation(cand_name):
 			return cand_name
 
-	# 2. Substring match fallback
 	var available: PackedStringArray = anim_player.get_animation_list()
 	for candidate in candidates:
 		var cand_str: String = str(candidate).to_lower()

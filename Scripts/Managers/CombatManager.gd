@@ -172,9 +172,6 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array, _enem
 	active_combatant = null
 	guarding_characters.clear()
 
-	# 🔍 DIAGNOSTIC LOG: Print exact runtime type and value received
-	GameLogger.combat("[DEBUG CombatManager] combat_started payload type: %s | Value: %s" % [typeof(enemy_data_or_group), enemy_data_or_group])
-	
 	var registered_cats: int = 0
 	for i in range(player_party.size()):
 		var cat: Resource = player_party[i] as Resource
@@ -191,43 +188,48 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array, _enem
 				c_mp = int(cat.get("current_mp"))
 			elif "current_mana" in cat:
 				c_mp = int(cat.get("current_mana"))
-			elif "mp" in cat:
-				c_mp = int(cat.get("mp"))
 
 			var c_max_mp: int = 10
 			if "max_mp" in cat:
 				c_max_mp = int(cat.get("max_mp"))
-			elif "max_mana" in cat:
-				c_max_mp = int(cat.get("max_mana"))
 
 			var c_str: int = int(cat.get("strength")) if "strength" in cat else 10
 			var c_def: int = int(cat.get("defense")) if "defense" in cat else 2
-
-			# Determine Row Alignment (Slots 0-2 = Front, Slots 3-5 = Back)
-			var c_is_front: bool = true
-			if "is_front_row" in cat:
-				c_is_front = bool(cat.get("is_front_row"))
-			else:
-				c_is_front = i <= 2
+			var c_is_front: bool = bool(cat.get("is_front_row")) if "is_front_row" in cat else (i <= 2)
 
 			var combatant: Combatant = Combatant.new(c_id, c_name, c_speed, true, i, c_hp, c_max_hp, c_mp, c_max_mp, c_str, c_def, cat, c_is_front)
 			combatant.meter = 0.0
 			combatants.append(combatant)
 
-	# 🎯 Extract enemy resources using universal resolver
 	var enemy_resources: Array[Resource] = _resolve_enemy_resources(enemy_data_or_group)
 
-	GameLogger.combat("Starting Combat w/ %d party members vs %d hostiles" % [registered_cats, enemy_resources.size()])
-
 	for e_idx in range(enemy_resources.size()):
-		var e_data: Resource = enemy_resources[e_idx]
-		if is_instance_valid(e_data):
-			var e_speed: float = float(e_data.get("speed")) if "speed" in e_data else (float(e_data.get("initiative_speed")) if "initiative_speed" in e_data else 10.0)
-			var e_max_hp: int = int(e_data.get("max_health")) if "max_health" in e_data else 30
-			var e_hp: int = int(e_data.get("current_health")) if "current_health" in e_data else e_max_hp
-			var e_str: int = int(e_data.get("strength")) if "strength" in e_data else (int(e_data.get("attack_damage")) if "attack_damage" in e_data else 8)
-			var e_def: int = int(e_data.get("defense")) if "defense" in e_data else 2
-			var e_name: String = str(e_data.get("enemy_name")) if e_data.get("enemy_name") != null else "Cyber-Zombie Cat"
+		var raw_e_data: Resource = enemy_resources[e_idx]
+		if is_instance_valid(raw_e_data):
+			# Duplicate resource for combat so mutations never corrupt the source .tres
+			var e_data: Resource = raw_e_data.duplicate(true)
+
+			var e_speed: float = float(e_data.get("speed")) if "speed" in e_data else 10.0
+			var e_max_hp: int = int(e_data.get("max_hp")) if "max_hp" in e_data else (int(e_data.get("max_health")) if "max_health" in e_data else 90)
+			var e_hp: int = e_max_hp
+
+			if "current_hp" in e_data and int(e_data.get("current_hp")) > 0:
+				e_hp = int(e_data.get("current_hp"))
+			elif "current_health" in e_data and int(e_data.get("current_health")) > 0:
+				e_hp = int(e_data.get("current_health"))
+
+			# Guarantee full health if resource was initialized at <= 0
+			if e_hp <= 0:
+				e_hp = e_max_hp
+
+			if "current_hp" in e_data:
+				e_data.set("current_hp", e_hp)
+			if "current_health" in e_data:
+				e_data.set("current_health", e_hp)
+
+			var e_str: int = int(e_data.get("strength")) if "strength" in e_data else 16
+			var e_def: int = int(e_data.get("defense")) if "defense" in e_data else 8
+			var e_name: String = str(e_data.get("enemy_name")) if e_data.get("enemy_name") != null else "Minotaur"
 
 			if enemy_resources.size() > 1:
 				e_name = "%s %c" % [e_name, 65 + e_idx]
@@ -241,14 +243,13 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array, _enem
 	is_combat_active = true
 	is_paused_for_input = false
 
-	# Validate combat setup immediately
 	if _check_battle_state():
 		return
 
 	for c: Combatant in combatants:
 		c.meter = minf(MAX_TURN_METER, c.get_effective_speed() * 5.0)
 		SignalBus.turn_meter_updated.emit(c.id, c.meter / MAX_TURN_METER)
-
+		
 
 func _on_combat_ended(victory: bool) -> void:
 	if not is_combat_active or is_transitioning_out:

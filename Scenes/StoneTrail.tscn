@@ -1,0 +1,174 @@
+[gd_scene load_steps=27 format=3 uid="uid://dyftx0kemcc88"]
+
+[ext_resource type="MeshLibrary" uid="uid://w6j6ksydupt" path="res://resources/mesh_library/knature_mesh_library.tres" id="1_83dqm"]
+[ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_pi64s"]
+[ext_resource type="Script" uid="uid://cblxdfhaelypp" path="res://Scripts/Environment/forest_grid_map_replacer.gd" id="3_ojhip"]
+[ext_resource type="PackedScene" uid="uid://r2hd51nblgow" path="res://Scenes/Environment/forest_wall_chunk.tscn" id="4_mk8mb"]
+[ext_resource type="PackedScene" uid="uid://crhntawb0lghi" path="res://Scenes/Environment/forest_wall_chunk_thick.tscn" id="5_1lacx"]
+[ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="6_uwibm"]
+[ext_resource type="Script" uid="uid://dokbtyywp86kj" path="res://Scripts/Environment/cloud_layer.gd" id="7_sylal"]
+[ext_resource type="PackedScene" uid="uid://ekckcrvvkuqm" path="res://resources/OutdoorParts/low_poly_cloud.glb" id="8_8fle0"]
+[ext_resource type="PackedScene" uid="uid://bpn2rvnvip8cv" path="res://resources/OutdoorParts/low_poly_cloud-2.glb" id="9_pmjde"]
+[ext_resource type="PackedScene" uid="uid://wlg457v4s706" path="res://resources/OutdoorParts/low_poly_cloud-3.glb" id="10_8r4xu"]
+[ext_resource type="PackedScene" uid="uid://bjfj4qtvjfvc2" path="res://resources/OutdoorParts/low_poly_cloud-4.glb" id="11_u0h4v"]
+[ext_resource type="Script" uid="uid://c7mly1i66aig7" path="res://Scripts/Environment/day_night_cycle.gd" id="12_myjf8"]
+[ext_resource type="PackedScene" uid="uid://buh6wg8d1ecdd" path="res://resources/OutdoorParts/moon.glb" id="13_1iw8h"]
+[ext_resource type="Script" uid="uid://l05eb00qic0y" path="res://Scripts/Environment/grass_scatter.gd" id="14_c0q50"]
+[ext_resource type="ArrayMesh" uid="uid://c7ybxyljir8sb" path="res://resources/meshes/grass_tuft.tres" id="15_itkve"]
+[ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="16_rnoqb"]
+[ext_resource type="Script" uid="uid://dgain4v6p65m5" path="res://Scripts/Environment/DungeonChest.gd" id="17_efu5m"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/MinotaurWorldEnemy.tscn" id="18_nrmpo"]
+[ext_resource type="Script" uid="uid://bwo1hj7v8l1ex" path="res://Scripts/Enemies/world_enemy.gd" id="19_asrv6"]
+[ext_resource type="Resource" uid="uid://p8o4h2oud4v6" path="res://Data/Enemies/Minotaur_Base.tres" id="20_448rd"]
+[ext_resource type="Script" uid="uid://464km5lxyytl" path="res://Scripts/Environment/night_enemy_spawner.gd" id="21_6pdu7"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_x4sae"]
+
+[sub_resource type="Sky" id="Sky_bosie"]
+sky_material = SubResource("ProceduralSkyMaterial_x4sae")
+
+[sub_resource type="Environment" id="Environment_4kg3n"]
+background_mode = 2
+sky = SubResource("Sky_bosie")
+ambient_light_source = 3
+ambient_light_color = Color(0.62, 1, 0.85, 1)
+volumetric_fog_enabled = true
+volumetric_fog_albedo = Color(0.38, 0.46, 0.44, 1)
+volumetric_fog_emission = Color(0.15, 0.25, 0.25, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n17pl"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.45, 0.55, 0.5, 0.18)
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_c3hdd"]
+material = SubResource("StandardMaterial3D_n17pl")
+size = Vector2(6, 6)
+
+[node name="StoneTrail" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_4kg3n")
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.87758255, 0.34391883, -0.334019, 0, 0.6967067, 0.7173561, 0.47942555, -0.6295392, 0.61141765, 0, 0, 0)
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.32, 0, -91.69)
+metadata/eye_height = 1.0
+
+[node name="FloorMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+mesh_library = ExtResource("1_83dqm")
+cell_center_y = false
+cell_scale = 2.0
+
+[node name="WallMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+mesh_library = ExtResource("2_pi64s")
+cell_scale = 2.0
+script = ExtResource("3_ojhip")
+
+[node name="WallMap2" type="GridMap" parent="."]
+mesh_library = ExtResource("2_pi64s")
+cell_scale = 2.0
+script = ExtResource("3_ojhip")
+forest_chunk_scene = ExtResource("4_mk8mb")
+
+[node name="WallMap3" type="GridMap" parent="."]
+mesh_library = ExtResource("2_pi64s")
+cell_scale = 2.0
+script = ExtResource("3_ojhip")
+forest_chunk_scene = ExtResource("5_1lacx")
+
+[node name="WoodPaths" type="Node3D" parent="."]
+
+[node name="BigTimbers" type="Node3D" parent="."]
+
+[node name="Shrooms" type="Node3D" parent="."]
+
+[node name="WorldSceneInitializer" type="Node3D" parent="."]
+script = ExtResource("6_uwibm")
+create_floor = false
+create_ceiling = false
+setup_dark_retro_environment = false
+attach_torch_to_player = false
+particle_color = Color(0.94, 1.01, 0.77, 0.4)
+
+[node name="GroundMist" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+amount = 60
+lifetime = 8.0
+mesh = SubResource("QuadMesh_c3hdd")
+emission_shape = 3
+emission_box_extents = Vector3(35, 0.3, 35)
+gravity = Vector3(0, -0.02, 0)
+scale_amount_min = 0.8
+scale_amount_max = 1.6
+color = Color(0.7, 0.8, 0.75, 0.3)
+
+[node name="CloudLayer" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+script = ExtResource("7_sylal")
+min_scale = 0.5
+max_scale = 0.65
+
+[node name="low_poly_cloud" type="Node3D" parent="CloudLayer" instance=ExtResource("8_8fle0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, -16.78)
+
+[node name="Sketchfab_Scene" type="Node3D" parent="CloudLayer" instance=ExtResource("9_pmjde")]
+
+[node name="@Node3D@49228" type="Node3D" parent="CloudLayer" instance=ExtResource("10_8r4xu")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 18.68, -3.9, -14.17)
+
+[node name="@Node3D@49229" type="Node3D" parent="CloudLayer" instance=ExtResource("11_u0h4v")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -10.7, 0, -19.97)
+
+[node name="DayLightCycle" type="Node3D" parent="." node_paths=PackedStringArray("sun_light", "moon_light", "world_environment", "moon_mesh_node")]
+script = ExtResource("12_myjf8")
+sun_light = NodePath("../SunLight")
+moon_light = NodePath("MoonLight")
+world_environment = NodePath("../WorldEnvironment")
+moon_mesh_node = NodePath("MoonLight/moon")
+moon_rotation_degrees = Vector3(0, 180, 0)
+
+[node name="MoonLight" type="DirectionalLight3D" parent="DayLightCycle"]
+light_color = Color(0.665, 0.798, 1, 1)
+
+[node name="moon" type="Node3D" parent="DayLightCycle/MoonLight" instance=ExtResource("13_1iw8h")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -200)
+
+[node name="GrassScatter" type="Node3D" parent="." node_paths=PackedStringArray("floor_map")]
+script = ExtResource("14_c0q50")
+floor_map = NodePath("../FloorMap")
+grass_mesh = ExtResource("15_itkve")
+valid_floor_item_ids = [1, 46]
+tufts_per_tile = 3
+
+[node name="Treasure" type="Node3D" parent="."]
+
+[node name="Chest" type="Node3D" parent="Treasure" instance=ExtResource("16_rnoqb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.37, -0.24, 11.4)
+script = ExtResource("17_efu5m")
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="MinotaurWorldEnemy" type="Node3D" parent="Enemies" groups=["world_enemies"] instance=ExtResource("18_nrmpo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.32, 0, -84)
+script = ExtResource("19_asrv6")
+enemy_data = ExtResource("20_448rd")
+model_scale = Vector3(0.18, 0.18, 0.18)
+is_night_only = false
+
+[node name="NightEnemySpawner" type="Node3D" parent="." node_paths=PackedStringArray("floor_map", "wall_maps", "spawn_point")]
+script = ExtResource("21_6pdu7")
+floor_map = NodePath("../FloorMap")
+wall_maps = [NodePath("../WallMap"), NodePath("../WallMap2"), NodePath("../WallMap3")]
+spawn_point = NodePath("../SpawnPoint")
+enemy_scene = ExtResource("18_nrmpo")

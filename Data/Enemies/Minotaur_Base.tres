@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://p8o4h2oud4v6"]
+
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="1_enemy"]
+[ext_resource type="PackedScene" uid="uid://b06t4o2t4g4in" path="res://resources/Enemies/minataur.glb" id="2_model"]
+
+[resource]
+script = ExtResource("1_enemy")
+enemy_id = "minotaur_base"
+enemy_type = "minotaur"
+enemy_name = "Minotaur"
+model_scene = ExtResource("2_model")
+model_scale = Vector3(0.08, 0.08, 0.08)
+base_level = 4
+max_health = 90
+current_health = 90
+attack_damage = 16
+defense = 8
+speed = 4.0
+initiative_speed = 3
+weakness_element = 1
+attack_element = 0
+max_group_size = 2
+movement_speed = 2.0
+aggro_range_tiles = 4
+can_surprise_player = true
+xp_value = 320
+gold_value = 175

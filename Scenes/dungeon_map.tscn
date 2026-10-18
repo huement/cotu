@@ -2,7 +2,7 @@
 
 [ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_vm1o7"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_kgprt"]
-[ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/enemy.tscn" id="2_kl8rm"]
+[ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/Enemies/enemy.tscn" id="2_kl8rm"]
 [ext_resource type="Resource" uid="uid://w6tvsfi0pypv" path="res://Data/Enemies/EnZombieSavage.tres" id="3_5c1re"]
 [ext_resource type="PackedScene" uid="uid://obtfq1vnf1h8" path="res://Scenes/Objects/Torch.tscn" id="3_7y88j"]
 [ext_resource type="Resource" uid="uid://bys08l4xf6vss" path="res://Data/Enemies/EnAzurianDrone.tres" id="3_bmgh2"]

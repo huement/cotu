@@ -27,7 +27,7 @@ func _ready() -> void:
 
 ## Attempts a cardinal step relative to parent orientation.
 func try_step(parent_node: Node3D, local_input_dir: Vector3, _current_facing: String) -> bool:
-	GameLogger.nav('try_step FIRED')
+	# GameLogger.nav('try_step FIRED')
 	if is_moving or not parent_node:
 		return false
 

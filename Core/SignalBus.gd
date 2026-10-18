@@ -17,6 +17,7 @@ enum CombatPhase {
 # Exploration & Navigation
 signal party_moved(new_grid_pos: Vector3i, facing: Direction)
 signal party_roster_updated(roster_slots: Array)
+signal day_night_changed(is_night: bool)
 
 # Combat Triggers
 signal combat_started(enemy_data_or_group: Variant, player_party: Array, enemy_facing: String)
@@ -51,6 +52,7 @@ signal popup_requested(action_type: StringName, data: Dictionary)
 signal popup_confirmed(action_type: StringName, extra_data: Dictionary)
 signal portrait_clicked(slot_index: int)
 signal battle_victory_popup_requested(data: Dictionary)
+signal time_period_changed(new_period: String)
 
 # JUICE IT
 signal camera_shake_requested(trauma: float)

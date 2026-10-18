@@ -1,0 +1,34 @@
+[gd_scene load_steps=6 format=3 uid="uid://cminotaur_world_enemy"]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/world_enemy.gd" id="1_script"]
+[ext_resource type="Resource" path="res://Data/Enemies/Minotaur_Base.tres" id="2_data"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/minataur.glb" id="3_mesh"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_enemy"]
+height = 2.0
+radius = 0.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_blocker"]
+size = Vector3(1.6, 2.0, 1.6)
+
+[node name="MinotaurWorldEnemy" type="Node3D" groups=["world_enemies"]]
+script = ExtResource("1_script")
+enemy_data = ExtResource("2_data")
+enemy_type = "minotaur"
+model_scale = Vector3(0.18, 0.18, 0.18)
+is_night_only = true
+
+[node name="Model" parent="." instance=ExtResource("3_mesh")]
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_enemy")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_blocker")
