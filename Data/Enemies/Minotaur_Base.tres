@@ -10,6 +10,7 @@ enemy_type = "minotaur"
 enemy_name = "Minotaur"
 model_scene = ExtResource("2_model")
 model_scale = Vector3(0.08, 0.08, 0.08)
+combat_forward_distance = 3.5
 base_level = 4
 max_health = 90
 current_health = 90

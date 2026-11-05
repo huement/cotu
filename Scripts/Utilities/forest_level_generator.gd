@@ -4,7 +4,7 @@ extends EditorScript
 
 func _run() -> void:
 	# --- CONFIGURATION (Edit these values before selecting File -> Run) ---
-	var scene_name: String = "StoneTrail"
+	var scene_name: String = "GloomReach"
 	var include_chests: bool = true
 	var include_minotaurs: bool = true
 
@@ -34,9 +34,6 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 	
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.ambient_light_color = Color(0.62, 1.0, 0.85, 1.0)
-	env.volumetric_fog_enabled = true
-	env.volumetric_fog_albedo = Color(0.38, 0.46, 0.44, 1.0)
-	env.volumetric_fog_emission = Color(0.15, 0.25, 0.25, 1.0)
 	world_env.environment = env
 	root.add_child(world_env)
 
@@ -74,7 +71,7 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 	wall_map.name = "WallMap"
 	wall_map.unique_name_in_owner = true
 	wall_map.mesh_library = wall_mesh_lib
-	wall_map.cell_scale = 2.0
+	wall_map.cell_scale = 2.6
 	wall_map.set_script(replacer_script)
 	root.add_child(wall_map)
 
@@ -90,7 +87,7 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 	var wall_map3 := GridMap.new()
 	wall_map3.name = "WallMap3"
 	wall_map3.mesh_library = wall_mesh_lib
-	wall_map3.cell_scale = 2.0
+	wall_map3.cell_scale = 1.6
 	wall_map3.set_script(replacer_script)
 	if ResourceLoader.exists("res://Scenes/Environment/forest_wall_chunk_thick.tscn"):
 		wall_map3.set("forest_chunk_scene", load("res://Scenes/Environment/forest_wall_chunk_thick.tscn"))

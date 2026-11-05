@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" uid="uid://bjis2vjryj0tq" path="res://Data/Items/health.png" id="1_vsbrs"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_x4djq"]
+
+[resource]
+script = ExtResource("2_x4djq")
+item_id = "pot_group_hp_25"
+item_name = "Group Heal Potion (+25)"
+description = "Mist canister. Restores 25 HP to every conscious party member."
+icon_path = "res://Data/Items/health.png"
+icon = ExtResource("1_vsbrs")
+item_type = 3
+target_type = 1
+credit_value = 150
+is_consumable = true
+heal_amount = 25
+stat_effect = {
+"heal": 25
+}

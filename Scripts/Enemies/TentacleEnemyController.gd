@@ -123,11 +123,8 @@ func _on_body_entered(body: Node) -> void:
 func trigger_combat_encounter() -> void:
 	if _is_in_active_combat:
 		return
-
-	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
-	if is_instance_valid(cm):
-		if cm.get("is_combat_active") or ("is_transitioning_out" in cm and cm.get("is_transitioning_out")):
-			return
+	if is_instance_valid(GameState) and GameState.has_method("can_begin_encounter") and not GameState.can_begin_encounter():
+		return
 
 	if enemy_group.is_empty():
 		_update_enemy_group()

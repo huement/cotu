@@ -201,13 +201,19 @@ func _on_area_entered(area: Area3D) -> void:
 func trigger_combat_encounter() -> void:
 	if _is_in_active_combat or not is_active or not visible:
 		return
-
-	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
-	if is_instance_valid(cm):
-		if cm.get("is_combat_active") or ("is_transitioning_out" in cm and cm.get("is_transitioning_out")):
-			return
+	if is_instance_valid(GameState) and GameState.has_method("can_begin_encounter") and not GameState.can_begin_encounter():
+		return
 
 	_is_in_active_combat = true
+
+	# Turn the party to face this enemy first (battle models appear in front of the camera).
+	await BattleFacing.orient_party(get_tree(), global_position)
+	if not is_inside_tree():
+		return
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	if is_instance_valid(cm) and bool(cm.get("is_combat_active")):
+		_is_in_active_combat = false
+		return
 	hide()
 
 	if enemy_group.is_empty() and is_instance_valid(enemy_data):

@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/RushEnemyController.gd" id="1_rush"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnEnragedAzurian.tres" id="2_data"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
+resource_local_to_scene = true
+size = Vector3(4, 3, 6)
+
+[node name="EnragedAzurian" type="Node3D"]
+script = ExtResource("1_rush")
+enemy_data = ExtResource("2_data")
+
+[node name="ModelPivot" type="Node3D" parent="."]
+
+[node name="TriggerArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 4)
+collision_layer = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TriggerArea"]
+shape = SubResource("BoxShape3D_trigger")

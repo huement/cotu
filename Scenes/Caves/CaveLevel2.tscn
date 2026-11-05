@@ -1,0 +1,157 @@
+[gd_scene load_steps=17 format=3 uid="uid://cxppcruorc0ao"]
+
+[ext_resource type="Script" uid="uid://p07sjcuqjhw7" path="res://Scripts/Environment/CaveLevel.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_init"]
+[ext_resource type="MeshLibrary" uid="uid://ryvsx374wa7r" path="res://resources/mesh_library/cave_floor_mesh_library.tres" id="3_floorlib"]
+[ext_resource type="MeshLibrary" uid="uid://du6r5md5opplr" path="res://resources/mesh_library/cave_wall_mesh_library.tres" id="4_walllib"]
+[ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="5_stairs"]
+[ext_resource type="PackedScene" uid="uid://cltube2ajn7vj" path="res://Scenes/Environment/CryptHole.tscn" id="6_crypt"]
+[ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/Enemies/enemy.tscn" id="7_enemy"]
+[ext_resource type="Resource" uid="uid://w6tvsfi0pypv" path="res://Data/Enemies/EnZombieSavage.tres" id="8_enemydata0"]
+[ext_resource type="Resource" uid="uid://bb7x20wwbb0ou" path="res://Data/Enemies/EnZombieGuard.tres" id="9_enemydata1"]
+[ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="11_cxkmt"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="12_um0pv"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotGroupHp100.tres" id="13_2guag"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotGroupHp50.tres" id="14_13y8d"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotGroupHp25.tres" id="15_c8mx2"]
+[ext_resource type="Script" uid="uid://co7xlukyxktxc" path="res://Scripts/Environment/EditorWorkLight.gd" id="99_editorworklight"]
+
+[sub_resource type="Environment" id="Environment_cave"]
+background_mode = 1
+background_color = Color(0.012, 0.01, 0.014, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.34, 0.27, 0.24, 1)
+ambient_light_energy = 0.9
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.015, 0.012, 0.016, 1)
+fog_density = 1.0
+fog_depth_begin = 6.0
+fog_depth_end = 24.0
+
+[node name="CaveLevel2" type="Node3D"]
+script = ExtResource("1_script")
+level_seed = 2202
+grid_size = Vector2i(28, 28)
+room_count = 8
+enemy_count = 3
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cave")
+
+[node name="EditorWorkLight" type="Node3D" parent="."]
+script = ExtResource("99_editorworklight")
+
+[node name="WorldSceneInitializer" type="Node3D" parent="."]
+script = ExtResource("2_init")
+create_floor = false
+create_ceiling = false
+setup_dark_retro_environment = false
+particle_color = Color(1, 0.88, 0.7, 0.35)
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 39, 0, 13)
+metadata/eye_height = 1.5
+metadata/battle_vertical_offset = -0.5
+
+[node name="ExitArrival" type="Marker3D" parent="."]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 9, 0, 21)
+
+[node name="FloorMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+mesh_library = ExtResource("3_floorlib")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(2, 3, 1048577, 2, 4, 1441792, 2, 9, 1, 2, 10, 1048576, 2, 11, 0, 2, 17, 1441793, 2, 18, 0, 2, 19, 655361, 3, 2, 1048576, 3, 3, 1048576, 3, 4, 1441793, 3, 5, 1441792, 3, 6, 1048576, 3, 8, 1048576, 3, 9, 1048576, 3, 10, 655361, 3, 11, 0, 3, 16, 1441792, 3, 17, 0, 3, 18, 1048577, 3, 19, 0, 3, 20, 1048577, 3, 21, 1048577, 4, 2, 1441792, 4, 3, 655361, 4, 4, 655360, 4, 5, 1441792, 4, 6, 1441793, 4, 7, 655360, 4, 8, 1, 4, 9, 1048576, 4, 10, 655361, 4, 11, 1048576, 4, 12, 1441792, 4, 13, 1048577, 4, 14, 655360, 4, 15, 1048576, 4, 16, 1048576, 4, 17, 655360, 4, 18, 655361, 4, 19, 655360, 4, 20, 0, 4, 21, 655360, 5, 2, 655360, 5, 3, 1048577, 5, 4, 1441792, 5, 16, 1441792, 5, 17, 1048576, 5, 18, 0, 5, 19, 0, 5, 20, 1, 5, 21, 655360, 6, 2, 655360, 6, 3, 1048577, 6, 4, 1048576, 6, 16, 655361, 6, 17, 1048576, 6, 18, 1441792, 6, 19, 1, 6, 20, 655360, 7, 3, 1048576, 7, 18, 1441793, 7, 19, 1441793, 7, 20, 1441792, 8, 3, 655360, 8, 4, 1048576, 8, 5, 655360, 8, 19, 1441793, 8, 20, 655360, 9, 3, 655360, 9, 5, 0, 9, 6, 1048576, 9, 7, 1441792, 9, 9, 1441792, 9, 18, 0, 9, 19, 0, 9, 20, 1048577, 10, 3, 655360, 10, 5, 1048577, 10, 6, 1441792, 10, 7, 1048577, 10, 8, 0, 10, 9, 655361, 10, 17, 655360, 10, 18, 1, 10, 19, 1441793, 10, 20, 0, 10, 21, 655360, 10, 22, 0, 11, 3, 655361, 11, 4, 1441792, 11, 5, 655361, 11, 6, 0, 11, 8, 1441792, 11, 9, 655360, 11, 10, 1441792, 11, 11, 1, 11, 16, 655360, 11, 17, 655360, 11, 18, 655360, 11, 19, 655360, 11, 20, 0, 11, 21, 0, 11, 22, 1048577, 11, 23, 1048576, 12, 5, 1441792, 12, 6, 655361, 12, 7, 0, 12, 8, 1048576, 12, 9, 0, 12, 10, 655361, 12, 11, 1441792, 12, 12, 1441792, 12, 13, 1441793, 12, 14, 1441792, 12, 15, 0, 12, 16, 1441793, 12, 17, 1048577, 12, 18, 1048576, 12, 19, 1048576, 12, 20, 0, 12, 21, 1441792, 12, 22, 1048577, 12, 23, 1441792, 13, 7, 655360, 13, 8, 655361, 13, 9, 655360, 13, 10, 655360, 13, 16, 1048576, 13, 17, 1048577, 13, 18, 655360, 13, 19, 655361, 13, 20, 655360, 13, 21, 1048577, 13, 22, 0, 13, 23, 1441792, 14, 7, 0, 14, 8, 655360, 14, 9, 655361, 14, 10, 1, 14, 11, 0, 14, 12, 1441792, 14, 16, 0, 14, 17, 0, 14, 18, 655360, 14, 19, 1, 14, 20, 0, 14, 21, 1048577, 14, 22, 1441792, 14, 23, 655361, 15, 7, 1441793, 15, 8, 655360, 15, 9, 655360, 15, 10, 655360, 15, 12, 655360, 15, 13, 1441792, 15, 17, 1048576, 15, 18, 1441792, 15, 19, 655360, 15, 20, 655360, 15, 21, 0, 15, 23, 1048576, 15, 24, 1, 16, 8, 1048576, 16, 9, 0, 16, 10, 655360, 16, 11, 0, 16, 12, 0, 16, 13, 1441792, 16, 14, 1048576, 16, 15, 1441792, 16, 23, 0, 17, 9, 1, 17, 10, 655360, 17, 12, 0, 17, 13, 1048577, 17, 15, 0, 17, 16, 1048576, 17, 17, 655361, 17, 18, 0, 17, 23, 1, 18, 6, 1048576, 18, 7, 1441792, 18, 8, 1048576, 18, 9, 655361, 18, 10, 655360, 18, 12, 1, 18, 18, 1441793, 18, 19, 1048576, 18, 21, 0, 18, 23, 1048576, 19, 5, 1048576, 19, 6, 655361, 19, 7, 0, 19, 8, 1048576, 19, 9, 0, 19, 12, 1, 19, 19, 0, 19, 20, 1441792, 19, 21, 1441792, 19, 22, 0, 19, 23, 1441792, 19, 24, 1, 20, 6, 1441792, 20, 7, 1441793, 20, 8, 655360, 20, 9, 1, 20, 12, 1, 20, 19, 1441792, 20, 20, 1048577, 20, 21, 0, 20, 22, 1048577, 20, 23, 655360, 20, 24, 655360, 21, 12, 1048577, 21, 13, 1048576, 21, 14, 655361, 21, 15, 1441792, 21, 18, 1441792, 21, 19, 1, 21, 20, 1, 21, 21, 0, 21, 22, 1048577, 21, 23, 0, 21, 24, 1048576, 22, 11, 1441792, 22, 12, 1048576, 22, 13, 655360, 22, 14, 655360, 22, 15, 1, 22, 16, 655361, 22, 17, 1441792, 22, 18, 1, 22, 22, 1, 22, 23, 1, 22, 24, 1048577, 23, 11, 1441792, 23, 12, 0, 23, 13, 1, 23, 14, 1048577, 23, 15, 655360, 23, 16, 1048577, 23, 17, 1, 23, 18, 1048577, 24, 11, 655360, 24, 12, 655360, 24, 13, 1441793, 24, 14, 655361, 24, 15, 1, 24, 16, 0, 24, 17, 1048577, 25, 12, 655361, 25, 13, 1048576, 25, 14, 655360, 25, 16, 1441792)
+}
+
+[node name="WallMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+mesh_library = ExtResource("4_walllib")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(3, 1, 0, 4, 1, 0, 5, 1, 0, 6, 1, 0, 2, 2, 4, 7, 2, 1441796, 8, 2, 2, 9, 2, 0, 10, 2, 1, 11, 2, 1, 1, 3, 1048576, 12, 3, 1441792, 1, 4, 1048577, 7, 4, 655365, 9, 4, 1441797, 10, 4, 1048581, 12, 4, 1441796, 19, 4, 1, 2, 5, 1048580, 5, 5, 655364, 6, 5, 655360, 7, 5, 1048577, 13, 5, 1441793, 18, 5, 4, 20, 5, 1441796, 2, 6, 1048576, 5, 6, 1441794, 8, 6, 1048580, 13, 6, 1441796, 14, 6, 0, 15, 6, 0, 17, 6, 1048577, 21, 6, 1441792, 3, 7, 1048581, 5, 7, 1441792, 8, 7, 1048576, 11, 7, 6, 16, 7, 1441796, 17, 7, 1048576, 21, 7, 1441794, 2, 8, 4, 5, 8, 1441792, 9, 8, 1048581, 17, 8, 5, 21, 8, 1441793, 1, 9, 1048578, 5, 9, 1441793, 8, 9, 1048578, 21, 9, 1441792, 1, 10, 1048576, 5, 10, 1441793, 9, 10, 655361, 10, 10, 1048580, 19, 10, 655364, 20, 10, 655360, 22, 10, 0, 23, 10, 0, 24, 10, 0, 1, 11, 1048577, 5, 11, 1441792, 10, 11, 1048576, 13, 11, 655365, 15, 11, 6, 17, 11, 1441797, 18, 11, 3, 19, 11, 1, 20, 11, 1, 21, 11, 4, 25, 11, 1441796, 2, 12, 655360, 3, 12, 1048580, 5, 12, 1441794, 11, 12, 1048580, 13, 12, 1048579, 26, 12, 1441793, 3, 13, 1048577, 5, 13, 1441792, 11, 13, 1048578, 13, 13, 1441792, 14, 13, 1048580, 18, 13, 655364, 19, 13, 655361, 20, 13, 1048580, 26, 13, 1441792, 3, 14, 1048578, 5, 14, 1441792, 11, 14, 1048576, 13, 14, 1441793, 15, 14, 1048580, 17, 14, 1441797, 20, 14, 1048577, 26, 14, 1441792, 3, 15, 4, 5, 15, 1441796, 6, 15, 1, 11, 15, 4, 13, 15, 1441796, 14, 15, 0, 15, 15, 1048578, 18, 15, 1441793, 20, 15, 1048577, 25, 15, 1441797, 2, 16, 4, 7, 16, 1441793, 10, 16, 4, 15, 16, 1441796, 16, 16, 1048580, 18, 16, 1441792, 21, 16, 1048580, 26, 16, 1441792, 1, 17, 1048577, 7, 17, 1441796, 9, 17, 4, 16, 17, 1048579, 18, 17, 1441796, 21, 17, 4, 25, 17, 655364, 1, 18, 1048576, 8, 18, 5, 16, 18, 1048579, 19, 18, 1441796, 20, 18, 4, 24, 18, 655364, 1, 19, 1048576, 16, 19, 1441793, 17, 19, 1048580, 22, 19, 655364, 23, 19, 655361, 2, 20, 1048580, 16, 20, 1441794, 18, 20, 1048581, 22, 20, 1441792, 2, 21, 1048576, 6, 21, 655364, 7, 21, 655360, 8, 21, 655360, 9, 21, 1048580, 16, 21, 1441794, 17, 21, 1048578, 22, 21, 1441796, 3, 22, 655360, 4, 22, 655360, 5, 22, 655361, 9, 22, 1048576, 15, 22, 1441797, 16, 22, 2, 17, 22, 1, 18, 22, 1048581, 23, 22, 1441793, 10, 23, 1048580, 23, 23, 1441794, 11, 24, 655360, 12, 24, 655360, 13, 24, 655360, 14, 24, 1048580, 16, 24, 655364, 17, 24, 655361, 18, 24, 1048580, 23, 24, 1441793, 15, 25, 655360, 19, 25, 655361, 20, 25, 655362, 21, 25, 655360, 22, 25, 655361, 4, 18, 1441799, 23, 13, 1441799, 20, 20, 1048583, 12, 9, 1441799)
+}
+
+[node name="EntryStairs" parent="." instance=ExtResource("5_stairs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0, 11)
+prompt_message = "Climb back up to the upper caves?"
+target_scene = "res://Scenes/Caves/CaveLevel1.tscn"
+use_map_manager = true
+arrival_point_name = "ExitArrival"
+object_id = "cave2_entry_stairs"
+snap_to_floor_center = false
+
+[node name="Exit" parent="." instance=ExtResource("6_crypt")]
+transform = Transform3D(0.17, 0, 0, 0, 0.17, 0, 0, 0, 0.17, 7, 0.101, 21)
+target_dungeon_scene = "res://Scenes/Caves/CaveLevel3.tscn"
+prompt_text = "The shaft drops into darkness. Climb down to the deepest caves?"
+object_id = "cave2_crypthole"
+snap_to_floor_center = false
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="EntryLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 3.2, 11)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.4
+omni_range = 7.0
+
+[node name="ExitLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1.2, 21)
+light_color = Color(0.65, 0.35, 1, 1)
+light_energy = 1.6
+omni_range = 6.0
+
+[node name="CrystalLight1" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1.3, 37)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="CrystalLight2" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 1.3, 27)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="CrystalLight3" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41, 1.3, 41)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="CrystalLight4" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 1.3, 19)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy1" parent="Enemies" instance=ExtResource("7_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43, 0, 45)
+data = ExtResource("8_enemydata0")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"
+
+[node name="Enemy2" parent="Enemies" instance=ExtResource("7_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 19)
+data = ExtResource("9_enemydata1")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("7_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37, 0, 39)
+data = ExtResource("8_enemydata0")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"
+
+[node name="Chest" parent="." instance=ExtResource("11_cxkmt")]
+transform = Transform3D(-0.03695771, 0, 0.9993168, 0, 1, 0, -0.9993168, 0, -0.03695771, 42.32549, -0.24, 30.38663)
+guaranteed_items = Array[ExtResource("12_um0pv")]([ExtResource("13_2guag"), ExtResource("14_13y8d"), ExtResource("15_c8mx2"), ExtResource("13_2guag"), ExtResource("14_13y8d")])
+gold_amount = 600

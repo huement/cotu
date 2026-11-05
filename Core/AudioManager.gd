@@ -197,6 +197,19 @@ func play_enemy_death_sound(enemy_type: String = "") -> void:
 	_play_from_folder("Enemies/", file_name)
 
 
+## Plays "Audio/Enemies/<enemy_type>_<action>.mp3" if it exists (e.g. beast_attack, minotaur_attack).
+## Returns false when that enemy type has no sound for the action.
+func play_enemy_action_sound(enemy_type: String, action: String) -> bool:
+	var key: String = enemy_type.to_lower().strip_edges()
+	if key.is_empty():
+		return false
+	var file_path: String = base_audio_dir.path_join("Enemies").path_join("%s_%s.mp3" % [key, action])
+	if not ResourceLoader.exists(file_path):
+		return false
+	_play_stream_from_path(file_path)
+	return true
+
+
 func play_3d_enemy_sound(sound_name: String, world_pos: Vector3) -> void:
 	var file_path: String = base_audio_dir.path_join("Enemies").path_join(sound_name.to_lower() + ".mp3")
 	if ResourceLoader.exists(file_path):
@@ -249,7 +262,9 @@ func _on_combat_ended(victory: bool) -> void:
 		
 	# Delay restarting standard level BGM slightly to allow victory fanfare to play out
 	await get_tree().create_timer(3.0).timeout
-	
+	if _is_in_combat:
+		return # a new battle started during the fanfare - keep its music
+
 	# Resume standard level background music
 	if _current_bgm_request != null:
 		play_bgm(_current_bgm_request)
@@ -348,6 +363,21 @@ func play_environment(sound_name: String) -> void:
 		return
 
 	_play_stream_from_path(full_path)
+
+
+## Plays any AudioStream from an absolute res:// path (oneshot SFX, no BGM loop).
+func play_audio_path(full_path: String) -> void:
+	var clean_path: String = full_path.strip_edges()
+	if clean_path.is_empty():
+		return
+	if not clean_path.begins_with("res://"):
+		clean_path = base_audio_dir.path_join(clean_path)
+	if not clean_path.ends_with(".mp3") and not clean_path.ends_with(".ogg") and not clean_path.ends_with(".wav"):
+		clean_path = clean_path.get_basename() + ".mp3"
+	if not ResourceLoader.exists(clean_path):
+		push_warning("AudioManager: Audio path not found: " + clean_path)
+		return
+	_play_stream_from_path(clean_path)
 
 
 # ==============================================================================

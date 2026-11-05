@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/Enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnBeast.tres" id="2_data"]
+
+[node name="BeastEnemy" instance=ExtResource("1_enemy")]
+data = ExtResource("2_data")
+pack_size = 1
+model_scale = Vector3(0.6, 0.6, 0.6)
+vertical_offset = 0.0
+enemy_type = "beast"

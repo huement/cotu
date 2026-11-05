@@ -13,6 +13,9 @@ extends DungeonInteractable
 
 @export_enum("bad", "good", "none") var aura_type: String = "bad"
 
+## Sound played on inspect (full res:// path). Empty = the mask sound for `aura_type`.
+@export var inspect_sound_path: String = ""
+
 var is_inspected: bool = false
 
 
@@ -39,7 +42,10 @@ func interact(_player: Node3D) -> void:
 	var map_id: String = _get_current_map_id()
 	
 	if is_instance_valid(AudioManager):
-		AudioManager.play_mask_sound(aura_type)
+		if inspect_sound_path.is_empty():
+			AudioManager.play_mask_sound(aura_type)
+		else:
+			AudioManager.play_audio_path(inspect_sound_path)
 		
 	if not is_inspected:
 		is_inspected = true

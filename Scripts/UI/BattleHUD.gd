@@ -32,6 +32,7 @@ const WATER_SLICE_SHADER: Shader = preload("res://Shaders/water_slice.gdshader")
 var _default_slice_material: ShaderMaterial = null
 var _water_slice_material: ShaderMaterial = null
 var _is_water_encounter: bool = false
+var _slice_tween: Tween = null
 
 var portrait_slots: Array[Node] = []
 var _state: CombatState = CombatState.IDLE
@@ -75,8 +76,6 @@ func _ready() -> void:
 	if is_instance_valid(SignalBus):
 		if SignalBus.has_signal(&"screen_slice_requested") and not SignalBus.screen_slice_requested.is_connected(play_screen_slice):
 			SignalBus.screen_slice_requested.connect(play_screen_slice)
-		if SignalBus.has_signal(&"enemy_attack_started") and not SignalBus.enemy_attack_started.is_connected(_on_enemy_attack_started_slice):
-			SignalBus.enemy_attack_started.connect(_on_enemy_attack_started_slice)
 
 
 # ==============================================================================
@@ -667,6 +666,10 @@ func _find_nearest_world_enemy(target_res: Resource) -> Node3D:
 
 
 func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facing: String) -> void:
+	# Built once per battle (the HUD may already be shown by GameState's BATTLE mode).
+	if not _current_enemy_resources.is_empty():
+		show()
+		return
 	show()
 	_reset_state()
 	_bind_action_buttons()
@@ -704,6 +707,40 @@ func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facin
 
 	if is_instance_valid(enemy_hp_label):
 		enemy_hp_label.text = "%d / %d" % [total_max_hp, total_max_hp]
+
+
+## Called by the HUD when CombatManager's watchdog finds this HUD hidden during a battle.
+## Rebuilds it if it was never built for this fight, otherwise just shows it again.
+func recover(enemy_payload: Variant, player_party: Array) -> void:
+	if _current_enemy_resources.is_empty():
+		hide()
+		on_combat_started(enemy_payload, player_party, "")
+	else:
+		show()
+	GameLogger.combat("BATTLE HUD recovered by the combat watchdog.")
+
+
+## Top bar: names and HP of the enemies still standing ("CORRUPTODON (X2) 104/104" ->
+## "CORRUPTODON 52/52" once one dies). Called on every enemy HP change.
+func _refresh_top_header() -> void:
+	var alive: Array[Resource] = []
+	var hp_now: int = 0
+	var hp_max: int = 0
+	for i: int in range(_current_enemy_resources.size()):
+		var e_id: String = "enemy_%d" % i
+		var cur: int = int(_enemy_current_hps.get(e_id, 0))
+		if cur <= 0:
+			continue
+		alive.append(_current_enemy_resources[i])
+		hp_now += cur
+		hp_max += int(_enemy_max_hps.get(e_id, cur))
+	if alive.is_empty():
+		if is_instance_valid(enemy_hp_label):
+			enemy_hp_label.text = "0 / 0"
+		return
+	update_enemy_header_display(alive)
+	if is_instance_valid(enemy_hp_label):
+		enemy_hp_label.text = "%d / %d" % [hp_now, hp_max]
 
 
 func update_enemy_header_display(enemy_pack: Array[Resource]) -> void:
@@ -751,8 +788,7 @@ func _on_enemy_health_changed(enemy_id: String, current_hp: int, max_hp: int) ->
 		total_current += _enemy_current_hps.get(id, 0)
 		total_max += _enemy_max_hps.get(id, 0)
 
-	if is_instance_valid(enemy_hp_label):
-		enemy_hp_label.text = "%d / %d" % [total_current, total_max]
+	_refresh_top_header()
 
 	# Synchronize live HP in open info card row
 	if _info_enemy_rows.has(enemy_id):
@@ -811,10 +847,14 @@ func _on_vfx_animation_finished() -> void:
 func _on_combat_ended(_victory: bool) -> void:
 	hide()
 	_reset_state()
+	_current_enemy_resources.clear()
 	_is_water_encounter = false
 	_is_info_menu_open = false
 	if is_instance_valid(_info_menu_panel):
 		_info_menu_panel.hide()
+	if is_instance_valid(_slice_tween):
+		_slice_tween.kill()
+		_slice_tween = null
 	if is_instance_valid(slice_overlay) and is_instance_valid(_default_slice_material):
 		slice_overlay.material = _default_slice_material
 		_default_slice_material.set_shader_parameter("progress", 0.0)
@@ -873,11 +913,6 @@ func _detect_water_encounter(enemy_pack: Array[Resource]) -> bool:
 	return false
 
 
-func _on_enemy_attack_started_slice(_enemy_id: String) -> void:
-	if _is_water_encounter:
-		play_screen_slice()
-
-
 func play_screen_slice() -> void:
 	if not is_instance_valid(slice_overlay):
 		_setup_slice_overlay()
@@ -891,12 +926,18 @@ func play_screen_slice() -> void:
 	if mat == null:
 		return
 
+	# Restart cleanly: an older slice tween would otherwise keep writing "progress"
+	# and its finished callback would zero out the new slice mid-swipe.
+	if is_instance_valid(_slice_tween):
+		_slice_tween.kill()
+
 	slice_overlay.visible = true
 	slice_overlay.move_to_front()
 	slice_overlay.material = mat
 	mat.set_shader_parameter("progress", 0.0)
 
 	var tween: Tween = create_tween()
+	_slice_tween = tween
 	tween.tween_method(
 		func(value: float) -> void:
 			if is_instance_valid(mat):
@@ -907,6 +948,8 @@ func play_screen_slice() -> void:
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	tween.finished.connect(func() -> void:
+		if _slice_tween == tween:
+			_slice_tween = null
 		if is_instance_valid(mat):
 			mat.set_shader_parameter("progress", 0.0)
 	, CONNECT_ONE_SHOT)

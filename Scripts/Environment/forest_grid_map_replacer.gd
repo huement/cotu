@@ -17,7 +17,8 @@ func _replace_forest_placeholders() -> void:
 		if get_cell_item(cell) == forest_item_id:
 			# Register cell as blocked in MapManager so player movement respects tree walls
 			if is_instance_valid(map_manager):
-				map_manager.register_blocked_tile(cell)
+				# Converts through world space so scaled WallMaps block the right squares
+				map_manager.register_blocked_grid_cell(self, cell)
 
 			var local_pos: Vector3 = map_to_local(cell)
 

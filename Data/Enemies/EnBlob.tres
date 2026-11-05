@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://rmuneiaru3gq"]
 
-[ext_resource type="PackedScene" uid="uid://ct3xw5fgx488s" path="res://resources/Enemies/blob.glb" id="1_uf1iu"]
+[ext_resource type="PackedScene" uid="uid://besprmo44xlo4" path="res://resources/Enemies/blobby.glb" id="1_uf1iu"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_x3utc"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_x3utc")
 enemy_id = "en_blob"
 enemy_type = "fear"
 enemy_name = "Pulsing Sac"
-model_path = "res://resources/Enemies/blob.glb"
+model_path = "res://resources/Enemies/blobby.glb"
 model_scene = ExtResource("1_uf1iu")
 base_level = 3
 max_health = 60
@@ -27,4 +27,3 @@ aggro_range_tiles = 2
 can_be_surprised = false
 xp_value = 150
 gold_value = 0
-drops_loot = false

@@ -1,0 +1,121 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://resources/tile_sets/cave/Textures/colormap.png" id="1_tex"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-wall.glb" id="2_cave_wall"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-wall-b.glb" id="3_cave_wall_b"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-wall-c.glb" id="4_cave_wall_c"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-wall-double.glb" id="5_cave_wall_double"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-wall-corner.glb" id="6_cave_wall_corner"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-wall-end.glb" id="7_cave_wall_end"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-pillar.glb" id="8_cave_pillar"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/cave/cave-crystal-rock.glb" id="9_cave_crystal_rock"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cave"]
+resource_name = "colormap"
+cull_mode = 2
+albedo_texture = ExtResource("1_tex")
+texture_filter = 0
+
+[sub_resource type="BoxShape3D" id="Shape_wall"]
+size = Vector3(2, 4, 2)
+
+[sub_resource type="BoxShape3D" id="Shape_rock"]
+size = Vector3(1.4, 2.6, 1.4)
+
+[node name="CaveWallTiles" type="Node3D"]
+
+[node name="cave-wall" parent="." instance=ExtResource("2_cave_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="cave-wall" parent="cave-wall" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-wall_col" type="StaticBody3D" parent="cave-wall/cave-wall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-wall/cave-wall/cave-wall_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("Shape_wall")
+
+[node name="cave-wall-b" parent="." instance=ExtResource("3_cave_wall_b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+
+[node name="cave-wall-b" parent="cave-wall-b" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-wall-b_col" type="StaticBody3D" parent="cave-wall-b/cave-wall-b"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-wall-b/cave-wall-b/cave-wall-b_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("Shape_wall")
+
+[node name="cave-wall-c" parent="." instance=ExtResource("4_cave_wall_c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0)
+
+[node name="cave-wall-c" parent="cave-wall-c" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-wall-c_col" type="StaticBody3D" parent="cave-wall-c/cave-wall-c"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-wall-c/cave-wall-c/cave-wall-c_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("Shape_wall")
+
+[node name="cave-wall-double" parent="." instance=ExtResource("5_cave_wall_double")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+
+[node name="cave-wall-double" parent="cave-wall-double" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-wall-double_col" type="StaticBody3D" parent="cave-wall-double/cave-wall-double"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-wall-double/cave-wall-double/cave-wall-double_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("Shape_wall")
+
+[node name="cave-wall-corner" parent="." instance=ExtResource("6_cave_wall_corner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
+
+[node name="cave-wall-corner" parent="cave-wall-corner" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-wall-corner_col" type="StaticBody3D" parent="cave-wall-corner/cave-wall-corner"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-wall-corner/cave-wall-corner/cave-wall-corner_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("Shape_wall")
+
+[node name="cave-wall-end" parent="." instance=ExtResource("7_cave_wall_end")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 0)
+
+[node name="cave-wall-end" parent="cave-wall-end" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-wall-end_col" type="StaticBody3D" parent="cave-wall-end/cave-wall-end"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-wall-end/cave-wall-end/cave-wall-end_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("Shape_wall")
+
+[node name="cave-pillar" parent="." instance=ExtResource("8_cave_pillar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+
+[node name="cave-pillar" parent="cave-pillar" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-pillar_col" type="StaticBody3D" parent="cave-pillar/cave-pillar"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-pillar/cave-pillar/cave-pillar_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("Shape_wall")
+
+[node name="cave-crystal-rock" parent="." instance=ExtResource("9_cave_crystal_rock")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 4)
+
+[node name="cave-crystal-rock" parent="cave-crystal-rock" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_cave")
+
+[node name="cave-crystal-rock_col" type="StaticBody3D" parent="cave-crystal-rock/cave-crystal-rock"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="cave-crystal-rock/cave-crystal-rock/cave-crystal-rock_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0)
+shape = SubResource("Shape_rock")

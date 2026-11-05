@@ -1,0 +1,205 @@
+[gd_scene load_steps=21 format=3 uid="uid://pwvrre2qwmwm"]
+
+[ext_resource type="Script" uid="uid://bcvr81rbuqpc2" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_init"]
+[ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="2_n7xw1"]
+[ext_resource type="AudioStream" uid="uid://bpdf50t4880cm" path="res://Audio/Environment/new-area.mp3" id="3_40oa4"]
+[ext_resource type="Script" uid="uid://co7xlukyxktxc" path="res://Scripts/Environment/EditorWorkLight.gd" id="3_worklight"]
+[ext_resource type="MeshLibrary" uid="uid://wkj1vx74cd3c" path="res://resources/mesh_library/nav_blocker_mesh_library.tres" id="4_navlib"]
+[ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="5_stairs"]
+[ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/Enemies/enemy.tscn" id="6_enemy"]
+[ext_resource type="PackedScene" uid="uid://cltube2ajn7vj" path="res://Scenes/Environment/CryptHole.tscn" id="7_crypt"]
+[ext_resource type="PackedScene" uid="uid://dnbdrcp6aris0" path="res://Scenes/Dungeons/Parts/SmallRoom.tscn" id="8_room_SmallRoom"]
+[ext_resource type="PackedScene" uid="uid://bpcdn1khhuu8r" path="res://Scenes/Dungeons/Parts/WideRoom.tscn" id="9_room_WideRoom"]
+[ext_resource type="PackedScene" uid="uid://d057a05vypqup" path="res://Scenes/Dungeons/Parts/LargeRoom.tscn" id="10_room_LargeRoom"]
+[ext_resource type="PackedScene" uid="uid://78xhgif81bl8" path="res://Scenes/Dungeons/Parts/CornerRoom.tscn" id="11_room_CornerRoom"]
+[ext_resource type="PackedScene" uid="uid://bw676kt4vufsx" path="res://resources/tile_sets/dungeon/corridor.glb" id="12_cor_corridor"]
+[ext_resource type="PackedScene" uid="uid://d4lle5jgv2d57" path="res://resources/tile_sets/dungeon/corridor-corner-square.glb" id="13_cor_corridor_corner_square"]
+[ext_resource type="PackedScene" uid="uid://dlrcqecsdj6uy" path="res://resources/tile_sets/dungeon/corridor-end.glb" id="14_cor_corridor_end"]
+[ext_resource type="Resource" uid="uid://bb7x20wwbb0ou" path="res://Data/Enemies/EnZombieGuard.tres" id="17_enemydata0"]
+[ext_resource type="Resource" uid="uid://b3472gtr5bafr" path="res://Data/Enemies/EnZombieKnight.tres" id="18_enemydata1"]
+[ext_resource type="Resource" uid="uid://b5pcgltvaqu3y" path="res://Data/Enemies/EnZombieSaber.tres" id="19_enemydata2"]
+
+[sub_resource type="Environment" id="Environment_dungeon"]
+background_mode = 1
+background_color = Color(0.01, 0.01, 0.015, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.26, 0.27, 0.34, 1)
+ambient_light_energy = 0.9
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.012, 0.012, 0.018, 1)
+fog_density = 1.0
+fog_depth_begin = 8.0
+fog_depth_end = 30.0
+
+[node name="DungeonLevel1_Upper" type="Node3D"]
+script = ExtResource("1_script")
+level_seed = 9000
+room_count = 5
+enemy_count = 5
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_dungeon")
+
+[node name="LevelTitleArea" parent="." instance=ExtResource("2_n7xw1")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 6.7458744, 0.856941, -2.862204)
+level_title = "Gloom
+Dungeon
+"
+trigger_sound = ExtResource("3_40oa4")
+
+[node name="EditorWorkLight" type="Node3D" parent="."]
+script = ExtResource("3_worklight")
+
+[node name="WorldSceneInitializer" type="Node3D" parent="."]
+script = ExtResource("2_init")
+create_floor = false
+create_ceiling = false
+setup_dark_retro_environment = false
+particle_color = Color(0.85, 0.85, 1, 0.3)
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 5, 0, 3)
+metadata/eye_height = 1.5
+metadata/battle_vertical_offset = -0.5
+
+[node name="FloorMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+cell_center_y = false
+
+[node name="WallMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+visible = false
+mesh_library = ExtResource("4_navlib")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(65534, 65528, 0, 65534, 65530, 0, 65535, 65528, 0, 65535, 65530, 0, 0, 65528, 0, 0, 65530, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 1, 2, 0, 2, 65534, 0, 2, 65535, 0, 2, 0, 0, 2, 2, 0, 3, 2, 0, 4, 65534, 0, 4, 65535, 0, 4, 0, 0, 4, 1, 0, 4, 2, 0, 10, 65510, 0, 10, 65511, 0, 10, 65512, 0, 10, 65513, 0, 10, 65514, 0, 10, 65520, 0, 10, 65521, 0, 10, 65522, 0, 10, 65523, 0, 10, 65524, 0, 11, 65510, 0, 12, 65510, 0, 12, 65511, 0, 12, 65512, 0, 12, 65513, 0, 12, 65514, 0, 12, 65520, 0, 12, 65521, 0, 12, 65522, 0, 12, 65523, 0, 12, 65524, 0)
+}
+
+[node name="Rooms" type="Node3D" parent="."]
+
+[node name="Room1_WideRoom" parent="Rooms" instance=ExtResource("9_room_WideRoom")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, -13)
+removed_nodes = PackedStringArray("Environment/Stones2", "Environment/Stones4", "Environment/Banner1", "Environment/WallArt2", "Environment/WallArt3")
+id_prefix = "dungeonlevel1_upper_room1_wideroom"
+
+[node name="Room2_CornerRoom" parent="Rooms" instance=ExtResource("11_room_CornerRoom")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -9, 0, -13)
+open_doors = 1
+removed_nodes = PackedStringArray("Banner1", "Stones1")
+id_prefix = "dungeonlevel1_upper_room2_cornerroom"
+
+[node name="Room3_LargeRoom" parent="Rooms" instance=ExtResource("10_room_LargeRoom")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 23, 0, -13)
+open_doors = 3
+id_prefix = "dungeonlevel1_upper_room3_largeroom"
+
+[node name="Room4_SmallRoom" parent="Rooms" instance=ExtResource("8_room_SmallRoom")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0, -37)
+open_doors = 5
+removed_nodes = PackedStringArray("Banner1", "Rug1", "Stones1")
+id_prefix = "dungeonlevel1_upper_room4_smallroom"
+
+[node name="Room5_SmallRoom" parent="Rooms" instance=ExtResource("8_room_SmallRoom")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, -29)
+open_doors = 2
+removed_nodes = PackedStringArray("Stones1")
+id_prefix = "dungeonlevel1_upper_room5_smallroom"
+
+[node name="Corridors" type="Node3D" parent="."]
+
+[node name="Corridor1" parent="Corridors" instance=ExtResource("12_cor_corridor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -13)
+
+[node name="Corridor2" parent="Corridors" instance=ExtResource("14_cor_corridor_end")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3)
+
+[node name="Corridor3" parent="Corridors" instance=ExtResource("12_cor_corridor")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7, 0, -1)
+
+[node name="Corridor4" parent="Corridors" instance=ExtResource("13_cor_corridor_corner_square")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 3)
+
+[node name="Corridor5" parent="Corridors" instance=ExtResource("14_cor_corridor_end")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 23, 0, -49)
+
+[node name="Corridor6" parent="Corridors" instance=ExtResource("12_cor_corridor")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 23, 0, -45)
+
+[node name="Corridor7" parent="Corridors" instance=ExtResource("12_cor_corridor")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 23, 0, -29)
+
+[node name="Corridor8" parent="Corridors" instance=ExtResource("12_cor_corridor")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 23, 0, -25)
+
+[node name="EntryStairs" parent="." instance=ExtResource("5_stairs")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 3, 0, 3)
+prompt_message = "Climb the stairs back up to Gloom Reach?"
+target_scene = "res://Scenes/GloomReach.tscn"
+use_map_manager = true
+arrival_point_name = "DungeonExitArrival"
+object_id = "dungeonlevel1_upper_entry_stairs"
+snap_to_floor_center = false
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="EntryLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3.2, 3)
+light_color = Color(1, 0.8, 0.55, 1)
+light_energy = 1.4
+omni_range = 8.0
+
+[node name="ExitLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.2, -49)
+light_color = Color(0.65, 0.35, 1, 1)
+light_energy = 1.6
+omni_range = 6.0
+
+[node name="ExitArrival" type="Marker3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 23, 0, -47)
+
+[node name="Exit" parent="." instance=ExtResource("7_crypt")]
+transform = Transform3D(0.17, 0, 0, 0, 0.17, 0, 0, 0, 0.17, 23, 0.101, -49)
+target_dungeon_scene = "res://Scenes/Dungeons/DungeonLevel1.tscn"
+prompt_text = "A dark shaft drops away beneath a loose slab. Climb down to the floor below?"
+object_id = "dungeonlevel1_upper_crypthole"
+snap_to_floor_center = false
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy1" parent="Enemies" instance=ExtResource("6_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, -15)
+data = ExtResource("17_enemydata0")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"
+
+[node name="Enemy2" parent="Enemies" instance=ExtResource("6_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -11)
+data = ExtResource("18_enemydata1")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("6_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -7)
+data = ExtResource("19_enemydata2")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"
+
+[node name="Enemy4" parent="Enemies" instance=ExtResource("6_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, -35)
+data = ExtResource("17_enemydata0")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"
+
+[node name="Enemy5" parent="Enemies" instance=ExtResource("6_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -15)
+data = ExtResource("18_enemydata1")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "zombie"

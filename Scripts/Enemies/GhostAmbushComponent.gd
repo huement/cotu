@@ -169,7 +169,7 @@ func _process_ambush_cooldown(delta: float) -> void:
 
 
 func _trigger_ambush() -> void:
-	if GameState.post_combat_immunity_timer > 0.0:
+	if is_instance_valid(GameState) and GameState.has_method("can_begin_encounter") and not GameState.can_begin_encounter():
 		_ambush_interval_timer = get_next_ambush_interval()
 		return
 

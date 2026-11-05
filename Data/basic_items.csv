@@ -1,4 +1,4 @@
-item_id,item_name,item_type,equip_slot,attack_bonus,defense_bonus,speed_bonus,heal_amount,energy_restore,credit_value,description,icon_path,effects,effect_amount,effect_element,effect_stat,weapon_type,is_consumable
+item_id,item_name,item_type,equip_slot,attack_bonus,defense_bonus,speed_bonus,heal_amount,energy_restore,credit_value,description,icon_path,effects,effect_amount,effect_element,effect_stat,weapon_type,is_consumable,attack_vfx,target_type
 weap_laser_claw,Laser Claw,WEAPON,RIGHT_HAND,8,0,2,0,0,150,A high-frequency energy claw standard among L.E.O. hazard cleaners.,res://Data/Items/claws.png,,,,,BLADE,FALSE
 weap_mono_katana,Mono-Katana,WEAPON,RIGHT_HAND,14,0,0,0,0,320,Molecularly sharpened blade capable of slicing rogue server racks.,res://Data/Items/katana.png,,,,,BLADE,FALSE
 armor_power_suit,Exo Power Suit,ARMOR,BODY,0,6,-1,0,0,250,Heavy-duty hazard protection plating.,res://Data/Items/gauntlet.png,+4 defense against RANGED,4,RANGED,defense,,FALSE
@@ -197,3 +197,6 @@ pot_mana_50,Mana Potion (+50),POTION,NONE,0,0,0,0,50,100,+50 MANA RESTORE,res://
 pot_mana_100,Mana Potion (+100),POTION,NONE,0,0,0,0,100,200,+100 MANA RESTORE,res://Data/Items/health.png,,,,,,TRUE
 pot_mana_full,Mana Potion (Full),POTION,NONE,0,0,0,0,100000,500,FULL MANA RESTORE,res://Data/Items/health.png,,,,,,TRUE
 pot_revive,Revive Potion,POTION,NONE,0,0,0,0,0,1000,Revive Downed Ally,res://Data/Items/health.png,Revive Downed Ally,1,LIFE,life,,TRUE
+pot_group_hp_25,Group Heal Potion (+25),POTION,NONE,0,0,0,25,0,150,Mist canister. Restores 25 HP to every conscious party member.,res://Data/Items/health.png,,,,,,TRUE,,ALL_PARTY
+pot_group_hp_50,Group Heal Potion (+50),POTION,NONE,0,0,0,50,0,300,Mist canister. Restores 50 HP to every conscious party member.,res://Data/Items/health.png,,,,,,TRUE,,ALL_PARTY
+pot_group_hp_100,Group Heal Potion (+100),POTION,NONE,0,0,0,100,0,600,Mist canister. Restores 100 HP to every conscious party member.,res://Data/Items/health.png,,,,,,TRUE,,ALL_PARTY

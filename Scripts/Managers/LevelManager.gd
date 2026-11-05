@@ -26,7 +26,7 @@ static func level_player(cat: Resource, options: Dictionary = {}) -> bool:
 			cat.set(stat_name, old_val + points_to_add)
 			print("LevelManager: %s +%d -> %d" % [stat_name.capitalize(), points_to_add, old_val + points_to_add])
 
-	# 3. Recalculate Derived Stats (Max HP & Max MP)
+	# 3. Recalculate Derived Stats (Max HP & Max MP/Energy)
 	var vit: int = int(cat.get("vitality")) if "vitality" in cat else (int(cat.get("vit")) if "vit" in cat else 10)
 	var int_stat: int = int(cat.get("intelligence")) if "intelligence" in cat else 10
 	var pie: int = int(cat.get("piety")) if "piety" in cat else 10
@@ -40,16 +40,31 @@ static func level_player(cat: Resource, options: Dictionary = {}) -> bool:
 	# Restore HP on Level Up
 	cat.set("current_hp", new_max_hp)
 
-	# Formula: Base MP + (INT/PIE scaling)
-	var old_max_mp: int = int(cat.get("max_mp")) if "max_mp" in cat else 10
+	# Formula: Base MP + (INT/PIE scaling). CatCharacter stores this as max_energy.
+	var old_max_mp: int = 10
+	if "max_mp" in cat:
+		old_max_mp = int(cat.get("max_mp"))
+	elif "max_energy" in cat:
+		old_max_mp = int(cat.get("max_energy"))
+	elif "max_mana" in cat:
+		old_max_mp = int(cat.get("max_mana"))
+
 	var mp_gain: int = 3 + int((int_stat + pie) * 0.75)
 	var new_max_mp: int = old_max_mp + mp_gain
-	cat.set("max_mp", new_max_mp)
-	
+
+	if "max_mp" in cat:
+		cat.set("max_mp", new_max_mp)
+	if "max_energy" in cat:
+		cat.set("max_energy", new_max_mp)
+	if "max_mana" in cat:
+		cat.set("max_mana", new_max_mp)
+
 	if "current_mp" in cat:
 		cat.set("current_mp", new_max_mp)
 	elif "current_mana" in cat:
 		cat.set("current_mana", new_max_mp)
+	elif "current_energy" in cat:
+		cat.set("current_energy", new_max_mp)
 
 	# 4. Compute Next Level XP Threshold
 	# Formula: 100 * (Level ^ 1.5)
@@ -68,14 +83,16 @@ static func level_player(cat: Resource, options: Dictionary = {}) -> bool:
 		cat_name, new_lvl, new_max_hp, hp_gain, new_max_mp, mp_gain, next_max_xp
 	])
 
-	# 5. Notify Global System & Save Progress
+	# 5. Notify Global System & Save Progress (skippable for batch tooling)
+	var notify_ui: bool = bool(options.get("notify_ui", true))
+	var persist_save: bool = bool(options.get("persist_save", true))
 	var tree := Engine.get_main_loop() as SceneTree
-	if is_instance_valid(tree) and tree.root.has_node("SignalBus"):
+	if notify_ui and is_instance_valid(tree) and tree.root.has_node("SignalBus"):
 		var sb: Node = tree.root.get_node("SignalBus")
 		if sb.has_signal("show_toast"):
 			sb.emit_signal("show_toast", "🌟 %s Leveled Up to Lvl %d!" % [cat_name, new_lvl], false)
 
-	if is_instance_valid(tree) and tree.root.has_node("GameState"):
+	if persist_save and is_instance_valid(tree) and tree.root.has_node("GameState"):
 		var gs: Node = tree.root.get_node("GameState")
 		if gs.has_method("save_game"):
 			gs.call("save_game")

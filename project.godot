@@ -23,6 +23,7 @@ CombatManager="*res://Scripts/Managers/CombatManager.gd"
 GameLogger="*res://Core/GameLogger.gd"
 TargetSelectionManager="*res://Scripts/Managers/TargetSelectionManager.gd"
 AudioManager="*res://Core/AudioManager.gd"
+LoreManager="*res://Scripts/Singletons/LoreManager.gd"
 
 [editor_plugins]
 

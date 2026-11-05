@@ -144,18 +144,20 @@ func _execute_all_party_use() -> void:
 		SignalBus.player_action_selected.emit(_acting_party_slot, &"ITEM", -1)
 	else:
 		var gs: Node = get_tree().root.get_node_or_null("GameState")
-		if is_instance_valid(gs) and "current_party" in gs and gs.current_party:
+		if is_instance_valid(gs) and "current_party" in gs and gs.current_party and "inventory" in gs and gs.inventory != null:
+			# One item, applied to everyone (consumes a single potion)
 			var party_slots: Array = gs.current_party.get("slots") as Array
-			for idx: int in range(party_slots.size()):
-				var cat: Resource = party_slots[idx] as Resource
-				if is_instance_valid(cat) and "inventory" in gs and gs.inventory != null:
-					var success: bool = gs.inventory.use_item(_pending_slot_index, cat)
-					GameLogger.info("TargetSelectionManager: All-party item use on slot %d success = %s" % [idx, str(success)])
-					if success:
-						if cat.get("current_hp") != null:
-							SignalBus.character_health_changed.emit(idx, cat.get("current_hp"))
-						if cat.get("current_energy") != null:
-							SignalBus.character_mana_changed.emit(idx, cat.get("current_energy"))
+			var success: bool = gs.inventory.use_item_on_targets(_pending_slot_index, party_slots)
+			GameLogger.info("TargetSelectionManager: All-party item use success = %s" % str(success))
+			if success:
+				for idx: int in range(party_slots.size()):
+					var cat: Resource = party_slots[idx] as Resource
+					if not is_instance_valid(cat):
+						continue
+					if cat.get("current_hp") != null:
+						SignalBus.character_health_changed.emit(idx, cat.get("current_hp"))
+					if cat.get("current_energy") != null:
+						SignalBus.character_mana_changed.emit(idx, cat.get("current_energy"), cat.get("max_energy") if cat.get("max_energy") != null else 0)
 	_reset_selection_state()
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://dqkr2j65k83yc"]
+[gd_scene load_steps=27 format=3 uid="uid://dqkr2j65k83yc"]
 
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_cn5rm"]
 [ext_resource type="Texture2D" uid="uid://dn0f5ac8pbppq" path="res://ui/HUD/sidebar.png" id="2_ako3u"]
@@ -22,6 +22,7 @@
 [ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="19_ralih"]
 [ext_resource type="Texture2D" uid="uid://be14sjxl48syt" path="res://ui/HUD/edge_vignette.png" id="20_p5q14"]
 [ext_resource type="FontFile" uid="uid://cx1vfygfe1ymt" path="res://ui/fonts/RedditMono-Bold.ttf" id="21_khvou"]
+[ext_resource type="Shader" uid="uid://ddae7co6523v3" path="res://Shaders/screen_slice.gdshader" id="23_55bpt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r0ikl"]
 shader = ExtResource("15_u1rxn")
@@ -33,6 +34,13 @@ shader_parameter/vignette_intensity = 0.150000007125
 [sub_resource type="Environment" id="Environment_r0ikl"]
 background_mode = 1
 background_color = Color(0.050980393, 0.06666667, 0.09019608, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yd1yt"]
+shader = ExtResource("23_55bpt")
+shader_parameter/progress = 0.0
+shader_parameter/line_width = 0.10000000405148
+shader_parameter/line_color = Color(0.9041508, 0, 0.075268306, 1)
+shader_parameter/glow_color = Color(0.9983018, 0.48437268, 0.44557494, 0.8)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_cn5rm")
@@ -298,3 +306,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("20_p5q14")
+
+[node name="SliceOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+z_index = 128
+material = SubResource("ShaderMaterial_yd1yt")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

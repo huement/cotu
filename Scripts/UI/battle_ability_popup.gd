@@ -629,28 +629,8 @@ func _confirm_and_emit_action() -> void:
 
 	var action_type: StringName = &"SKILL" if _current_tab == AbilityTab.SKILLS else &"SPELL"
 
-	var cost_val: int = 0
-	if "energy_cost" in _selected_ability:
-		cost_val = int(_selected_ability.get("energy_cost"))
-	elif "mana_cost" in _selected_ability:
-		cost_val = int(_selected_ability.get("mana_cost"))
-	elif "mp_cost" in _selected_ability:
-		cost_val = int(_selected_ability.get("mp_cost"))
-
-	if is_instance_valid(_active_cat):
-		var new_val: int = 0
-		if "current_energy" in _active_cat:
-			new_val = max(0, int(_active_cat.get("current_energy")) - cost_val)
-			_active_cat.set("current_energy", new_val)
-		elif "current_mp" in _active_cat:
-			new_val = max(0, int(_active_cat.get("current_mp")) - cost_val)
-			_active_cat.set("current_mp", new_val)
-		elif "current_mana" in _active_cat:
-			new_val = max(0, int(_active_cat.get("current_mana")) - cost_val)
-			_active_cat.set("current_mana", new_val)
-
-		if get_tree().root.has_node("SignalBus"):
-			SignalBus.character_mana_changed.emit(_active_slot_index, new_val)
+	# Mana is spent by CombatManager when the ability actually resolves
+	# (so it is never charged twice, or charged for a cast that fails).
 
 	var target_mgr: Node = get_tree().root.get_node_or_null("TargetSelectionManager")
 	if is_instance_valid(target_mgr) and target_mgr.has_method("set_pending_ability"):

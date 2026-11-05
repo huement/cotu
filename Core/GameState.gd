@@ -33,11 +33,52 @@ var current_mode: Mode = Mode.EXPLORING:
 			
 var active_character_index: int = 0
 var post_combat_immunity_timer: float = 0.0
+var encounter_lock_timer: float = 0.0
+
+## Seconds after ANY battle ends before another can start (also covers fleeing and defeat).
+const POST_BATTLE_COOLDOWN: float = 5.0
+## Extra immunity once the victory screen is closed (enemies may have walked up meanwhile).
+const POST_VICTORY_SCREEN_COOLDOWN: float = 3.0
+## Failsafe: never block encounters longer than this waiting for the victory screen.
+const VICTORY_SCREEN_MAX_WAIT: float = 120.0
+
+## True between a won battle and the player closing the victory screen. No new fights meanwhile.
+var awaiting_victory_screen: bool = false
+var _victory_screen_wait: float = 0.0
 
 
 func _process(delta: float) -> void:
 	if post_combat_immunity_timer > 0.0:
 		post_combat_immunity_timer -= delta
+	if encounter_lock_timer > 0.0:
+		encounter_lock_timer -= delta
+	if awaiting_victory_screen:
+		_victory_screen_wait += delta
+		if _victory_screen_wait >= VICTORY_SCREEN_MAX_WAIT:
+			push_warning("GameState: victory screen never closed - unblocking encounters.")
+			awaiting_victory_screen = false
+
+
+func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array, _enemy_facing: String) -> void:
+	awaiting_victory_screen = false
+	current_mode = Mode.BATTLE
+
+
+func _on_combat_ended(victory: bool) -> void:
+	start_post_combat_immunity(POST_BATTLE_COOLDOWN)
+	if victory:
+		awaiting_victory_screen = true
+		_victory_screen_wait = 0.0
+	else:
+		current_mode = Mode.EXPLORING
+
+
+## True while a battle is running or its victory screen is still open: enemies hold still.
+func is_battle_in_progress() -> bool:
+	if awaiting_victory_screen:
+		return true
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	return is_instance_valid(cm) and (bool(cm.get("is_combat_active")) or bool(cm.get("is_transitioning_out")))
 
 
 func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> void:
@@ -46,8 +87,12 @@ func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> voi
 		# Now that the player has dismissed the victory screen, return to the
 		# normal exploration state and start a brief post-combat immunity period
 		# to prevent instant re-engagement from lurking enemies.
-		current_mode = Mode.EXPLORING
-		start_post_combat_immunity(5.0)
+		awaiting_victory_screen = false
+		var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+		var fighting: bool = is_instance_valid(cm) and bool(cm.get("is_combat_active"))
+		if not fighting: # never drop out of BATTLE mode (hides the battle HUD) mid-fight
+			current_mode = Mode.EXPLORING
+			start_post_combat_immunity(POST_VICTORY_SCREEN_COOLDOWN)
 	elif action_type == &"REST":
 		_process_party_rest(extra_data)
 
@@ -55,6 +100,24 @@ func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> voi
 func start_post_combat_immunity(duration: float) -> void:
 	post_combat_immunity_timer = max(post_combat_immunity_timer, duration)
 	print("[GameState] 🛡️ Post-combat immunity initiated for %.1f seconds." % post_combat_immunity_timer)
+
+
+func lock_encounters(duration: float) -> void:
+	encounter_lock_timer = max(encounter_lock_timer, duration)
+
+
+func clear_encounter_lock() -> void:
+	encounter_lock_timer = 0.0
+
+
+func can_begin_encounter() -> bool:
+	if encounter_lock_timer > 0.0 or post_combat_immunity_timer > 0.0 or awaiting_victory_screen:
+		return false
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	if is_instance_valid(cm):
+		if bool(cm.get("is_combat_active")) or bool(cm.get("is_transitioning_out")):
+			return false
+	return true
 
 
 func get_active_cat() -> Resource:
@@ -71,6 +134,9 @@ func _ready() -> void:
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 	if sb and sb.has_signal("popup_confirmed"):
 		sb.popup_confirmed.connect(_on_popup_confirmed)
+	if sb and sb.has_signal("combat_started"):
+		sb.combat_started.connect(_on_combat_started)
+		sb.combat_ended.connect(_on_combat_ended)
 
 
 func _award_victory_xp(victory_data: Dictionary) -> void:
@@ -116,6 +182,7 @@ func _load_default_save() -> void:
 		if default_save != null and default_save.party != null:
 			current_party = default_save.party.duplicate(true) as DungeonParty
 			inventory = default_save.inventory.duplicate(true) as Inventory if default_save.inventory != null else Inventory.new()
+			inventory.normalize_stacks()
 			current_floor_id = default_save.current_floor_id
 			if "party_gold" in default_save:
 				party_gold = default_save.party_gold
@@ -162,6 +229,7 @@ func load_game() -> bool:
 
 	current_party = save.party
 	inventory = save.inventory if save.inventory != null else Inventory.new()
+	inventory.normalize_stacks() # Older saves stored one entry per potion
 	current_floor_id = save.current_floor_id
 	if "party_gold" in save:
 		party_gold = save.party_gold

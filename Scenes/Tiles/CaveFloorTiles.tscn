@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://cc4ivbownci2t"]
+
+[ext_resource type="PackedScene" uid="uid://dy0ev2vddrqgw" path="res://resources/tile_sets/cave/cave-floor.glb" id="2_cave_floor"]
+[ext_resource type="PackedScene" uid="uid://cw2ksjpq4dqla" path="res://resources/tile_sets/cave/cave-floor-detail.glb" id="3_cave_floor_detail"]
+[ext_resource type="PackedScene" uid="uid://bygeu6xjq5drs" path="res://resources/tile_sets/cave/cave-floor-concrete.glb" id="5_cave_floor_concrete"]
+
+[node name="CaveFloorTiles" type="Node3D"]
+
+[node name="cave-floor" parent="." instance=ExtResource("2_cave_floor")]
+
+[node name="cave-floor-detail" parent="." instance=ExtResource("3_cave_floor_detail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+
+[node name="cave-floor-concrete" parent="." instance=ExtResource("5_cave_floor_concrete")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.9634047, 0, 0)

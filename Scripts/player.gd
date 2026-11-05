@@ -45,7 +45,7 @@ var current_grid_pos: Vector2i = Vector2i.ZERO
 var current_facing: Facing = Facing.NORTH
 var is_moving: bool = false
 var _is_in_combat: bool = false
-
+var is_movement_locked: bool = false
 var _last_proximity_tier: int = 0
 
 func _ready() -> void:
@@ -77,10 +77,11 @@ func _initialize_player() -> void:
 	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	if not grid_map:
 		grid_map = world_root.get_node_or_null("FloorMap") as GridMap
-	if not grid_map and map_manager and is_instance_valid(map_manager.dungeon_grid):
-		grid_map = map_manager.dungeon_grid
+	# Movement grid = the map's FloorMap (2 m cells) when it has one; wall layers may be scaled
 	if not grid_map and map_manager and is_instance_valid(map_manager.floor_grid):
 		grid_map = map_manager.floor_grid
+	if not grid_map and map_manager and is_instance_valid(map_manager.dungeon_grid):
+		grid_map = map_manager.dungeon_grid
 	if not grid_map and map_manager and is_instance_valid(map_manager.active_map_instance):
 		var active_map: Node3D = map_manager.active_map_instance
 		if active_map is GridMap:
@@ -167,9 +168,10 @@ func _physics_process(_delta: float) -> void:
 # MOVEMENT & INPUT HANDLING MAIN
 # ==============================================================================
 func _input(event: InputEvent) -> void:
-	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
+	# 🛑 LOCKOUT GUARD: Block movement while in combat, moving, or explicitly locked
+	if _is_in_combat or is_movement_locked or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
-
+		
 	# Ignore OS auto-repeat key echo events
 	if event.is_echo():
 		return
@@ -269,7 +271,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				if map_manager:
 					var testbed_scene: PackedScene = load("res://Scenes/dungeon_testbed.tscn")
 					map_manager.switch_map_from_resource(testbed_scene)
-					grid_map = map_manager.dungeon_grid
+					grid_map = map_manager.get_nav_grid()
 					print("Map swapped to Testbed!")
 			KEY_T: # Press 'T' to test FIRE VFX & Shake
 				SignalBus.camera_shake_requested.emit(0.5)
@@ -445,7 +447,10 @@ func _is_cell_blocked(grid_pos: Vector3i) -> bool:
 	if map_manager and map_manager.is_tile_blocked(grid_pos):
 		return true
 
-	if is_instance_valid(grid_map):
+	# Only a combined floor+wall GridMap (dungeon style) blocks by "any tile here".
+	# On FloorMap-based maps every floor cell has a tile, so walls come from MapManager.
+	var grid_is_walls: bool = not map_manager or grid_map == map_manager.dungeon_grid
+	if is_instance_valid(grid_map) and grid_is_walls:
 		var item_index: int = grid_map.get_cell_item(grid_pos)
 		if item_index != GridMap.INVALID_CELL_ITEM:
 			return true
@@ -741,3 +746,27 @@ func refresh_for_new_map() -> void:
 	var grid_comp: Node = get_node_or_null("%GridMovementComponent")
 	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
 		grid_comp.set("current_grid_pos", current_grid_pos)
+
+
+## Instantly moves the party to the floor cell under `world_pos` and turns to face
+## `look_at_world` (snapped to the nearest of N/E/S/W). Used by scripted events (boss statue).
+func teleport_to(world_pos: Vector3, look_at_world: Vector3 = Vector3.INF) -> void:
+	current_grid_pos = _world_to_cell(world_pos)
+	if look_at_world != Vector3.INF:
+		var dir: Vector3 = look_at_world - _cell_to_world(current_grid_pos)
+		if Vector2(dir.x, dir.z).length_squared() > 0.0001:
+			current_facing = _angle_to_facing(rad_to_deg(atan2(-dir.x, -dir.z)))
+	is_moving = false
+	_apply_canonical_transform()
+	var grid_comp: Node = get_node_or_null("%GridMovementComponent")
+	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
+		grid_comp.set("current_grid_pos", current_grid_pos)
+	SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+
+func set_movement_locked(locked: bool) -> void:
+	is_movement_locked = locked
+
+
+func is_locked() -> bool:
+	return _is_in_combat or is_moving or is_movement_locked

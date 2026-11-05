@@ -11,4 +11,6 @@ addons/asset_placer
 addons/go_placer
 addons/ScatterShot
 
+_backup**/*
+
 CLAUDE.md

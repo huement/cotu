@@ -99,11 +99,8 @@ func _cell_to_world(cell: Vector2i) -> Vector3:
 	if not is_instance_valid(map_mgr):
 		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
-	if is_instance_valid(map_mgr) and "dungeon_grid" in map_mgr and is_instance_valid(map_mgr.dungeon_grid):
-		var grid: GridMap = map_mgr.dungeon_grid as GridMap
-		var cell_3d := Vector3i(cell.x, 0, cell.y)
-		var local_pos: Vector3 = grid.map_to_local(cell_3d)
-		var global_pos: Vector3 = grid.to_global(local_pos)
+	if is_instance_valid(map_mgr) and map_mgr.has_method("nav_cell_to_world") and is_instance_valid(map_mgr.get_nav_grid()):
+		var global_pos: Vector3 = map_mgr.nav_cell_to_world(Vector3i(cell.x, 0, cell.y))
 		return Vector3(global_pos.x, global_pos.y + vertical_offset, global_pos.z)
 	
 	return Vector3(cell.x * 2.0 + 1.0, vertical_offset, cell.y * 2.0 + 1.0)
@@ -152,7 +149,12 @@ func _setup_enemy_group() -> void:
 					dup.set("custom_material", template.get("custom_material"))
 				if "texture_path" in template and not str(template.get("texture_path")).is_empty():
 					dup.set("texture_path", template.get("texture_path"))
-				
+				# Battle model is never smaller than the one walking around the map.
+				if "model_scale" in dup:
+					var data_scale: Vector3 = dup.get("model_scale") as Vector3
+					if model_scale.x > data_scale.x:
+						dup.set("model_scale", model_scale)
+
 				enemy_group.append(dup)
 
 
@@ -162,8 +164,8 @@ func _align_to_grid() -> void:
 		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
 	var grid: GridMap = null
-	if is_instance_valid(map_mgr) and "dungeon_grid" in map_mgr and is_instance_valid(map_mgr.dungeon_grid):
-		grid = map_mgr.dungeon_grid as GridMap
+	if is_instance_valid(map_mgr) and map_mgr.has_method("get_nav_grid"):
+		grid = map_mgr.get_nav_grid()
 
 	if initial_cell != Vector2i.ZERO:
 		_grid_position = initial_cell
@@ -250,6 +252,9 @@ func _apply_material_override_recursive(node: Node, mat: Material) -> void:
 # ==============================================================================
 func _process(delta: float) -> void:
 	if not _is_initialized or _is_in_active_combat or enemy_data == null or _is_moving:
+		return
+	# Hold still while any battle (or its victory screen) is on.
+	if is_instance_valid(GameState) and GameState.has_method("is_battle_in_progress") and GameState.is_battle_in_progress():
 		return
 
 	var step_interval: float = maxf(0.5, enemy_data.movement_speed)
@@ -468,12 +473,8 @@ func _get_ambush_component() -> GhostAmbushComponent:
 func trigger_combat_encounter() -> void:
 	if _is_in_active_combat:
 		return
-
-	# Prevent triggering a new battle if the Combat Manager is busy
-	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
-	if is_instance_valid(cm):
-		if cm.get("is_combat_active") or ("is_transitioning_out" in cm and cm.get("is_transitioning_out")):
-			return
+	if is_instance_valid(GameState) and GameState.has_method("can_begin_encounter") and not GameState.can_begin_encounter():
+		return
 
 	# 👻 GHOST AMBUSH GUARD: If this enemy is an ambush ghost, block direct combat unless the ambush failed
 	var ambush_comp: GhostAmbushComponent = _get_ambush_component()
@@ -482,6 +483,15 @@ func trigger_combat_encounter() -> void:
 		return
 
 	_is_in_active_combat = true
+
+	# Turn the party to face this enemy first (battle models appear in front of the camera).
+	await BattleFacing.orient_party(get_tree(), global_position)
+	if not is_inside_tree():
+		return
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	if is_instance_valid(cm) and bool(cm.get("is_combat_active")):
+		_is_in_active_combat = false # another fight started while we turned
+		return
 	hide()
 
 	if is_instance_valid(GameLogger):

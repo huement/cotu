@@ -1,0 +1,95 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" uid="uid://j28iufrfn4eb" path="res://resources/tile_sets/dungeon/Textures/colormap.png" id="1_tex"]
+[ext_resource type="PackedScene" uid="uid://bw676kt4vufsx" path="res://resources/tile_sets/dungeon/corridor.glb" id="2_corridor"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-corner-square.glb" id="3_corridor_corner_square"]
+[ext_resource type="PackedScene" uid="uid://dlrcqecsdj6uy" path="res://resources/tile_sets/dungeon/corridor-end.glb" id="4_corridor_end"]
+[ext_resource type="PackedScene" uid="uid://clhbqgajnn8f1" path="res://resources/tile_sets/dungeon/corridor-junction.glb" id="5_corridor_junction"]
+[ext_resource type="PackedScene" uid="uid://dmx6a3suqwjjd" path="res://resources/tile_sets/dungeon/corridor-intersection.glb" id="6_corridor_intersection"]
+[ext_resource type="PackedScene" uid="uid://8vvee7xqytex" path="res://resources/tile_sets/dungeon/template-wall.glb" id="7_template_wall"]
+[ext_resource type="PackedScene" uid="uid://lridbcvsjlk8" path="res://resources/tile_sets/dungeon/template-wall-detail-a.glb" id="8_template_wall_detail_a"]
+[ext_resource type="PackedScene" uid="uid://bobfnd82qci3n" path="res://resources/tile_sets/dungeon/template-wall-half.glb" id="9_template_wall_half"]
+[ext_resource type="PackedScene" uid="uid://4opl7j4a7l0b" path="res://resources/tile_sets/dungeon/template-wall-top.glb" id="10_template_wall_top"]
+[ext_resource type="PackedScene" uid="uid://ch7mcefu2n8r4" path="res://resources/tile_sets/dungeon/template-wall-corner.glb" id="11_template_wall_corner"]
+[ext_resource type="PackedScene" uid="uid://cemyqye7aklvh" path="res://resources/tile_sets/dungeon/template-corner.glb" id="12_template_corner"]
+[ext_resource type="PackedScene" uid="uid://bmhktd52yu2hc" path="res://resources/tile_sets/dungeon/template-detail.glb" id="13_template_detail"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dungeon"]
+resource_name = "colormap"
+cull_mode = 2
+albedo_texture = ExtResource("1_tex")
+texture_filter = 0
+
+[node name="DungeonStructureTiles" type="Node3D"]
+
+[node name="corridor" parent="." instance=ExtResource("2_corridor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="corridor" parent="corridor" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="corridor-corner-square" parent="." instance=ExtResource("3_corridor_corner_square")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="corridor-corner-square" parent="corridor-corner-square" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="corridor-end" parent="." instance=ExtResource("4_corridor_end")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+
+[node name="corridor-end" parent="corridor-end" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="corridor-junction" parent="." instance=ExtResource("5_corridor_junction")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 0)
+
+[node name="corridor-junction" parent="corridor-junction" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="corridor-intersection" parent="." instance=ExtResource("6_corridor_intersection")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 0)
+
+[node name="corridor-intersection" parent="corridor-intersection" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-wall" parent="." instance=ExtResource("7_template_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 0)
+
+[node name="template-wall" parent="template-wall" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-wall-detail-a" parent="." instance=ExtResource("8_template_wall_detail_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="template-wall-detail-a" parent="template-wall-detail-a" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-wall-half" parent="." instance=ExtResource("9_template_wall_half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 6)
+
+[node name="template-wall-half" parent="template-wall-half" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-wall-top" parent="." instance=ExtResource("10_template_wall_top")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 6)
+
+[node name="template-wall-top" parent="template-wall-top" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-wall-corner" parent="." instance=ExtResource("11_template_wall_corner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 6)
+
+[node name="template-wall-corner" parent="template-wall-corner" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-corner" parent="." instance=ExtResource("12_template_corner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 6)
+
+[node name="template-corner" parent="template-corner" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-detail" parent="." instance=ExtResource("13_template_detail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 6)
+
+[node name="template-detail" parent="template-detail" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")

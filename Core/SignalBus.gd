@@ -22,6 +22,8 @@ signal day_night_changed(is_night: bool)
 # Combat Triggers
 signal combat_started(enemy_data_or_group: Variant, player_party: Array, enemy_facing: String)
 signal combat_ended(victory: bool)
+## CombatManager's watchdog found a running battle with the battle HUD hidden; HUD shows it again.
+signal battle_hud_recovery_requested(enemy_data_or_group: Variant, player_party: Array)
 signal combat_phase_changed(new_phase: CombatPhase)
 
 # Combat Actions & Escapes
@@ -62,7 +64,11 @@ signal edge_flash_requested(color: Color, duration: float)
 signal audio_effect_requested(effect_name: StringName)
 signal target_vfx_requested(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: float)
 signal screen_slice_requested()
+## One big slash on the exploration HUD (environmental hazards)
+signal hazard_slash_requested()
 signal weapon_swing_requested(anim_name: String)
+## Lore object scare: aura overlay + image flash (see LoreScareFX)
+signal lore_scare_requested(data: Dictionary)
 
 # Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)

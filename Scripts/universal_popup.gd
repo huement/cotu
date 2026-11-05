@@ -63,7 +63,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		return
 
 	# Intercept item selection when the Standalone ITEMS Modal is already open
-	if action_type == &"ITEM_ACTIONS" and active_action_type == &"ITEMS":
+	if action_type == &"ITEM_ACTIONS" and (active_action_type == &"ITEMS" or active_action_type == &"BATTLE_ITEMS"):
 		_update_items_preview(data)
 		return
 
@@ -81,7 +81,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		&"REST":
 			title_label.text = "Set Purrogate Camp Duration"
 			_build_rest_ui()
-		&"ITEMS":
+		&"ITEMS", &"BATTLE_ITEMS":
 			title_label.text = "Useable Items"
 			_build_items_inventory_ui()
 		&"ITEM_ACTIONS":
@@ -192,6 +192,10 @@ func _close_modal() -> void:
 func _on_cancel_pressed() -> void:
 	if is_instance_valid(AudioManager):
 		AudioManager.play_ui_sound("button-close")
+	# Lore popups report closing however they were dismissed (see BossStatue)
+	if active_action_type == &"LORE_POPUP":
+		_emit_confirmation(&"LORE_POPUP", active_data.duplicate())
+		return
 	_close_modal()
 
 
@@ -812,7 +816,8 @@ func _build_lore_popup_ui(data: Dictionary) -> void:
 	content_area.add_child(scroll)
 
 	var close_btn := _create_modal_button("CLOSE", Color(0.0, 0.7, 0.8, 1.0))
-	close_btn.pressed.connect(_close_modal)
+	# Confirm (not just close) so scripted objects like BossStatue know the player read it
+	close_btn.pressed.connect(func() -> void: _emit_confirmation(&"LORE_POPUP", data))
 
 	var btn_hbox := HBoxContainer.new()
 	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER

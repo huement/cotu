@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" uid="uid://u4shg1uh4n3g" path="res://resources/tile_sets/dungeon_boss/Textures/colormap.png" id="1_tex"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon_boss/boss-wall.glb" id="2_boss_wall"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon_boss/boss-wall-detail.glb" id="3_boss_wall_detail"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon_boss/boss-wall-half.glb" id="4_boss_wall_half"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon_boss/boss-wall-top.glb" id="5_boss_wall_top"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon_boss/boss-wall-post.glb" id="6_boss_wall_post"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon_boss/boss-corner.glb" id="7_boss_corner"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon_boss/boss-column.glb" id="8_boss_column"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_boss"]
+resource_name = "colormap"
+cull_mode = 2
+albedo_texture = ExtResource("1_tex")
+texture_filter = 0
+
+[node name="BossWallTiles" type="Node3D"]
+
+[node name="boss-wall" parent="." instance=ExtResource("2_boss_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="boss-wall" parent="boss-wall" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="boss-wall-detail" parent="." instance=ExtResource("3_boss_wall_detail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="boss-wall-detail" parent="boss-wall-detail" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="boss-wall-half" parent="." instance=ExtResource("4_boss_wall_half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+
+[node name="boss-wall-half" parent="boss-wall-half" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="boss-wall-top" parent="." instance=ExtResource("5_boss_wall_top")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 0)
+
+[node name="boss-wall-top" parent="boss-wall-top" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="boss-wall-post" parent="." instance=ExtResource("6_boss_wall_post")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 0)
+
+[node name="boss-wall-post" parent="boss-wall-post" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="boss-corner" parent="." instance=ExtResource("7_boss_corner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 0)
+
+[node name="boss-corner" parent="boss-corner" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="boss-column" parent="." instance=ExtResource("8_boss_column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="boss-column" parent="boss-column" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")

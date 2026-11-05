@@ -43,6 +43,7 @@ func switch_map_from_resource(map_resource: PackedScene) -> void:
 	if is_instance_valid(active_map_instance):
 		active_map_instance.queue_free()
 
+	_blocked_tiles.clear()
 	active_map_instance = map_resource.instantiate() as Node3D
 	add_child(active_map_instance)
 
@@ -60,6 +61,7 @@ func switch_map(scene_path: String) -> void:
 	if is_instance_valid(active_map_instance):
 		active_map_instance.queue_free()
 
+	_blocked_tiles.clear()
 	active_map_instance = map_resource.instantiate() as Node3D
 	add_child(active_map_instance)
 
@@ -125,18 +127,88 @@ func _apply_map_audio(map_instance: Node) -> void:
 	AudioManager.play_bgm(track_name)
 
 
-## Converts an absolute 3D world position into 3D GridMap integer coordinates.
+# ==============================================================================
+# NAVIGATION GRID
+# Movement, enemy positions and blocked tiles all use ONE grid: the map's FloorMap
+# (always the 2 m player grid), or the dungeon GridMap when there is no FloorMap.
+# Wall layers (WallMap, WallMap2...) may be scaled/offset freely; they are converted
+# to navigation cells through world positions.
+# ==============================================================================
+func get_nav_grid() -> GridMap:
+	if is_instance_valid(floor_grid):
+		return floor_grid
+	return dungeon_grid
+
+
+## World position of a navigation cell's center. Height follows the cell-centered
+## convention (half a cell above the floor) so existing enemy vertical_offsets are unchanged.
+func nav_cell_to_world(cell: Vector3i) -> Vector3:
+	var grid: GridMap = get_nav_grid()
+	if not is_instance_valid(grid):
+		return Vector3(cell.x * 2.0 + 1.0, 1.0, cell.z * 2.0 + 1.0)
+	var local_pos: Vector3 = grid.map_to_local(cell)
+	if not grid.cell_center_y:
+		local_pos.y += grid.cell_size.y * 0.5
+	return grid.to_global(local_pos)
+
+
+## Converts a cell of ANY GridMap (e.g. a scaled WallMap) into the navigation cell under its center.
+func grid_cell_to_nav_cell(grid: GridMap, cell: Vector3i) -> Vector3i:
+	var nav: GridMap = get_nav_grid()
+	if not is_instance_valid(grid) or grid == nav:
+		return Vector3i(cell.x, 0, cell.z)
+	var world: Vector3 = grid.to_global(grid.map_to_local(cell))
+	var nav_cell: Vector3i = world_to_grid(world)
+	return Vector3i(nav_cell.x, 0, nav_cell.z)
+
+
+## Converts a navigation cell into the matching cell of another GridMap (e.g. a scaled WallMap).
+func nav_cell_to_grid_cell(grid: GridMap, nav_cell: Vector3i) -> Vector3i:
+	var nav: GridMap = get_nav_grid()
+	if not is_instance_valid(grid) or not is_instance_valid(nav) or grid == nav:
+		return Vector3i(nav_cell.x, 0, nav_cell.z)
+	var world: Vector3 = nav.to_global(nav.map_to_local(Vector3i(nav_cell.x, 0, nav_cell.z)))
+	var local: Vector3 = grid.to_local(world)
+	var cell: Vector3i = grid.local_to_map(local)
+	return Vector3i(cell.x, 0, cell.z)
+
+
+## Blocks every navigation cell covered by `cell` of `grid` (handles scaled wall layers).
+func register_blocked_grid_cell(grid: GridMap, cell: Vector3i) -> void:
+	var nav: GridMap = get_nav_grid()
+	if not is_instance_valid(grid) or not is_instance_valid(nav) or grid == nav:
+		register_blocked_tile(Vector3i(cell.x, 0, cell.z))
+		return
+
+	var center: Vector3 = grid.to_global(grid.map_to_local(cell))
+	var grid_scale: Vector3 = grid.global_basis.get_scale()
+	var half: Vector3 = grid.cell_size * grid_scale * 0.5
+	var lo: Vector3i = world_to_grid(center - half)
+	var hi: Vector3i = world_to_grid(center + half)
+	var any: bool = false
+	for x in range(mini(lo.x, hi.x), maxi(lo.x, hi.x) + 1):
+		for z in range(mini(lo.z, hi.z), maxi(lo.z, hi.z) + 1):
+			var nav_center: Vector3 = nav.to_global(nav.map_to_local(Vector3i(x, 0, z)))
+			if absf(nav_center.x - center.x) <= half.x + 0.01 and absf(nav_center.z - center.z) <= half.z + 0.01:
+				register_blocked_tile(Vector3i(x, 0, z))
+				any = true
+	if not any:
+		register_blocked_tile(grid_cell_to_nav_cell(grid, cell))
+
+
+## Converts an absolute 3D world position into navigation grid coordinates.
 func world_to_grid(world_position: Vector3) -> Vector3i:
-	if not dungeon_grid:
+	var grid: GridMap = get_nav_grid()
+	if not is_instance_valid(grid):
 		return Vector3i.ZERO
-	return dungeon_grid.local_to_map(dungeon_grid.to_local(world_position))
+	return grid.local_to_map(grid.to_local(world_position))
 
 
-## Converts 3D GridMap integer coordinates back into absolute 3D world positions.
+## Converts navigation grid coordinates back into absolute 3D world positions.
 func grid_to_world(grid_position: Vector3i) -> Vector3:
-	if not dungeon_grid:
+	if not is_instance_valid(get_nav_grid()):
 		return Vector3.ZERO
-	return dungeon_grid.to_global(dungeon_grid.map_to_local(grid_position))
+	return nav_cell_to_world(grid_position)
 
 
 ## Checks if a target grid cell contains a blocking wall tile, water, enemy, or 3D physics obstacle.
@@ -148,7 +220,7 @@ func is_tile_blocked(grid_position: Vector3i) -> bool:
 
 	# 1. Check WallMap for trees or walls
 	if is_instance_valid(dungeon_grid):
-		var wall_item_index: int = dungeon_grid.get_cell_item(ground_cell)
+		var wall_item_index: int = dungeon_grid.get_cell_item(nav_cell_to_grid_cell(dungeon_grid, ground_cell))
 		if wall_item_index != GridMap.INVALID_CELL_ITEM:
 			if dungeon_grid.name == "WallMap" or dungeon_grid.name == "%WallMap":
 				return true
@@ -189,7 +261,12 @@ func is_tile_blocked(grid_position: Vector3i) -> bool:
 		shape_query.collision_mask = 1 # Layer 1 for StaticBody3D
 
 		var hits: Array[Dictionary] = space_state.intersect_shape(shape_query)
-		if not hits.is_empty():
+		for hit: Dictionary in hits:
+			var collider: Object = hit.get("collider")
+			if collider == floor_grid:
+				continue
+			if collider is Node and (collider as Node).is_in_group(&"player"):
+				continue
 			return true
 
 	return false
@@ -228,9 +305,8 @@ func get_active_spawn_grid_pos() -> Vector2i:
 		if not spawn_node:
 			spawn_node = active_map_instance.get_node_or_null("SpawnPoint") as Node3D
 
-		if spawn_node and is_instance_valid(dungeon_grid):
-			var local_pos: Vector3 = dungeon_grid.to_local(spawn_node.global_position)
-			var map_pos: Vector3i = dungeon_grid.local_to_map(local_pos)
+		if spawn_node and is_instance_valid(get_nav_grid()):
+			var map_pos: Vector3i = world_to_grid(spawn_node.global_position)
 			return Vector2i(map_pos.x, map_pos.z)
 
 	return Vector2i(0, 0)

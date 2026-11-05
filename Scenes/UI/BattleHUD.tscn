@@ -2907,6 +2907,7 @@ grow_vertical = 0
 texture = ExtResource("3_83cdx")
 
 [node name="TopHeader" type="Control" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -3145,7 +3146,8 @@ unique_name_in_owner = true
 z_as_relative = false
 material = SubResource("CanvasItemMaterial_7ppdr")
 use_parent_material = true
-position = Vector2(583, 350)
+position = Vector2(583, 320)
+scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_v1htw")
 animation = &"AIR"
 
@@ -3170,4 +3172,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 1)

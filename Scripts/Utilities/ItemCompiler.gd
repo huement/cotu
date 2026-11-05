@@ -57,6 +57,7 @@ func compile_items() -> void:
 		if line.size() >= 17: item.weapon_type = _parse_weapon_type(line[16].strip_edges())
 		if line.size() >= 18: item.is_consumable = line[17].strip_edges().to_lower() in ["true", "1", "t", "yes"]
 		if line.size() >= 19: _apply_vfx_frames(item, line[18].strip_edges())
+		if line.size() >= 20: item.target_type = _parse_target_type(line[19].strip_edges())
 
 		item.stat_effect = {}
 		if item.heal_amount > 0:
@@ -117,6 +118,15 @@ func _parse_equip_slot(slot_str: String) -> ItemData.EquipmentSlot:
 		"BOTH_HANDS": return ItemData.EquipmentSlot.BOTH_HANDS
 		"ACCESSORY": return ItemData.EquipmentSlot.ACCESSORY_1
 		_: return ItemData.EquipmentSlot.NONE
+
+## Empty = SINGLE_PARTY_MEMBER (the old default for every item)
+func _parse_target_type(target_str: String) -> ItemData.TargetType:
+	match target_str.to_upper():
+		"ALL_PARTY", "PARTY", "ALL_ALLIES": return ItemData.TargetType.ALL_PARTY
+		"SINGLE_ENEMY", "ENEMY": return ItemData.TargetType.SINGLE_ENEMY
+		"ALL_ENEMIES", "ENEMIES", "ALL_ENEMY": return ItemData.TargetType.ALL_ENEMIES
+		"NONE": return ItemData.TargetType.NONE
+		_: return ItemData.TargetType.SINGLE_PARTY_MEMBER
 
 func _parse_weapon_type(wp_str: String) -> ItemData.WeaponType:
 	match wp_str.to_upper():

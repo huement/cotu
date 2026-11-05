@@ -37,8 +37,8 @@ func _align_to_grid() -> void:
 		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
 	var grid: GridMap = null
-	if is_instance_valid(map_mgr) and "dungeon_grid" in map_mgr and is_instance_valid(map_mgr.dungeon_grid):
-		grid = map_mgr.dungeon_grid as GridMap
+	if is_instance_valid(map_mgr) and map_mgr.has_method("get_nav_grid"):
+		grid = map_mgr.get_nav_grid()
 
 	# 1. Resolve 2D grid cell coordinates for spatial lookup & player interaction
 	if initial_cell != Vector2i.ZERO:
@@ -56,8 +56,10 @@ func _align_to_grid() -> void:
 	# 2. Only overwrite 3D transform if snapping is enabled (Chests/Loot)
 	if snap_to_floor_center and is_instance_valid(grid):
 		var cell_3d := Vector3i(_grid_position.x, 0, _grid_position.y)
-		var local_pos: Vector3 = grid.map_to_local(cell_3d)
-		global_position = grid.to_global(local_pos)
+		if is_instance_valid(map_mgr) and map_mgr.has_method("nav_cell_to_world"):
+			global_position = map_mgr.nav_cell_to_world(cell_3d)
+		else:
+			global_position = grid.to_global(grid.map_to_local(cell_3d))
 
 
 func interact(_player: Node3D) -> void:

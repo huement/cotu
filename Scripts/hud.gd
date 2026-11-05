@@ -86,10 +86,13 @@ func _connect_signal_bus() -> void:
 	
 	_connect_signal_safe(sb, &"combat_started", on_combat_started)
 	_connect_signal_safe(sb, &"combat_ended", _on_combat_ended)
+	_connect_signal_safe(sb, &"battle_hud_recovery_requested", _on_battle_hud_recovery_requested)
 	_connect_signal_safe(sb, &"edge_flash_requested", _on_edge_flash_requested)
+	_connect_signal_safe(sb, &"hazard_slash_requested", play_hazard_slash)
 	_connect_signal_safe(sb, &"enemy_proximity_changed", _on_enemy_proximity_changed)
 	# 🎯 Intercept popup action buttons (e.g. REST, SEARCH, LOOK)
 	_connect_signal_safe(sb, &"popup_requested", _on_popup_requested)
+	_ensure_lore_scare_fx()
 
 
 ## Responds to granular character data changes by refreshing all party portraits
@@ -246,6 +249,8 @@ func switch_state(new_state: int) -> void:
 func _on_game_state_changed(new_state: int) -> void:
 	match new_state:
 		GameState.Mode.EXPLORING:
+			if _is_battle_running():
+				return # never hide the battle HUD while a fight is on
 			_set_exploration_ui_visible(true)
 			if battle_hud:
 				battle_hud.hide()
@@ -278,6 +283,20 @@ func _on_combat_ended(_victory: bool) -> void:
 	if battle_hud:
 		battle_hud.hide()
 	_set_exploration_ui_visible(true)
+
+
+## Safety net: a battle is running but its HUD isn't on screen (see CombatManager watchdog).
+func _on_battle_hud_recovery_requested(enemy_data_or_group: Variant, player_party: Array) -> void:
+	_set_exploration_ui_visible(false)
+	if battle_hud and battle_hud.has_method("recover"):
+		battle_hud.call("recover", enemy_data_or_group, player_party)
+	elif battle_hud:
+		battle_hud.show()
+
+
+func _is_battle_running() -> bool:
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	return is_instance_valid(cm) and bool(cm.get("is_combat_active"))
 
 
 ## Tweens EnemyInRange indicator width, position, and color based on threat tier
@@ -393,3 +412,56 @@ func _on_time_period_changed(new_period: String) -> void:
 func _update_time_display(period_text: String) -> void:
 	if time_label:
 		time_label.text = period_text
+
+
+# ==============================================================================
+# LORE SCARE FX (Horned Skull, etc.)
+# ==============================================================================
+const _LORE_SCARE_FX_SCRIPT: GDScript = preload("res://Scripts/UI/LoreScareFX.gd")
+var _lore_scare_fx: CanvasLayer = null
+
+
+func _ensure_lore_scare_fx() -> void:
+	if is_instance_valid(_lore_scare_fx):
+		return
+	_lore_scare_fx = _LORE_SCARE_FX_SCRIPT.new() as CanvasLayer
+	_lore_scare_fx.name = "LoreScareFX"
+	add_child(_lore_scare_fx)
+
+
+# ==============================================================================
+# HAZARD SLASH (exploration screen effect, e.g. rock tentacles)
+# ==============================================================================
+const BIG_SLASH_SHADER: Shader = preload("res://Shaders/big_slash.gdshader")
+var _big_slash_material: ShaderMaterial = null
+var _big_slash_tween: Tween = null
+
+
+## Plays one big slash across the screen on %SliceOverlay.
+func play_hazard_slash(duration: float = 0.7) -> void:
+	var overlay: ColorRect = get_node_or_null("%SliceOverlay") as ColorRect
+	if not is_instance_valid(overlay):
+		push_warning("DungeonHUD: %SliceOverlay not found, can't play hazard slash.")
+		return
+
+	if _big_slash_material == null:
+		_big_slash_material = ShaderMaterial.new()
+		_big_slash_material.shader = BIG_SLASH_SHADER
+	# Random angle each strike so repeated hits don't look identical
+	_big_slash_material.set_shader_parameter("angle_degrees", randf_range(-38.0, -18.0) * (1.0 if randf() < 0.5 else -1.0))
+	_big_slash_material.set_shader_parameter("progress", 0.0)
+
+	if is_instance_valid(_big_slash_tween):
+		_big_slash_tween.kill()
+
+	overlay.material = _big_slash_material
+	overlay.visible = true
+	overlay.move_to_front()
+
+	var mat: ShaderMaterial = _big_slash_material
+	_big_slash_tween = create_tween()
+	_big_slash_tween.tween_method(
+		func(value: float) -> void: mat.set_shader_parameter("progress", value),
+		0.0, 1.0, duration
+	)
+	_big_slash_tween.tween_callback(func() -> void: mat.set_shader_parameter("progress", 0.0))

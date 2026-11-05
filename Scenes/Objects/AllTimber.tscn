@@ -1,0 +1,123 @@
+[gd_scene load_steps=25 format=3 uid="uid://bky6us1m7b0n"]
+
+[ext_resource type="Script" uid="uid://dpc8asoyphpa3" path="res://Scripts/Environment/big_timber.gd" id="1_jonf8"]
+[ext_resource type="PackedScene" uid="uid://d2l0ko5laybgc" path="res://resources/tile_sets/nature/tree_tall_dark.glb" id="2_16mgs"]
+[ext_resource type="PackedScene" uid="uid://d3cgpld8ex8m1" path="res://resources/tile_sets/nature/tree_blocks_fall.glb" id="2_xrde2"]
+[ext_resource type="PackedScene" uid="uid://d6hbe6p4edbf" path="res://resources/tile_sets/nature/tree_plateau_dark.glb" id="3_bdgcm"]
+[ext_resource type="PackedScene" uid="uid://mge4q1rqknts" path="res://resources/tile_sets/nature/tree_blocks.glb" id="3_iilg0"]
+[ext_resource type="PackedScene" uid="uid://crn1acca1bdja" path="res://resources/tile_sets/nature/tree_pineTallD.glb" id="4_uqvbv"]
+[ext_resource type="PackedScene" uid="uid://dndk2dth6x48t" path="res://resources/tile_sets/nature/tree_tall_fall.glb" id="5_06mms"]
+[ext_resource type="PackedScene" uid="uid://657l60fvja4f" path="res://resources/tile_sets/nature/tree_pineRoundF.glb" id="5_62fq0"]
+[ext_resource type="PackedScene" uid="uid://cy4wc30mngbiq" path="res://resources/tile_sets/nature/tree_pineGroundB.glb" id="6_3ba0i"]
+[ext_resource type="PackedScene" uid="uid://go0se3ycsbj5" path="res://resources/tile_sets/nature/tree_simple_fall.glb" id="6_71veg"]
+[ext_resource type="PackedScene" uid="uid://cdiw5ylv21eck" path="res://resources/tile_sets/nature/tree_oak_fall.glb" id="7_f6726"]
+[ext_resource type="PackedScene" uid="uid://cogkb1ksscsxx" path="res://resources/tile_sets/nature/tree_oak_dark.glb" id="8_51tko"]
+[ext_resource type="PackedScene" uid="uid://crqwgmw61dyt7" path="res://resources/tile_sets/nature/tree_plateau_fall.glb" id="8_ea854"]
+[ext_resource type="PackedScene" uid="uid://b122lqfgutudh" path="res://resources/tile_sets/nature/tree_detailed_dark.glb" id="9_tonly"]
+[ext_resource type="PackedScene" uid="uid://bosbqddaiehu8" path="res://resources/tile_sets/nature/tree_cone.glb" id="10_pcwhv"]
+[ext_resource type="PackedScene" uid="uid://tf2jxp5av0rd" path="res://resources/tile_sets/nature/tree_pineRoundB.glb" id="12_hjoer"]
+[ext_resource type="PackedScene" uid="uid://dob24d6ptycqc" path="res://resources/tile_sets/nature/tree_pineTallD_detailed.glb" id="13_nn477"]
+[ext_resource type="PackedScene" uid="uid://sx4tmu64py4h" path="res://resources/tile_sets/nature/tree_detailed_fall.glb" id="17_cc1vi"]
+[ext_resource type="PackedScene" uid="uid://bpn4orfgb2gjh" path="res://resources/tile_sets/nature/tree_cone_fall.glb" id="19_lg87d"]
+[ext_resource type="PackedScene" uid="uid://c7pc37fx7qob7" path="res://resources/tile_sets/nature/tree_default.glb" id="20_sicev"]
+[ext_resource type="PackedScene" uid="uid://bsq7kyjc71jvq" path="res://resources/tile_sets/nature/tree_default_fall.glb" id="21_cttil"]
+[ext_resource type="PackedScene" uid="uid://dfa2srknf7gqy" path="res://resources/tile_sets/nature/tree_fat_fall.glb" id="22_bx6nf"]
+[ext_resource type="PackedScene" uid="uid://4xtf7l3jfslc" path="res://resources/tile_sets/nature/tree_fat_darkh.glb" id="23_u50ve"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_5fhxv"]
+radius = 0.8
+
+[node name="AllTimber" type="Node3D"]
+script = ExtResource("1_jonf8")
+
+[node name="tree_blocks_fall" parent="." instance=ExtResource("2_xrde2")]
+transform = Transform3D(2.9, 0, 0, 0, 2.9, 0, 0, 0, 2.9, 0, 0, 0)
+
+[node name="tree_blocks" parent="." instance=ExtResource("3_iilg0")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+visible = false
+
+[node name="tree_tall_dark" parent="." instance=ExtResource("2_16mgs")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+visible = false
+
+[node name="tree_tall_fall" parent="." instance=ExtResource("5_06mms")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="tree_simple_fall" parent="." instance=ExtResource("6_71veg")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="tree_plateau_dark" parent="." instance=ExtResource("3_bdgcm")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+visible = false
+
+[node name="tree_plateau_fall" parent="." instance=ExtResource("8_ea854")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+visible = false
+
+[node name="tree_pine_tall" parent="." instance=ExtResource("4_uqvbv")]
+transform = Transform3D(2.66, 0, 0, 0, 2.66, 0, 0, 0, 2.66, 0, 0, 0)
+visible = false
+
+[node name="tree_pine_round" parent="." instance=ExtResource("5_62fq0")]
+transform = Transform3D(2.67, 0, 0, 0, 2.67, 0, 0, 0, 2.67, 0, 0, 0)
+visible = false
+
+[node name="tree_pine_ground" parent="." instance=ExtResource("6_3ba0i")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+visible = false
+
+[node name="tree_pine_round_bare" parent="." instance=ExtResource("12_hjoer")]
+visible = false
+
+[node name="tree_pine_skinny_tall" parent="." instance=ExtResource("13_nn477")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+visible = false
+
+[node name="tree_oak_fall" parent="." instance=ExtResource("7_f6726")]
+transform = Transform3D(2.4, 0, 0, 0, 2.4, 0, 0, 0, 2.4, 0, 0, 0)
+visible = false
+
+[node name="tree_oak_dark" parent="." instance=ExtResource("8_51tko")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+visible = false
+
+[node name="tree_detailed_dark" parent="." instance=ExtResource("9_tonly")]
+transform = Transform3D(3.2, 0, 0, 0, 3.733, 0, 0, 0, 2.667, 0, 0, 0)
+visible = false
+
+[node name="tree_detailed_fall" parent="." instance=ExtResource("17_cc1vi")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+visible = false
+
+[node name="tree_cone" parent="." instance=ExtResource("10_pcwhv")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+visible = false
+
+[node name="tree_cone_fall" parent="." instance=ExtResource("19_lg87d")]
+transform = Transform3D(2.9, 0, 0, 0, 2.9, 0, 0, 0, 2.9, 0, 0, 0)
+visible = false
+
+[node name="tree_default" parent="." instance=ExtResource("20_sicev")]
+transform = Transform3D(2.88, 0, 0, 0, 2.88, 0, 0, 0, 2.88, 0, 0, 0)
+visible = false
+
+[node name="tree_default_fall" parent="." instance=ExtResource("21_cttil")]
+transform = Transform3D(2.68, 0, 0, 0, 2.68, 0, 0, 0, 2.68, 0, 0, 0)
+visible = false
+
+[node name="tree_fat_fall" parent="." instance=ExtResource("22_bx6nf")]
+transform = Transform3D(2.66, 0, 0, 0, 2.66, 0, 0, 0, 2.66, 0, 0, 0)
+visible = false
+
+[node name="tree_fat_dark" parent="." instance=ExtResource("23_u50ve")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+visible = false
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.91757846, 0)
+shape = SubResource("CylinderShape3D_5fhxv")

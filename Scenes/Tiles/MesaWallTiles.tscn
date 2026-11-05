@@ -1,0 +1,381 @@
+[gd_scene load_steps=59 format=3]
+
+[ext_resource type="PackedScene" uid="uid://bxwpy7nofphqx" path="res://resources/tile_sets/mesa/brick-wall-curve-small.glb" id="1_29326"]
+[ext_resource type="PackedScene" uid="uid://f1tjoulgdu20" path="res://resources/tile_sets/mesa/brick-wall-curve.glb" id="2_g2tjf"]
+[ext_resource type="PackedScene" uid="uid://byxrt4vvepwtc" path="res://resources/tile_sets/mesa/brick-wall-end.glb" id="3_a7edc"]
+[ext_resource type="PackedScene" uid="uid://bm5oakaltfgrc" path="res://resources/tile_sets/mesa/brick-wall.glb" id="4_2m7os"]
+[ext_resource type="PackedScene" uid="uid://dbi1cw35xy2lh" path="res://resources/tile_sets/mesa/stone-wall-column.glb" id="5_09fqu"]
+[ext_resource type="PackedScene" uid="uid://mcm32i6fhvds" path="res://resources/tile_sets/mesa/stone-wall-curve.glb" id="6_gzgsy"]
+[ext_resource type="PackedScene" uid="uid://bol0evdx2j7te" path="res://resources/tile_sets/mesa/stone-wall-damaged.glb" id="7_d4yz0"]
+[ext_resource type="PackedScene" uid="uid://dko2q2rq5v1e4" path="res://resources/tile_sets/mesa/stone-wall.glb" id="8_tva0h"]
+[ext_resource type="PackedScene" uid="uid://sk18w4n7es44" path="res://resources/tile_sets/mesa/fence-damaged.glb" id="9_35l9m"]
+[ext_resource type="PackedScene" uid="uid://7d8anef43jay" path="res://resources/tile_sets/mesa/fence-gate.glb" id="10_yhz0n"]
+[ext_resource type="PackedScene" uid="uid://dr65jtthhi8s1" path="res://resources/tile_sets/mesa/fence.glb" id="11_lzgcj"]
+[ext_resource type="PackedScene" uid="uid://dsm12obetwxtl" path="res://resources/tile_sets/mesa/iron-fence-bar.glb" id="12_syeef"]
+[ext_resource type="PackedScene" uid="uid://cfl8n3hy26fj3" path="res://resources/tile_sets/mesa/iron-fence-border-column.glb" id="13_3i4iy"]
+[ext_resource type="PackedScene" uid="uid://dm5kea3adnttr" path="res://resources/tile_sets/mesa/iron-fence-border-curve.glb" id="14_mk9my"]
+[ext_resource type="PackedScene" uid="uid://c8hxqbxvlnxnr" path="res://resources/tile_sets/mesa/iron-fence-border-gate.glb" id="15_gc6qp"]
+[ext_resource type="PackedScene" uid="uid://bd60u8bn50x22" path="res://resources/tile_sets/mesa/iron-fence-border.glb" id="16_7leio"]
+[ext_resource type="PackedScene" uid="uid://b1jbccr5q7gyi" path="res://resources/tile_sets/mesa/iron-fence-curve.glb" id="17_nber0"]
+[ext_resource type="PackedScene" uid="uid://fsb31a7rlwxd" path="res://resources/tile_sets/mesa/iron-fence-damaged.glb" id="18_sx7if"]
+[ext_resource type="PackedScene" uid="uid://ckdgq7bkmj7af" path="res://resources/tile_sets/mesa/iron-fence.glb" id="19_icb4w"]
+[ext_resource type="PackedScene" uid="uid://bo0gm881sigd2" path="res://resources/tile_sets/mesa/border-pillar.glb" id="20_etuie"]
+[ext_resource type="PackedScene" uid="uid://cdpb6bh1s4awa" path="res://resources/tile_sets/mesa/column-large.glb" id="21_ivwf4"]
+[ext_resource type="PackedScene" uid="uid://bqfhtwf133fea" path="res://resources/tile_sets/mesa/pillar-large.glb" id="22_yyaef"]
+[ext_resource type="PackedScene" uid="uid://d3mcxxh0rf36o" path="res://resources/tile_sets/mesa/pillar-obelisk.glb" id="23_y3238"]
+[ext_resource type="PackedScene" uid="uid://dno3lwabyhjac" path="res://resources/tile_sets/mesa/pillar-small.glb" id="24_f4boh"]
+[ext_resource type="PackedScene" uid="uid://o7alf1gyenop" path="res://resources/tile_sets/mesa/pillar-square.glb" id="25_tjm7k"]
+[ext_resource type="PackedScene" uid="uid://bak05rjygkfkk" path="res://resources/tile_sets/mesa/pine-crooked.glb" id="26_zqm1m"]
+[ext_resource type="PackedScene" uid="uid://01cplq4q2gel" path="res://resources/tile_sets/mesa/pine-fall-crooked.glb" id="27_ii5wc"]
+[ext_resource type="PackedScene" uid="uid://pp1f2stp3h4t" path="res://resources/tile_sets/mesa/pine-fall.glb" id="28_4rn0y"]
+[ext_resource type="PackedScene" uid="uid://coxcwf3g5thve" path="res://resources/tile_sets/mesa/pine.glb" id="29_ecrcr"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ml64l"]
+size = Vector3(1, 0.725, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8cz2k"]
+size = Vector3(1, 0.725, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mpb3u"]
+size = Vector3(1, 0.85, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5af3r"]
+size = Vector3(1, 0.725, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_o6sbe"]
+size = Vector3(1, 0.85, 0.35)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ebann"]
+size = Vector3(1, 0.725, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_emrvf"]
+size = Vector3(1, 0.725, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ipgad"]
+size = Vector3(1, 0.725, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_26mi0"]
+size = Vector3(1, 0.620122, 0.312061)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_artbn"]
+size = Vector3(1, 0.620122, 0.204)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_n2qav"]
+size = Vector3(1, 0.620122, 0.184)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_npaxx"]
+size = Vector3(0.119354, 0.6689, 0.103364)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ljtop"]
+size = Vector3(1, 0.8789, 0.2215)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4f0dg"]
+size = Vector3(0.9, 0.8789, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_zq05s"]
+size = Vector3(1, 0.76, 0.2215)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_49ern"]
+size = Vector3(1, 0.8789, 0.15)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2pdcl"]
+size = Vector3(0.88, 0.8789, 0.88)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xi2v7"]
+size = Vector3(1, 0.880429, 0.324833)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tcbe4"]
+size = Vector3(1, 0.8789, 0.11)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e28xc"]
+size = Vector3(0.2215, 0.76, 0.2215)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e0b5a"]
+size = Vector3(0.39, 1.13, 0.39)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fhq0v"]
+size = Vector3(0.2215, 1.1253, 0.2215)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_f76bt"]
+size = Vector3(0.35, 1.012, 0.35)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_55qax"]
+size = Vector3(0.1815, 0.756411, 0.1815)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v25pu"]
+size = Vector3(0.35, 1.15, 0.35)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nyoun"]
+size = Vector3(1.178, 2.108141, 1.334557)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_erkh2"]
+size = Vector3(1.178, 2.108141, 1.334557)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_75u2u"]
+size = Vector3(1.178, 2.302456, 1.334557)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wtbiz"]
+size = Vector3(1.178, 2.302456, 1.334557)
+
+[node name="MesaWallTiles" type="Node3D"]
+
+[node name="brick-wall-curve-small" parent="." instance=ExtResource("1_29326")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="brick-wall-curve-small_col" type="StaticBody3D" parent="brick-wall-curve-small/brick-wall-curve-small"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="brick-wall-curve-small/brick-wall-curve-small/brick-wall-curve-small_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3625, 0)
+shape = SubResource("BoxShape3D_ml64l")
+
+[node name="brick-wall-curve" parent="." instance=ExtResource("2_g2tjf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0)
+
+[node name="brick-wall-curve_col" type="StaticBody3D" parent="brick-wall-curve/brick-wall-curve"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="brick-wall-curve/brick-wall-curve/brick-wall-curve_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3625, 0)
+shape = SubResource("BoxShape3D_8cz2k")
+
+[node name="brick-wall-end" parent="." instance=ExtResource("3_a7edc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="brick-wall-end_col" type="StaticBody3D" parent="brick-wall-end/brick-wall-end"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="brick-wall-end/brick-wall-end/brick-wall-end_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.425, -0.35)
+shape = SubResource("BoxShape3D_mpb3u")
+
+[node name="brick-wall" parent="." instance=ExtResource("4_2m7os")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 0)
+
+[node name="brick-wall_col" type="StaticBody3D" parent="brick-wall/brick-wall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="brick-wall/brick-wall/brick-wall_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3625, -0.35)
+shape = SubResource("BoxShape3D_5af3r")
+
+[node name="stone-wall-column" parent="." instance=ExtResource("5_09fqu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+
+[node name="stone-wall-column_col" type="StaticBody3D" parent="stone-wall-column/stone-wall-column"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="stone-wall-column/stone-wall-column/stone-wall-column_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.425, -0.4)
+shape = SubResource("BoxShape3D_o6sbe")
+
+[node name="stone-wall-curve" parent="." instance=ExtResource("6_gzgsy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 0)
+
+[node name="stone-wall-curve_col" type="StaticBody3D" parent="stone-wall-curve/stone-wall-curve"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="stone-wall-curve/stone-wall-curve/stone-wall-curve_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3625, 0)
+shape = SubResource("BoxShape3D_ebann")
+
+[node name="stone-wall-damaged" parent="." instance=ExtResource("7_d4yz0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+
+[node name="stone-wall-damaged_col" type="StaticBody3D" parent="stone-wall-damaged/stone-wall-damaged"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="stone-wall-damaged/stone-wall-damaged/stone-wall-damaged_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3625, -0.4)
+shape = SubResource("BoxShape3D_emrvf")
+
+[node name="stone-wall" parent="." instance=ExtResource("8_tva0h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3)
+
+[node name="stone-wall_col" type="StaticBody3D" parent="stone-wall/stone-wall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="stone-wall/stone-wall/stone-wall_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3625, -0.4)
+shape = SubResource("BoxShape3D_ipgad")
+
+[node name="fence-damaged" parent="." instance=ExtResource("9_35l9m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 3)
+
+[node name="fence-damaged_col" type="StaticBody3D" parent="fence-damaged/fence-damaged"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="fence-damaged/fence-damaged/fence-damaged_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.310061, 0.045349)
+shape = SubResource("BoxShape3D_26mi0")
+
+[node name="fence-gate" parent="." instance=ExtResource("10_yhz0n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 3)
+
+[node name="fence-gate_col" type="StaticBody3D" parent="fence-gate/fence-gate"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="fence-gate/fence-gate/fence-gate_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.310061, 0)
+shape = SubResource("BoxShape3D_artbn")
+
+[node name="fence" parent="." instance=ExtResource("11_lzgcj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 3)
+
+[node name="fence_col" type="StaticBody3D" parent="fence/fence"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="fence/fence/fence_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.310061, 0)
+shape = SubResource("BoxShape3D_n2qav")
+
+[node name="iron-fence-bar" parent="." instance=ExtResource("12_syeef")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 3)
+
+[node name="iron-fence-bar_col" type="StaticBody3D" parent="iron-fence-bar/iron-fence-bar"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence-bar/iron-fence-bar/iron-fence-bar_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.33445, 0)
+shape = SubResource("BoxShape3D_npaxx")
+
+[node name="iron-fence-border-column" parent="." instance=ExtResource("13_3i4iy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="iron-fence-border-column_col" type="StaticBody3D" parent="iron-fence-border-column/iron-fence-border-column"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence-border-column/iron-fence-border-column/iron-fence-border-column_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43945, -0.325)
+shape = SubResource("BoxShape3D_ljtop")
+
+[node name="iron-fence-border-curve" parent="." instance=ExtResource("14_mk9my")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 6)
+
+[node name="iron-fence-border-curve_col" type="StaticBody3D" parent="iron-fence-border-curve/iron-fence-border-curve"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence-border-curve/iron-fence-border-curve/iron-fence-border-curve_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, 0.43945, 0.05)
+shape = SubResource("BoxShape3D_4f0dg")
+
+[node name="iron-fence-border-gate" parent="." instance=ExtResource("15_gc6qp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 6)
+
+[node name="iron-fence-border-gate_col" type="StaticBody3D" parent="iron-fence-border-gate/iron-fence-border-gate"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence-border-gate/iron-fence-border-gate/iron-fence-border-gate_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38, -0.325)
+shape = SubResource("BoxShape3D_zq05s")
+
+[node name="iron-fence-border" parent="." instance=ExtResource("16_7leio")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 6)
+
+[node name="iron-fence-border_col" type="StaticBody3D" parent="iron-fence-border/iron-fence-border"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence-border/iron-fence-border/iron-fence-border_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43945, -0.325)
+shape = SubResource("BoxShape3D_49ern")
+
+[node name="iron-fence-curve" parent="." instance=ExtResource("17_nber0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 6)
+
+[node name="iron-fence-curve_col" type="StaticBody3D" parent="iron-fence-curve/iron-fence-curve"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence-curve/iron-fence-curve/iron-fence-curve_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 0.43945, 0.06)
+shape = SubResource("BoxShape3D_2pdcl")
+
+[node name="iron-fence-damaged" parent="." instance=ExtResource("18_sx7if")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 6)
+
+[node name="iron-fence-damaged_col" type="StaticBody3D" parent="iron-fence-damaged/iron-fence-damaged"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence-damaged/iron-fence-damaged/iron-fence-damaged_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.438727, -0.217584)
+shape = SubResource("BoxShape3D_xi2v7")
+
+[node name="iron-fence" parent="." instance=ExtResource("19_icb4w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 9)
+
+[node name="iron-fence_col" type="StaticBody3D" parent="iron-fence/iron-fence"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="iron-fence/iron-fence/iron-fence_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43945, -0.325)
+shape = SubResource("BoxShape3D_tcbe4")
+
+[node name="border-pillar" parent="." instance=ExtResource("20_etuie")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 9)
+
+[node name="border-pillar_col" type="StaticBody3D" parent="border-pillar/border-pillar"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="border-pillar/border-pillar/border-pillar_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38, 0)
+shape = SubResource("BoxShape3D_e28xc")
+
+[node name="column-large" parent="." instance=ExtResource("21_ivwf4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 9)
+
+[node name="column-large_col" type="StaticBody3D" parent="column-large/column-large"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="column-large/column-large/column-large_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.565, 0)
+shape = SubResource("BoxShape3D_e0b5a")
+
+[node name="pillar-large" parent="." instance=ExtResource("22_yyaef")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 9)
+
+[node name="pillar-large_col" type="StaticBody3D" parent="pillar-large/pillar-large"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar-large/pillar-large/pillar-large_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.56265, 0)
+shape = SubResource("BoxShape3D_fhq0v")
+
+[node name="pillar-obelisk" parent="." instance=ExtResource("23_y3238")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 9)
+
+[node name="pillar-obelisk_col" type="StaticBody3D" parent="pillar-obelisk/pillar-obelisk"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar-obelisk/pillar-obelisk/pillar-obelisk_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.506, 0)
+shape = SubResource("BoxShape3D_f76bt")
+
+[node name="pillar-small" parent="." instance=ExtResource("24_f4boh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 9)
+
+[node name="pillar-small_col" type="StaticBody3D" parent="pillar-small/pillar-small"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar-small/pillar-small/pillar-small_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.378206, 0)
+shape = SubResource("BoxShape3D_55qax")
+
+[node name="pillar-square" parent="." instance=ExtResource("25_tjm7k")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12)
+
+[node name="pillar-square_col" type="StaticBody3D" parent="pillar-square/pillar-square"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar-square/pillar-square/pillar-square_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.575, 0)
+shape = SubResource("BoxShape3D_v25pu")
+
+[node name="pine-crooked" parent="." instance=ExtResource("26_zqm1m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 12)
+
+[node name="pine-crooked_col" type="StaticBody3D" parent="pine-crooked/pine-crooked"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pine-crooked/pine-crooked/pine-crooked_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.017913, 0.95407, 0)
+shape = SubResource("BoxShape3D_nyoun")
+
+[node name="pine-fall-crooked" parent="." instance=ExtResource("27_ii5wc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 12)
+
+[node name="pine-fall-crooked_col" type="StaticBody3D" parent="pine-fall-crooked/pine-fall-crooked"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pine-fall-crooked/pine-fall-crooked/pine-fall-crooked_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.017913, 0.95407, 0)
+shape = SubResource("BoxShape3D_erkh2")
+
+[node name="pine-fall" parent="." instance=ExtResource("28_4rn0y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 12)
+
+[node name="pine-fall_col" type="StaticBody3D" parent="pine-fall/pine-fall"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pine-fall/pine-fall/pine-fall_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.051228, 0)
+shape = SubResource("BoxShape3D_75u2u")
+
+[node name="pine" parent="." instance=ExtResource("29_ecrcr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 12)
+
+[node name="pine_col" type="StaticBody3D" parent="pine/pine"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pine/pine/pine_col"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.051228, 0)
+shape = SubResource("BoxShape3D_wtbiz")

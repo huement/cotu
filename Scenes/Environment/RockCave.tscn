@@ -1,0 +1,95 @@
+[gd_scene load_steps=11 format=3 uid="uid://pcgp86t81of3"]
+
+[ext_resource type="PackedScene" uid="uid://b338gm7m8jujv" path="res://resources/OutdoorParts/stone_gateway.glb" id="1_pfupt"]
+[ext_resource type="PackedScene" uid="uid://kacf376shcmv" path="res://resources/tile_sets/nature/cliff_cave_stone.glb" id="1_pikef"]
+[ext_resource type="PackedScene" uid="uid://cvfyeacr08bkj" path="res://resources/tile_sets/nature/cliff_large_stone.glb" id="3_owicr"]
+[ext_resource type="PackedScene" uid="uid://c5ytd1hqquj1s" path="res://resources/tile_sets/nature/cliff_top_stone.glb" id="4_bo3w6"]
+[ext_resource type="PackedScene" uid="uid://obtfq1vnf1h8" path="res://Scenes/Objects/Torch.tscn" id="5_o0dee"]
+[ext_resource type="PackedScene" uid="uid://ctdrbtf4iakl3" path="res://resources/tile_sets/nature/cliff_blockSlope_stone.glb" id="6_bo3w6"]
+[ext_resource type="PackedScene" uid="uid://besjncgoi2rom" path="res://resources/tile_sets/nature/cliff_blockQuarter_stone.glb" id="7_o0dee"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fov1k"]
+size = Vector3(1.9338379, 3.116211, 6.684616)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p5wh6"]
+shading_mode = 0
+albedo_color = Color(0.06879827, 0.06879828, 0.06879828, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nafxn"]
+size = Vector3(2, 3, 1)
+
+[node name="RockCave" type="Node3D"]
+
+[node name="cliff_cave_stone2" parent="." instance=ExtResource("1_pikef")]
+transform = Transform3D(-1.3113416e-07, 0, -3, 0, 3, 0, 3, 0, -1.3113416e-07, 1.4, -0.6074412, -0.11373097)
+
+[node name="StoneGateModel" parent="." instance=ExtResource("1_pfupt")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15759277, 0.75146484, 0.0002975464)
+shape = SubResource("BoxShape3D_fov1k")
+
+[node name="cliff_large_stone2" parent="." instance=ExtResource("3_owicr")]
+transform = Transform3D(-0.12526757, 0, -1.9960731, 0, 2, 0, 1.9960731, 0, -0.12526757, 0.29672182, -0.6524943, -2.2439883)
+
+[node name="cliff_large_stone3" parent="." instance=ExtResource("3_owicr")]
+transform = Transform3D(-0.12526757, 0, -1.9960731, 0, 2, 0, 1.9960731, 0, -0.12526757, 0.29672182, 0.3276292, -2.2439883)
+
+[node name="cliff_top_stone2" parent="." instance=ExtResource("4_bo3w6")]
+transform = Transform3D(-1.13649605e-07, 0, -2.6, 0, 2.6, 0, 2.6, 0, -1.13649605e-07, 0.99331546, -0.6043942, 2.3791938)
+
+[node name="Torch" parent="." instance=ExtResource("5_o0dee")]
+transform = Transform3D(-0.19966976, 0, 0.011488387, 0, 0.20000006, 0, -0.011488387, 0, -0.19966976, -3.6571794, 1.1835512, 0.9522378)
+
+[node name="Torch2" parent="." instance=ExtResource("5_o0dee")]
+transform = Transform3D(-0.0058956416, 0, 0.59997106, 0, 0.6, 0, -0.59997106, 0, -0.0058956416, 0.23879784, 1.4212128, 1.01511)
+
+[node name="Torch3" parent="." instance=ExtResource("5_o0dee")]
+transform = Transform3D(-0.0058956416, 0, 0.59997106, 0, 0.6, 0, -0.59997106, 0, -0.0058956416, 0.23879784, 1.4212128, -1.0657458)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(2.804101, 0, 0, 0, 1, 0, 0, 0, 1.3529797, -3.4489994, 0.7177917, -1.9808893)
+material_override = SubResource("StandardMaterial3D_p5wh6")
+mesh = SubResource("BoxMesh_nafxn")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(-6.5520396e-08, 0, 1.3529797, 0, 1, 0, -1.498932, 0, -5.9140618e-08, -5.6041365, 0.7177917, 0.15127468)
+material_override = SubResource("StandardMaterial3D_p5wh6")
+mesh = SubResource("BoxMesh_nafxn")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(2.7388813, 0, 0, 0, 1, 0, 0, 0, 2.5203419, -3.0759315, 0.7177917, 2.3351634)
+material_override = SubResource("StandardMaterial3D_p5wh6")
+mesh = SubResource("BoxMesh_nafxn")
+
+[node name="cliff_blockSlope_stone2" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.417351, 1.9052737, 3.186349)
+
+[node name="cliff_blockSlope_stone3" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.3789816, 1.8171966, 2.2146568)
+
+[node name="cliff_blockSlope_stone4" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.33223152, 1.9507322, 1.8220623)
+
+[node name="cliff_blockSlope_stone5" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.3789816, 2.1333637, 0.9980171)
+
+[node name="cliff_blockSlope_stone6" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.5757539, 2.245047, -1.8631005)
+
+[node name="cliff_blockSlope_stone8" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.07627821, 2.3109927, -0.99575716)
+
+[node name="cliff_blockSlope_stone9" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.30221653, 2.3383517, 0.027777255)
+
+[node name="cliff_blockSlope_stone7" parent="." instance=ExtResource("6_bo3w6")]
+transform = Transform3D(0.03767274, 0, -0.9992901, 0, 1, 0, 0.9992901, 0, 0.03767274, -0.4226861, 2.245047, -2.7543292)
+
+[node name="cliff_blockQuarter_stone2" parent="." instance=ExtResource("7_o0dee")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 6, -2.1985695, 1.9836884, 0.45059133)
+
+[node name="cliff_blockQuarter_stone3" parent="." instance=ExtResource("7_o0dee")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 6, -4.222905, 1.7814562, 0.45059133)

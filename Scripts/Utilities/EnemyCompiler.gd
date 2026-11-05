@@ -68,6 +68,14 @@ func compile_enemies() -> void:
 		if line.size() > 28:
 			enemy.enemy_type = line[28].strip_edges()
 
+		# Optional columns (index 29, 30): uniform model_scale, combat_forward_distance.
+		# Empty = keep EnemyData defaults.
+		if line.size() > 29 and not line[29].strip_edges().is_empty():
+			var s: float = float(line[29])
+			enemy.model_scale = Vector3(s, s, s)
+		if line.size() > 30 and not line[30].strip_edges().is_empty():
+			enemy.combat_forward_distance = float(line[30])
+
 		# Load 3D GLB mesh
 		if not enemy.model_path.is_empty() and ResourceLoader.exists(enemy.model_path):
 			enemy.model_scene = load(enemy.model_path) as PackedScene

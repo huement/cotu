@@ -62,11 +62,13 @@ func _render_grid() -> void:
 				existing = u
 				break
 
+		# Count real stack quantities, not entries
+		var qty: int = maxi(1, item.quantity)
 		if existing != null:
-			item_counts[existing] += 1
+			item_counts[existing] += qty
 		else:
 			unique_items.append(item)
-			item_counts[item] = 1
+			item_counts[item] = qty
 
 	# 1. Render occupied slots with icons and quantity badges
 	for i in range(unique_items.size()):

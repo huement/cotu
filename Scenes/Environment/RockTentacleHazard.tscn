@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Environment/TentacleHazard.gd" id="1_hazard"]
+[ext_resource type="PackedScene" uid="uid://dm3atssalq66m" path="res://resources/Enemies/rock_tentacle.glb" id="2_model"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_trigger"]
+resource_local_to_scene = true
+radius = 2.5
+
+[node name="RockTentacleHazard" type="Node3D"]
+script = ExtResource("1_hazard")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+
+[node name="TriggerArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TriggerArea"]
+shape = SubResource("SphereShape3D_trigger")

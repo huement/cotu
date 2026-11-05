@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" uid="uid://j28iufrfn4eb" path="res://resources/tile_sets/dungeon/Textures/colormap.png" id="1_tex"]
+[ext_resource type="PackedScene" uid="uid://d23reip6nrqgy" path="res://resources/tile_sets/dungeon/template-floor.glb" id="2_template_floor"]
+[ext_resource type="PackedScene" uid="uid://bo5tlwccl5hj5" path="res://resources/tile_sets/dungeon/template-floor-detail.glb" id="3_template_floor_detail"]
+[ext_resource type="PackedScene" uid="uid://c5ss40khhet28" path="res://resources/tile_sets/dungeon/template-floor-detail-a.glb" id="4_template_floor_detail_a"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dungeon"]
+resource_name = "colormap"
+cull_mode = 2
+albedo_texture = ExtResource("1_tex")
+texture_filter = 0
+
+[node name="DungeonFloorTiles" type="Node3D"]
+
+[node name="template-floor" parent="." instance=ExtResource("2_template_floor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="template-floor" parent="template-floor" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-floor-detail" parent="." instance=ExtResource("3_template_floor_detail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="template-floor-detail" parent="template-floor-detail" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
+
+[node name="template-floor-detail-a" parent="." instance=ExtResource("4_template_floor_detail_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+
+[node name="template-floor-detail-a" parent="template-floor-detail-a" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dungeon")
