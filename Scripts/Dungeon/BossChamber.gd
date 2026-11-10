@@ -10,6 +10,10 @@ extends DungeonRoom
 ##    north gate (Caps/Cap_N/Blocker, a BossExitGate) which leads to the row's `exit_scene`.
 ## The win is saved, so coming back later finds the boss gone and the side room open.
 ##
+## Instead of a DungeonBoss you can place a BossEnemy (enemy.tscn + BossEnemy.gd) as a child of the
+## chamber: then no boss is spawned from the CSV, and beating that enemy does the same things
+## (reward side = the CSV row's reward_side). Leave the row's boss_scene empty for those levels.
+##
 ## Reward rooms: EnvironmentE / EnvironmentW. Their DungeonChest children get the chest values in
 ## name order; any child with a `lore_title` (HornedSkull, WallMask) gets the lore values.
 
@@ -70,6 +74,10 @@ func _ready() -> void:
 # ==============================================================================
 
 func _spawn_boss() -> void:
+	var enemy_boss: BossEnemy = _find_placed_enemy_boss()
+	if enemy_boss != null:
+		enemy_boss.boss_defeated.connect(_on_enemy_boss_defeated)
+		return
 	boss = _find_placed_boss()
 	if boss == null and lore != null and not lore.boss_scene_path.is_empty():
 		var scene: PackedScene = load(lore.boss_scene_path) as PackedScene
@@ -99,10 +107,24 @@ func _find_placed_boss() -> DungeonBoss:
 	return null
 
 
+func _find_placed_enemy_boss() -> BossEnemy:
+	for child: Node in get_children():
+		if child is BossEnemy:
+			return child as BossEnemy
+	return null
+
+
 func _remove_placed_boss() -> void:
 	var placed: DungeonBoss = _find_placed_boss()
 	if placed != null:
 		placed.queue_free()
+	var enemy_boss: BossEnemy = _find_placed_enemy_boss()
+	if enemy_boss != null:
+		enemy_boss.queue_free()
+
+
+func _on_enemy_boss_defeated(_enemy: BossEnemy) -> void:
+	_on_boss_defeated(null, lore.reward_side if lore != null else "")
 
 
 func _on_boss_defeated(_boss: DungeonBoss, side: String) -> void:
@@ -110,13 +132,15 @@ func _on_boss_defeated(_boss: DungeonBoss, side: String) -> void:
 	_set_state("boss_defeated", true)
 	_set_state("opened_side", side)
 	if is_instance_valid(_exit_gate):
-		_exit_gate.unlock()
+		_exit_gate.is_locked = false # usable now; the opening is shown with the side wall below
 	var gs: Node = get_tree().root.get_node_or_null("GameState")
 	if is_instance_valid(gs) and gs.has_method("save_game"):
 		gs.call("save_game")
 	if side_drop_delay > 0.0:
 		await get_tree().create_timer(side_drop_delay).timeout
 	_open_side(side, true)
+	if is_instance_valid(_exit_gate):
+		_exit_gate.unlock(true)
 
 
 # ==============================================================================
@@ -221,6 +245,8 @@ func _setup_exit_gate() -> void:
 		_exit_gate.is_locked = lore.exit_requires_boss and not is_boss_defeated
 	else:
 		_exit_gate.is_locked = not is_boss_defeated
+	if not _exit_gate.is_locked and is_boss_defeated:
+		_exit_gate.unlock(false) # already beaten on an earlier visit: show the doorway open
 
 
 # ==============================================================================
@@ -232,8 +258,7 @@ func _state_id() -> String:
 
 
 func _map_id() -> String:
-	var scene: Node = get_tree().current_scene
-	return str(scene.name) if is_instance_valid(scene) else "default_dungeon"
+	return GameState.get_current_map_id()
 
 
 func _get_state() -> Dictionary:

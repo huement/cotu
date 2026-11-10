@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://c44jk0lssl1xy"]
+
+[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/skill.png" id="1_uqtqd"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_y67wi"]
+
+[resource]
+script = ExtResource("2_y67wi")
+item_id = "lrn_skill_crystal"
+item_name = "Skill Crystal"
+description = "A humming shard of memory-crystal. Hold it to teach one new skill to a party member."
+icon_path = "res://Data/Items/loot_icons/skill.png"
+icon = ExtResource("1_uqtqd")
+item_type = 4
+can_use_in_battle = false
+credit_value = 400
+max_durability = 1
+current_durability = 1
+is_consumable = true
+effects = "LearnSkill"

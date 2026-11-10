@@ -1,0 +1,153 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Menus/hud_game_menu.gd" id="1_menu"]
+[ext_resource type="Texture2D" path="res://ui/icons/square_cross.svg" id="2_close"]
+[ext_resource type="Texture2D" path="res://ui/HUD/main_menu_top.png" id="3_top"]
+
+[node name="HudGameMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 90
+script = ExtResource("1_menu")
+
+[node name="Root" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.62)
+
+[node name="MenuCluster" type="Control" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.5
+anchor_right = 0.95
+anchor_bottom = 0.5
+offset_top = -118.0
+offset_bottom = 118.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopBanner" type="TextureRect" parent="Root/MenuCluster"]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = -52.0
+offset_bottom = 5.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("3_top")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MenuPanel" type="PanelContainer" parent="Root/MenuCluster"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Inner" type="MarginContainer" parent="Root/MenuCluster/MenuPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 22
+
+[node name="VBox" type="VBoxContainer" parent="Root/MenuCluster/MenuPanel/Inner"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="Root/MenuCluster/MenuPanel/Inner/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="Root/MenuCluster/MenuPanel/Inner/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "GAME MENU"
+
+[node name="StatusLabel" type="Label" parent="Root/MenuCluster/MenuPanel/Inner/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Root/MenuCluster/MenuPanel/Inner/VBox/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Resume (Esc)"
+text = "RESUME"
+icon = ExtResource("2_close")
+
+[node name="MenuButtons" type="HBoxContainer" parent="Root/MenuCluster/MenuPanel/Inner/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="ConfirmPanel" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -290.0
+offset_top = -100.0
+offset_right = 290.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Inner" type="MarginContainer" parent="Root/ConfirmPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 22
+
+[node name="VBox" type="VBoxContainer" parent="Root/ConfirmPanel/Inner"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ConfirmTitle" type="Label" parent="Root/ConfirmPanel/Inner/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ARE YOU SURE?"
+
+[node name="ConfirmMessage" type="Label" parent="Root/ConfirmPanel/Inner/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+size_flags_vertical = 3
+text = "Message"
+autowrap_mode = 3
+
+[node name="ConfirmButtons" type="HBoxContainer" parent="Root/ConfirmPanel/Inner/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12

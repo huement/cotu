@@ -1,32 +1,35 @@
 # res://Scripts/Utilities/ItemCompiler.gd
 @tool
 extends EditorScript
+class_name ItemCompiler
+## Compiles Data/basic_items.csv into Equipment/Consumables/Misc .tres files.
 
-# Paths to search for the CSV file (checks project root and Data directory)
 const CSV_PATHS: Array[String] = [
+	"res://Data/basic_items.csv",
 	"res://Data/Items/basic_items.csv",
-	"res://Data/basic_items.csv"
 ]
-
 const OUTPUT_DIR_EQUIP: String = "res://Data/Items/Equipment/"
 const OUTPUT_DIR_CONSUMABLE: String = "res://Data/Items/Consumables/"
 const OUTPUT_DIR_MISC: String = "res://Data/Items/Misc/"
 
+
 func _run() -> void:
 	compile_items()
 
-func compile_items() -> void:
+
+## Callable from the editor (_run) or a headless SceneTree runner.
+static func compile_items() -> int:
 	var csv_path: String = _find_valid_csv_path()
 	if csv_path.is_empty():
-		printerr("Item Compiler Error: Could not locate 'Items - basic_items.csv'!")
-		return
+		printerr("Item Compiler Error: Could not locate 'basic_items.csv'!")
+		return 0
 
 	_ensure_directories()
 
 	var file := FileAccess.open(csv_path, FileAccess.READ)
 	if file == null:
 		printerr("Item Compiler Error: Failed to open CSV file at ", csv_path)
-		return
+		return 0
 
 	var _header: PackedStringArray = file.get_csv_line()
 	var count: int = 0
@@ -50,14 +53,33 @@ func compile_items() -> void:
 		item.description = line[10].strip_edges()
 		item.icon_path = line[11].strip_edges()
 
-		if line.size() >= 13: item.effects = line[12].strip_edges()
-		if line.size() >= 14: item.effect_amount = float(line[13])
-		if line.size() >= 15: item.effect_element = _parse_effect_element(line[14].strip_edges())
-		if line.size() >= 16: item.effect_stat = line[15].strip_edges()
-		if line.size() >= 17: item.weapon_type = _parse_weapon_type(line[16].strip_edges())
-		if line.size() >= 18: item.is_consumable = line[17].strip_edges().to_lower() in ["true", "1", "t", "yes"]
-		if line.size() >= 19: _apply_vfx_frames(item, line[18].strip_edges())
-		if line.size() >= 20: item.target_type = _parse_target_type(line[19].strip_edges())
+		if line.size() >= 13:
+			item.effects = line[12].strip_edges()
+		if line.size() >= 14:
+			item.effect_amount = float(line[13])
+		if line.size() >= 15:
+			item.effect_element = _parse_effect_element(line[14].strip_edges())
+		if line.size() >= 16:
+			item.effect_stat = line[15].strip_edges()
+		if line.size() >= 17:
+			item.weapon_type = _parse_weapon_type(line[16].strip_edges())
+		if line.size() >= 18:
+			item.is_consumable = _parse_bool(line[17])
+		if line.size() >= 19:
+			_apply_vfx_frames(item, line[18].strip_edges())
+		if line.size() >= 20:
+			item.target_type = _parse_target_type(line[19].strip_edges())
+		if line.size() >= 21:
+			item.is_throwable = _parse_bool(line[20])
+		if line.size() >= 22:
+			var granted_raw: String = line[21].strip_edges()
+			if not granted_raw.is_empty():
+				var granted: Array[String] = []
+				for part: String in granted_raw.split("|"):
+					var effect_id: String = part.strip_edges()
+					if not effect_id.is_empty():
+						granted.append(effect_id)
+				item.granted_status_effects = granted
 
 		item.stat_effect = {}
 		if item.heal_amount > 0:
@@ -74,78 +96,126 @@ func compile_items() -> void:
 		elif item.item_type in [ItemData.ItemType.POTION, ItemData.ItemType.CONSUMABLE] or item.is_consumable:
 			target_dir = OUTPUT_DIR_CONSUMABLE
 
-		# 🎯 SANITIZED FILENAME: item_id.to_pascal_case() eliminates special characters
 		var safe_name: String = item.item_id.to_pascal_case() + ".tres"
 		var save_path: String = target_dir + safe_name
+		var old_uid: int = ResourceLoader.get_resource_uid(save_path) if ResourceLoader.exists(save_path) else ResourceUID.INVALID_ID
 
 		var err := ResourceSaver.save(item, save_path)
 		if err == OK:
+			if old_uid != ResourceUID.INVALID_ID:
+				ResourceSaver.set_uid(save_path, old_uid)
 			count += 1
 		else:
 			printerr("Failed to save Item resource for: ", item.item_name, " Error Code: ", err)
 
-	print("Data Compiler Success: Created/Updated ", count, " Item .tres files from ", csv_path)
+	print("Item Compiler Success: Created/Updated ", count, " Item .tres files from ", csv_path)
+	return count
 
-func _find_valid_csv_path() -> String:
+
+static func _find_valid_csv_path() -> String:
 	for path in CSV_PATHS:
 		if FileAccess.file_exists(path):
 			return path
 	return ""
 
-func _ensure_directories() -> void:
-	for dir in [OUTPUT_DIR_EQUIP, OUTPUT_DIR_CONSUMABLE, OUTPUT_DIR_MISC]:
-		if not DirAccess.dir_exists_absolute(dir):
-			DirAccess.make_dir_recursive_absolute(dir)
 
-func _parse_item_type(type_str: String) -> ItemData.ItemType:
+static func _ensure_directories() -> void:
+	for dir_path: String in [OUTPUT_DIR_EQUIP, OUTPUT_DIR_CONSUMABLE, OUTPUT_DIR_MISC]:
+		if not DirAccess.dir_exists_absolute(dir_path):
+			DirAccess.make_dir_recursive_absolute(dir_path)
+
+
+static func _parse_bool(s: String) -> bool:
+	return s.strip_edges().to_lower() in ["true", "1", "t", "yes"]
+
+
+static func _parse_item_type(type_str: String) -> ItemData.ItemType:
 	match type_str.to_upper():
-		"WEAPON": return ItemData.ItemType.WEAPON
-		"ARMOR": return ItemData.ItemType.ARMOR
-		"POTION": return ItemData.ItemType.POTION
-		"CONSUMABLE": return ItemData.ItemType.CONSUMABLE
-		"EQUIPMENT": return ItemData.ItemType.EQUIPMENT
-		_: return ItemData.ItemType.MISC
+		"WEAPON":
+			return ItemData.ItemType.WEAPON
+		"ARMOR":
+			return ItemData.ItemType.ARMOR
+		"POTION":
+			return ItemData.ItemType.POTION
+		"CONSUMABLE":
+			return ItemData.ItemType.CONSUMABLE
+		"EQUIPMENT":
+			return ItemData.ItemType.EQUIPMENT
+		_:
+			return ItemData.ItemType.MISC
 
-func _parse_equip_slot(slot_str: String) -> ItemData.EquipmentSlot:
+
+static func _parse_equip_slot(slot_str: String) -> ItemData.EquipmentSlot:
 	match slot_str.to_upper():
-		"HEAD": return ItemData.EquipmentSlot.HEAD
-		"BODY": return ItemData.EquipmentSlot.BODY
-		"ARMS": return ItemData.EquipmentSlot.ARMS
-		"LEGS": return ItemData.EquipmentSlot.LEGS
-		"FEET": return ItemData.EquipmentSlot.FEET
-		"RIGHT_HAND": return ItemData.EquipmentSlot.RIGHT_HAND
-		"LEFT_HAND": return ItemData.EquipmentSlot.LEFT_HAND
-		"BOTH_HANDS": return ItemData.EquipmentSlot.BOTH_HANDS
-		"ACCESSORY": return ItemData.EquipmentSlot.ACCESSORY_1
-		_: return ItemData.EquipmentSlot.NONE
+		"HEAD":
+			return ItemData.EquipmentSlot.HEAD
+		"BODY":
+			return ItemData.EquipmentSlot.BODY
+		"ARMS":
+			return ItemData.EquipmentSlot.ARMS
+		"LEGS":
+			return ItemData.EquipmentSlot.LEGS
+		"FEET":
+			return ItemData.EquipmentSlot.FEET
+		"RIGHT_HAND":
+			return ItemData.EquipmentSlot.RIGHT_HAND
+		"LEFT_HAND":
+			return ItemData.EquipmentSlot.LEFT_HAND
+		"BOTH_HANDS":
+			return ItemData.EquipmentSlot.BOTH_HANDS
+		"ACCESSORY", "ACCESSORY_1":
+			return ItemData.EquipmentSlot.ACCESSORY_1
+		"ACCESSORY_2":
+			return ItemData.EquipmentSlot.ACCESSORY_2
+		_:
+			return ItemData.EquipmentSlot.NONE
+
 
 ## Empty = SINGLE_PARTY_MEMBER (the old default for every item)
-func _parse_target_type(target_str: String) -> ItemData.TargetType:
+static func _parse_target_type(target_str: String) -> ItemData.TargetType:
 	match target_str.to_upper():
-		"ALL_PARTY", "PARTY", "ALL_ALLIES": return ItemData.TargetType.ALL_PARTY
-		"SINGLE_ENEMY", "ENEMY": return ItemData.TargetType.SINGLE_ENEMY
-		"ALL_ENEMIES", "ENEMIES", "ALL_ENEMY": return ItemData.TargetType.ALL_ENEMIES
-		"NONE": return ItemData.TargetType.NONE
-		_: return ItemData.TargetType.SINGLE_PARTY_MEMBER
+		"ALL_PARTY", "PARTY", "ALL_ALLIES":
+			return ItemData.TargetType.ALL_PARTY
+		"SINGLE_ENEMY", "ENEMY":
+			return ItemData.TargetType.SINGLE_ENEMY
+		"ALL_ENEMIES", "ENEMIES", "ALL_ENEMY":
+			return ItemData.TargetType.ALL_ENEMIES
+		"NONE":
+			return ItemData.TargetType.NONE
+		_:
+			return ItemData.TargetType.SINGLE_PARTY_MEMBER
 
-func _parse_weapon_type(wp_str: String) -> ItemData.WeaponType:
+
+static func _parse_weapon_type(wp_str: String) -> ItemData.WeaponType:
 	match wp_str.to_upper():
-		"BLADE": return ItemData.WeaponType.BLADE
-		"BASH": return ItemData.WeaponType.BASH
-		"RANGED": return ItemData.WeaponType.RANGED
-		_: return ItemData.WeaponType.NONE
+		"BLADE":
+			return ItemData.WeaponType.BLADE
+		"BASH":
+			return ItemData.WeaponType.BASH
+		"RANGED":
+			return ItemData.WeaponType.RANGED
+		_:
+			return ItemData.WeaponType.NONE
 
-func _parse_effect_element(elem_str: String) -> ItemData.EffectElement:
+
+static func _parse_effect_element(elem_str: String) -> ItemData.EffectElement:
 	match elem_str.to_upper():
-		"MAGIC": return ItemData.EffectElement.MAGIC
-		"BLADE": return ItemData.EffectElement.BLADE
-		"RANGED": return ItemData.EffectElement.RANGED
-		"BASH": return ItemData.EffectElement.BASH
-		"LIFE": return ItemData.EffectElement.LIFE
-		_: return ItemData.EffectElement.NONE
+		"MAGIC":
+			return ItemData.EffectElement.MAGIC
+		"BLADE":
+			return ItemData.EffectElement.BLADE
+		"RANGED":
+			return ItemData.EffectElement.RANGED
+		"BASH":
+			return ItemData.EffectElement.BASH
+		"LIFE":
+			return ItemData.EffectElement.LIFE
+		_:
+			return ItemData.EffectElement.NONE
+
 
 ## Safely loads and assigns a SpriteFrames resource from a CSV string path
-func _apply_vfx_frames(target_resource: Resource, vfx_path_string: String) -> void:
+static func _apply_vfx_frames(target_resource: Resource, vfx_path_string: String) -> void:
 	var clean_path: String = vfx_path_string.strip_edges()
 	if clean_path.is_empty():
 		return
@@ -155,4 +225,4 @@ func _apply_vfx_frames(target_resource: Resource, vfx_path_string: String) -> vo
 		if is_instance_valid(vfx_frames):
 			target_resource.set("attack_vfx", vfx_frames)
 	else:
-		push_warning("DataCompiler: VFX file not found at path: %s" % clean_path)
+		push_warning("ItemCompiler: VFX file not found at path: %s" % clean_path)

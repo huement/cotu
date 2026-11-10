@@ -3,34 +3,19 @@ extends Node
 
 ## Standalone Debug Controller for testing combat triggers and UI feedback FX.
 ##
-## Hotkeys:
-##   [B] - Single Tap: Toggle Scavenger/Zombie Encounter. Double Tap: Spawn Ghost Encounter.
-##   [N] - Direct Spawn Ghost Encounter.
-##   [H] - Test Chevron Flash Damage FX.
-##   [V] - Test Nine HUD Assistant Voice ("cant-sleep-here").
+## No hotkeys of its own any more: everything is a button in the debug menu (Scripts/Testing/DebugMenu.gd,
+## open with ` in debug builds):
+##   MIXED FIGHT  -> _toggle_combat_encounter()  (Scavenger + Zombie Cat)
+##   GHOST FIGHT  -> _trigger_ghost_encounter()
+##   END BATTLE is handled by the debug menu itself (ends like a retreat - no victory screen).
+##   NINE VOICE TEST -> _test_nine_hud()
+##   LEVEL UP (debug menu) replaces the old H / L keys (_test_level_up_screen / _simulate_level_up).
+## Add `func open_debug_panel() -> void` here and the debug menu shows an OPEN BATTLE TESTER button for it.
 
 @export var enemy_a_path: String = "res://Data/Enemies/EnScavengerCyclops.tres"
 @export var enemy_zombie_path: String = "res://Data/Enemies/EnZombieCat.tres"
 @export var enemy_ghost_path: String = "res://Data/Enemies/EnGhost.tres"
 @export var legacy_zombie_path: String = "res://Data/Enemies/ZombieCat_Base.tres"
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not OS.is_debug_build():
-		return
-
-	if event is InputEventKey and event.pressed and not event.echo:
-		match event.keycode:
-			KEY_B:
-				_toggle_combat_encounter()
-			KEY_N:
-				_trigger_ghost_encounter()
-			KEY_H:
-				_test_chevron_flash()
-			KEY_V:
-				_test_nine_hud()
-			KEY_L:
-				_simulate_level_up()
 
 
 func _toggle_combat_encounter() -> void:
@@ -140,11 +125,41 @@ func _ensure_material_texture(enemy_data: Resource) -> void:
 			std_mat.albedo_texture = load(tex_path) as Texture2D
 
 
-func _test_chevron_flash() -> void:
+func _test_level_up_screen() -> void:
+	var active_party: Array = _get_active_party()
+	var candidates: Array[Resource] = []
+	for slot: Variant in active_party:
+		var cat: Resource = slot as Resource
+		if not is_instance_valid(cat):
+			continue
+		var hp: int = int(cat.get("current_hp")) if "current_hp" in cat else 1
+		if hp > 0:
+			candidates.append(cat)
+
+	if candidates.is_empty():
+		push_warning("BattleTest: [H Key] No living party members for Level Up screen.")
+		return
+
+	var pick: Resource = candidates[randi() % candidates.size()]
+	if pick is CatCharacter:
+		var cat_char: CatCharacter = pick as CatCharacter
+		if not cat_char.has_unspent_points():
+			cat_char.grant_level_points()
+			cat_char.pending_level_rolls += 1 # show the bonus dice too
+			print("BattleTest: Seeded level points for %s (stat=%d skill=%d spell=%d)." % [
+				cat_char.name,
+				cat_char.unspent_stat_points,
+				cat_char.unspent_skill_points,
+				cat_char.unspent_spell_points,
+			])
+
 	var sb: Node = SignalBus
-	if is_instance_valid(sb) and sb.has_signal("chevron_flash_requested"):
-		print("BattleTest: [H Key] Requesting chevron flash FX...")
-		sb.chevron_flash_requested.emit(true)
+	if is_instance_valid(sb) and sb.has_signal(&"level_up_screen_requested"):
+		var cat_name: String = str(pick.get("name")) if "name" in pick else "Unknown"
+		print("BattleTest: [H Key] Opening Level Up screen for %s..." % cat_name)
+		sb.level_up_screen_requested.emit(pick)
+	else:
+		push_warning("BattleTest: SignalBus.level_up_screen_requested missing!")
 
 
 func _test_nine_hud() -> void:
@@ -162,8 +177,8 @@ func _build_test_loot_table(item_count: int = 2) -> Resource:
 	var item1: ItemData = null
 	var item2: ItemData = null
 
-	var paths_1: Array[String] = ["res://Data/Items/GemDataQuartz.tres", "res://Data/Items/DataQuartz.tres"]
-	var paths_2: Array[String] = ["res://Data/Items/ConHealthVial.tres", "res://Data/Items/HealthVial.tres"]
+	var paths_1: Array[String] = ["res://Data/Items/Loot/GemDataQuartz.tres", "res://Data/Items/GemDataQuartz.tres"]
+	var paths_2: Array[String] = ["res://Data/Items/Consumables/PotHealthVial.tres", "res://Data/Items/ConHealthVial.tres"]
 
 	for path in paths_1:
 		if ResourceLoader.exists(path):
@@ -183,7 +198,7 @@ func _build_test_loot_table(item_count: int = 2) -> Resource:
 
 	if not is_instance_valid(item2):
 		item2 = ItemData.new()
-		item2.item_id = "con_health_vial"
+		item2.item_id = "pot_health_vial"
 		item2.item_name = "Neon-Tinged Health Vial"
 		item2.credit_value = 50
 

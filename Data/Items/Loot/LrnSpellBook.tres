@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://cu8mxo8c345a2"]
+
+[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/book.png" id="1_07vmr"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_ih2dr"]
+
+[resource]
+script = ExtResource("2_ih2dr")
+item_id = "lrn_spell_book"
+item_name = "Spell Book"
+description = "An old tome humming with stored incantations. Read it to teach one new spell to a party member whose class can use it."
+icon_path = "res://Data/Items/loot_icons/book.png"
+icon = ExtResource("1_07vmr")
+item_type = 4
+can_use_in_battle = false
+credit_value = 500
+max_durability = 1
+current_durability = 1
+is_consumable = true
+effects = "LearnSpell"

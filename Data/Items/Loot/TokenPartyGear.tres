@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/chip.png" id="1_iqe7p"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_uwnyy"]
+
+[resource]
+script = ExtResource("2_uwnyy")
+item_id = "token_party_gear"
+item_name = "Party Gear"
+description = "Placeholder chest loot. Expands into one random armor or weapon usable by the current party (regular tier)."
+icon_path = "res://Data/Items/loot_icons/chip.png"
+icon = ExtResource("1_iqe7p")
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+max_durability = 1
+current_durability = 1
+effects = "PartyGear"

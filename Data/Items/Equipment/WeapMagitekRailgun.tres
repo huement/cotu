@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dp4a7lkui2ts4"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_n54qg"]
+
+[resource]
+script = ExtResource("1_n54qg")
+item_id = "weap_magitek_railgun"
+item_name = "Magitek Railgun"
+description = "Fires solid tungsten slugs propelled by electromagic fields."
+icon_path = "res://Assets/Icons/Items/magitek_railgun.png"
+item_type = 1
+target_type = 2
+equipment_slot = 8
+weapon_type = 3
+attack_bonus = 75
+speed_bonus = -5
+credit_value = 1600
+effects = "Pierce"
+effect_amount = 0.3
+effect_element = 3

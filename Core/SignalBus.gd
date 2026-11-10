@@ -22,6 +22,8 @@ signal day_night_changed(is_night: bool)
 # Combat Triggers
 signal combat_started(enemy_data_or_group: Variant, player_party: Array, enemy_facing: String)
 signal combat_ended(victory: bool)
+## Every party member is down (emitted right after combat_ended(false)). Not sent for fleeing.
+signal party_defeated
 ## CombatManager's watchdog found a running battle with the battle HUD hidden; HUD shows it again.
 signal battle_hud_recovery_requested(enemy_data_or_group: Variant, player_party: Array)
 signal combat_phase_changed(new_phase: CombatPhase)
@@ -48,6 +50,10 @@ signal chevron_flash_requested(is_player_hit: bool)
 signal character_xp_changed(slot_index: int, current_xp: int, max_xp: int)
 signal character_leveled_up(slot_index: int, new_level: int)
 signal party_gold_changed(new_total: int, amount_changed: int)
+## Opens the Level Up allocation screen for a party member (CatCharacter).
+signal level_up_screen_requested(character: Resource)
+## Opens the quartermaster / shop UI (optional stock override in data).
+signal shop_requested(data: Dictionary)
 
 # Popups & UI
 signal popup_requested(action_type: StringName, data: Dictionary)
@@ -55,6 +61,8 @@ signal popup_confirmed(action_type: StringName, extra_data: Dictionary)
 signal portrait_clicked(slot_index: int)
 signal battle_victory_popup_requested(data: Dictionary)
 signal time_period_changed(new_period: String)
+## Nine voice assistant: basename under Audio/Voice/ (e.g. "intro" → intro.mp3).
+signal nine_speak_requested(clip_basename: String)
 
 # JUICE IT
 signal camera_shake_requested(trauma: float)
@@ -66,7 +74,11 @@ signal target_vfx_requested(enemy_id: String, vfx_frames: SpriteFrames, trauma_a
 signal screen_slice_requested()
 ## One big slash on the exploration HUD (environmental hazards)
 signal hazard_slash_requested()
+# Weapon Animation & Impact Synchronization
+signal weapon_impact_occurred
+signal weapon_animation_finished
 signal weapon_swing_requested(anim_name: String)
+
 ## Lore object scare: aura overlay + image flash (see LoreScareFX)
 signal lore_scare_requested(data: Dictionary)
 

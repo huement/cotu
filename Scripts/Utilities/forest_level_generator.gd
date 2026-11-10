@@ -2,11 +2,16 @@
 @tool
 extends EditorScript
 
+## Every outdoor map uses the pixel sky. Use pixel_sky_overcast.tres for gloomier maps.
+const PIXEL_SKY_MATERIAL: String = "res://resources/Environment/pixel_sky.tres"
+
 func _run() -> void:
 	# --- CONFIGURATION (Edit these values before selecting File -> Run) ---
-	var scene_name: String = "GloomReach"
+	# Prefer Scripts/Utilities/generate_green_grove.gd for the starter clearing
+	# (painted floor, 3-sided tree wall, stone gate, return-visit slime drones).
+	var scene_name: String = "BrokenBoneMarsh"
 	var include_chests: bool = true
-	var include_minotaurs: bool = true
+	var include_minotaurs: bool = false
 
 	_create_forest_level(scene_name, include_chests, include_minotaurs)
 
@@ -29,7 +34,8 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 	env.background_mode = Environment.BG_SKY
 	
 	var sky := Sky.new()
-	sky.sky_material = ProceduralSkyMaterial.new()
+	# Pixel-art sky (clouds + night stars live in the shader; DayNightCycle drives it).
+	sky.sky_material = load(PIXEL_SKY_MATERIAL) if ResourceLoader.exists(PIXEL_SKY_MATERIAL) else ProceduralSkyMaterial.new()
 	env.sky = sky
 	
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
@@ -55,7 +61,7 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 	root.add_child(spawn_point)
 
 	# 4. Empty GridMaps (Ready for tile painting)
-	var floor_mesh_lib = load("res://resources/mesh_library/knature_mesh_library.tres")
+	var floor_mesh_lib = load("res://resources/mesh_library/blackmarsh_mesh_library.tres")
 	var wall_mesh_lib = load("res://resources/mesh_library/forestwall_mesh_library.tres")
 	var replacer_script = load("res://Scripts/Environment/forest_grid_map_replacer.gd")
 
@@ -80,8 +86,8 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 	wall_map2.mesh_library = wall_mesh_lib
 	wall_map2.cell_scale = 2.0
 	wall_map2.set_script(replacer_script)
-	if ResourceLoader.exists("res://Scenes/Environment/forest_wall_chunk.tscn"):
-		wall_map2.set("forest_chunk_scene", load("res://Scenes/Environment/forest_wall_chunk.tscn"))
+	if ResourceLoader.exists("res://Scenes/Environment/forest_wall_chunk_thick.tscn"):
+		wall_map2.set("forest_chunk_scene", load("res://Scenes/Environment/forest_wall_chunk_thick.tscn"))
 	root.add_child(wall_map2)
 
 	var wall_map3 := GridMap.new()
@@ -142,21 +148,6 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 	quad_mesh.material = mist_mat
 	ground_mist.mesh = quad_mesh
 	root.add_child(ground_mist)
-
-	# 8. CloudLayer
-	var cloud_layer := Node3D.new()
-	cloud_layer.name = "CloudLayer"
-	cloud_layer.position = Vector3(0.0, 15.0, 0.0)
-	if ResourceLoader.exists("res://Scripts/Environment/cloud_layer.gd"):
-		cloud_layer.set_script(load("res://Scripts/Environment/cloud_layer.gd"))
-		cloud_layer.set("min_scale", 0.5)
-		cloud_layer.set("max_scale", 0.65)
-	root.add_child(cloud_layer)
-
-	_add_cloud_instance(cloud_layer, "res://resources/OutdoorParts/low_poly_cloud.glb", Vector3(0, 15, -16.78), Vector3.ONE)
-	_add_cloud_instance(cloud_layer, "res://resources/OutdoorParts/low_poly_cloud-2.glb", Vector3.ZERO, Vector3.ONE)
-	_add_cloud_instance(cloud_layer, "res://resources/OutdoorParts/low_poly_cloud-3.glb", Vector3(18.68, -3.9, -14.17), Vector3(2, 2, 2))
-	_add_cloud_instance(cloud_layer, "res://resources/OutdoorParts/low_poly_cloud-4.glb", Vector3(-10.7, 0, -19.97), Vector3(3, 3, 3))
 
 	# 9. DayLightCycle & Moon
 	var day_light_cycle := Node3D.new()
@@ -247,13 +238,6 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 		push_error("Failed to pack scene root node.")
 
 	root.queue_free()
-
-func _add_cloud_instance(parent: Node, glb_path: String, pos: Vector3, scale_vec: Vector3) -> void:
-	if ResourceLoader.exists(glb_path):
-		var inst = load(glb_path).instantiate()
-		inst.position = pos
-		inst.scale = scale_vec
-		parent.add_child(inst)
 
 func _set_owner_recursive(node: Node, root_node: Node) -> void:
 	for child in node.get_children():

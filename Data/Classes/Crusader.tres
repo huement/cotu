@@ -18,3 +18,4 @@ level_spells_unlock = 3
 stat_points_per_level = 4
 skill_points_per_level = 4
 spell_points_per_level = 2
+allowed_weapon_types = Array[int]([1, 2])

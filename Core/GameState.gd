@@ -12,6 +12,11 @@ signal core_state_changed(new_mode: Mode)
 
 const SAVE_PATH: String = "user://save_game.tres"
 const DEFAULT_SAVE_PATH: String = "res://Data/default_save.tres"
+## Extra items every new game starts with in the pack (one entry = one item).
+const STARTER_BONUS_ITEMS: Array[String] = [
+	"res://Data/Items/Equipment/WeapKatIronBroadsword.tres",
+	"res://Data/Items/Equipment/WeapKatIronBroadsword.tres",
+]
 
 var current_mode: Mode = Mode.EXPLORING:
 	set(value):
@@ -31,6 +36,20 @@ var current_mode: Mode = Mode.EXPLORING:
 			current_time_period = value
 			SignalBus.emit_signal("time_period_changed", current_time_period)
 			
+## Shared day/night clock (0..1, 0.25 = morning). Every map's DayNightCycle reads and advances it,
+## so time no longer resets when you change maps. Saved with the game.
+var world_time: float = 0.25
+## Seconds played (only counts while the game isn't paused).
+var play_time_seconds: float = 0.0
+## Where the last loaded save left the party: { map_scene_path, player_cell, player_facing, location_name }.
+## MapManager consumes it once when the world starts (consume_pending_location()).
+var pending_location: Dictionary = {}
+## Extra loot for the battle about to start, set by boss scripts right before they emit combat_started
+## (register_boss_rewards). CombatManager pays it out on victory and clears it after any battle.
+var pending_boss_rewards: Dictionary = {}
+## Last place we knew the party was standing - used when saving from somewhere without a live map.
+var _last_location: Dictionary = {}
+
 var active_character_index: int = 0
 var post_combat_immunity_timer: float = 0.0
 var encounter_lock_timer: float = 0.0
@@ -48,6 +67,7 @@ var _victory_screen_wait: float = 0.0
 
 
 func _process(delta: float) -> void:
+	play_time_seconds += delta
 	if post_combat_immunity_timer > 0.0:
 		post_combat_immunity_timer -= delta
 	if encounter_lock_timer > 0.0:
@@ -128,6 +148,23 @@ func get_active_cat() -> Resource:
 	return null
 
 
+## Highest level among living party members. Used for StoneGate / zone unlock checks.
+## Dead or empty slots are ignored; returns 0 if nobody is alive.
+func get_party_level() -> int:
+	if current_party == null:
+		return 0
+	var highest: int = 0
+	var party_slots: Array = current_party.slots
+	for slot: Variant in party_slots:
+		var cat: CatCharacter = slot as CatCharacter
+		if not is_instance_valid(cat):
+			continue
+		if cat.current_hp <= 0:
+			continue
+		highest = maxi(highest, cat.level)
+	return highest
+
+
 func _ready() -> void:
 	_initialize_active_session()
 
@@ -176,31 +213,64 @@ func _initialize_active_session() -> void:
 		_load_default_save()
 
 
-func _load_default_save() -> void:
+## equip_starters = false when the caller swaps in its own party right after (roster New Game).
+func _load_default_save(equip_starters: bool = true) -> void:
 	if ResourceLoader.exists(DEFAULT_SAVE_PATH):
 		var default_save := load(DEFAULT_SAVE_PATH) as SaveGame
 		if default_save != null and default_save.party != null:
 			current_party = default_save.party.duplicate(true) as DungeonParty
+			# Starter characters are external .tres files (Data/StarterParty/) - duplicate(true) doesn't
+			# copy those, so copy each one or the game would edit the cached starter resources.
+			for i: int in current_party.slots.size():
+				var starter: Resource = current_party.slots[i]
+				if starter != null:
+					current_party.slots[i] = starter.duplicate(true)
 			inventory = default_save.inventory.duplicate(true) as Inventory if default_save.inventory != null else Inventory.new()
+			for path: String in STARTER_BONUS_ITEMS:
+				var bonus: ItemData = load(path) as ItemData
+				if bonus != null:
+					inventory.add_item(bonus.duplicate(true), 1)
 			inventory.normalize_stacks()
+			if equip_starters:
+				# Class starter gear (Data/basic_items.csv); spares go in the pack.
+				StarterKit.equip_party(current_party, inventory)
 			current_floor_id = default_save.current_floor_id
-			if "party_gold" in default_save:
-				party_gold = default_save.party_gold
+			party_gold = default_save.party_gold
+			# Fresh world: no opened chests / solved puzzles / beaten bosses, morning, start map.
+			environment_states = {}
+			world_time = 0.25
+			current_time_period = "MORNING"
+			play_time_seconds = 0.0
+			pending_location = {}
+			_last_location = {}
 			_sync_party_references()
-			save_game()
+			save_game(false) # the old world may still be loaded - don't record its map
 			print("GameState: Starter party successfully initialized from default_save.tres")
 			return
 
 	printerr("GameState ERROR: Failed to load default_save.tres from ", DEFAULT_SAVE_PATH)
 
 
-func save_game() -> bool:
+## include_location = false skips live capture (world may be unloading / not ready).
+## It still writes `_last_location` when set — needed so a brand-new game keeps
+## GreenGrove + SpawnPointNewGame across Continue before the party has moved.
+func save_game(include_location: bool = true) -> bool:
 	var save := SaveGame.new()
 	save.party = current_party
 	save.inventory = inventory
 	save.current_floor_id = current_floor_id
-	if "party_gold" in save:
-		save.party_gold = party_gold
+	save.save_version = SaveGame.CURRENT_VERSION
+	save.party_gold = party_gold
+	save.environment_states = environment_states.duplicate(true)
+	save.world_time = world_time
+	save.time_period = current_time_period
+	save.play_time_seconds = play_time_seconds
+	var loc: Dictionary = capture_location() if include_location else _last_location
+	save.map_scene_path = str(loc.get("map_scene_path", ""))
+	save.location_name = str(loc.get("location_name", ""))
+	save.player_cell = loc.get("player_cell", Vector2i.ZERO) as Vector2i
+	save.player_facing = str(loc.get("player_facing", "NORTH"))
+	save.spawn_marker = str(loc.get("spawn_marker", ""))
 	save.save_timestamp = Time.get_datetime_string_from_system()
 
 	var err := ResourceSaver.save(save, SAVE_PATH)
@@ -215,7 +285,8 @@ func save_game() -> bool:
 func load_game() -> bool:
 	if not ResourceLoader.exists(SAVE_PATH):
 		return false
-	var save := ResourceLoader.load(SAVE_PATH) as SaveGame
+	# CACHE_MODE_IGNORE: read fresh copies, otherwise the cached (live, unsaved) party comes back.
+	var save := ResourceLoader.load(SAVE_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as SaveGame
 	if save == null or save.party == null or save.party.slots == null:
 		return false
 
@@ -231,12 +302,103 @@ func load_game() -> bool:
 	inventory = save.inventory if save.inventory != null else Inventory.new()
 	inventory.normalize_stacks() # Older saves stored one entry per potion
 	current_floor_id = save.current_floor_id
-	if "party_gold" in save:
-		party_gold = save.party_gold
+	party_gold = save.party_gold
+	environment_states = save.environment_states.duplicate(true)
+	world_time = save.world_time
+	play_time_seconds = save.play_time_seconds
+	if not save.time_period.is_empty():
+		current_time_period = save.time_period
+	pending_location = {}
+	_last_location = {}
+	if not save.map_scene_path.is_empty():
+		pending_location = {
+			"map_scene_path": save.map_scene_path,
+			"location_name": save.location_name,
+			"player_cell": save.player_cell,
+			"player_facing": save.player_facing,
+			"spawn_marker": save.spawn_marker,
+		}
+		_last_location = pending_location.duplicate()
 
 	_sync_party_references()
 	print("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, SAVE_PATH])
 	return true
+
+
+## Where the party is right now: map path, cell, facing (falls back to the last known place).
+## A live capture clears spawn_marker — once they've been placed in the world, Continue
+## should restore the cell, not the new-game intro marker.
+func capture_location() -> Dictionary:
+	var map_mgr: MapManager = get_tree().root.find_child("MapManager", true, false) as MapManager
+	var player: DungeonPlayer = get_tree().get_first_node_in_group(&"player") as DungeonPlayer
+	if is_instance_valid(map_mgr) and is_instance_valid(map_mgr.active_map_instance) and is_instance_valid(player):
+		var path: String = map_mgr.active_map_instance.scene_file_path
+		if not path.is_empty():
+			_last_location = {
+				"map_scene_path": path,
+				"location_name": str(map_mgr.active_map_instance.name),
+				"player_cell": player.current_grid_pos,
+				"player_facing": player.get_facing_name(),
+				"spawn_marker": "",
+			}
+	return _last_location
+
+
+## Key for environment_states: the active map's name ("FeroShaw", "WindmillCave1"...), so objects
+## with the same object_id on different maps (e.g. the BossChamber prefab's chest) don't share state.
+func get_current_map_id() -> String:
+	var map_mgr: MapManager = get_tree().root.find_child("MapManager", true, false) as MapManager
+	if is_instance_valid(map_mgr) and is_instance_valid(map_mgr.active_map_instance):
+		return str(map_mgr.active_map_instance.name)
+	var scene: Node = get_tree().current_scene
+	return str(scene.name) if is_instance_valid(scene) else "default_map"
+
+
+## Bosses call this just before starting their fight: on victory the party also gets these items.
+func register_boss_rewards(spell_books: int, skill_crystals: int) -> void:
+	pending_boss_rewards = { "spell_books": maxi(0, spell_books), "skill_crystals": maxi(0, skill_crystals) }
+
+
+## The pending boss rewards (and clears them). Empty when the battle wasn't a boss fight.
+func take_boss_rewards() -> Dictionary:
+	var r: Dictionary = pending_boss_rewards
+	pending_boss_rewards = {}
+	return r
+
+
+## Returns the saved location once (then clears it). Empty when there's nothing to restore.
+func consume_pending_location() -> Dictionary:
+	var loc: Dictionary = pending_location
+	pending_location = {}
+	return loc
+
+
+## Where a brand-new game (created characters) begins: this map, at this marker.
+const NEW_GAME_MAP: String = "res://Scenes/GreenGrove.tscn"
+const NEW_GAME_MARKER: String = "SpawnPointNewGame"
+
+
+## New game with a party built from the roster (CharacterRoster.build_party). Everyone gets their
+## class's starter kit (StarterKit). Starts with the test save's supplies (potions, gold) but none of
+## its characters, on NEW_GAME_MAP at NEW_GAME_MARKER.
+func start_new_game_with_party(party: DungeonParty) -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
+	_load_default_save(false)
+	current_party = party
+	# Class starter gear from Data/basic_items.csv; anything that doesn't fit a slot goes in the pack.
+	StarterKit.equip_party(current_party, inventory)
+	_sync_party_references()
+	# Persist map + intro marker so Continue (before any travel/fight) still opens
+	# SpawnPointNewGame, not GreenGrove's default SpawnPoint.
+	pending_location = {
+		"map_scene_path": NEW_GAME_MAP,
+		"location_name": "GreenGrove",
+		"spawn_marker": NEW_GAME_MARKER,
+	}
+	_last_location = pending_location.duplicate()
+	save_game(false)
+	print("GameState: New game with %d created characters." % party.get_viable_combatants().size())
 
 
 func reset_to_starter_party() -> void:
@@ -293,18 +455,12 @@ func _process_party_rest(rest_data: Dictionary) -> void:
 
 	print("[GameState] 🏕️ Party resting for %d hours..." % hours)
 
-	# @TODO: Display hp and energy recovered amount!@
-	var total_hp_recovered: int = 0
-	var total_energy_recovered: int = 0
 	var party_slots: Array = current_party.slots
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")
 
 	for i in range(party_slots.size()):
 		var cat: CatCharacter = party_slots[i] as CatCharacter
 		if is_instance_valid(cat) and cat.current_hp > 0:
-			var recovery: Dictionary = cat.rest(hours)
-			total_hp_recovered += int(recovery.get("hp_restored", 0))
-			total_energy_recovered += int(recovery.get("energy_restored", 0))
 
 			# Broadcast live HUD updates
 			if sb:

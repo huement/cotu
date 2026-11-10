@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75.75 57.79">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-8, .cls-9, .cls-10 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #80ffdb;
+      }
+
+      .cls-3 {
+        opacity: .71;
+      }
+
+      .cls-3, .cls-5 {
+        fill: #000;
+      }
+
+      .cls-8 {
+        stroke-linecap: square;
+        stroke-width: 2.15px;
+      }
+
+      .cls-8, .cls-9, .cls-10 {
+        stroke: #00f0ff;
+      }
+
+      .cls-4 {
+        fill: #00f0ff;
+      }
+
+      .cls-5 {
+        opacity: .25;
+      }
+
+      .cls-9 {
+        stroke-width: 2.18px;
+      }
+
+      .cls-10 {
+        stroke-width: 2.19px;
+      }
+
+      .cls-6 {
+        fill: #fff;
+      }
+
+      .cls-7 {
+        fill: #64dfdf;
+      }
+    </style>
+  </defs>
+  <g id="Layer_6" data-name="Layer 6">
+    <g>
+      <g>
+        <polygon id="btn-strafe-left" class="cls-3" points="17.44 1.19 74.66 1.19 74.66 56.16 1.54 56.16 1.54 16.46 17.44 1.19"/>
+        <polygon class="cls-4" points="41.16 43.14 41.37 14.21 26.78 28.85 41.16 43.14"/>
+        <polygon class="cls-4" points="57.06 43.14 57.27 14.21 42.68 28.85 57.06 43.14"/>
+        <g>
+          <polygon id="btn-strafe-left-2" data-name="btn-strafe-left" class="cls-5" points="17.44 1.19 74.66 1.19 74.66 56.16 1.54 56.16 1.54 16.46 17.44 1.19"/>
+          <polygon id="btn-strafe-left-3" data-name="btn-strafe-left" class="cls-9" points="17.44 1.19 74.66 1.19 74.66 56.16 1.54 56.16 1.54 16.46 17.44 1.19"/>
+          <line class="cls-8" x1="21.79" y1="19.51" x2="21.79" y2="37.84"/>
+          <g>
+            <polygon class="cls-1" points="53.79 34.78 52.72 33.72 47.64 28.58 53.68 22.57 53.79 34.78"/>
+            <polygon class="cls-6" points="50.37 36.07 42.87 28.49 57.22 14.21 57.26 19 47.72 28.47 47.76 28.51 47.73 28.55 52.85 33.65 57.42 38.27 57.46 43.14 50.37 36.07"/>
+            <path class="cls-4" d="M53.89,34.69l.06.06-.1-12.22-.03.02s0-.05,0-.07l3.47-3.45.16,19.27-3.57-3.61s0-.01,0-.02Z"/>
+          </g>
+          <g>
+            <polygon class="cls-1" points="37.88 34.78 36.82 33.72 31.74 28.58 37.78 22.57 37.88 34.78"/>
+            <polygon class="cls-6" points="34.47 36.07 26.97 28.49 41.32 14.21 41.36 19 31.82 28.47 31.86 28.51 31.82 28.55 36.94 33.65 41.52 38.27 41.56 43.14 34.47 36.07"/>
+            <path class="cls-4" d="M37.99,34.69l.06.06-.1-12.22-.03.02s0-.05,0-.07l3.47-3.45.16,19.27-3.57-3.61s0-.01,0-.02Z"/>
+          </g>
+        </g>
+        <polygon class="cls-4" points=".04 9.07 9.61 0 .04 0 .04 9.07"/>
+      </g>
+      <g>
+        <g>
+          <polygon id="btn-strafe-left-4" data-name="btn-strafe-left" class="cls-5" points="17.39 1.32 74.59 1.32 74.59 56.7 1.5 56.7 1.5 16.7 17.39 1.32"/>
+          <polygon id="btn-strafe-left-5" data-name="btn-strafe-left" class="cls-10" points="17.39 1.32 74.59 1.32 74.59 56.7 1.5 56.7 1.5 16.7 17.39 1.32"/>
+          <rect class="cls-7" x="20.66" y="18.7" width="2.15" height="20.62"/>
+          <g>
+            <polygon class="cls-1" points="53.72 35.16 52.66 34.09 47.58 28.91 53.62 22.85 53.72 35.16"/>
+            <polygon class="cls-6" points="50.31 36.46 42.81 28.82 57.15 14.43 57.19 19.26 47.66 28.8 47.7 28.84 47.67 28.88 52.78 34.02 57.35 38.68 57.39 43.58 50.31 36.46"/>
+            <path class="cls-4" d="M53.83,35.06l.06.06-.1-12.31-.03.03s0-.05,0-.07l3.47-3.47.16,19.42-3.57-3.63s0-.01,0-.02Z"/>
+          </g>
+          <g>
+            <polygon class="cls-1" points="37.83 35.16 36.76 34.09 31.68 28.91 37.73 22.85 37.83 35.16"/>
+            <polygon class="cls-6" points="34.41 36.46 26.92 28.82 41.26 14.43 41.3 19.26 31.76 28.8 31.81 28.84 31.77 28.88 36.89 34.02 41.46 38.68 41.5 43.58 34.41 36.46"/>
+            <path class="cls-4" d="M37.93,35.06l.06.06-.1-12.31-.03.03s0-.05,0-.07l3.47-3.47.16,19.42-3.57-3.63s0-.01,0-.02Z"/>
+          </g>
+        </g>
+        <polygon class="cls-2" points="0 9.26 9.57 .12 0 .12 0 9.26"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,360 @@
+[gd_scene load_steps=38 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_yyffh"]
+[ext_resource type="Script" path="res://Scripts/Environment/EditorWorkLight.gd" id="2_kxn00"]
+[ext_resource type="Script" path="res://Scripts/WorldSceneInitializerModule.gd" id="3_l5hqh"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="4_finif"]
+[ext_resource type="Script" path="res://Scripts/Triggers/level_title_trigger.gd" id="5_8ceuq"]
+[ext_resource type="MeshLibrary" path="res://resources/mesh_library/nav_blocker_mesh_library.tres" id="6_1ync4"]
+[ext_resource type="PackedScene" path="res://Scenes/Dungeons/Parts/LargeRoom.tscn" id="7_mo7yv"]
+[ext_resource type="Script" path="res://Scripts/Dungeon/DungeonRoom.gd" id="8_12gvm"]
+[ext_resource type="PackedScene" path="res://Scenes/Dungeons/Parts/CornerRoom.tscn" id="9_t0ma6"]
+[ext_resource type="PackedScene" path="res://Scenes/Dungeons/Parts/SmallRoom.tscn" id="10_nvqct"]
+[ext_resource type="PackedScene" path="res://Scenes/Dungeons/Parts/WideRoom.tscn" id="11_7qxsp"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-end.glb" id="12_rtt5o"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor.glb" id="13_c3qhg"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-corner-square.glb" id="14_alcki"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/Stairs.tscn" id="15_mc4jq"]
+[ext_resource type="Script" path="res://Scripts/Objects/Stairs.gd" id="16_mmbde"]
+[ext_resource type="PackedScene" path="res://Scenes/Environment/CryptHole.tscn" id="17_mj5pd"]
+[ext_resource type="Script" path="res://Scripts/Environment/CryptHole.gd" id="18_guamr"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/chest.tscn" id="19_iefxr"]
+[ext_resource type="Script" path="res://Scripts/Environment/DungeonChest.gd" id="20_japki"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="21_um5gl"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotHp25.tres" id="22_2mi8m"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotHp50.tres" id="23_8v7lq"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotMana25.tres" id="24_aghi4"]
+[ext_resource type="Resource" path="res://Data/Items/Equipment/IronHeadArmor.tres" id="25_qhrux"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotCatnip.tres" id="26_d6doc"]
+[ext_resource type="Resource" path="res://Data/Items/Equipment/SteelKiteShield.tres" id="27_m7u5k"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotRevive.tres" id="28_pe64x"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/enemy.tscn" id="29_f4m2x"]
+[ext_resource type="Script" path="res://Scripts/Enemies/enemy.gd" id="30_tm2nl"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnGhost.tres" id="31_4y4ej"]
+[ext_resource type="Script" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="32_0q3gx"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnZombieSavage.tres" id="33_ogdkt"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnScavengerCyclops.tres" id="34_k4uhj"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnRageWraith.tres" id="35_yg0fx"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnZombieGuard.tres" id="36_pmppm"]
+
+[sub_resource type="Environment" id="Environment_tet8j"]
+background_mode = 1
+background_color = Color(0.01, 0.01, 0.015, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.26, 0.27, 0.34, 1)
+ambient_light_energy = 0.9
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.012, 0.012, 0.018, 1)
+fog_density = 1.0
+fog_depth_end = 36.0
+
+[node name="VeroWoodDungeon_Upper" type="Node3D"]
+script = ExtResource("1_yyffh")
+level_seed = 73000
+room_count = 8
+enemy_count = 7
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_tet8j")
+
+[node name="EditorWorkLight" type="Node3D" parent="."]
+script = ExtResource("2_kxn00")
+
+[node name="WorldSceneInitializer" type="Node3D" parent="."]
+script = ExtResource("3_l5hqh")
+create_floor = false
+create_ceiling = false
+setup_dark_retro_environment = false
+particle_color = Color(0.85, 0.85, 1, 0.3)
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 5, 0, 3)
+metadata/eye_height = 1.5
+metadata/battle_vertical_offset = -0.5
+
+[node name="LevelTitle" type="Node3D" parent="." instance=ExtResource("4_finif")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 3)
+script = ExtResource("5_8ceuq")
+level_title = "Vero Wood
+Dungeon Top"
+play_new_area_sound = true
+
+[node name="FloorMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+cell_center_y = false
+
+[node name="WallMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+visible = false
+mesh_library = ExtResource("6_1ync4")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 1, 2, 0, 2, 0, 0, 2, 2, 0, 3, 0, 0, 3, 2, 0, 4, 0, 0, 4, 2, 0, 12, 8, 0, 12, 10, 0, 13, 8, 0, 14, 8, 0, 14, 9, 0, 14, 10, 0, 12, 11, 0, 12, 12, 0, 14, 11, 0, 14, 12, 0, 12, 13, 0, 12, 14, 0, 14, 13, 0, 14, 14, 0, 8, 65530, 0, 8, 65531, 0, 8, 65532, 0, 10, 65530, 0, 10, 65531, 0, 10, 65532, 0, 8, 65528, 0, 8, 65529, 0, 10, 65528, 0, 10, 65529, 0, 8, 65516, 0, 8, 65517, 0, 8, 65518, 0, 10, 65516, 0, 10, 65517, 0, 10, 65518, 0, 8, 65514, 0, 8, 65515, 0, 10, 65514, 0, 10, 65515, 0, 12, 65510, 0, 12, 65512, 0, 13, 65512, 0, 14, 65510, 0, 14, 65511, 0, 14, 65512, 0, 12, 65508, 0, 12, 65509, 0, 14, 65508, 0, 14, 65509, 0, 8, 16, 0, 8, 18, 0, 9, 16, 0, 9, 18, 0, 10, 16, 0, 10, 18, 0, 6, 16, 0, 6, 17, 0, 6, 18, 0, 7, 16, 0, 6, 19, 0, 6, 20, 0, 8, 19, 0, 8, 20, 0, 6, 30, 0, 6, 31, 0, 6, 32, 0, 8, 30, 0, 8, 31, 0, 8, 32, 0, 6, 33, 0, 6, 34, 0, 8, 33, 0, 8, 34, 0, 6, 35, 0, 6, 36, 0, 8, 35, 0, 8, 36, 0, 10, 40, 0, 10, 42, 0, 11, 40, 0, 11, 42, 0, 12, 40, 0, 12, 42, 0, 13, 40, 0, 13, 42, 0, 14, 40, 0, 14, 41, 0, 14, 42, 0)
+}
+
+[node name="Rooms" type="Node3D" parent="."]
+
+[node name="Room1_LargeRoom" type="Node3D" parent="Rooms" instance=ExtResource("7_mo7yv")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 19, 0, 3)
+script = ExtResource("8_12gvm")
+footprint = Vector2i(20, 20)
+open_doors = 7
+removed_nodes = PackedStringArray("Environment/Banner2", "Environment/Barrel3", "Environment/Barrel5")
+id_prefix = "verowooddungeon_upper_room1_largeroom"
+
+[node name="Room2_CornerRoom" type="Node3D" parent="Rooms" instance=ExtResource("9_t0ma6")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 19, 0, 19)
+script = ExtResource("8_12gvm")
+open_doors = 9
+removed_nodes = PackedStringArray("Stones1")
+id_prefix = "verowooddungeon_upper_room2_cornerroom"
+
+[node name="Room3_CornerRoom" type="Node3D" parent="Rooms" instance=ExtResource("9_t0ma6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 35)
+script = ExtResource("8_12gvm")
+open_doors = 9
+removed_nodes = PackedStringArray()
+id_prefix = "verowooddungeon_upper_room3_cornerroom"
+
+[node name="Room4_LargeRoom" type="Node3D" parent="Rooms" instance=ExtResource("7_mo7yv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, -25)
+script = ExtResource("8_12gvm")
+footprint = Vector2i(20, 20)
+open_doors = 5
+removed_nodes = PackedStringArray("Environment/Barrel2", "Environment/Barrel5")
+id_prefix = "verowooddungeon_upper_room4_largeroom"
+
+[node name="Room5_SmallRoom" type="Node3D" parent="Rooms" instance=ExtResource("10_nvqct")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 19, 0, -49)
+script = ExtResource("8_12gvm")
+open_doors = 9
+removed_nodes = PackedStringArray()
+id_prefix = "verowooddungeon_upper_room5_smallroom"
+
+[node name="Room6_WideRoom" type="Node3D" parent="Rooms" instance=ExtResource("11_7qxsp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, -61)
+script = ExtResource("8_12gvm")
+footprint = Vector2i(20, 12)
+open_doors = 4
+removed_nodes = PackedStringArray()
+id_prefix = "verowooddungeon_upper_room6_wideroom"
+
+[node name="Room7_LargeRoom" type="Node3D" parent="Rooms" instance=ExtResource("7_mo7yv")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15, 0, 51)
+script = ExtResource("8_12gvm")
+footprint = Vector2i(20, 20)
+open_doors = 10
+removed_nodes = PackedStringArray("Environment/Banner2", "Environment/Barrel1", "Environment/Barrel4", "Environment/Barrel3", "Environment/Barrel5")
+id_prefix = "verowooddungeon_upper_room7_largeroom"
+
+[node name="Room8_WideRoom" type="Node3D" parent="Rooms" instance=ExtResource("11_7qxsp")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 15, 0, 83)
+script = ExtResource("8_12gvm")
+footprint = Vector2i(20, 12)
+open_doors = 9
+removed_nodes = PackedStringArray("Environment/Stones3", "Environment/Banner1", "Environment/WallArt2", "Environment/WallArt3")
+id_prefix = "verowooddungeon_upper_room8_wideroom"
+
+[node name="Corridors" type="Node3D" parent="."]
+
+[node name="Corridor1" type="Node3D" parent="Corridors" instance=ExtResource("12_rtt5o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3)
+
+[node name="Corridor2" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 3)
+
+[node name="Corridor3" type="Node3D" parent="Corridors" instance=ExtResource("14_alcki")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15, 0, 35)
+
+[node name="Corridor4" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15, 0, 39)
+
+[node name="Corridor5" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15, 0, 63)
+
+[node name="Corridor6" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15, 0, 67)
+
+[node name="Corridor7" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15, 0, 71)
+
+[node name="Corridor8" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19, 0, -41)
+
+[node name="Corridor9" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19, 0, -37)
+
+[node name="Corridor10" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19, 0, -13)
+
+[node name="Corridor11" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19, 0, -9)
+
+[node name="Corridor12" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 35)
+
+[node name="Corridor13" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0, 83)
+
+[node name="Corridor14" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, -53)
+
+[node name="Corridor15" type="Node3D" parent="Corridors" instance=ExtResource("14_alcki")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, -49)
+
+[node name="Corridor16" type="Node3D" parent="Corridors" instance=ExtResource("14_alcki")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 19)
+
+[node name="Corridor17" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 23)
+
+[node name="Corridor18" type="Node3D" parent="Corridors" instance=ExtResource("13_c3qhg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 27)
+
+[node name="Corridor19" type="Node3D" parent="Corridors" instance=ExtResource("12_rtt5o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 27, 0, 83)
+
+[node name="EntryStairs" type="Node3D" parent="." instance=ExtResource("15_mc4jq")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 0, 3)
+script = ExtResource("16_mmbde")
+prompt_message = "Climb the stairs back up to the Vero Woods?"
+target_scene = "res://Scenes/VeroWood.tscn"
+use_map_manager = true
+arrival_point_name = "SpawnPointDungeon"
+object_id = "verowooddungeon_upper_entry_stairs"
+snap_to_floor_center = false
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="EntryLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3.2, 3)
+light_color = Color(1, 0.8, 0.55, 1)
+light_energy = 1.4
+omni_range = 8.0
+
+[node name="ExitLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 1.2, 83)
+light_color = Color(0.65, 0.35, 1, 1)
+light_energy = 1.6
+omni_range = 6.0
+
+[node name="Exit" type="Node3D" parent="." instance=ExtResource("17_mj5pd")]
+transform = Transform3D(0.17, 0, 0, 0, 0.17, 0, 0, 0, 0.17, 27, 0.101, 83)
+script = ExtResource("18_guamr")
+target_dungeon_scene = "res://Scenes/Dungeons/VeroWoodDungeon.tscn"
+prompt_text = "A root-choked shaft drops into colder dark. Climb down to the deeper crypt?"
+object_id = "verowooddungeon_upper_crypthole"
+snap_to_floor_center = false
+
+[node name="ExitArrival" type="Marker3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 25, 0, 83)
+
+[node name="Chests" type="Node3D" parent="."]
+
+[node name="Chest1" type="Node3D" parent="Chests" instance=ExtResource("19_iefxr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -31)
+script = ExtResource("20_japki")
+guaranteed_items = Array[ExtResource("21_um5gl")]([ExtResource("22_2mi8m"), ExtResource("23_8v7lq"), ExtResource("24_aghi4")])
+gold_amount = 80
+object_id = "verowooddungeon_upper_chest_1"
+
+[node name="Chest2" type="Node3D" parent="Chests" instance=ExtResource("19_iefxr")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33, 0, -65)
+script = ExtResource("20_japki")
+guaranteed_items = Array[ExtResource("21_um5gl")]([ExtResource("25_qhrux"), ExtResource("26_d6doc")])
+gold_amount = 120
+object_id = "verowooddungeon_upper_chest_2"
+
+[node name="Chest3" type="Node3D" parent="Chests" instance=ExtResource("19_iefxr")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13, 0, 9)
+script = ExtResource("20_japki")
+guaranteed_items = Array[ExtResource("21_um5gl")]([ExtResource("27_m7u5k"), ExtResource("28_pe64x")])
+gold_amount = 160
+object_id = "verowooddungeon_upper_chest_3"
+
+[node name="Ghosts" type="Node3D" parent="."]
+
+[node name="Ghost1" type="Node3D" parent="Ghosts" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, 59)
+script = ExtResource("30_tm2nl")
+data = ExtResource("31_4y4ej")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.75
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost1"]
+script = ExtResource("32_0q3gx")
+ghost_level = 2
+
+[node name="Ghost2" type="Node3D" parent="Ghosts" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 87)
+script = ExtResource("30_tm2nl")
+data = ExtResource("31_4y4ej")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.75
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost2"]
+script = ExtResource("32_0q3gx")
+ghost_level = 2
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy1" type="Node3D" parent="Enemies" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, -63)
+script = ExtResource("30_tm2nl")
+data = ExtResource("33_ogdkt")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy2" type="Node3D" parent="Enemies" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, -33)
+script = ExtResource("30_tm2nl")
+data = ExtResource("34_k4uhj")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy3" type="Node3D" parent="Enemies" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 43)
+script = ExtResource("30_tm2nl")
+data = ExtResource("35_yg0fx")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+stat_multiplier = 0.9
+
+[node name="Enemy4" type="Node3D" parent="Enemies" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, -3)
+script = ExtResource("30_tm2nl")
+data = ExtResource("36_pmppm")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy5" type="Node3D" parent="Enemies" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 83)
+script = ExtResource("30_tm2nl")
+data = ExtResource("33_ogdkt")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy6" type="Node3D" parent="Enemies" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -47)
+script = ExtResource("30_tm2nl")
+data = ExtResource("34_k4uhj")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy7" type="Node3D" parent="Enemies" instance=ExtResource("29_f4m2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 39)
+script = ExtResource("30_tm2nl")
+data = ExtResource("35_yg0fx")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+stat_multiplier = 0.9

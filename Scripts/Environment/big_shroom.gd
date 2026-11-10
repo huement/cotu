@@ -2,6 +2,8 @@
 extends Node3D
 
 enum MushroomType {
+	REDDOTS,
+	REDDOTSSMALL,
 	RED,
 	GROUP,
 	TALL,
@@ -23,6 +25,8 @@ func _update_visibility() -> void:
 		return
 
 	var mushroom_nodes: Dictionary = {
+		MushroomType.REDDOTS: get_node_or_null("RedDots"),
+		MushroomType.REDDOTSSMALL: get_node_or_null("RedDotsSmall"),
 		MushroomType.RED: get_node_or_null("RedModel"),
 		MushroomType.GROUP: get_node_or_null("GroupModel"),
 		MushroomType.TALL: get_node_or_null("TallModel"),

@@ -24,10 +24,14 @@ GameLogger="*res://Core/GameLogger.gd"
 TargetSelectionManager="*res://Scripts/Managers/TargetSelectionManager.gd"
 AudioManager="*res://Core/AudioManager.gd"
 LoreManager="*res://Scripts/Singletons/LoreManager.gd"
+MenuKit="*res://addons/game_menu_kit/menu_kit.gd"
+PulseLiteUI="*res://addons/pulselite_ui/PulseLiteUI.gd"
+SettingsManager="*res://addons/settings_menu/SettingsManager.gd"
+DebugMenu="*res://Scripts/Testing/DebugMenu.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+enabled=PackedStringArray("res://addons/dice_roller/plugin.cfg", "res://addons/game_menu_kit/plugin.cfg", "res://addons/gut/plugin.cfg", "res://addons/pulselite_ui/plugin.cfg", "res://addons/settings_menu/plugin.cfg")
 
 [input]
 
@@ -71,7 +75,20 @@ interact={
 ]
 }
 
+[menu_kit]
+
+scenes/main_menu="res://Scenes/GameMenus/MainMenu.tscn"
+camera/apply_fov=false
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[settings_menu]
+
+audio/buses=PackedStringArray("Master", "Music", "SFX", "Ambient", "Voice", "UI")
+
+[shards]
+
+hud/force_mobile_hud=false

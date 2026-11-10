@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://801r7gfhq0jd"]
 
-[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_tftcv"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_tftcv"]
 
 [resource]
 script = ExtResource("1_tftcv")

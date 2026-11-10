@@ -3,8 +3,9 @@ extends Resource
 class_name DungeonParty
 
 ## The 6-Slot Structural Matrix for Wizardry-style Party:
-## Slots 0, 1, 2, 3 = Front Row (Exposed to Melee)  [1-based: Slots 1–4]
-## Slots 4, 5       = Back Row  (Supports Ranged/Magic) [1-based: Slots 5–6]
+## Slots 0, 1, 2 = Front Row (Exposed to Melee)
+## Slots 3, 4, 5 = Back Row  (Supports Ranged/Magic)
+## `reorganize_party_matrix()` packs living front cats into 0..2 and back into 3..5.
 ##
 ## NOTE: Typed as Array[Resource] to avoid cyclic compiler deadlocks in Godot 4
 @export var slots: Array[Resource] = [null, null, null, null, null, null]
@@ -88,3 +89,38 @@ func get_viable_combatants() -> Array[Resource]:
 			if hp > 0:
 				active_units.append(cat_res)
 	return active_units
+
+
+## Profession names for every filled slot (duplicates kept — e.g. two Spartans → ["Spartan","Spartan"]).
+func get_active_class_names() -> Array[String]:
+	var classes: Array[String] = []
+	for cat_res: Resource in slots:
+		if not is_instance_valid(cat_res):
+			continue
+		var prof_name: String = _extract_class_name(cat_res)
+		if not prof_name.is_empty():
+			classes.append(prof_name)
+	return classes
+
+
+## Deduped profession names currently in the party.
+func get_unique_active_classes() -> Array[String]:
+	var unique: Array[String] = []
+	for prof_name: String in get_active_class_names():
+		if not unique.has(prof_name):
+			unique.append(prof_name)
+	return unique
+
+
+func _extract_class_name(cat_res: Resource) -> String:
+	if "profession" in cat_res and is_instance_valid(cat_res.get("profession")):
+		var prof: Resource = cat_res.get("profession") as Resource
+		if is_instance_valid(prof) and "profession_name" in prof:
+			var from_prof: String = str(prof.get("profession_name")).strip_edges()
+			if not from_prof.is_empty():
+				return from_prof
+	if "profession_name" in cat_res:
+		var direct: String = str(cat_res.get("profession_name")).strip_edges()
+		if not direct.is_empty():
+			return direct
+	return ""

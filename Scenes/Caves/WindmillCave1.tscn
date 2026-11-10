@@ -1,0 +1,232 @@
+[gd_scene load_steps=27 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Environment/CaveLevel.gd" id="1_1ttxi"]
+[ext_resource type="Script" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_drpn4"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="3_x24na"]
+[ext_resource type="Script" path="res://Scripts/Triggers/level_title_trigger.gd" id="4_wsu26"]
+[ext_resource type="MeshLibrary" path="res://resources/mesh_library/cave_floor_mesh_library.tres" id="5_b374t"]
+[ext_resource type="MeshLibrary" path="res://resources/mesh_library/cave_wall_mesh_library.tres" id="6_8hy4h"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/Stairs.tscn" id="7_diekw"]
+[ext_resource type="Script" path="res://Scripts/Objects/Stairs.gd" id="8_blefw"]
+[ext_resource type="PackedScene" path="res://Scenes/Environment/CryptHole.tscn" id="9_aexwe"]
+[ext_resource type="Script" path="res://Scripts/Environment/CryptHole.gd" id="10_habgd"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/enemy.tscn" id="11_ipfr0"]
+[ext_resource type="Script" path="res://Scripts/Enemies/enemy.gd" id="12_4pl62"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnSlimeDrone.tres" id="13_qhrt5"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnScavengerCyclops.tres" id="14_dsdao"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnMarshCrab.tres" id="15_3uwut"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/chest.tscn" id="16_ms35w"]
+[ext_resource type="Script" path="res://Scripts/Environment/DungeonChest.gd" id="17_61cgl"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="18_sjju0"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotHp25.tres" id="19_shy1t"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotMana25.tres" id="20_4ki2i"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotHp5.tres" id="21_k3yxe"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotCatnip.tres" id="22_syc0c"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotHp50.tres" id="23_v1kn6"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotRevive.tres" id="24_fsb0c"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotMana5.tres" id="25_mqu67"]
+
+[sub_resource type="Environment" id="Environment_acbmu"]
+background_mode = 1
+background_color = Color(0.012, 0.01, 0.014, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.34, 0.27, 0.24, 1)
+ambient_light_energy = 0.9
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.015, 0.012, 0.016, 1)
+fog_density = 1.0
+fog_depth_begin = 6.0
+fog_depth_end = 24.0
+
+[node name="WindmillCave1" type="Node3D"]
+script = ExtResource("1_1ttxi")
+level_seed = 811
+grid_size = Vector2i(30, 30)
+room_count = 8
+enemy_count = 5
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_acbmu")
+
+[node name="WorldSceneInitializer" type="Node3D" parent="."]
+script = ExtResource("2_drpn4")
+create_floor = false
+create_ceiling = false
+setup_dark_retro_environment = false
+particle_color = Color(1, 0.88, 0.7, 0.35)
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, 15, 0, 55)
+metadata/eye_height = 1.5
+metadata/battle_vertical_offset = -0.5
+
+[node name="LevelTitle" type="Node3D" parent="." instance=ExtResource("3_x24na")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 55)
+script = ExtResource("4_wsu26")
+level_title = "Windmill
+Cellar"
+play_new_area_sound = true
+
+[node name="ExitArrival" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, 49, 0, 41)
+
+[node name="FloorMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+mesh_library = ExtResource("5_b374t")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(2, 18, 1048576, 3, 10, 0, 3, 11, 1441793, 3, 17, 0, 3, 18, 1, 3, 19, 655360, 4, 10, 0, 4, 11, 1441792, 4, 12, 655360, 4, 13, 1441792, 4, 14, 655360, 4, 15, 0, 4, 16, 1441792, 4, 17, 1048577, 4, 18, 655361, 4, 19, 1, 5, 10, 1, 5, 11, 0, 5, 12, 0, 5, 17, 655361, 5, 18, 1441792, 5, 19, 0, 6, 9, 0, 6, 10, 1048576, 6, 11, 1441792, 6, 12, 0, 6, 13, 1441793, 6, 14, 1048577, 6, 18, 1441793, 6, 19, 0, 6, 26, 1441793, 6, 27, 1048576, 7, 6, 655361, 7, 7, 1048577, 7, 8, 1441792, 7, 9, 1441792, 7, 10, 1048576, 7, 11, 1, 7, 13, 1048576, 7, 19, 1048576, 7, 20, 0, 7, 21, 655361, 7, 22, 655361, 7, 23, 655360, 7, 24, 1441792, 7, 25, 1, 7, 26, 0, 7, 27, 1441792, 7, 28, 655360, 8, 4, 655360, 8, 5, 1, 8, 6, 1048576, 8, 11, 1048576, 8, 13, 1, 8, 22, 0, 8, 23, 655360, 8, 25, 655361, 8, 26, 655361, 9, 3, 1441793, 9, 4, 1, 9, 5, 1441793, 9, 6, 1048577, 9, 11, 1441792, 9, 13, 1048576, 9, 22, 1048577, 10, 3, 0, 10, 4, 655360, 10, 5, 1, 10, 6, 1048577, 10, 7, 1441792, 10, 11, 655360, 10, 13, 1441792, 10, 14, 0, 11, 3, 1441792, 11, 4, 655360, 11, 5, 1048576, 11, 7, 1048576, 11, 8, 655360, 11, 11, 655361, 11, 14, 1048576, 11, 15, 0, 11, 16, 655361, 11, 17, 655361, 12, 3, 1048576, 12, 4, 1048577, 12, 5, 655360, 12, 6, 1048577, 12, 7, 0, 12, 8, 1441792, 12, 9, 1048577, 12, 10, 1048576, 12, 11, 1, 12, 12, 655360, 12, 13, 1441793, 12, 14, 0, 12, 15, 0, 12, 17, 1048576, 13, 4, 1441792, 13, 5, 1441792, 13, 6, 1, 13, 7, 1, 13, 10, 655361, 13, 11, 1441792, 13, 12, 1441793, 13, 13, 1048576, 13, 14, 1, 13, 15, 1441793, 13, 16, 655361, 13, 17, 1441792, 13, 18, 1048577, 14, 5, 1048576, 14, 6, 1, 14, 12, 1441793, 14, 13, 655360, 14, 14, 1441792, 14, 15, 655361, 14, 16, 655361, 14, 17, 1441793, 15, 6, 0, 15, 12, 1048577, 15, 13, 655360, 15, 14, 1441792, 15, 15, 0, 15, 16, 655360, 16, 6, 1, 16, 12, 0, 17, 6, 1, 17, 12, 655361, 18, 6, 1441792, 18, 7, 1, 18, 12, 655360, 19, 5, 0, 19, 6, 1048576, 19, 7, 1441792, 19, 12, 1441793, 20, 5, 655361, 20, 6, 655360, 20, 7, 1441793, 20, 12, 1441793, 21, 5, 1048576, 21, 6, 1048577, 21, 7, 655361, 21, 8, 655360, 21, 9, 655361, 21, 12, 1441793, 22, 5, 655361, 22, 6, 1441792, 22, 7, 1441793, 22, 9, 655360, 22, 10, 1441792, 22, 12, 1, 22, 13, 655360, 23, 5, 1441792, 23, 6, 1441793, 23, 7, 655361, 23, 10, 655360, 23, 11, 0, 23, 12, 1048576, 23, 13, 1048576, 23, 18, 655360, 23, 19, 1048576, 23, 20, 655360, 23, 21, 0, 23, 22, 1048576, 23, 23, 0, 24, 6, 0, 24, 11, 1048576, 24, 12, 1048576, 24, 13, 0, 24, 14, 655360, 24, 16, 655360, 24, 17, 1441792, 24, 18, 655360, 24, 19, 1048576, 24, 20, 1441792, 24, 21, 655360, 24, 22, 655360, 24, 23, 1441793, 25, 6, 1048576, 25, 11, 1048576, 25, 12, 0, 25, 13, 655360, 25, 14, 0, 25, 15, 0, 25, 16, 655361, 25, 18, 655360, 25, 19, 655360, 25, 20, 655361, 25, 21, 0, 25, 22, 1441792, 26, 11, 655361, 26, 12, 0, 26, 13, 655360)
+}
+
+[node name="WallMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+mesh_library = ExtResource("6_8hy4h")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(9, 2, 1, 10, 2, 0, 11, 2, 2, 12, 2, 2, 8, 3, 4, 13, 3, 1441796, 7, 4, 1048577, 14, 4, 1441796, 19, 4, 0, 20, 4, 0, 21, 4, 1, 22, 4, 0, 23, 4, 2, 7, 5, 4, 15, 5, 1441796, 16, 5, 0, 17, 5, 0, 18, 5, 4, 24, 5, 1441796, 25, 5, 0, 6, 6, 1048578, 11, 6, 6, 26, 6, 1441792, 6, 7, 1048576, 8, 7, 655364, 9, 7, 1048580, 14, 7, 655364, 15, 7, 655361, 16, 7, 655361, 17, 7, 1048580, 24, 7, 655364, 25, 7, 655360, 6, 8, 4, 8, 8, 1441794, 10, 8, 1048580, 13, 8, 655364, 18, 8, 655360, 19, 8, 655361, 20, 8, 1048580, 22, 8, 1441797, 23, 8, 655361, 3, 9, 1, 4, 9, 0, 5, 9, 4, 8, 9, 1441793, 11, 9, 1048580, 13, 9, 1441796, 20, 9, 1048577, 23, 9, 1441796, 2, 10, 1048576, 8, 10, 1441796, 9, 10, 1, 10, 10, 2, 11, 10, 4, 14, 10, 1441793, 21, 10, 1048580, 24, 10, 1441796, 25, 10, 0, 26, 10, 1, 2, 11, 1048577, 14, 11, 1441796, 15, 11, 2, 16, 11, 0, 17, 11, 0, 18, 11, 1, 19, 11, 2, 20, 11, 0, 21, 11, 0, 22, 11, 1048581, 27, 11, 1441792, 3, 12, 1048580, 7, 12, 1441797, 8, 12, 3, 9, 12, 3, 10, 12, 3, 11, 12, 1048580, 27, 12, 1441792, 3, 13, 1048577, 5, 13, 655365, 11, 13, 5, 16, 13, 655364, 17, 13, 655360, 18, 13, 655362, 19, 13, 655361, 20, 13, 655360, 21, 13, 1048580, 27, 13, 1441793, 3, 14, 1048576, 5, 14, 1048579, 7, 14, 655364, 8, 14, 655360, 9, 14, 1048580, 16, 14, 1441792, 22, 14, 655362, 23, 14, 1048580, 26, 14, 655364, 3, 15, 1048576, 5, 15, 1441792, 6, 15, 655360, 10, 15, 1048580, 16, 15, 1441794, 24, 15, 1048581, 26, 15, 1441793, 3, 16, 4, 5, 16, 1441796, 10, 16, 1048576, 12, 16, 6, 16, 16, 1441794, 23, 16, 1048578, 26, 16, 1441792, 2, 17, 4, 6, 17, 1441796, 10, 17, 1048576, 15, 17, 655364, 23, 17, 4, 25, 17, 1441797, 1, 18, 1048578, 7, 18, 1441796, 11, 18, 655360, 12, 18, 1048580, 14, 18, 655364, 22, 18, 1048576, 26, 18, 1441794, 2, 19, 1048580, 8, 19, 1441792, 13, 19, 655361, 22, 19, 1048576, 26, 19, 1441793, 3, 20, 655361, 4, 20, 655361, 5, 20, 655360, 6, 20, 1048580, 8, 20, 1441793, 22, 20, 1048576, 26, 20, 1441792, 6, 21, 1048577, 8, 21, 1441796, 9, 21, 1, 22, 21, 1048577, 26, 21, 1441792, 6, 22, 1048577, 10, 22, 1441793, 22, 22, 1048576, 26, 22, 1441792, 6, 23, 1048578, 9, 23, 655364, 22, 23, 1048576, 25, 23, 655364, 6, 24, 1048576, 8, 24, 1441797, 23, 24, 655362, 24, 24, 655361, 6, 25, 4, 9, 25, 1441792, 5, 26, 1048576, 9, 26, 1441792, 5, 27, 1048578, 8, 27, 655364, 6, 28, 1048580, 8, 28, 1441794, 7, 29, 655360, 24, 12, 1048583, 9, 5, 1441799, 5, 11, 1441799, 20, 6, 655367)
+}
+
+[node name="EntryStairs" type="Node3D" parent="." instance=ExtResource("7_diekw")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15, 0, 57)
+script = ExtResource("8_blefw")
+prompt_message = "Climb the ladder back up into the windmill?"
+target_scene = "res://Scenes/FeroShaw.tscn"
+use_map_manager = true
+arrival_point_name = "SpawnPoint_Windmill"
+object_id = "windmill_cave_1_entry_stairs"
+snap_to_floor_center = false
+
+[node name="Exit" type="Node3D" parent="." instance=ExtResource("9_aexwe")]
+transform = Transform3D(0.17, 0, 0, 0, 0.17, 0, 0, 0, 0.17, 49, 0.101, 43)
+script = ExtResource("10_habgd")
+target_dungeon_scene = "res://Scenes/Caves/WindmillCave2.tscn"
+prompt_text = "Below a broken millstone, a shaft drops deeper. Climb down?"
+object_id = "windmill_cave_1_crypthole"
+snap_to_floor_center = false
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="EntryLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 3.2, 57)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.4
+omni_range = 7.0
+
+[node name="ExitLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49, 1.2, 43)
+light_color = Color(0.65, 0.35, 1, 1)
+light_energy = 1.6
+omni_range = 6.0
+
+[node name="CrystalLight1" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49, 1.3, 25)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="CrystalLight2" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 1.3, 11)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="CrystalLight3" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 1.3, 23)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="CrystalLight4" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41, 1.3, 13)
+light_color = Color(0.3, 1, 0.85, 1)
+light_energy = 1.3
+omni_range = 6.0
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy1" type="Node3D" parent="Enemies" instance=ExtResource("11_ipfr0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 0, 31)
+script = ExtResource("12_4pl62")
+data = ExtResource("13_qhrt5")
+pack_size = 3
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "slime"
+
+[node name="Enemy2" type="Node3D" parent="Enemies" instance=ExtResource("11_ipfr0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, 29)
+script = ExtResource("12_4pl62")
+data = ExtResource("14_dsdao")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "cyclops"
+stat_multiplier = 0.9
+
+[node name="Enemy3" type="Node3D" parent="Enemies" instance=ExtResource("11_ipfr0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43, 0, 19)
+script = ExtResource("12_4pl62")
+data = ExtResource("15_3uwut")
+pack_size = 3
+model_scale = Vector3(0.65, 0.65, 0.65)
+vertical_offset = -1.0
+enemy_type = "crab"
+stat_multiplier = 0.9
+
+[node name="Enemy4" type="Node3D" parent="Enemies" instance=ExtResource("11_ipfr0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 41)
+script = ExtResource("12_4pl62")
+data = ExtResource("13_qhrt5")
+pack_size = 3
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "slime"
+
+[node name="Enemy5" type="Node3D" parent="Enemies" instance=ExtResource("11_ipfr0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, 7)
+script = ExtResource("12_4pl62")
+data = ExtResource("14_dsdao")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "cyclops"
+stat_multiplier = 0.9
+
+[node name="Chests" type="Node3D" parent="."]
+
+[node name="Chest1" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 19, 0, 13)
+script = ExtResource("17_61cgl")
+guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("19_shy1t"), ExtResource("19_shy1t")])
+gold_amount = 30
+object_id = "windmill_cave_1_chest_1"
+
+[node name="Chest2" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 25, 0, 27)
+script = ExtResource("17_61cgl")
+guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("20_4ki2i"), ExtResource("21_k3yxe")])
+gold_amount = 25
+object_id = "windmill_cave_1_chest_2"
+
+[node name="Chest3" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 51, 0, 27)
+script = ExtResource("17_61cgl")
+guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("19_shy1t"), ExtResource("22_syc0c")])
+gold_amount = 40
+object_id = "windmill_cave_1_chest_3"
+
+[node name="Chest4" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0, 13)
+script = ExtResource("17_61cgl")
+guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("23_v1kn6")])
+gold_amount = 35
+object_id = "windmill_cave_1_chest_4"
+
+[node name="Chest5" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 37)
+script = ExtResource("17_61cgl")
+guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("24_fsb0c"), ExtResource("25_mqu67")])
+gold_amount = 50
+object_id = "windmill_cave_1_chest_5"

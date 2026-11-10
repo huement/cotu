@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_aja4e"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_j5cak"]
+
+[resource]
+script = ExtResource("2_j5cak")
+item_id = "armor_warden_bone_arms"
+item_name = "Bone Arms Armor"
+description = "Bone armor for the Warden class. Grants Defense Up I while worn."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_aja4e")
+item_type = 2
+equipment_slot = 2
+defense_bonus = 6
+credit_value = 125
+effects = "+4 defense against MAGIC"
+effect_amount = 4.0
+effect_element = 1
+effect_stat = "defense"
+granted_status_effects = Array[String](["eff_defense_up_1"])

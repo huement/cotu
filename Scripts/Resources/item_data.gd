@@ -99,6 +99,13 @@ enum ElementalBase {
 @export var attack_vfx: SpriteFrames
 @export var granted_status_effects: Array[String] = []
 
+@export_group("Throwing")
+## Can be thrown at enemies from the battle ITEMS menu (throwing stars, knives, exploding potions...).
+## Uses one from the stack. Power = attack_bonus (or effect_amount when attack_bonus is 0).
+## DEX decides whether it hits, how hard and how often it crits - see CombatMath.throw_*.
+## target_type ALL_ENEMIES = hits every enemy (e.g. an exploding potion); anything else = one enemy.
+@export var is_throwable: bool = false
+
 ## Returns string key matching CharacterLoadoutPanel slot keys ("BODY", "LEFT_HAND", "RIGHT_HAND", etc.)
 func get_slot_string() -> String:
 	match equipment_slot:
@@ -125,7 +132,23 @@ func get_slot_string() -> String:
 
 
 func can_be_used(in_combat: bool) -> bool:
+	if is_throwable:
+		return in_combat # thrown at enemies - battle only
 	var is_usable: bool = is_consumable or item_type == ItemType.CONSUMABLE or item_type == ItemType.POTION
 	if not is_usable:
 		return false
 	return can_use_in_battle if in_combat else can_use_in_field
+
+
+## Who this item targets in battle. Throwables always go at enemies (one, unless ALL_ENEMIES).
+func get_battle_target_type() -> TargetType:
+	if is_throwable and target_type != TargetType.ALL_ENEMIES:
+		return TargetType.SINGLE_ENEMY
+	return target_type
+
+
+## Base power of a thrown item (before DEX / defence): attack_bonus, else effect_amount, else 1.
+func get_throw_power() -> int:
+	if attack_bonus > 0:
+		return attack_bonus
+	return maxi(1, roundi(effect_amount))

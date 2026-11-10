@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://cj24i5803tj43"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
 
-[ext_resource type="Material" uid="uid://snrc4u5yijy6" path="res://resources/Enemies/Kenny/Materials/en_archanist_husk_mat.tres" id="1_td0ir"]
-[ext_resource type="PackedScene" uid="uid://bxh86qkiiy5q2" path="res://resources/Enemies/Kenny/character-p.glb" id="2_nm1jv"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_iev4n"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_archanist_husk_mat.tres" id="1_td0ir"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-p.glb" id="2_nm1jv"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_iev4n"]
 
 [resource]
 script = ExtResource("3_iev4n")
@@ -13,6 +13,7 @@ model_path = "res://resources/Enemies/Kenny/character-p.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-p.png"
 model_scene = ExtResource("2_nm1jv")
 custom_material = ExtResource("1_td0ir")
+model_scale = Vector3(1, 1, 1)
 base_level = 8
 max_health = 95
 current_health = 95
@@ -22,7 +23,7 @@ speed = 12.0
 initiative_speed = 15
 weakness_element = 2
 attack_element = 1
-equipped_item_id = "con_mana_vial"
+equipped_item_id = "pot_mana_vial"
 can_cast_spells = true
 spell_ids = Array[String](["sp_arcane_cataclysm", "sp_static_nova"])
 max_mana = 60

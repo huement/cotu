@@ -1,22 +1,22 @@
 effect_id,name,description,level,type,element,duration,modifier_stat,modifier_type,modifier_value,max_stacks,cured_by,is_cleansable,is_dispellable,icon_path
-eff_defense_up_1,Defense Up I,Increases Defense by 15%.,1,POSITIVE,NONE,2,DEF,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/def_up_1.png
-eff_defense_up_2,Defense Up II,Increases Defense by 30%.,2,POSITIVE,NONE,2,DEF,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/def_up_2.png
-eff_defense_up_3,Defense Up III,Increases Defense by 60%.,3,POSITIVE,NONE,3,DEF,MULTIPLIER,60,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/def_up_3.png
-eff_attack_up_1,Attack Up I,Increases Attack by 15%.,1,POSITIVE,NONE,2,ATK,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/atk_up_1.png
-eff_attack_up_2,Attack Up II,Increases Attack by 30%.,2,POSITIVE,NONE,2,ATK,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/atk_up_2.png
-eff_attack_up_3,Attack Up III,Increases Attack by 50%.,3,POSITIVE,NONE,3,ATK,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/atk_up_3.png
-eff_accuracy_up_1,Accuracy Up I,Increases Accuracy by 15%.,1,POSITIVE,NONE,2,ACC,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/acc_up_1.png
-eff_accuracy_up_2,Accuracy Up II,Increases Accuracy by 30%.,2,POSITIVE,NONE,2,ACC,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/acc_up_2.png
-eff_accuracy_up_3,Accuracy Up III,Increases Accuracy by 50%.,3,POSITIVE,NONE,3,ACC,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/acc_up_3.png
-eff_dexterity_up_1,Dexterity Up I,Increases Dexterity by 15%.,1,POSITIVE,NONE,2,DEX,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/dex_up_1.png
-eff_dexterity_up_2,Dexterity Up II,Increases Dexterity by 30%.,2,POSITIVE,NONE,2,DEX,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/dex_up_2.png
-eff_dexterity_up_3,Dexterity Up III,Increases Dexterity by 50%.,3,POSITIVE,NONE,3,DEX,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/dex_up_3.png
-eff_magic_up_1,Magic Up I,Increases Magic by 15%.,1,POSITIVE,NONE,2,MAG,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/mag_up_1.png
-eff_magic_up_2,Magic Up II,Increases Magic by 30%.,2,POSITIVE,NONE,2,MAG,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/mag_up_2.png
-eff_magic_up_3,Magic Up III,Increases Magic by 50%.,3,POSITIVE,NONE,3,MAG,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/mag_up_3.png
-eff_speed_up_1,Speed Up I,Increases Speed by 15%.,1,POSITIVE,NONE,2,SPD,MULTIPLIER,15,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/spd_up_1.png
-eff_speed_up_2,Speed Up II,Increases Speed by 30%.,2,POSITIVE,NONE,2,SPD,MULTIPLIER,30,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/spd_up_2.png
-eff_speed_up_3,Speed Up III,Increases Speed by 50%.,3,POSITIVE,NONE,3,SPD,MULTIPLIER,50,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/spd_up_3.png
+eff_defense_up_1,Defense Up I,Increases Defense by 2%.,1,POSITIVE,NONE,2,DEF,MULTIPLIER,2,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/def_up_1.png
+eff_defense_up_2,Defense Up II,Increases Defense by 5%.,2,POSITIVE,NONE,2,DEF,MULTIPLIER,5,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/def_up_2.png
+eff_defense_up_3,Defense Up III,Increases Defense by 8%.,3,POSITIVE,NONE,3,DEF,MULTIPLIER,8,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/def_up_3.png
+eff_attack_up_1,Attack Up I,Increases Attack by 2%.,1,POSITIVE,NONE,2,ATK,MULTIPLIER,2,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/atk_up_1.png
+eff_attack_up_2,Attack Up II,Increases Attack by 5%.,2,POSITIVE,NONE,2,ATK,MULTIPLIER,5,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/atk_up_2.png
+eff_attack_up_3,Attack Up III,Increases Attack by 8%.,3,POSITIVE,NONE,3,ATK,MULTIPLIER,8,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/atk_up_3.png
+eff_accuracy_up_1,Accuracy Up I,Increases Accuracy by 2%.,1,POSITIVE,NONE,2,ACC,MULTIPLIER,2,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/acc_up_1.png
+eff_accuracy_up_2,Accuracy Up II,Increases Accuracy by 5%.,2,POSITIVE,NONE,2,ACC,MULTIPLIER,5,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/acc_up_2.png
+eff_accuracy_up_3,Accuracy Up III,Increases Accuracy by 8%.,3,POSITIVE,NONE,3,ACC,MULTIPLIER,8,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/acc_up_3.png
+eff_dexterity_up_1,Dexterity Up I,Increases Dexterity by 2%.,1,POSITIVE,NONE,2,DEX,MULTIPLIER,2,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/dex_up_1.png
+eff_dexterity_up_2,Dexterity Up II,Increases Dexterity by 5%.,2,POSITIVE,NONE,2,DEX,MULTIPLIER,5,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/dex_up_2.png
+eff_dexterity_up_3,Dexterity Up III,Increases Dexterity by 8%.,3,POSITIVE,NONE,3,DEX,MULTIPLIER,8,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/dex_up_3.png
+eff_magic_up_1,Magic Up I,Increases Magic by 2%.,1,POSITIVE,NONE,2,MAG,MULTIPLIER,2,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/mag_up_1.png
+eff_magic_up_2,Magic Up II,Increases Magic by 5%.,2,POSITIVE,NONE,2,MAG,MULTIPLIER,5,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/mag_up_2.png
+eff_magic_up_3,Magic Up III,Increases Magic by 8%.,3,POSITIVE,NONE,3,MAG,MULTIPLIER,8,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/mag_up_3.png
+eff_speed_up_1,Speed Up I,Increases Speed by 2%.,1,POSITIVE,NONE,2,SPD,MULTIPLIER,2,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/spd_up_1.png
+eff_speed_up_2,Speed Up II,Increases Speed by 5%.,2,POSITIVE,NONE,2,SPD,MULTIPLIER,5,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/spd_up_2.png
+eff_speed_up_3,Speed Up III,Increases Speed by 8%.,3,POSITIVE,NONE,3,SPD,MULTIPLIER,8,1,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/spd_up_3.png
 eff_continuous_heal_1,Continuous Heal I,Restores 5% of MAX HP at the start of the turn.,1,POSITIVE,NATURE,2,HP,PERCENT_MAX_HP_HEAL,5,5,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/heal_1.png
 eff_continuous_heal_2,Continuous Heal II,Restores 10% of MAX HP at the start of the turn.,2,POSITIVE,NATURE,2,HP,PERCENT_MAX_HP_HEAL,10,5,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/heal_2.png
 eff_continuous_heal_3,Continuous Heal III,Restores 15% of MAX HP at the start of the turn.,3,POSITIVE,NATURE,3,HP,PERCENT_MAX_HP_HEAL,15,5,DISPEL,FALSE,TRUE,res://Data/Effects/Icons/heal_3.png

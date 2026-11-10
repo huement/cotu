@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_1st7n"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_u4qvw"]
+
+[resource]
+script = ExtResource("2_u4qvw")
+item_id = "armor_shade_bone_feet"
+item_name = "Bone Feet Armor"
+description = "Bone armor for the Shade class. Grants Defense Up I while worn."
+icon_path = "res://Data/Items/armor.png"
+icon = ExtResource("1_1st7n")
+item_type = 2
+equipment_slot = 4
+defense_bonus = 6
+credit_value = 125
+effects = "+2 defense against BLADE"
+effect_amount = 2.0
+effect_element = 2
+effect_stat = "defense"
+granted_status_effects = Array[String](["eff_defense_up_1"])

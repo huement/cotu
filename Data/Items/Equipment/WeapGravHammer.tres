@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://c3r8ox5865sv1"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_jaagl"]
+
+[resource]
+script = ExtResource("1_jaagl")
+item_id = "weap_grav_hammer"
+item_name = "Grav-Hammer of the Ancients"
+description = "A massive concrete hammer fitted with a gravity distortion core."
+icon_path = "res://Assets/Icons/Items/grav_hammer.png"
+item_type = 1
+target_type = 2
+equipment_slot = 8
+weapon_type = 2
+attack_bonus = 90
+defense_bonus = 5
+speed_bonus = -20
+credit_value = 1400
+effects = "Stun"
+effect_amount = 0.2
+effect_element = 5

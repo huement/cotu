@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" uid="uid://bx6drxci78ubu" path="res://resources/Enemies/slime.glb" id="1_mesh"]
+
+[node name="SlimeDroneModel" type="Node3D"]
+
+[node name="slime" parent="." instance=ExtResource("1_mesh")]
+transform = Transform3D(1.25, 0, 0, 0, -5.4639235e-08, -1.25, 0, 1.25, -5.4639235e-08, 0, 0.424, 0)

@@ -16,3 +16,4 @@ req_personality = 0
 level_spells_unlock = 5
 skill_points_per_level = 5
 spell_points_per_level = 0
+allowed_weapon_types = Array[int]([1, 3])

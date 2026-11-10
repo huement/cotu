@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dew0scm40wjbv"]
+
+[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/ruby.png" id="1_ig8wt"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_dy2sh"]
+
+[resource]
+script = ExtResource("2_dy2sh")
+item_id = "gem_neon_ruby"
+item_name = "Neon Ruby"
+description = "Radiates a harsh crimson light. Highly valued by street-alchemists."
+icon_path = "res://Data/Items/loot_icons/ruby.png"
+icon = ExtResource("1_ig8wt")
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 300

@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="11_hqsng"]
 [ext_resource type="Resource" uid="uid://bs77hhk6itw7l" path="res://Data/Items/Equipment/ElderStaff.tres" id="12_g2p8o"]
 [ext_resource type="Script" uid="uid://co7xlukyxktxc" path="res://Scripts/Environment/EditorWorkLight.gd" id="99_editorworklight"]
+[ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="99_leveltitle"]
 
 [sub_resource type="Environment" id="Environment_cave"]
 background_mode = 1
@@ -48,6 +49,12 @@ unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, 25)
 metadata/eye_height = 1.5
 metadata/battle_vertical_offset = -0.5
+
+[node name="LevelTitle" parent="." instance=ExtResource("99_leveltitle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, 25)
+level_title = "Gloom
+Caves I"
+play_new_area_sound = true
 
 [node name="ExitArrival" type="Marker3D" parent="."]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 25, 0, 35)

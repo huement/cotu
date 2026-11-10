@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bifinj866axbp"]
+
+[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/sapphire.png" id="1_lm8aq"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_kmel7"]
+
+[resource]
+script = ExtResource("2_kmel7")
+item_id = "gem_flux_sapphire"
+item_name = "Flux Sapphire"
+description = "Constantly shifts between physical and holographic states."
+icon_path = "res://Data/Items/loot_icons/sapphire.png"
+icon = ExtResource("1_lm8aq")
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 350

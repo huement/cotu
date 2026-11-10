@@ -60,46 +60,58 @@ func setup_victory_display(data: Dictionary) -> void:
 	confirm_button.grab_focus()
 
 
-## Builds a styled mini-card for an individual dropped item
+## Square loot slot: icon alone when present, otherwise a text label. Never both.
 func _create_loot_card(item: ItemData) -> PanelContainer:
-	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(120, 60)
+	const SLOT_SIZE: float = 64.0
+	var has_icon: bool = is_instance_valid(item.icon)
 
-	# Style Box for Item Card
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
+	card.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	card.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.05, 0.08, 0.12, 0.9)
-	style.border_width_bottom = 2
-	style.border_width_left = 2
-	style.border_width_right = 2
-	style.border_width_top = 2
-	style.border_color = Color(0.0, 0.8, 0.9, 0.8) # Neon Cyan
-	style.corner_radius_bottom_left = 4
-	style.corner_radius_bottom_right = 4
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(0)
+	style.content_margin_left = 4.0
+	style.content_margin_top = 4.0
+	style.content_margin_right = 4.0
+	style.content_margin_bottom = 4.0
+	if has_icon:
+		style.bg_color = Color(0.08, 0.1, 0.12, 0.95)
+		style.border_color = Color(0.35, 0.4, 0.45, 1.0)
+	else:
+		# Text-only: white tile, black label, sharp 1px border.
+		style.bg_color = Color(1.0, 1.0, 1.0, 1.0)
+		style.border_color = Color(0.0, 0.0, 0.0, 1.0)
 	card.add_theme_stylebox_override("panel", style)
 
-	var hbox := HBoxContainer.new()
-	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	var qty_suffix: String = " x%d" % item.quantity if item.quantity > 1 else ""
+	var display_name: String = str(item.item_name) + qty_suffix
 
-	# Item Icon
-	if is_instance_valid(item.icon):
+	if has_icon:
 		var icon_rect := TextureRect.new()
 		icon_rect.texture = item.icon
 		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		icon_rect.custom_minimum_size = Vector2(32, 32)
 		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		hbox.add_child(icon_rect)
+		icon_rect.custom_minimum_size = Vector2(SLOT_SIZE - 10.0, SLOT_SIZE - 10.0)
+		icon_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		icon_rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		icon_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		card.add_child(icon_rect)
+	else:
+		var name_label := Label.new()
+		name_label.text = display_name.to_upper()
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		name_label.add_theme_color_override("font_color", Color(0.0, 0.0, 0.0, 1.0))
+		name_label.add_theme_font_size_override("font_size", 10)
+		card.add_child(name_label)
 
-	# Item Name Label
-	var name_label := Label.new()
-	name_label.text = item.item_name
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	hbox.add_child(name_label)
-
-	card.add_child(hbox)
-	card.tooltip_text = "%s\nValue: ₡ %d" % [item.description, item.credit_value]
+	card.tooltip_text = "%s\n%s\nValue: ₡ %d" % [display_name, item.description, item.credit_value]
 	return card
 
 

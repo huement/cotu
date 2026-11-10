@@ -11,28 +11,40 @@ extends EditorScript
 ## Change LEVEL_SEED for a different cave with the same settings.
 
 # --- CONFIGURATION (edit before File -> Run) ----------------------------------
-const LEVEL_NAME: String = "CaveLevel4"
+## Current settings: the Broken Bone Marsh travel cave - one LONG cave (~146 steps end to end,
+## about 2.5x a CaveLevel3-sized cave) linking the two crypts on either side of the river.
+##   West crypt (BrokenBoneMarsh CryptHole_E node) -> this cave's SpawnPoint (west end)
+##   East crypt (BrokenBoneMarsh CryptHole_W node) -> this cave's ExitArrival (east end)
+##   Entry stairs (west end) -> BrokenBoneMarsh SpawnPoint_C_W, exit stairs (east end) -> SpawnPoint_C_E
+const LEVEL_NAME: String = "BrokenBoneMarshCave"
 const SAVE_DIR: String = "res://Scenes/Caves"
-const LEVEL_SEED: int = 4404
-const GRID_SIZE: Vector2i = Vector2i(30, 30) # cells (2 m each); at least 12 x 12
-const ROOM_COUNT: int = 8
-const ENEMY_COUNT: int = 3
+const LEVEL_SEED: int = 7103
+## Banner shown when the party arrives (empty = no title node; the banner shows the scene name).
+const LEVEL_TITLE: String = "Marsh\nUndercroft"
+const GRID_SIZE: Vector2i = Vector2i(130, 22) # cells (2 m each); at least 12 x 12
+const ROOM_COUNT: int = 24
+const ENEMY_COUNT: int = 10
 const ENEMY_DATA: Array[String] = [
-	"res://Data/Enemies/EnZombieGuard.tres",
-	"res://Data/Enemies/EnZombieKnight.tres",
+	"res://Data/Enemies/EnMarshCrab.tres",
 ]
+## Pack size per enemy, picked at random in this range (inclusive). (0, 0) = enemy.tscn default.
+const ENEMY_PACK_SIZE: Vector2i = Vector2i(2, 4)
+## Size of the enemy model walking around the cave (1.0 = as imported; the crab is ~2 m wide).
+const ENEMY_WORLD_SCALE: float = 0.65
+## true = entrance at the west end, rooms chained west -> east, exit at the far east end.
+const START_AT_WEST_END: bool = true
 
 ## Entrance stairs lead back UP to this map, arriving on this marker.
-const PREVIOUS_SCENE: String = "res://Scenes/Caves/CaveLevel3.tscn"
-const PREVIOUS_ARRIVAL: String = "ExitArrival"
-const ENTRY_PROMPT: String = "Climb back up to the caves above?"
+const PREVIOUS_SCENE: String = "res://Scenes/BrokenBoneMarsh.tscn"
+const PREVIOUS_ARRIVAL: String = "SpawnPoint_C_W"
+const ENTRY_PROMPT: String = "Climb back up to the west bank of the marsh?"
 
 ## The exit leads to this map, arriving on this marker.
 ## false = crypt hole in the floor (go deeper), true = stairs in an alcove (way out).
-const EXIT_IS_STAIRS: bool = false
-const NEXT_SCENE: String = ""
-const NEXT_ARRIVAL: String = "SpawnPoint"
-const EXIT_PROMPT: String = "A cold draft rises from a shaft in the floor. Climb down deeper?"
+const EXIT_IS_STAIRS: bool = true
+const NEXT_SCENE: String = "res://Scenes/BrokenBoneMarsh.tscn"
+const NEXT_ARRIVAL: String = "SpawnPoint_C_E"
+const EXIT_PROMPT: String = "Grey daylight spills down a worn stair. Climb up to the east bank of the marsh?"
 # ------------------------------------------------------------------------------
 
 const CAVE_LEVEL_SCRIPT: String = "res://Scripts/Environment/CaveLevel.gd"
@@ -42,6 +54,7 @@ const WALL_LIBRARY: String = "res://resources/mesh_library/cave_wall_mesh_librar
 const STAIRS_SCENE: String = "res://Scenes/Objects/Stairs.tscn"
 const CRYPT_SCENE: String = "res://Scenes/Environment/CryptHole.tscn"
 const ENEMY_SCENE: String = "res://Scenes/Enemies/enemy.tscn"
+const LEVEL_TITLE_SCENE: String = "res://Scenes/UI/LevelTitleTrigger.tscn"
 
 const CELL_SIZE: float = 2.0
 ## crypthole.glb is ~13 m wide: 0.17 fits one 2 m cell; the lift puts its base on the floor.
@@ -50,7 +63,7 @@ const CRYPT_LIFT: float = 0.101
 
 
 func _run() -> void:
-	var layout: CaveGenerator.CaveLayout = CaveGenerator.generate(LEVEL_SEED, GRID_SIZE, ROOM_COUNT, ENEMY_COUNT, EXIT_IS_STAIRS)
+	var layout: CaveGenerator.CaveLayout = CaveGenerator.generate(LEVEL_SEED, GRID_SIZE, ROOM_COUNT, ENEMY_COUNT, EXIT_IS_STAIRS, START_AT_WEST_END)
 	if layout == null:
 		return
 
@@ -128,6 +141,14 @@ func _build_level(layout: CaveGenerator.CaveLayout) -> Node3D:
 	spawn.set_meta("battle_vertical_offset", -0.5)
 	root.add_child(spawn)
 
+	if not LEVEL_TITLE.is_empty():
+		var title: Node3D = _instance(LEVEL_TITLE_SCENE)
+		title.name = "LevelTitle"
+		title.position = spawn.position
+		title.set("level_title", LEVEL_TITLE)
+		title.set("play_new_area_sound", true)
+		root.add_child(title)
+
 	var arrival := Marker3D.new()
 	arrival.name = "ExitArrival"
 	arrival.transform = _cell_transform(layout.arrival_cell, layout.arrival_angle + 180)
@@ -184,15 +205,23 @@ func _build_level(layout: CaveGenerator.CaveLayout) -> Node3D:
 	var enemies := Node3D.new()
 	enemies.name = "Enemies"
 	root.add_child(enemies)
+	var pack_rng := RandomNumberGenerator.new()
+	pack_rng.seed = LEVEL_SEED + 5
 	for i: int in range(layout.enemies.size()):
 		var enemy: Node3D = _instance(ENEMY_SCENE)
 		enemy.name = "Enemy%d" % (i + 1)
 		enemy.position = _cell_center(layout.enemies[i], 0.0)
+		var enemy_type: String = "zombie"
 		if not ENEMY_DATA.is_empty():
-			enemy.set("data", load(ENEMY_DATA[i % ENEMY_DATA.size()]))
-		enemy.set("model_scale", Vector3.ONE)
+			var enemy_data: Resource = load(ENEMY_DATA[i % ENEMY_DATA.size()])
+			enemy.set("data", enemy_data)
+			if enemy_data is EnemyData and not (enemy_data as EnemyData).enemy_type.is_empty():
+				enemy_type = (enemy_data as EnemyData).enemy_type
+		if ENEMY_PACK_SIZE.y > 0:
+			enemy.set("pack_size", pack_rng.randi_range(ENEMY_PACK_SIZE.x, ENEMY_PACK_SIZE.y))
+		enemy.set("model_scale", Vector3.ONE * ENEMY_WORLD_SCALE)
 		enemy.set("vertical_offset", -1.0)
-		enemy.set("enemy_type", "zombie")
+		enemy.set("enemy_type", enemy_type)
 		enemies.add_child(enemy)
 
 	return root

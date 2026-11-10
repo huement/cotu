@@ -22,10 +22,15 @@ var _current_bgm_request: Variant = null
 
 var _is_left_foot: bool = true
 
+## True while something (e.g. the Game Over screen) owns the audio: level music won't auto-resume.
+var hold_music: bool = false
+
+
 func _ready() -> void:
 	_ui_player = AudioStreamPlayer.new()
 	_ui_player.name = "UIPlayer"
 	_ui_player.bus = &"UI" if AudioServer.get_bus_index("UI") != -1 else &"Master"
+	_ui_player.process_mode = Node.PROCESS_MODE_ALWAYS # menus that pause the game still click
 	add_child(_ui_player)
 		
 	_voice_player = AudioStreamPlayer.new()
@@ -252,6 +257,25 @@ func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array, _en
 	_is_in_combat = true
 	stop_all_enemy_loops()
 	play_battle_music()
+	if _combat_has_enemy_type(_enemy_data_or_group, "zombie") and randi() % 5 == 0:
+		play_enemy_sound("zombie_surprise")
+
+
+func _combat_has_enemy_type(data: Variant, type_key: String) -> bool:
+	if data is Array:
+		for d in data:
+			if _combat_has_enemy_type(d, type_key):
+				return true
+		return false
+	if data is Object and is_instance_valid(data):
+		var t: Variant = data.get("enemy_type")
+		if t != null and str(t).to_lower() == type_key:
+			return true
+		for field in ["enemies", "enemy_list", "members"]:
+			var sub: Variant = data.get(field)
+			if sub is Array and _combat_has_enemy_type(sub, type_key):
+				return true
+	return false
 
 
 func _on_combat_ended(victory: bool) -> void:
@@ -262,8 +286,8 @@ func _on_combat_ended(victory: bool) -> void:
 		
 	# Delay restarting standard level BGM slightly to allow victory fanfare to play out
 	await get_tree().create_timer(3.0).timeout
-	if _is_in_combat:
-		return # a new battle started during the fanfare - keep its music
+	if _is_in_combat or hold_music:
+		return # a new battle started during the fanfare / game over owns the audio
 
 	# Resume standard level background music
 	if _current_bgm_request != null:
@@ -315,9 +339,17 @@ func play_proximity_clicker(tier: int) -> void:
 # ==============================================================================
 # 4. ENVIRONMENT & ITEMS SFX
 # ==============================================================================
-func play_mask_sound(mask_type: String = "bad") -> void:
-	var file_name: String = "mask-" + mask_type.to_lower()
-	_play_from_folder("Items/", file_name)
+## Plays Items/mask-<type>.mp3. Missing types (e.g. "good") fall back to mask-default, then mask-bad.
+func play_mask_sound(mask_type: String = "default") -> void:
+	var key: String = mask_type.strip_edges().to_lower()
+	if key.is_empty() or key == "none":
+		key = "default"
+	var candidates: Array[String] = ["mask-" + key, "mask-default", "mask-bad"]
+	for file_name: String in candidates:
+		if _has_file("Items/", file_name):
+			_play_from_folder("Items/", file_name)
+			return
+	push_warning("AudioManager: No mask sound found (tried %s)." % str(candidates))
 
 
 func play_magic_sound(element_name: String) -> void:
@@ -450,32 +482,50 @@ func sync_nearby_enemy_loops(nearby_types: Array[String]) -> void:
 
 func _start_enemy_loop(enemy_type: String) -> void:
 	var key: String = enemy_type.to_lower()
-	var possible_paths: Array[String] = [
-		base_audio_dir + "Enemies/" + key + "_walking.mp3",
-		base_audio_dir + "Enemies/" + key + "_shuffle.mp3"
-	]
-
-	var file_path: String = ""
-	for path in possible_paths:
-		if ResourceLoader.exists(path):
-			file_path = path
-			break
-
-	if file_path.is_empty():
-		return
-
-	var stream: AudioStream = load(file_path) as AudioStream
-	if not is_instance_valid(stream):
+	var candidates: Array[AudioStream] = _get_enemy_walk_streams(key)
+	if candidates.is_empty():
 		return
 
 	var asp := AudioStreamPlayer.new()
 	asp.name = "EnemyLoop_" + key
 	asp.bus = &"SFX" if AudioServer.get_bus_index("SFX") != -1 else &"Master"
-	asp.stream = stream
 	add_child(asp)
+	if candidates.size() == 1:
+		asp.stream = candidates[0]
+	else:
+		# Rotate through variants: play one clip, then pick another when it ends.
+		asp.stream = candidates.pick_random()
+		asp.finished.connect(func() -> void:
+			if is_instance_valid(asp) and asp.is_inside_tree():
+				asp.stream = candidates.pick_random()
+				asp.play())
 	asp.play()
 
 	_active_enemy_loops[key] = asp
+
+
+## Collects <type>_walking.mp3, <type>_walking_2.mp3, ... (falls back to <type>_shuffle.mp3).
+## When several variants exist they are made non-looping so the rotation can advance.
+func _get_enemy_walk_streams(key: String) -> Array[AudioStream]:
+	var out: Array[AudioStream] = []
+	var paths: Array[String] = [base_audio_dir + "Enemies/" + key + "_walking.mp3"]
+	for i in range(2, 10):
+		paths.append(base_audio_dir + "Enemies/%s_walking_%d.mp3" % [key, i])
+	for p in paths:
+		if ResourceLoader.exists(p):
+			var s: AudioStream = load(p) as AudioStream
+			if is_instance_valid(s):
+				out.append(s)
+	if out.is_empty():
+		var shuffle: String = base_audio_dir + "Enemies/" + key + "_shuffle.mp3"
+		if ResourceLoader.exists(shuffle):
+			out.append(load(shuffle) as AudioStream)
+	if out.size() > 1:
+		for i in out.size():
+			if "loop" in out[i]:
+				out[i] = out[i].duplicate()
+				out[i].set("loop", false)
+	return out
 
 
 func _stop_enemy_loop(enemy_type: String) -> void:

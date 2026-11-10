@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88.41 76.64">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-8, .cls-9 {
+        fill: none;
+      }
+
+      .cls-2 {
+        opacity: .71;
+      }
+
+      .cls-2, .cls-5 {
+        fill: #000;
+      }
+
+      .cls-3 {
+        fill: #00f0ff;
+      }
+
+      .cls-4 {
+        fill: #00f0ff;
+      }
+
+      .cls-5 {
+        opacity: .25;
+      }
+
+      .cls-6 {
+        fill: #fff;
+      }
+
+      .cls-8 {
+        stroke-width: 2.15px;
+      }
+
+      .cls-8, .cls-9 {
+        stroke: #00f0ff;
+      }
+
+      .cls-9 {
+        stroke-width: 2.15px;
+      }
+
+      .cls-7 {
+        fill: #64dfdf;
+      }
+    </style>
+  </defs>
+  <g id="Layer_6" data-name="Layer 6">
+    <g>
+      <g>
+        <polygon id="btn-back" class="cls-2" points="1.15 1.07 87.33 1.07 87.33 59.1 71.94 74.37 16.54 74.37 1.15 59.1 1.15 1.07"/>
+        <polygon class="cls-4" points="59.96 32.13 28.53 32.13 44.39 52.38 59.96 32.13"/>
+        <polygon id="btn-back-2" data-name="btn-back" class="cls-5" points="1.15 1.07 87.33 1.07 87.33 59.1 71.94 74.37 16.54 74.37 1.15 59.1 1.15 1.07"/>
+        <polygon id="btn-back-3" data-name="btn-back" class="cls-8" points="1.15 1.07 87.33 1.07 87.33 59.1 71.94 74.37 16.54 74.37 1.15 59.1 1.15 1.07"/>
+        <rect class="cls-4" x="30.24" y="21.76" width="28" height="3.4"/>
+        <g>
+          <polygon class="cls-1" points="56.93 34.85 31.69 34.6 31.74 34.66 56.88 34.91 56.93 34.85"/>
+          <polygon class="cls-3" points="24.84 31.08 27.42 34.62 31.74 34.66 31.69 34.6 56.93 34.85 56.88 34.91 61.13 34.95 63.65 31.46 24.84 31.08"/>
+          <polygon class="cls-6" points="31.74 34.66 27.42 34.62 44.48 58.03 61.13 34.95 56.88 34.91 54.41 38.34 44.47 52.12 34.28 38.14 31.74 34.66"/>
+        </g>
+      </g>
+      <g>
+        <polygon id="btn-back-4" data-name="btn-back" class="cls-5" points="1.08 1.72 87.23 1.72 87.23 60.18 71.84 75.56 16.46 75.56 1.08 60.18 1.08 1.72"/>
+        <polygon id="btn-back-5" data-name="btn-back" class="cls-9" points="1.08 1.72 87.23 1.72 87.23 60.18 71.84 75.56 16.46 75.56 1.08 60.18 1.08 1.72"/>
+        <rect class="cls-7" x="30.16" y="22.56" width="27.99" height="3.43"/>
+        <g>
+          <polygon class="cls-1" points="56.84 35.74 31.61 35.49 31.66 35.56 56.79 35.81 56.84 35.74"/>
+          <polygon class="cls-3" points="24.75 31.95 27.33 35.52 31.66 35.56 31.61 35.49 56.84 35.74 56.79 35.81 61.03 35.85 63.55 32.33 24.75 31.95"/>
+          <polygon class="cls-6" points="31.66 35.56 27.33 35.52 44.39 59.1 61.03 35.85 56.79 35.81 54.32 39.26 44.38 53.15 34.19 39.06 31.66 35.56"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

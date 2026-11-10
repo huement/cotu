@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://dydjwtmdkx2fb"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
 
-[ext_resource type="Material" uid="uid://j83cael1rc01" path="res://resources/Enemies/Kenny/Materials/en_cyber_lich_prime_mat.tres" id="1_de84u"]
-[ext_resource type="PackedScene" uid="uid://cym3tonljf3kt" path="res://resources/Enemies/Kenny/character-r.glb" id="2_3lkpb"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_ygym1"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_cyber_lich_prime_mat.tres" id="1_de84u"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-r.glb" id="2_3lkpb"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_ygym1"]
 
 [resource]
 script = ExtResource("3_ygym1")
@@ -13,6 +13,7 @@ model_path = "res://resources/Enemies/Kenny/character-r.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-r.png"
 model_scene = ExtResource("2_3lkpb")
 custom_material = ExtResource("1_de84u")
+model_scale = Vector3(1, 1, 1)
 base_level = 10
 max_health = 160
 current_health = 160
@@ -22,7 +23,7 @@ speed = 13.0
 initiative_speed = 16
 weakness_element = 4
 attack_element = 0
-equipped_weapon_id = "wpn_arcane_staff"
+equipped_weapon_id = "weap_arcane_staff"
 can_cast_spells = true
 spell_ids = Array[String](["sp_arcane_cataclysm", "sp_neurotoxin_gas"])
 max_mana = 80

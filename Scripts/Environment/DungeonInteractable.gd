@@ -55,11 +55,15 @@ func _align_to_grid() -> void:
 
 	# 2. Only overwrite 3D transform if snapping is enabled (Chests/Loot)
 	if snap_to_floor_center and is_instance_valid(grid):
+		# Centre on the cell in X/Z only. nav_cell_to_world() returns the cell's middle height
+		# (1 m above the floor, for enemies), which made chests float. Keep the placed height.
 		var cell_3d := Vector3i(_grid_position.x, 0, _grid_position.y)
+		var center: Vector3
 		if is_instance_valid(map_mgr) and map_mgr.has_method("nav_cell_to_world"):
-			global_position = map_mgr.nav_cell_to_world(cell_3d)
+			center = map_mgr.nav_cell_to_world(cell_3d)
 		else:
-			global_position = grid.to_global(grid.map_to_local(cell_3d))
+			center = grid.to_global(grid.map_to_local(cell_3d))
+		global_position = Vector3(center.x, global_position.y, center.z)
 
 
 func interact(_player: Node3D) -> void:
@@ -68,5 +72,4 @@ func interact(_player: Node3D) -> void:
 
 ## Helper to fetch active map ID
 func _get_current_map_id() -> String:
-	var scene: Node = get_tree().current_scene
-	return str(scene.name) if is_instance_valid(scene) else "default_dungeon"
+	return GameState.get_current_map_id()

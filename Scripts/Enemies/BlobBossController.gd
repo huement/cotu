@@ -2,6 +2,7 @@
 class_name BlobBossController
 extends Node3D
 
+const _Formation = preload("res://Scripts/3D/CombatFormation.gd")
 const GROUP_WORLD_ENEMIES: StringName = &"world_enemies"
 const GROUP_BLOB_BOSS: StringName = &"blob_boss"
 
@@ -109,6 +110,12 @@ const GROUP_BLOB_BOSS: StringName = &"blob_boss"
 # ==============================================================================
 # RUNTIME STATE
 # ==============================================================================
+@export_group("Boss Rewards")
+## Spell Books / Skill Crystals added to the loot when this boss is beaten (shown on the victory screen).
+@export_range(0, 10) var reward_spell_books: int = 1
+@export_range(0, 10) var reward_skill_crystals: int = 1
+@export_group("")
+
 var current_health: int = 60
 var max_health: int = 60
 var scaled_damage: int = 10
@@ -229,9 +236,10 @@ func _build_runtime_enemy_data() -> void:
 	boss_data.model_scale = base_data.model_scale * boss_scale
 	boss_data.combat_forward_distance = combat_view_distance
 	boss_data.combat_uses_world_node = true
+	_Formation.mark_boss(boss_data)
 
 	if has_minions:
-		# Always a pair: [minion L, boss, minion R]
+		# Always a pair: [minion L, boss, minion R] — formation slots 2 / 1 / 3
 		enemy_group.append(_build_minion_data())
 		_boss_slot = 1
 		enemy_group.append(boss_data)
@@ -407,6 +415,7 @@ func _start_combat_encounter() -> void:
 		if "slots" in GameState.current_party:
 			party_slots = GameState.current_party.slots
 
+	GameState.register_boss_rewards(reward_spell_books, reward_skill_crystals)
 	SignalBus.combat_started.emit(enemy_group, party_slots, "SOUTH")
 	_register_with_visual_manager()
 
@@ -529,44 +538,37 @@ func _clear_minions() -> void:
 	_minion_nodes.clear()
 
 
-## Places minions left/right of the boss, spaced by their actual mesh widths.
+## Places minions on formation slots 2 (left) and 3 (right), matching EnemyVisualManager.
 func _layout_minions(camera: Camera3D) -> void:
 	if _minion_nodes.is_empty():
 		return
+	if not is_instance_valid(camera):
+		return
 
-	var right: Vector3 = Vector3.RIGHT
-	var toward_cam: Vector3 = Vector3.BACK
-	if is_instance_valid(camera):
-		right = camera.global_transform.basis.x
-		right.y = 0.0
-		right = right.normalized() if right.length_squared() > 0.0001 else Vector3.RIGHT
-		toward_cam = camera.global_transform.basis.z
-		toward_cam.y = 0.0
-		toward_cam = toward_cam.normalized() if toward_cam.length_squared() > 0.0001 else Vector3.BACK
+	var cam_transform: Transform3D = camera.global_transform
+	var forward: Vector3 = -cam_transform.basis.z
+	forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		forward = Vector3.FORWARD
+	else:
+		forward = forward.normalized()
+	var right: Vector3 = cam_transform.basis.x
+	right.y = 0.0
+	right = right.normalized() if right.length_squared() > 0.0001 else Vector3.RIGHT
 
-	var boss_aabb: AABB = _compute_visual_aabb()
-	var boss_center: Vector3 = boss_aabb.get_center() if boss_aabb.size != Vector3.ZERO else global_position
-	var boss_half: float = _half_width_along(boss_aabb, right)
-	var boss_depth_half: float = _half_width_along(boss_aabb, toward_cam)
-
+	# Slot 2 = left minion, slot 3 = right minion (same spacing as combat packs).
+	var form_slots: Array[int] = [2, 3]
 	for i in range(_minion_nodes.size()):
 		var minion: Node3D = _minion_nodes[i]
 		if not is_instance_valid(minion):
 			continue
-		var side: float = -1.0 if i == 0 else 1.0
-		# Reset first so the measured AABB is relative to a known spot
-		minion.global_position = global_position
-		var m_aabb: AABB = _compute_visual_aabb(minion)
-		var m_half: float = _half_width_along(m_aabb, right)
-		var m_center_off: Vector3 = (m_aabb.get_center() - minion.global_position) if m_aabb.size != Vector3.ZERO else Vector3.ZERO
-		m_center_off.y = 0.0
-
-		# Line the minion's front edge up with the boss's front edge
-		var m_depth_half: float = _half_width_along(m_aabb, toward_cam)
-		var target_center: Vector3 = boss_center + right * side * (boss_half + m_half + minion_gap) \
-			+ toward_cam * (boss_depth_half - m_depth_half + minion_forward_offset)
-		var pos: Vector3 = target_center - m_center_off
-		pos.y = global_position.y
+		var slot: int = form_slots[mini(i, form_slots.size() - 1)]
+		var offset: Vector2 = _Formation.slot_offset(
+			slot, _Formation.DEFAULT_SPACING, _Formation.DEFAULT_BACK_PULL)
+		var dist: float = combat_view_distance + offset.y + minion_forward_offset
+		var pos: Vector3 = Vector3(cam_transform.origin.x, global_position.y, cam_transform.origin.z) \
+			+ forward * dist \
+			+ right * offset.x
 		minion.global_position = pos
 
 

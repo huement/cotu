@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_marsh_stalker_mat.tres" id="1_tous0"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-g.glb" id="2_dqwwl"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_q7jsm"]
+
+[resource]
+script = ExtResource("3_q7jsm")
+enemy_id = "en_marsh_stalker"
+enemy_name = "Marsh Stalker"
+model_path = "res://resources/Enemies/Kenny/character-g.glb"
+texture_path = "res://resources/Enemies/Kenny/texture-g.png"
+model_scene = ExtResource("2_dqwwl")
+custom_material = ExtResource("1_tous0")
+model_scale = Vector3(1, 1, 1)
+base_level = 4
+max_health = 75
+current_health = 75
+attack_damage = 20
+defense = 15
+initiative_speed = 13
+attack_element = 2
+equipped_weapon_id = "weap_plasma_katana"
+occurs_in_groups = false
+max_group_size = 1
+movement_speed = 1.6
+aggro_range_tiles = 6
+can_surprise_player = true
+can_be_surprised = false
+xp_value = 200
+gold_value = 200

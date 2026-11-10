@@ -126,6 +126,9 @@ func update_preview(item: ItemData, slot_idx: int) -> void:
 		_preview_title_label.text = item.item_name.to_upper()
 	if _preview_desc_label:
 		_preview_desc_label.text = item.description
+		if item.is_throwable:
+			_preview_desc_label.text += "\n\nTHROWN · power %d · %s · aim and crits from DEX" % [
+				item.get_throw_power(), "hits every enemy" if item.get_battle_target_type() == ItemData.TargetType.ALL_ENEMIES else "one enemy"]
 	if _preview_icon:
 		_preview_icon.texture = item.icon if "icon" in item else null
 
@@ -138,6 +141,7 @@ func update_preview(item: ItemData, slot_idx: int) -> void:
 
 	if _items_use_btn:
 		_items_use_btn.disabled = not is_usable
+		_items_use_btn.text = "THROW" if item.is_throwable else "USE"
 	if _items_drop_btn:
 		_items_drop_btn.disabled = in_combat
 

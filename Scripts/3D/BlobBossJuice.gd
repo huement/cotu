@@ -5,6 +5,20 @@ extends Node3D
 const BLOB_SHADER: Shader = preload("res://Shaders/blob_monster.gdshader")
 const BLOB_ALBEDO: Texture2D = preload("res://resources/Enemies/blobby_Image_0.png")
 
+@export_group("Look")
+## true = the slime shader (rim glow, charge and hit flashes). false = keep the model's own materials.
+@export var use_blob_shader: bool = true
+## true = the jelly squash-and-stretch idle. false = stand still (use for creatures like the Beast King).
+@export var squash_idle: bool = true
+## Play the model's own clips (idle / attack / hurt / death) instead of the blob squash, lunge and melt.
+@export var use_model_clips: bool = false
+@export var clip_idle: StringName = &"idle"
+@export var clip_attack: StringName = &"attack"
+@export var clip_hurt: StringName = &"hurt"
+@export var clip_death: StringName = &"death"
+## Seconds into the attack clip when the hit lands.
+@export var attack_hit_time: float = 0.35
+
 @export_group("Juice Tuning")
 @export var base_squash_duration: float = 0.8
 @export var hit_shake_intensity: float = 0.18
@@ -20,8 +34,9 @@ var _is_attacking: bool = false
 
 
 func _ready() -> void:
-	_init_shader_material()
-	_collect_and_apply_meshes(self)
+	if use_blob_shader:
+		_init_shader_material()
+		_collect_and_apply_meshes(self)
 	_base_scale = scale
 	play_idle()
 
@@ -76,6 +91,10 @@ func play_idle() -> void:
 		return
 	if is_instance_valid(_active_tween) and _active_tween.is_running():
 		_active_tween.kill()
+	if use_model_clips:
+		_play_clip(clip_idle, true)
+	if not squash_idle:
+		return
 
 	if is_instance_valid(_shader_mat):
 		_shader_mat.set_shader_parameter("attack_charge", 0.0)
@@ -91,6 +110,9 @@ func play_idle() -> void:
 
 
 func play_attack_animation(target_callback: Callable = Callable()) -> void:
+	if use_model_clips:
+		_play_clip_attack(target_callback)
+		return
 	_is_attacking = true
 	if is_instance_valid(_active_tween):
 		_active_tween.kill()
@@ -142,6 +164,9 @@ func play_attack_animation(target_callback: Callable = Callable()) -> void:
 
 
 func play_hit_shake() -> void:
+	if use_model_clips and not _is_attacking:
+		_play_clip(clip_hurt, false)
+		get_tree().create_timer(maxf(0.2, _clip_length(clip_hurt))).timeout.connect(play_idle, CONNECT_ONE_SHOT)
 	# Flash red via shader
 	if is_instance_valid(_shader_mat):
 		if is_instance_valid(_flash_tween) and _flash_tween.is_running():
@@ -174,6 +199,18 @@ func play_death_sink(on_complete: Callable = Callable()) -> void:
 		_active_tween.kill()
 	if is_instance_valid(_shake_tween):
 		_shake_tween.kill()
+	if use_model_clips:
+		# Real death clip, then sink into the ground.
+		_play_clip(clip_death, false)
+		var death_tween: Tween = create_tween()
+		death_tween.tween_interval(maxf(0.3, _clip_length(clip_death)))
+		death_tween.tween_property(self, "position", position - Vector3(0.0, 1.5, 0.0), 1.0) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		death_tween.finished.connect(func() -> void:
+			if on_complete.is_valid():
+				on_complete.call()
+		, CONNECT_ONE_SHOT)
+		return
 
 	var melt_tween: Tween = create_tween()
 	var flat_scale: Vector3 = Vector3(_base_scale.x * 1.6, 0.05, _base_scale.z * 1.6)
@@ -188,3 +225,50 @@ func play_death_sink(on_complete: Callable = Callable()) -> void:
 		if on_complete.is_valid():
 			on_complete.call()
 	, CONNECT_ONE_SHOT)
+
+
+# ==============================================================================
+# Model clips (use_model_clips)
+# ==============================================================================
+func _anim_player() -> AnimationPlayer:
+	return find_child("AnimationPlayer", true, false) as AnimationPlayer
+
+
+func _clip_length(clip: StringName) -> float:
+	var ap: AnimationPlayer = _anim_player()
+	if ap == null or not ap.has_animation(clip):
+		return 0.0
+	return ap.get_animation(clip).length
+
+
+func _play_clip(clip: StringName, loop: bool) -> void:
+	var ap: AnimationPlayer = _anim_player()
+	if ap == null or not ap.has_animation(clip):
+		return
+	var anim: Animation = ap.get_animation(clip)
+	anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+	ap.play(clip, 0.15)
+
+
+## Attack clip + a short lunge toward the camera; the hit lands at attack_hit_time.
+func _play_clip_attack(target_callback: Callable) -> void:
+	_is_attacking = true
+	_play_clip(clip_attack, false)
+	var start_pos: Vector3 = position
+	var tween: Tween = create_tween()
+	# +Z faces the camera
+	tween.tween_property(self, "position", start_pos + Vector3(0.0, 0.0, 0.8), attack_hit_time) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func() -> void:
+		if is_instance_valid(SignalBus):
+			SignalBus.camera_shake_requested.emit(0.5)
+		if target_callback.is_valid():
+			target_callback.call()
+	)
+	tween.tween_property(self, "position", start_pos, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(maxf(0.0, _clip_length(clip_attack) - attack_hit_time - 0.4))
+	tween.finished.connect(func() -> void:
+		_is_attacking = false
+		play_idle()
+	, CONNECT_ONE_SHOT)
+

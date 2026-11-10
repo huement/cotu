@@ -19,6 +19,7 @@ class_name CharacterSheetMenu
 @onready var hp_val_label: Label = %HPValLabel as Label
 @onready var energy_val_label: Label = %EnergyValLabel as Label
 @onready var close_button: Button = %CloseButton as Button
+@onready var spend_points_button: Button = %SpendPointsButton as Button
 @onready var portrait_texture: TextureRect = %PortraitTexture as TextureRect
 
 # SceneUniqueNodes for Attack Type and Row Toggle
@@ -53,6 +54,8 @@ func _ready() -> void:
 
 	if close_button:
 		close_button.pressed.connect(_on_close_button_pressed)
+	if spend_points_button:
+		spend_points_button.pressed.connect(_on_spend_points_pressed)
 
 	if prev_character_button:
 		prev_character_button.pressed.connect(_on_prev_character_pressed)
@@ -177,8 +180,35 @@ func _render_character_sheet(character: CatCharacter) -> void:
 		inventory_grid.display_inventory(GameState.inventory)
 	if skills_spells_panel:
 		skills_spells_panel.display_character_abilities(character)
-	
+
+	_update_spend_points_button(character)
 	_update_status_effects_display(character)
+
+
+func _update_spend_points_button(character: CatCharacter) -> void:
+	if not is_instance_valid(spend_points_button):
+		return
+	var has_points: bool = character.has_method("has_unspent_points") and character.has_unspent_points()
+	spend_points_button.visible = has_points
+	if has_points:
+		spend_points_button.text = "[ SPEND POINTS: %d/%d/%d ]" % [
+			character.unspent_stat_points,
+			character.unspent_skill_points,
+			character.unspent_spell_points,
+		]
+
+
+func _on_spend_points_pressed() -> void:
+	if not is_instance_valid(_current_character):
+		return
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-press")
+	# Close the sheet first so LevelUpMenu owns pause/input.
+	if overlay_panel:
+		overlay_panel.visible = false
+	GameState.current_mode = GameState.Mode.EXPLORING
+	if is_instance_valid(SignalBus) and SignalBus.has_signal(&"level_up_screen_requested"):
+		SignalBus.level_up_screen_requested.emit(_current_character)
 
 
 ## Tints and desaturates UI elements when character is downed
@@ -241,24 +271,32 @@ func _update_status_effects_display(cat_character: Resource) -> void:
 			if is_instance_valid(item):
 				equipped_items.append(item)
 
-	# 2. Extract unique granted_status_effects IDs
-	var effect_ids: Array[String] = []
+	# 2. Count granted_status_effects IDs across equipped pieces (stacks for set bonuses)
+	var effect_stacks: Dictionary = {}
+	var effect_order: Array[String] = []
 	for item in equipped_items:
 		if is_instance_valid(item) and "granted_status_effects" in item:
 			var effects: Array = item.get("granted_status_effects") as Array
 			for eff_id in effects:
-				if eff_id is String and not effect_ids.has(eff_id):
-					effect_ids.append(eff_id)
+				if not (eff_id is String):
+					continue
+				var id_str: String = eff_id as String
+				if id_str.is_empty():
+					continue
+				if not effect_stacks.has(id_str):
+					effect_order.append(id_str)
+					effect_stacks[id_str] = 0
+				effect_stacks[id_str] = int(effect_stacks[id_str]) + 1
 
 	# 3. Instantiate badge scenes for each granted equipment status effect
 	var badge_scene: PackedScene = load("res://Scenes/UI/StatusEffectBadge.tscn")
-	for eff_id in effect_ids:
+	for eff_id: String in effect_order:
 		var info: Dictionary = StatusEffectDatabase.get_effect_info(eff_id)
 		if not info.is_empty():
 			var badge_inst := badge_scene.instantiate() as StatusEffectBadge
 			container.add_child(badge_inst)
 			# Pass 0 so equipment status effects are recognized as permanent (no "2t" label)
-			badge_inst.setup(info, 0)
+			badge_inst.setup(info, 0, int(effect_stacks[eff_id]))
 
 
 # ==============================================================================
@@ -385,7 +423,7 @@ func _on_character_xp_changed(_slot_index: int, _current_xp: int, _max_xp: int) 
 			_render_character_sheet(active_cat)
 
 
-func _on_character_stats_changed(slot_index: int, _current: int, _max: int) -> void:
+func _on_character_stats_changed(slot_index: int, _current: int, _max: int = -1) -> void:
 	if overlay_panel.visible and slot_index == _current_slot_index:
 		if is_instance_valid(_current_character):
 			_render_character_sheet(_current_character)

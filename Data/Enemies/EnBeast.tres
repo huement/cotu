@@ -1,15 +1,15 @@
 [gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
-[ext_resource type="PackedScene" uid="uid://cvp5tl7sdodgi" path="res://resources/Enemies/beast.glb" id="1_model"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/beast.glb" id="1_cgssn"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_iojrp"]
 
 [resource]
-script = ExtResource("2_script")
+script = ExtResource("2_iojrp")
 enemy_id = "en_beast"
 enemy_type = "beast"
 enemy_name = "Feral Beast"
 model_path = "res://resources/Enemies/beast.glb"
-model_scene = ExtResource("1_model")
+model_scene = ExtResource("1_cgssn")
 model_scale = Vector3(0.6, 0.6, 0.6)
 combat_forward_distance = 3.0
 base_level = 4
@@ -18,10 +18,8 @@ current_health = 110
 attack_damage = 22
 defense = 7
 speed = 11.0
-initiative_speed = 12
 weakness_element = 2
 attack_element = 2
-min_group_size = 1
 max_group_size = 2
 movement_speed = 1.8
 aggro_range_tiles = 5

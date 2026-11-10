@@ -1,0 +1,95 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Menus/menu_screen_template.gd" id="1_tmpl"]
+[ext_resource type="Texture2D" path="res://ui/icons/arrow_left.svg" id="2_back"]
+
+[node name="MenuScreenTemplate" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tmpl")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.86)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 72
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 72
+theme_override_constants/margin_bottom = 40
+
+[node name="Panel" type="PanelContainer" parent="Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Inner" type="MarginContainer" parent="Margin/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="Margin/Panel/Inner"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="Margin/Panel/Inner/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="BackButton" type="Button" parent="Margin/Panel/Inner/VBox/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 52)
+layout_mode = 2
+size_flags_vertical = 4
+text = "BACK"
+icon = ExtResource("2_back")
+
+[node name="TitleBlock" type="VBoxContainer" parent="Margin/Panel/Inner/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Margin/Panel/Inner/VBox/Header/TitleBlock"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SCREEN TITLE"
+
+[node name="SubtitleLabel" type="Label" parent="Margin/Panel/Inner/VBox/Header/TitleBlock"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Subtitle"
+
+[node name="Divider" type="ColorRect" parent="Margin/Panel/Inner/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+
+[node name="Body" type="VBoxContainer" parent="Margin/Panel/Inner/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BodyLabel" type="RichTextLabel" parent="Margin/Panel/Inner/VBox/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "Body text"

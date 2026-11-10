@@ -5,6 +5,8 @@ description: Run Shards in Godot 4.5, capture logs/screenshots, query Godot docs
 
 # Shards / Godot 4.5 workflow
 
+Project briefing: repo-root `AGENTS.md`. Docs index: `_documentation/INDEX.md`.
+
 ## Binaries
 
 - Godot: `/Applications/Godot.app/Contents/MacOS/Godot` (symlink: `godot`)

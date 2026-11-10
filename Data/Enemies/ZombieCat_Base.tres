@@ -2,7 +2,7 @@
 
 [ext_resource type="Material" uid="uid://d37hfmbiw1ujo" path="res://resources/Enemies/Kenny/Materials/en_zombie_cat_mat.tres" id="1_ht43a"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="1_k5ssf"]
-[ext_resource type="PackedScene" uid="uid://ds6mkgkahu71e" path="res://resources/Enemies/Kenny/character-l.glb" id="1_wiw8o"]
+[ext_resource type="PackedScene" uid="uid://c7uv1yulj8oks" path="res://resources/Enemies/Kenny/character-l.glb" id="1_wiw8o"]
 
 [resource]
 script = ExtResource("1_k5ssf")

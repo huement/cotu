@@ -87,3 +87,33 @@ Spells belong to specific `SpellbookType` domains (`ARCHANIST`, `SOULWRIGHT`, `M
 * **Parameters**:
   * `current_energy`: Caster's active energy/MP pool.
   * `character_class_name`: Optional string identifier for the caster's primary class.
+
+## LEARNING SPELLS & SKILLS (2026-11)
+
+Characters no longer know every spell/skill of their class. Code: `Scripts/Progression/AbilityRules.gd` (rules, pure, tested in `tests/progression/test_ability_rules.gd`) and `AbilityLibrary.gd` (loads every SpellData/SkillData).
+
+### What a new character starts with (`AbilityRules.initialize_abilities`)
+- Up to **2 cheapest tier-1 spells** of their spellbook(s) — only if the book is already open at their level.
+- The **first class COMBAT skill** (Skills.csv order by cost/name) + **every race skill** for their breed.
+- `CatCharacter.abilities_initialized` is saved; it runs once. Old saves (that knew everything) are trimmed to the starter set but keep anything already ranked up with level-up points.
+- When a class's spellbook opens on a level-up (Warden / Echo / Amazon / Crusader / Voidhand at 3, Ronin / Ghostblade at 5 — `Spells Unlock At Level` in `Data/Class_Progression.csv`) the character gets its starter spells for free + a toast.
+
+### Who can learn what
+| | Rule |
+|---|---|
+| Spell | spellbook is one of the class's books (`ProfessionData.spellbook_type`, e.g. "Soulwright, Archanist") · book is open · **tier ≤ 1 + (level − unlock level) / 3** (tier 1 at unlock, tier 2 three levels later...) · level ≥ the spell's `requirement` · `class_locked` spells only for the class that owns the book |
+| Skill | class in `assigned_classes` **or** breed in `assigned_races` (no lists = anyone) |
+
+Tunables: `LEVELS_PER_TIER`, `STARTER_SPELLS`, `STARTER_CLASS_SKILLS` at the top of `AbilityRules.gd`.
+
+### Spell Books & Skill Crystals
+- Items: `Data/Loot.csv` rows `lrn_spell_book` / `lrn_skill_crystal` → `Data/Items/LrnSpellBook.tres` / `LrnSkillCrystal.tres` (effects `LearnSpell` / `LearnSkill`, field-only, consumable). Icons `Data/Items/spell_book.png` / `skill_crystal.png` (rendered from the models).
+- **Using** one from ITEMS on a party member opens `AbilityLearnScreen` (what they can learn now + the class's later spells greyed out with "Needs level 7" etc.). The item is consumed **only** when something is learned; Cancel / Esc keeps it.
+- **World pickups**: `Scenes/Objects/SpellBook.tscn` / `SkillCrystal.tscn` use `Scripts/Environment/ItemPickup.gd` (floats, spins, glows; search the tile in front of it to collect; vanishes and is saved per map). Drop instances anywhere — each gets a save id from its node name + grid cell (or set `object_id`). `ItemPickup` works with any `ItemData` (`item`, `quantity`, `pickup_message`, glow colour...).
+- **Boss rewards**: `BlobBossController` (Slime Lord, Beast King, BossChamber `DungeonBoss`), `BossEnemy` (FeroShaw drone) and `TentacleBossController` have **Boss Rewards → reward_spell_books / reward_skill_crystals** (default 1 + 1). They call `GameState.register_boss_rewards()` before the fight; `CombatManager` adds the items on victory (shown on the victory screen) and drops them if you lose / flee.
+
+### Level-up points vs books
+Spell/skill **points** from levelling still only **rank up** abilities a character already knows (Level Up screen). Books and crystals are the only way to learn **new** ones.
+
+### Export safety
+All `res://` folder scans (spells, skills, status effects) go through `AbilityLibrary.load_all()` / `ResourceLoader.list_directory`, which works in exported builds (raw `DirAccess` only sees `*.remap` files there).

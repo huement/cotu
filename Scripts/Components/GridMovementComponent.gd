@@ -45,8 +45,10 @@ func try_step(parent_node: Node3D, local_input_dir: Vector3, _current_facing: St
 
 	if map_manager:
 		var target_grid_pos: Vector3i = map_manager.world_to_grid(target_world_pos)
-		if map_manager.is_tile_blocked(target_grid_pos):
-			GameLogger.nav('try_step BLOCKED INSTANCE')
+		var block_reason: String = map_manager.get_tile_block_reason(target_grid_pos)
+		if not block_reason.is_empty():
+			var from_cell: Vector3i = map_manager.world_to_grid(parent_node.global_position)
+			GameLogger.nav("Step blocked %s -> %s: %s" % [Vector2i(from_cell.x, from_cell.z), Vector2i(target_grid_pos.x, target_grid_pos.z), block_reason])
 			var enemy_node: Node3D = map_manager.get_enemy_at_grid_pos(target_grid_pos)
 			if is_instance_valid(enemy_node):
 				if enemy_node.has_method("trigger_combat_encounter"):

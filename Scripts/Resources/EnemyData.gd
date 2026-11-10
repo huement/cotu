@@ -13,6 +13,8 @@ extends Resource
 @export var model_scale: Vector3 = Vector3(0.5, 0.5, 0.5)
 ## If greater than 0, overrides EnemyVisualManager camera distance for this enemy.
 @export var combat_forward_distance: float = 0.0
+## Camera-relative Y offset for combat placement (EnemyVisualManager default is -0.85).
+@export var vertical_offset: float = -0.85
 ## The overworld node is the combat mesh. Do not spawn or reorient a second copy.
 @export var combat_uses_world_node: bool = false
 ## Yaw applied after look_at. 180 faces most GLBs at the camera; 0 if the mesh already faces +Z.

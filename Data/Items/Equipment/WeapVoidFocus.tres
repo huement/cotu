@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://xu1y07anvcwj"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_2lhue"]
+
+[resource]
+script = ExtResource("1_2lhue")
+item_id = "weap_void_focus"
+item_name = "Void-Tether Focus"
+description = "A dark matter sphere that channels devastating sorcery."
+icon_path = "res://Assets/Icons/Items/void_focus.png"
+item_type = 1
+target_type = 2
+equipment_slot = 5
+attack_bonus = 25
+credit_value = 1200
+effects = "Amplify"
+effect_amount = 1.2
+effect_element = 1
+effect_stat = "attack"

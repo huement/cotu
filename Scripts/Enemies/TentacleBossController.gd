@@ -17,6 +17,12 @@ const GROUP_LAKE_BOSS: StringName = &"lake_boss"
 @export var rise_depth: float = 6.0
 @export var rise_duration: float = 2.8
 
+@export_group("Boss Rewards")
+## Spell Books / Skill Crystals added to the loot when this boss is beaten (shown on the victory screen).
+@export_range(0, 10) var reward_spell_books: int = 1
+@export_range(0, 10) var reward_skill_crystals: int = 1
+@export_group("")
+
 var _enemy_data: EnemyData
 var current_health: int = 230
 var _is_in_active_combat: bool = false
@@ -196,6 +202,7 @@ func trigger_combat_encounter() -> void:
 	if is_instance_valid(GameLogger):
 		GameLogger.combat("Player engaged the sea monster at cell Vector2i%s" % get_grid_pos())
 
+	GameState.register_boss_rewards(reward_spell_books, reward_skill_crystals)
 	SignalBus.combat_started.emit(enemy_group, party_slots, "SOUTH")
 
 

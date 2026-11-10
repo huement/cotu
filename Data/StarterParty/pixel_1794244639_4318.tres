@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="CatCharacter" load_steps=6 format=3]
+
+[ext_resource type="Resource" path="res://Data/Races/Siamese.tres" id="1_6dumd"]
+[ext_resource type="Resource" path="res://Data/Skills/SkEnchantGear.tres" id="2_xl8jj"]
+[ext_resource type="Resource" path="res://Data/Spells/SpCorrosiveSpray.tres" id="3_prwf3"]
+[ext_resource type="Resource" path="res://Data/Classes/Maester.tres" id="4_65xy8"]
+[ext_resource type="Script" path="res://resources/CatCharacter.gd" id="5_tlxbm"]
+
+[resource]
+script = ExtResource("5_tlxbm")
+name = "Pixel"
+breed = ExtResource("1_6dumd")
+profession = ExtResource("4_65xy8")
+portrait_path = "res://Data/Portraits/Maester.png"
+roster_id = "pixel_1794244639_4318"
+creation_dice = Array[int]([5, 3, 6])
+creation_allocation = {
+"dexterity": 4,
+"intelligence": 6,
+"speed": 2,
+"vitality": 2
+}
+max_xp = 1100
+strength = 7
+intelligence = 16
+piety = 10
+vitality = 9
+dexterity = 13
+speed = 11
+current_hp = 18
+max_hp = 18
+current_energy = 26
+max_energy = 26
+known_spells = Array[Resource]([ExtResource("3_prwf3")])
+known_skills = Array[Resource]([ExtResource("2_xl8jj")])
+abilities_initialized = true

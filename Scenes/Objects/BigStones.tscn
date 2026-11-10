@@ -1,0 +1,111 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Environment/big_stones.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://rf3o1dqumfdi" path="res://resources/tile_sets/nature/stone_tallA.glb" id="2_stoneA"]
+[ext_resource type="PackedScene" uid="uid://2a7ys1jqwkif" path="res://resources/tile_sets/nature/stone_tallB.glb" id="3_stoneB"]
+[ext_resource type="PackedScene" uid="uid://cdxpqbawwwair" path="res://resources/tile_sets/nature/stone_tallC.glb" id="4_stoneC"]
+[ext_resource type="PackedScene" uid="uid://d0w4f4ak70w0d" path="res://resources/tile_sets/nature/stone_tallD.glb" id="5_stoneD"]
+[ext_resource type="PackedScene" uid="uid://d38frapq48kx5" path="res://resources/tile_sets/nature/stone_tallE.glb" id="6_stoneE"]
+[ext_resource type="PackedScene" uid="uid://vpcw1cuwinjf" path="res://resources/tile_sets/nature/stone_tallF.glb" id="7_stoneF"]
+[ext_resource type="PackedScene" uid="uid://be2br1pl3wk3l" path="res://resources/tile_sets/nature/stone_tallG.glb" id="8_stoneG"]
+[ext_resource type="PackedScene" uid="uid://cnfvi48xpy48v" path="res://resources/tile_sets/nature/stone_tallH.glb" id="9_stoneH"]
+
+[sub_resource type="BoxShape3D" id="Box_A"]
+size = Vector3(1.77, 1.992, 1.23)
+
+[sub_resource type="BoxShape3D" id="Box_B"]
+size = Vector3(1.721, 2.209, 1.733)
+
+[sub_resource type="BoxShape3D" id="Box_C"]
+size = Vector3(1.026, 1.957, 0.982)
+
+[sub_resource type="BoxShape3D" id="Box_D"]
+size = Vector3(0.996, 1.93, 1.038)
+
+[sub_resource type="BoxShape3D" id="Box_E"]
+size = Vector3(1.026, 1.109, 1.185)
+
+[sub_resource type="BoxShape3D" id="Box_F"]
+size = Vector3(0.998, 1.434, 1.153)
+
+[sub_resource type="BoxShape3D" id="Box_G"]
+size = Vector3(0.956, 1.957, 1.104)
+
+[sub_resource type="BoxShape3D" id="Box_H"]
+size = Vector3(1.294, 1.777, 1.494)
+
+[node name="BigStones" type="Node3D"]
+script = ExtResource("1_script")
+stone_type = 0
+
+[node name="StoneA" parent="." instance=ExtResource("2_stoneA")]
+transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, 0, 0, 0)
+
+[node name="StoneB" parent="." instance=ExtResource("3_stoneB")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="StoneC" parent="." instance=ExtResource("4_stoneC")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="StoneD" parent="." instance=ExtResource("5_stoneD")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="StoneE" parent="." instance=ExtResource("6_stoneE")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="StoneF" parent="." instance=ExtResource("7_stoneF")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="StoneG" parent="." instance=ExtResource("8_stoneG")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="StoneH" parent="." instance=ExtResource("9_stoneH")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)
+visible = false
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="StoneACollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.896, 0)
+shape = SubResource("Box_A")
+
+[node name="StoneBCollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98, -0)
+shape = SubResource("Box_B")
+disabled = true
+
+[node name="StoneCCollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.854, 0)
+shape = SubResource("Box_C")
+disabled = true
+
+[node name="StoneDCollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.84, 0)
+shape = SubResource("Box_D")
+disabled = true
+
+[node name="StoneECollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43, 0)
+shape = SubResource("Box_E")
+disabled = true
+
+[node name="StoneFCollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.592, 0)
+shape = SubResource("Box_F")
+disabled = true
+
+[node name="StoneGCollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.854, 0)
+shape = SubResource("Box_G")
+disabled = true
+
+[node name="StoneHCollision" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.763, 0)
+shape = SubResource("Box_H")
+disabled = true

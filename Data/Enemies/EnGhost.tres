@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://drw6qwu6guuka"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://crdlpjkm4cmdo"]
 
 [ext_resource type="PackedScene" uid="uid://cxtuxauq6u7qk" path="res://resources/Enemies/ghost.glb" id="1_xfoff"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_m77h0"]
@@ -25,5 +25,5 @@ movement_speed = 1.2
 aggro_range_tiles = 5
 can_surprise_player = true
 can_be_surprised = false
-xp_value = 80
+xp_value = 240
 gold_value = 40

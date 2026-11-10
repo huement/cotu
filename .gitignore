@@ -13,4 +13,5 @@ addons/ScatterShot
 
 _backup**/*
 
-CLAUDE.md
+# CLAUDE.md is a thin pointer to AGENTS.md — keep both tracked.
+# Personal Claude overrides can live outside the repo.

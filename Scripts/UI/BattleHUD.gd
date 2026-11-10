@@ -14,6 +14,7 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var enemy_hp_label: Label = %EnemyHPLabel as Label
 @onready var turn_character_label: Label = %TurnCharacter as Label
 @onready var turn_info_label: Label = %TurnInfo as Label
+@onready var active_portrait: TextureRect = %ActivePortrait as TextureRect
 
 @onready var left_chevrons: TextureRect = %LeftChevrons as TextureRect
 @onready var right_chevrons: TextureRect = %RightChevrons as TextureRect
@@ -28,6 +29,7 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 
 const WATER_ENEMY_IDS: Array[String] = ["en_lake_tentacle", "en_lake_monster"]
 const WATER_SLICE_SHADER: Shader = preload("res://Shaders/water_slice.gdshader")
+const TURN_INFO_SCROLL_SPEED: float = 28.0 ## pixels per second when TurnInfo overflows
 
 var _default_slice_material: ShaderMaterial = null
 var _water_slice_material: ShaderMaterial = null
@@ -42,6 +44,10 @@ var _pending_target_action: StringName = &""
 var _is_auto_battle_on: bool = false
 var _buttons_bound: bool = false
 var current_turn_slot_index: int = -1
+
+var _turn_info_scroll_label: Label = null
+var _turn_info_tween: Tween = null
+var _active_portrait_default: Texture2D = null
 
 var _enemy_max_hps: Dictionary = {}
 var _enemy_current_hps: Dictionary = {}
@@ -62,8 +68,12 @@ func _ready() -> void:
 	_initialize_portrait_slots()
 	_setup_target_button_container()
 	_setup_enemy_info_menu()
+	_setup_turn_info_scroller()
 	_connect_to_signal_bus()
 	_bind_action_buttons()
+
+	if is_instance_valid(active_portrait):
+		_active_portrait_default = active_portrait.texture
 
 	if is_instance_valid(auto_button):
 		auto_button.toggled.connect(_on_auto_button_toggled)
@@ -415,27 +425,26 @@ func _on_combatant_turn_ready(combatant_id: String, slot_index: int) -> void:
 		if is_instance_valid(portrait_slots[i]) and portrait_slots[i].has_method("set_active"):
 			portrait_slots[i].set_active(i == slot_index)
 
+	var cat_res: Resource = _get_party_slot_resource(slot_index)
 	var cat_name: String = "???"
-	var gs: Node = get_tree().root.get_node_or_null("GameState")
-
-	if is_instance_valid(gs) and "current_party" in gs and gs.current_party:
-		var slots: Array = gs.current_party.get("slots") as Array
-		if slot_index >= 0 and slot_index < slots.size() and is_instance_valid(slots[slot_index]):
-			var cat_res: Resource = slots[slot_index] as Resource
-			if "name" in cat_res and cat_res.get("name") != null:
-				cat_name = str(cat_res.get("name")).to_upper()
-			elif "character_name" in cat_res and cat_res.get("character_name") != null:
-				cat_name = str(cat_res.get("character_name")).to_upper()
+	if is_instance_valid(cat_res):
+		if "name" in cat_res and cat_res.get("name") != null:
+			cat_name = str(cat_res.get("name")).to_upper()
+		elif "character_name" in cat_res and cat_res.get("character_name") != null:
+			cat_name = str(cat_res.get("character_name")).to_upper()
 
 	if is_instance_valid(turn_character_label):
 		turn_character_label.text = cat_name
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "ACTIVE"
+	_set_active_portrait(cat_res)
+	_set_turn_info_text(_build_turn_info_line(cat_res, slot_index))
 	if is_instance_valid(action_bar):
 		action_bar.show()
 
 
 func _on_action_button_pressed(action_type: StringName, _button_name: String) -> void:
+	# Changed your mind while picking an attack target: drop the targeting and take the new action.
+	if _state == CombatState.SELECTING_TARGET:
+		_cancel_target_selection()
 	if _state != CombatState.AWAITING_ACTION:
 		return
 		
@@ -490,8 +499,7 @@ func _start_target_selection(action_type: StringName, alive_indices: Array[int])
 	_state = CombatState.SELECTING_TARGET
 	_pending_target_action = action_type
 
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "SELECT TARGET"
+	_set_turn_info_text("SELECT TARGET")
 
 	_clear_target_buttons()
 
@@ -503,7 +511,36 @@ func _start_target_selection(action_type: StringName, alive_indices: Array[int])
 			btn.pressed.connect(_on_target_selected.bind(enemy_idx))
 			_target_button_container.add_child(btn)
 
+		var back_btn := Button.new()
+		back_btn.text = "BACK"
+		back_btn.custom_minimum_size = Vector2(90, 36)
+		back_btn.pressed.connect(_cancel_target_selection)
+		_target_button_container.add_child(back_btn)
+
 		_target_button_container.show()
+
+
+## Leaves target picking and returns to the action bar for the same party member.
+## (BACK button, Esc / right-click, or pressing another action button.)
+func _cancel_target_selection() -> void:
+	if _state != CombatState.SELECTING_TARGET:
+		return
+	_clear_target_buttons()
+	_pending_target_action = &""
+	_state = CombatState.AWAITING_ACTION
+	_set_turn_info_text(_build_turn_info_line(_get_party_slot_resource(_active_slot_index), _active_slot_index))
+	if is_instance_valid(action_bar):
+		action_bar.show()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _state != CombatState.SELECTING_TARGET:
+		return
+	var is_right_click: bool = event is InputEventMouseButton and (event as InputEventMouseButton).pressed \
+		and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT
+	if event.is_action_pressed("ui_cancel") or is_right_click:
+		_cancel_target_selection()
+		get_viewport().set_input_as_handled()
 
 
 func _on_target_selected(enemy_idx: int) -> void:
@@ -534,8 +571,136 @@ func _reset_state() -> void:
 
 	if is_instance_valid(action_bar):
 		action_bar.hide()
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "WAITING"
+	_set_turn_info_text("WAITING")
+
+
+func _get_party_slot_resource(slot_index: int) -> Resource:
+	var gs: Node = get_tree().root.get_node_or_null("GameState")
+	if not is_instance_valid(gs) or not ("current_party" in gs) or gs.current_party == null:
+		return null
+	var slots: Array = gs.current_party.get("slots") as Array
+	if slot_index < 0 or slot_index >= slots.size():
+		return null
+	return slots[slot_index] as Resource
+
+
+func _get_combatant_for_slot(slot_index: int) -> Combatant:
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	if not is_instance_valid(cm) or not ("combatants" in cm):
+		return null
+	var list: Array = cm.get("combatants") as Array
+	for entry: Variant in list:
+		if entry is Combatant:
+			var c: Combatant = entry as Combatant
+			if c.is_player and c.slot_index == slot_index:
+				return c
+	return null
+
+
+func _build_turn_info_line(cat_res: Resource, slot_index: int) -> String:
+	var attack_type: String = CombatMath.effective_attack_type_for_character(cat_res)
+	var parts: PackedStringArray = PackedStringArray(["ATK: %s" % attack_type])
+
+	var combatant: Combatant = _get_combatant_for_slot(slot_index)
+	if is_instance_valid(combatant):
+		var negatives: Array[String] = combatant.get_negative_status_names()
+		if not negatives.is_empty():
+			parts.append("STAT: %s" % ", ".join(negatives))
+
+	return "  |  ".join(parts)
+
+
+func _set_active_portrait(character: Resource) -> void:
+	if not is_instance_valid(active_portrait):
+		return
+	var tex: Texture2D = _resolve_character_portrait(character)
+	active_portrait.texture = tex if is_instance_valid(tex) else _active_portrait_default
+	active_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	active_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	active_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+func _resolve_character_portrait(character: Resource) -> Texture2D:
+	if not is_instance_valid(character):
+		return null
+	if "portrait" in character and character.get("portrait") is Texture2D:
+		return character.get("portrait") as Texture2D
+	if "portrait_path" in character:
+		var path: String = str(character.get("portrait_path"))
+		if not path.is_empty() and ResourceLoader.exists(path):
+			return load(path) as Texture2D
+	if "breed" in character and is_instance_valid(character.get("breed")):
+		var breed: Resource = character.get("breed") as Resource
+		if is_instance_valid(breed) and "portrait_path" in breed:
+			var breed_path: String = str(breed.get("portrait_path"))
+			if not breed_path.is_empty() and ResourceLoader.exists(breed_path):
+				return load(breed_path) as Texture2D
+	return null
+
+
+func _setup_turn_info_scroller() -> void:
+	if not is_instance_valid(turn_info_label):
+		return
+	turn_info_label.clip_contents = true
+	turn_info_label.text = ""
+	turn_info_label.clip_text = false
+
+	_turn_info_scroll_label = Label.new()
+	_turn_info_scroll_label.name = "TurnInfoScroll"
+	_turn_info_scroll_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_turn_info_scroll_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_turn_info_scroll_label.add_theme_color_override("font_color", turn_info_label.get_theme_color("font_color"))
+	var info_font: Font = turn_info_label.get_theme_font("font")
+	if is_instance_valid(info_font):
+		_turn_info_scroll_label.add_theme_font_override("font", info_font)
+	_turn_info_scroll_label.add_theme_font_size_override("font_size", turn_info_label.get_theme_font_size("font_size"))
+	turn_info_label.add_child(_turn_info_scroll_label)
+
+
+func _set_turn_info_text(message: String) -> void:
+	if not is_instance_valid(turn_info_label):
+		return
+	if not is_instance_valid(_turn_info_scroll_label):
+		_setup_turn_info_scroller()
+	if not is_instance_valid(_turn_info_scroll_label):
+		turn_info_label.text = message
+		return
+
+	if is_instance_valid(_turn_info_tween):
+		_turn_info_tween.kill()
+		_turn_info_tween = null
+
+	turn_info_label.text = ""
+	_turn_info_scroll_label.text = message
+	_turn_info_scroll_label.position = Vector2.ZERO
+	_turn_info_scroll_label.size = Vector2.ZERO
+	_turn_info_scroll_label.reset_size()
+
+	# Defer scroll setup so label minimum size is measured after layout.
+	call_deferred("_start_turn_info_marquee_if_needed")
+
+
+func _start_turn_info_marquee_if_needed() -> void:
+	if not is_instance_valid(turn_info_label) or not is_instance_valid(_turn_info_scroll_label):
+		return
+
+	var avail: float = turn_info_label.size.x
+	var needed: float = _turn_info_scroll_label.get_minimum_size().x
+	_turn_info_scroll_label.size = Vector2(needed, turn_info_label.size.y)
+	_turn_info_scroll_label.position = Vector2.ZERO
+
+	if needed <= avail + 1.0:
+		return
+
+	var distance: float = needed - avail + 12.0
+	var duration: float = maxf(1.5, distance / TURN_INFO_SCROLL_SPEED)
+	_turn_info_tween = create_tween()
+	_turn_info_tween.set_loops()
+	_turn_info_tween.tween_interval(0.7)
+	_turn_info_tween.tween_property(_turn_info_scroll_label, "position:x", -distance, duration) \
+		.set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
+	_turn_info_tween.tween_interval(0.9)
+	_turn_info_tween.tween_property(_turn_info_scroll_label, "position:x", 0.0, 0.35)
 
 
 func _on_auto_button_toggled(is_on: bool) -> void:

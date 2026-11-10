@@ -11,16 +11,27 @@ Dungeons are built from room **parts** (hand-made scenes) joined by Kenney corri
 | `Scripts/Dungeon/DungeonRoom.gd` | At load time it removes the caps on connected doorways and the rolled-out dressing, then prefixes every `object_id` in the room. |
 | `Scripts/Dungeon/DungeonLevel.gd` | Root of a generated level. Holds `map_type`, `bgm_track_name` and the seed it was built with. |
 | `Scripts/Dungeon/DungeonGenerator.gd` | Layout logic: reads the room templates, places rooms and corridors, builds the movement model and picks enemy spots. |
-| `Scripts/Utilities/GenerateDungeonLevel.gd` | EditorScript that builds a level and saves it as a `.tscn`. |
+| `Scripts/Utilities/GenerateDungeonLevel.gd` | EditorScript that builds a single level and saves it as a `.tscn`. |
+| `Scripts/Dungeon/DungeonFloorBuilder.gd` | Shared builder for two-floor dungeons (chests, ghosts, BossEnemy, crypt exit). |
+| `Scripts/Utilities/GenerateFeroShawDungeon.gd` | Two-floor Fero Shaw dungeon (EditorScript → File → Run). |
+| `Scripts/Utilities/GenerateVeroWoodDungeon.gd` | Two-floor Vero Wood dungeon (EditorScript → File → Run). |
 | `resources/mesh_library/nav_blocker_mesh_library.tres` | Invisible "nav-blocker" tile used on WallMap to mark corridor walls. |
 | `Scenes/Dungeons/DungeonLevel1.tscn` | The first dungeon. Its entrance is the RockCave in GloomReach. |
 
 ## Making a new level
 
+### Single floor (older path)
+
 1. Open `Scripts/Utilities/GenerateDungeonLevel.gd` and edit the CONFIGURATION block: `LEVEL_NAME`, `LEVEL_SEED`, `ROOM_COUNT`, `ENEMY_COUNT`, `ENEMY_DATA`, the room weights, and where the entrance stairs lead back to.
 2. Run it with **File → Run**. The level is saved and opened.
 3. If you don't like the layout, change `LEVEL_SEED` and run it again. Running with the same name overwrites the file.
 4. Hook the level up: point a CryptHole, StoneGate or Stairs at it (`target_dungeon_scene` / `target_scene`, plus `arrival_point_name`).
+
+### Two-floor dungeon (preferred)
+
+1. Copy `GenerateFeroShawDungeon.gd` or `GenerateVeroWoodDungeon.gd`, set floor names/seeds/enemies/boss, and a `Bosses.csv` row for reward/exit.
+2. Run the EditorScript with **File → Run** (or headless: `godot --path . --headless -s res://Scripts/Utilities/BuildVeroWoodDungeon.gd` for Vero).
+3. Point the overworld CryptHole at `*_Upper.tscn`.
 
 ## How a level is put together
 
@@ -97,6 +108,18 @@ Scripts:
 - `Scripts/Dungeon/BossExitGate.gd`
 - `Scripts/Singletons/LoreManager.gd` (autoload)
 - `Scripts/WorldData/LoreData.gd`
+
+## Battle room (dungeon "battle mode")
+
+Dungeon corridors are too tight to fit a whole enemy pack, so dungeon fights don't happen where they start.
+
+- **What happens.** The screen fades to black, the party's view moves into `Scenes/Dungeons/DungeonBattle.tscn`, the battle runs there, and when it ends the view cuts back to where the party was.
+- **Script.** `Scripts/Managers/BattleArena.gd`. Enemies call `await BattleArena.prepare_party(get_tree(), global_position)` just before they emit `combat_started` (`enemy.gd`, `world_enemy.gd`; ghosts and BossEnemy go through `enemy.gd`).
+- **Which maps.** Any map whose root is a `DungeonLevel`. Set root metadata `use_battle_room` to `true` / `false` to force it on or off for one map. Other maps still just turn the party to face the enemy (`BattleFacing`).
+- **Boss chamber.** A fight that starts while the party stands on a BossChamber's `BossFloor` stays in the chamber. A boss met anywhere else goes to the battle room.
+- **The party never leaves its cell.** Only the Player node's transform moves (`DungeonPlayer.enter_battle_view` / `leave_battle_view`); `current_grid_pos`, saves and the dungeon's enemies are untouched.
+- **Editing the room.** The party stands on the scene's `SpawnPoint` marker and looks along its -Z. Enemies appear about 3.4 m in front. `BattleLight` lights the fight. Floor and wall GridMaps both need **Center Y off** (like BossChamber), or the floor sits 2 m up the walls.
+- The room is added to the level at runtime as a hidden child named `BattleArena`, 2000 m away.
 
 ## Not done yet
 

@@ -21,6 +21,7 @@ extends CanvasLayer
 @onready var edge_flash: TextureRect = %EdgeFlash as TextureRect
 @onready var enemy_in_range: ColorRect = %EnemyInRange as ColorRect
 @onready var time_label: Label = %DaytimeLabel
+@onready var gold_label: Label = %GoldLabel as Label
 
 # Strongly-typed reference to the player grid-walker
 @onready var player: Node3D = get_node("../Player") as Node3D
@@ -38,27 +39,100 @@ extends CanvasLayer
 # Nine HUD Voice Assistant Reference
 @onready var nine_hud: Control = %NineHud as Control
 
+# In-game menu (Quit / Settings / Save / Party / Load / Help)
+const HUD_GAME_MENU_SCENE: PackedScene = preload("res://Scenes/GameMenus/HudGameMenu.tscn")
+## Seconds before the "MAIN MENU" hint next to the menu button fades out.
+const GAME_MENU_LABEL_DELAY: float = 5.0
+const GAME_MENU_LABEL_FADE: float = 1.0
+## Exploration-only menu button group (hidden in battle; BattleHUD has its own %GameMenuButton).
+@onready var game_menu_anchor: Control = %GameMenuAnchor as Control
+@onready var game_menu_button: TextureButton = %GameMenuButton as TextureButton
+@onready var game_menu_button_label: Label = %GameMenuButtonLabel as Label
+var game_menu: HudGameMenu = null
+var _game_menu_label_tween: Tween = null
+
 var _current_enemy_tier: int = 0
 var _proximity_step_count: int = 0
+
+## Exploration-only HUD pieces hidden while BattleHUD is up.
+## Add new CanvasItem nodes here (or in `_cache_exploration_ui_nodes`) when you
+## introduce exploration chrome that must not leak into battle.
+var _exploration_only_nodes: Array[CanvasItem] = []
+## Extra exploration-only chrome added at runtime (e.g. MobileHUD's layer); hides in battle too.
+var _extra_exploration_nodes: Array[CanvasItem] = []
+## Touch-screen layout (portraits bottom-left, D-pad). Switched on automatically on touch devices.
+var mobile_hud: MobileHUD = null
 
 # ==============================================================================
 # 2. LIFECYCLE & INITIALIZATION
 # ==============================================================================
 func _ready() -> void:
 	_verify_ui_nodes()
+	_cache_exploration_ui_nodes()
 	_initialize_ui_state()
 	_setup_portrait_click_listeners()
 	_connect_signal_bus()
 	_connect_game_state()
+	_setup_game_menu()
+	mobile_hud = MobileHUD.new()
+	mobile_hud.name = "MobileHUDController"
+	add_child(mobile_hud)
+	mobile_hud.setup(self)
 
 	SignalBus.time_period_changed.connect(_on_time_period_changed)
 	_update_time_display(GameState.current_time_period)
+	_connect_signal_safe(SignalBus, &"party_gold_changed", _on_party_gold_changed)
+	_refresh_gold_label(GameState.party_gold)
 	
 	# Defer initial portrait update by one frame to resolve potential race
 	# conditions with GameState initialization.
 	await get_tree().process_frame
 	if "current_party" in GameState and is_instance_valid(GameState.current_party) and "slots" in GameState.current_party:
 		_update_party_portraits(GameState.current_party.slots)
+
+
+## Creates the ONE in-game menu and wires every menu button to it:
+## - exploration: %GameMenuButton (+ %GameMenuButtonLabel hint) under MainHUDLayout/GameMenuAnchor
+## - battle:      %GameMenuButton inside the BattleHUD scene (its own unique name scope)
+## No script lives on the buttons themselves; Esc also toggles the menu (HudGameMenu._unhandled_input).
+func _setup_game_menu() -> void:
+	game_menu = HUD_GAME_MENU_SCENE.instantiate() as HudGameMenu
+	add_child(game_menu)
+	_hook_game_menu_button(game_menu_button, true)
+	if is_instance_valid(battle_hud):
+		_hook_game_menu_button(battle_hud.get_node_or_null(^"%GameMenuButton") as TextureButton, false)
+	if is_instance_valid(game_menu_button_label):
+		game_menu_button_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_fade_game_menu_label(0.0, GAME_MENU_LABEL_DELAY)
+
+
+func _hook_game_menu_button(button: TextureButton, shows_hint_label: bool) -> void:
+	if not is_instance_valid(button):
+		return
+	button.tooltip_text = "Game Menu (Esc)"
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.pressed.connect(game_menu.toggle_menu)
+	button.mouse_entered.connect(_on_game_menu_button_hover.bind(button, true, shows_hint_label))
+	button.mouse_exited.connect(_on_game_menu_button_hover.bind(button, false, shows_hint_label))
+
+
+## Brightens the hovered button; the exploration one also brings its "MAIN MENU" hint back.
+func _on_game_menu_button_hover(button: TextureButton, hovered: bool, shows_hint_label: bool) -> void:
+	button.modulate = Color(1.25, 1.25, 1.25) if hovered else Color.WHITE
+	if shows_hint_label:
+		_fade_game_menu_label(1.0 if hovered else 0.0, 0.0 if hovered else 0.6)
+
+
+func _fade_game_menu_label(target_alpha: float, delay: float) -> void:
+	if not is_instance_valid(game_menu_button_label):
+		return
+	if _game_menu_label_tween != null:
+		_game_menu_label_tween.kill()
+	_game_menu_label_tween = create_tween()
+	if delay > 0.0:
+		_game_menu_label_tween.tween_interval(delay)
+	var duration: float = GAME_MENU_LABEL_FADE if target_alpha <= 0.0 else 0.15
+	_game_menu_label_tween.tween_property(game_menu_button_label, "modulate:a", target_alpha, duration)
 
 
 ## Initial visual defaults for HUD components
@@ -92,7 +166,15 @@ func _connect_signal_bus() -> void:
 	_connect_signal_safe(sb, &"enemy_proximity_changed", _on_enemy_proximity_changed)
 	# 🎯 Intercept popup action buttons (e.g. REST, SEARCH, LOOK)
 	_connect_signal_safe(sb, &"popup_requested", _on_popup_requested)
+	_connect_signal_safe(sb, &"nine_speak_requested", _on_nine_speak_requested)
 	_ensure_lore_scare_fx()
+
+
+func _on_nine_speak_requested(clip_basename: String) -> void:
+	if clip_basename.is_empty():
+		return
+	if is_instance_valid(nine_hud) and nine_hud.has_method("make_nine_talk"):
+		nine_hud.make_nine_talk(clip_basename)
 
 
 ## Responds to granular character data changes by refreshing all party portraits
@@ -122,20 +204,63 @@ func _connect_signal_safe(target: Node, signal_name: StringName, callback: Calla
 			sig.connect(callback)
 
 
-## Cleanly toggles exploration overlays (renamed parameter prevents shadowing base CanvasLayer method)
+## Builds the exploration-only node list. Keep this as the single registry of
+## HUD chrome that swaps off when battle mode starts.
+func _cache_exploration_ui_nodes() -> void:
+	_exploration_only_nodes.clear()
+	var candidates: Array[CanvasItem] = [
+		minimap_anchor,
+		compass_label,
+		cockpit_background,
+		top_bar,
+		right_sidebar_anchor,
+		action_bar_anchor,
+		game_menu_anchor,
+		time_label, # %DaytimeLabel — must not float over BattleHUD
+		gold_label, # %GoldLabel — exploration wallet readout
+		enemy_in_range,
+	]
+	candidates.append_array(_extra_exploration_nodes)
+	for node: CanvasItem in candidates:
+		if is_instance_valid(node):
+			_exploration_only_nodes.append(node)
+
+
+## Registers runtime-built HUD chrome that should hide in battle like the rest of the exploration HUD.
+func add_exploration_node(node: CanvasItem) -> void:
+	if is_instance_valid(node) and not _extra_exploration_nodes.has(node):
+		_extra_exploration_nodes.append(node)
+		_cache_exploration_ui_nodes()
+
+
+func remove_exploration_node(node: CanvasItem) -> void:
+	_extra_exploration_nodes.erase(node)
+	_cache_exploration_ui_nodes()
+
+
+## Toggles every exploration-only control. Prefer `show_battle_hud()` /
+## `show_exploration_hud()` for full mode swaps.
 func _set_exploration_ui_visible(show_ui: bool) -> void:
-	if minimap_anchor:
-		minimap_anchor.visible = show_ui
-	if compass_label:
-		compass_label.visible = show_ui
-	if cockpit_background:
-		cockpit_background.visible = show_ui
-	if top_bar:
-		top_bar.visible = show_ui
-	if right_sidebar_anchor:
-		right_sidebar_anchor.visible = show_ui
-	if action_bar_anchor:
-		action_bar_anchor.visible = show_ui
+	if _exploration_only_nodes.is_empty():
+		_cache_exploration_ui_nodes()
+	for node: CanvasItem in _exploration_only_nodes:
+		if is_instance_valid(node):
+			node.visible = show_ui
+
+
+## Hide exploration chrome and show BattleHUD. Call this (or combat_started)
+## whenever entering a fight so new HUD widgets don't get stuck on screen.
+func show_battle_hud() -> void:
+	_set_exploration_ui_visible(false)
+	if is_instance_valid(battle_hud):
+		battle_hud.show()
+
+
+## Hide BattleHUD and restore exploration chrome.
+func show_exploration_hud() -> void:
+	if is_instance_valid(battle_hud):
+		battle_hud.hide()
+	_set_exploration_ui_visible(true)
 
 
 # ==============================================================================
@@ -251,13 +376,9 @@ func _on_game_state_changed(new_state: int) -> void:
 		GameState.Mode.EXPLORING:
 			if _is_battle_running():
 				return # never hide the battle HUD while a fight is on
-			_set_exploration_ui_visible(true)
-			if battle_hud:
-				battle_hud.hide()
+			show_exploration_hud()
 		GameState.Mode.BATTLE:
-			_set_exploration_ui_visible(false)
-			if battle_hud:
-				battle_hud.show()
+			show_battle_hud()
 		GameState.Mode.MANAGEMENT:
 			_set_exploration_ui_visible(false)
 
@@ -266,32 +387,26 @@ func _on_game_state_changed(new_state: int) -> void:
 # 7. Combat Functions
 # ==============================================================================
 func on_combat_started(enemy_data_or_group: Variant = null, player_party: Array = [], _enemy_facing: String = "") -> void:
-	_set_exploration_ui_visible(false)
+	show_battle_hud()
 
 	var active_party: Array = player_party
 	if active_party.is_empty() and (Engine.has_singleton("GameState") or get_tree().root.has_node("GameState")):
 		if GameState.current_party:
 			active_party = GameState.current_party.slots
 
-	if battle_hud:
-		battle_hud.show()
-		if battle_hud.has_method("on_combat_started"):
-			battle_hud.on_combat_started(enemy_data_or_group, active_party, _enemy_facing)
+	if is_instance_valid(battle_hud) and battle_hud.has_method("on_combat_started"):
+		battle_hud.on_combat_started(enemy_data_or_group, active_party, _enemy_facing)
 
 
 func _on_combat_ended(_victory: bool) -> void:
-	if battle_hud:
-		battle_hud.hide()
-	_set_exploration_ui_visible(true)
+	show_exploration_hud()
 
 
 ## Safety net: a battle is running but its HUD isn't on screen (see CombatManager watchdog).
 func _on_battle_hud_recovery_requested(enemy_data_or_group: Variant, player_party: Array) -> void:
-	_set_exploration_ui_visible(false)
-	if battle_hud and battle_hud.has_method("recover"):
+	show_battle_hud()
+	if is_instance_valid(battle_hud) and battle_hud.has_method("recover"):
 		battle_hud.call("recover", enemy_data_or_group, player_party)
-	elif battle_hud:
-		battle_hud.show()
 
 
 func _is_battle_running() -> bool:
@@ -344,8 +459,8 @@ func _on_enemy_proximity_changed(_min_dist: int, current_tier: int) -> void:
 
 
 ## Handles popup requests from ActionButtons (REST, SEARCH, etc.)
-func _on_popup_requested(action_type: String) -> void:
-	if action_type == "REST":
+func _on_popup_requested(action_type: StringName, _data: Dictionary = {}) -> void:
+	if String(action_type) == "REST":
 		if _are_monsters_nearby():
 			if is_instance_valid(nine_hud) and nine_hud.has_method("make_nine_talk"):
 				nine_hud.make_nine_talk("cant-sleep-here")
@@ -407,6 +522,15 @@ func _trigger_edge_flash(color: Color, duration: float = 0.4, max_alpha: float =
 
 func _on_time_period_changed(new_period: String) -> void:
 	_update_time_display(new_period)
+
+
+func _on_party_gold_changed(new_total: int, _amount_changed: int) -> void:
+	_refresh_gold_label(new_total)
+
+
+func _refresh_gold_label(total: int) -> void:
+	if is_instance_valid(gold_label):
+		gold_label.text = "₡ %d" % total
 
 
 func _update_time_display(period_text: String) -> void:

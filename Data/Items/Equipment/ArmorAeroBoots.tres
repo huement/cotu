@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bkqsq2vbh3gl6"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_ut6sg"]
+
+[resource]
+script = ExtResource("1_ut6sg")
+item_id = "armor_aero_boots"
+item_name = "Aero-Boots"
+description = "Magically enchanted thruster boots for superior agility."
+icon_path = "res://Assets/Icons/Items/aero_boots.png"
+item_type = 2
+equipment_slot = 4
+defense_bonus = 10
+speed_bonus = 25
+credit_value = 300

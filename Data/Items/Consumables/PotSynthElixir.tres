@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://6nkqklawakw8"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_uppsd"]
+
+[resource]
+script = ExtResource("1_uppsd")
+item_id = "pot_synth_elixir"
+item_name = "Synthetic Elixir"
+description = "A powerful cocktail of magic and science."
+icon_path = "res://Assets/Icons/Items/synth_elixir.png"
+item_type = 3
+credit_value = 200
+is_consumable = true
+heal_amount = 300
+energy_restore = 300
+stat_effect = {
+"energy": 300,
+"heal": 300
+}

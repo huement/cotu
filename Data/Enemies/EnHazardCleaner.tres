@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://nuhmv8jqoiqc"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
 
-[ext_resource type="Material" uid="uid://biwxp1y0qp2np" path="res://resources/Enemies/Kenny/Materials/en_hazard_cleaner_mat.tres" id="1_43r4r"]
-[ext_resource type="PackedScene" uid="uid://dcw600hl4mocc" path="res://resources/Enemies/Kenny/character-j.glb" id="2_nb4l5"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_vjs05"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_hazard_cleaner_mat.tres" id="1_43r4r"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-j.glb" id="2_nb4l5"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_vjs05"]
 
 [resource]
 script = ExtResource("3_vjs05")
@@ -13,6 +13,7 @@ model_path = "res://resources/Enemies/Kenny/character-j.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-j.png"
 model_scene = ExtResource("2_nb4l5")
 custom_material = ExtResource("1_43r4r")
+model_scale = Vector3(1, 1, 1)
 base_level = 5
 max_health = 70
 current_health = 70

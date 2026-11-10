@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://sus3oi2lsu3d"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_w6u15"]
+
+[resource]
+script = ExtResource("1_w6u15")
+item_id = "armor_holo_visor"
+item_name = "Holo-Visor"
+description = "Projects tactical spell-trajectories directly into the retina."
+icon_path = "res://Assets/Icons/Items/holo_visor.png"
+item_type = 2
+equipment_slot = 7
+attack_bonus = 5
+defense_bonus = 15
+credit_value = 250

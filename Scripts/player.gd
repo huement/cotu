@@ -17,6 +17,9 @@ enum Facing {
 @export var movement_duration: float = 0.2
 @export var rotation_duration: float = 0.15
 @export var eye_height: float = 2
+## Extra camera height while standing on a Bridges-layer tile (FeroShaw / BrokenBoneMarsh).
+@export var bridge_eye_lift: float = 0.45
+@export var bridge_eye_lift_duration: float = 0.22
 @export var max_shake_offset: Vector3 = Vector3(0.15, 0.15, 0.05)
 @export var shake_decay: float = 3.0
 @export var back_hold_to_turn_duration: float = 0.4 # How long to hold back to trigger a 180 turn.
@@ -36,6 +39,9 @@ var _forward_held_start_time: float = 0.0
 
 
 var _trauma: float = 0.0
+var _base_eye_height: float = 2.0
+var _on_bridge: bool = false
+var _bridge_cam_tween: Tween = null
 
 #var grid_map: GridMap
 var grid_map: GridMap
@@ -46,6 +52,9 @@ var current_facing: Facing = Facing.NORTH
 var is_moving: bool = false
 var _is_in_combat: bool = false
 var is_movement_locked: bool = false
+## True while the party's view is in the dungeon battle room (see BattleArena). The party stays on
+## its grid cell (current_grid_pos); only this node's transform is somewhere else.
+var battle_position_override: bool = false
 var _last_proximity_tier: int = 0
 
 func _ready() -> void:
@@ -54,6 +63,7 @@ func _ready() -> void:
 	_connect_to_signal_bus()
 
 	if is_instance_valid(grid_movement):
+		grid_movement.step_started.connect(_on_component_step_started)
 		grid_movement.step_completed.connect(_on_component_step_completed)
 		grid_movement.turn_completed.connect(_on_component_turn_completed)
 
@@ -133,25 +143,51 @@ func _initialize_player() -> void:
 
 # Determine eye height dynamically per map (checking metadata AND script properties)
 func _eye_height_setup(spawn_point: Node3D, world_root: Node3D) -> void:
-	var active_height: float = eye_height # Default fallback
-	if spawn_point:
+	var active_height: float = _resolve_eye_height(spawn_point, world_root)
+	GameLogger.info("Player: SpawnPoint eye_height: %s" % active_height)
+	_apply_eye_height(active_height)
+
+
+## Reads eye height from an arrival / spawn marker (used after MapTransition.teleport).
+func apply_eye_height_from(marker: Node3D) -> void:
+	if not is_instance_valid(marker):
+		return
+	var height: float = _resolve_eye_height(marker, null)
+	_apply_eye_height(height)
+
+
+func _resolve_eye_height(spawn_point: Node3D, world_root: Node3D) -> float:
+	if is_instance_valid(spawn_point):
 		if spawn_point.has_meta("eye_height"):
-			active_height = float(spawn_point.get_meta("eye_height"))
-		elif "eye_height" in spawn_point:
-			active_height = float(spawn_point.get("eye_height"))
-	elif map_manager and is_instance_valid(map_manager.active_map_instance):
+			return float(spawn_point.get_meta("eye_height"))
+		if "eye_height" in spawn_point:
+			return float(spawn_point.get("eye_height"))
+	if map_manager and is_instance_valid(map_manager.active_map_instance):
 		var active_map: Node3D = map_manager.active_map_instance
 		if active_map.has_meta("eye_height"):
-			active_height = float(active_map.get_meta("eye_height"))
-		elif "eye_height" in active_map:
-			active_height = float(active_map.get("eye_height"))
-	elif world_root.has_meta("eye_height"):
-		active_height = float(world_root.get_meta("eye_height"))
+			return float(active_map.get_meta("eye_height"))
+		if "eye_height" in active_map:
+			return float(active_map.get("eye_height"))
+		# Maps like FeroShaw only had SpawnPoint_* arrivals — pick any marker meta.
+		for child: Node in active_map.get_children():
+			if child is Marker3D and child.has_meta("eye_height"):
+				return float(child.get_meta("eye_height"))
+	if is_instance_valid(world_root) and world_root.has_meta("eye_height"):
+		return float(world_root.get_meta("eye_height"))
+	return eye_height
 
-	GameLogger.info("Player: SpawnPoint eye_height: %s" % active_height)
-	camera.position = Vector3(0.0, active_height, 0.0)
+
+func _apply_eye_height(active_height: float) -> void:
+	_base_eye_height = active_height
+	_on_bridge = false
+	if _bridge_cam_tween != null:
+		_bridge_cam_tween.kill()
+		_bridge_cam_tween = null
+	camera.position = Vector3(0.0, _base_eye_height, 0.0)
 	camera.rotation_degrees = Vector3.ZERO
 	camera.make_current()
+	# Apply bridge lift if we spawn / arrive already on a bridge tile.
+	_update_bridge_camera(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), false)
 
 
 func _physics_process(_delta: float) -> void:
@@ -160,7 +196,7 @@ func _physics_process(_delta: float) -> void:
 
 	rotation_degrees.x = 0.0
 	rotation_degrees.z = 0.0
-	if not is_moving:
+	if not is_moving and not battle_position_override:
 		_apply_canonical_transform()
 
 
@@ -519,6 +555,14 @@ func _is_enemy_adjacent() -> bool:
 	return false
 
 
+## Lift / lower the camera as soon as a step toward a bridge (or off it) begins.
+func _on_component_step_started(target_world_position: Vector3) -> void:
+	if not is_instance_valid(map_manager):
+		return
+	var target_cell: Vector3i = map_manager.world_to_grid(target_world_position)
+	_update_bridge_camera(target_cell, true)
+
+
 ## Called when the player finishes stepping to a new grid cell
 func _on_component_step_completed(world_position: Vector3) -> void:
 	var grid_3d: Vector3i = Vector3i.ZERO
@@ -634,42 +678,63 @@ func _try_interact_facing_tile() -> bool:
 func _get_surface_type_at_position(grid_pos: Vector3i) -> String:
 	if not is_instance_valid(map_manager):
 		return ""
-		
+
+	# Bridges layer first (FeroShaw / BrokenBoneMarsh keep bridges on their own GridMap).
+	var bridge_name: String = map_manager.get_bridge_item_name(grid_pos).to_lower()
+	if not bridge_name.is_empty():
+		return _surface_type_from_item_name(bridge_name)
+
 	# Floor tiles sit on floor_grid; fallback to dungeon_grid if floor_grid isn't separate
 	var target_grid: GridMap = map_manager.floor_grid if is_instance_valid(map_manager.floor_grid) else map_manager.dungeon_grid
 	if not is_instance_valid(target_grid):
 		return ""
-		
+
 	var cell_item: int = target_grid.get_cell_item(grid_pos)
-	
+
 	# If no item on floor_grid at this position, check dungeon_grid
 	if cell_item == GridMap.INVALID_CELL_ITEM and is_instance_valid(map_manager.dungeon_grid) and target_grid != map_manager.dungeon_grid:
 		target_grid = map_manager.dungeon_grid
 		cell_item = target_grid.get_cell_item(grid_pos)
-		
+
 	if cell_item == GridMap.INVALID_CELL_ITEM:
 		return ""
-		
+
 	var mesh_library: MeshLibrary = target_grid.mesh_library
 	if not is_instance_valid(mesh_library):
 		return ""
-		
-	var item_name: String = mesh_library.get_item_name(cell_item).to_lower()
-	
-	# Match tile GLB mesh names to audio surface keys
+
+	return _surface_type_from_item_name(mesh_library.get_item_name(cell_item).to_lower())
+
+
+## Match tile GLB mesh names to audio surface keys.
+func _surface_type_from_item_name(item_name: String) -> String:
 	if "bridge" in item_name or "path_wood" in item_name or "path_stone" in item_name:
 		if "stone" in item_name:
 			return "bridge_stone"
-		elif "wood" in item_name:
-			return "bridge_wood"
 		return "bridge_wood"
-		
 	if "grass" in item_name:
 		return "ground_grass"
-	elif "path" in item_name:
+	if "path" in item_name:
 		return "ground_path"
-		
 	return ""
+
+
+## Raise the camera slightly on bridge tiles; ease back down when leaving.
+func _update_bridge_camera(grid_pos: Vector3i, animate: bool) -> void:
+	if not is_instance_valid(camera):
+		return
+	var want_bridge: bool = is_instance_valid(map_manager) and map_manager.is_bridge_at(grid_pos)
+	if want_bridge == _on_bridge and animate:
+		return
+	_on_bridge = want_bridge
+	var target_y: float = _base_eye_height + (bridge_eye_lift if _on_bridge else 0.0)
+	if not animate:
+		camera.position.y = target_y
+		return
+	if _bridge_cam_tween != null:
+		_bridge_cam_tween.kill()
+	_bridge_cam_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_bridge_cam_tween.tween_property(camera, "position:y", target_y, bridge_eye_lift_duration)
 
 
 # Scans all active enemies in the dungeon, calculates grid distance, and triggers clickers / HUD alerts
@@ -762,6 +827,54 @@ func teleport_to(world_pos: Vector3, look_at_world: Vector3 = Vector3.INF) -> vo
 	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
 		grid_comp.set("current_grid_pos", current_grid_pos)
 	SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+
+## Puts the party on `cell` facing "NORTH" / "EAST" / "SOUTH" / "WEST" (loading a save).
+## Puts the party on a marker's cell, facing the marker's direction (new-game start points).
+func move_to_marker(marker: Node3D) -> void:
+	current_grid_pos = _world_to_cell(marker.global_position)
+	current_facing = _angle_to_facing(marker.global_rotation_degrees.y)
+	is_moving = false
+	_apply_canonical_transform()
+
+
+func restore_location(cell: Vector2i, facing_name: String) -> void:
+	current_grid_pos = cell
+	match facing_name.to_upper():
+		"EAST":
+			current_facing = Facing.EAST
+		"SOUTH":
+			current_facing = Facing.SOUTH
+		"WEST":
+			current_facing = Facing.WEST
+		_:
+			current_facing = Facing.NORTH
+	is_moving = false
+	_apply_canonical_transform()
+	var grid_comp: Node = get_node_or_null("%GridMovementComponent")
+	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
+		grid_comp.set("current_grid_pos", current_grid_pos)
+	SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+
+## "NORTH" / "EAST" / "SOUTH" / "WEST"
+func get_facing_name() -> String:
+	return _get_cardinal_string()
+
+
+## Moves the party's VIEW to a spot off the movement grid (the dungeon battle room) without
+## changing its grid cell or facing. Undo with leave_battle_view().
+func enter_battle_view(world_pos: Vector3, yaw_radians: float) -> void:
+	battle_position_override = true
+	is_moving = false
+	global_position = world_pos
+	rotation = Vector3(0.0, yaw_radians, 0.0)
+
+
+## Puts the view back on the party's grid cell and facing.
+func leave_battle_view() -> void:
+	battle_position_override = false
+	_apply_canonical_transform()
 
 
 func set_movement_locked(locked: bool) -> void:

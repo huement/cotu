@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bltgmeaqhelxc"]
+[gd_scene load_steps=13 format=3 uid="uid://bltgmeaqhelxc"]
 
 [ext_resource type="MeshLibrary" uid="uid://ydwffaumcrfd" path="res://resources/mesh_library/dungeon_mesh_library.tres" id="1_bb5wt"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_jhbni"]
@@ -9,7 +9,6 @@
 [ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="35_o303t"]
 [ext_resource type="PackedScene" uid="uid://ceks7tayr3m7r" path="res://Scenes/Objects/Banner.tscn" id="36_fkomk"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="37_aqe2a"]
-[ext_resource type="AudioStream" uid="uid://bpdf50t4880cm" path="res://Audio/Environment/new-area.mp3" id="38_ua6uh"]
 [ext_resource type="Texture2D" uid="uid://baqe7a82cb112" path="res://ui/LOGOS/smilodon-destroyed.png" id="39_2o8m1"]
 [ext_resource type="Texture2D" uid="uid://devj0vld35c7r" path="res://ui/LOGOS/smilodon.png" id="40_cm8hq"]
 [ext_resource type="Texture2D" uid="uid://db82aeyfaahrd" path="res://ui/LOGOS/smilodon-bloody.png" id="41_jcy16"]
@@ -210,11 +209,10 @@ transform = Transform3D(-2.2499604, 0, 0.013430007, 0, 2.2499993, 0, -0.01343000
 [node name="Banner7" parent="Banners" instance=ExtResource("36_fkomk")]
 transform = Transform3D(0.15655999, 0, 2.244547, 0, 2.249999, 0, -2.244547, 0, 0.15655999, -22.844059, 1.9921982, 30.935635)
 
-[node name="LevelTitleArea" parent="." instance=ExtResource("37_aqe2a")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 24.081873, 1.191164, -2.862204)
+[node name="LevelTitle" parent="." instance=ExtResource("37_aqe2a")]
 level_title = "Dungeon
 Rock Btm"
-trigger_sound = ExtResource("38_ua6uh")
+play_new_area_sound = true
 
 [node name="Smilo" type="Sprite3D" parent="."]
 transform = Transform3D(0.49285173, 0.08424469, 0, -0.08424469, 0.49285173, 0, 0, 0, 0.5, 21.597672, 3.27591, 0.38256145)

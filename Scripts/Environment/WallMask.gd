@@ -13,8 +13,9 @@ extends DungeonInteractable
 
 @export_enum("bad", "good", "none") var aura_type: String = "bad"
 
-## Sound played on inspect (full res:// path). Empty = the mask sound for `aura_type`.
-@export var inspect_sound_path: String = ""
+## Sound played on inspect (full res:// path). Empty = mask sound for `aura_type`, with
+## AudioManager falling back to mask-default / mask-bad so a scare always plays.
+@export_file("*.mp3", "*.ogg", "*.wav") var inspect_sound_path: String = ""
 
 var is_inspected: bool = false
 
@@ -38,14 +39,26 @@ func _load_saved_state() -> void:
 		is_inspected = bool(state["is_inspected"])
 
 
+func _play_inspect_sound() -> void:
+	if not is_instance_valid(AudioManager):
+		return
+	var custom: String = inspect_sound_path.strip_edges()
+	if not custom.is_empty():
+		var path: String = custom if custom.begins_with("res://") else "res://Audio/".path_join(custom)
+		if not path.ends_with(".mp3") and not path.ends_with(".ogg") and not path.ends_with(".wav"):
+			path = path.get_basename() + ".mp3"
+		if ResourceLoader.exists(path):
+			AudioManager.play_audio_path(path)
+			return
+		push_warning("WallMask: Inspect sound missing at %s — using mask default." % path)
+	# aura "good"/"bad"/"none"/empty → play_mask_sound always resolves to a real file.
+	AudioManager.play_mask_sound(aura_type)
+
+
 func interact(_player: Node3D) -> void:
 	var map_id: String = _get_current_map_id()
-	
-	if is_instance_valid(AudioManager):
-		if inspect_sound_path.is_empty():
-			AudioManager.play_mask_sound(aura_type)
-		else:
-			AudioManager.play_audio_path(inspect_sound_path)
+
+	_play_inspect_sound()
 		
 	if not is_inspected:
 		is_inspected = true

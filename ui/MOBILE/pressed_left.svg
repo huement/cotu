@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75.55 76.13">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-8, .cls-9, .cls-10 {
+        fill: none;
+      }
+
+      .cls-2 {
+        opacity: .71;
+      }
+
+      .cls-2, .cls-5 {
+        fill: #000;
+      }
+
+      .cls-3 {
+        fill: #00f0ff;
+      }
+
+      .cls-4 {
+        fill: #00f0ff;
+      }
+
+      .cls-8 {
+        stroke-linecap: square;
+        stroke-width: 1.84px;
+      }
+
+      .cls-8, .cls-9, .cls-10 {
+        stroke: #00f0ff;
+      }
+
+      .cls-5 {
+        opacity: .25;
+      }
+
+      .cls-6 {
+        fill: #fff;
+      }
+
+      .cls-7 {
+        fill: #64dfdf;
+      }
+
+      .cls-9 {
+        stroke-width: 1.77px;
+      }
+
+      .cls-10 {
+        stroke-width: 1.78px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_6" data-name="Layer 6">
+    <g>
+      <g>
+        <polygon id="btn-left" class="cls-2" points=".93 .89 74.67 .89 74.67 74.04 13.65 74.04 .93 61.43 .93 .89"/>
+        <polygon class="cls-4" points="42.98 53.35 43.3 21.58 20.88 37.66 42.98 53.35"/>
+        <polygon id="btn-left-2" data-name="btn-left" class="cls-5" points=".93 .89 74.67 .89 74.67 74.04 13.65 74.04 .93 61.43 .93 .89"/>
+        <polygon id="btn-left-3" data-name="btn-left" class="cls-9" points=".93 .89 74.67 .89 74.67 74.04 13.65 74.04 .93 61.43 .93 .89"/>
+        <line class="cls-8" x1="54.73" y1="28.3" x2="54.73" y2="46.63"/>
+        <g>
+          <polygon class="cls-1" points="41.27 50.02 41.53 24.98 41.46 25.03 41.21 49.97 41.27 50.02"/>
+          <polygon class="cls-3" points="45.07 18.17 41.5 20.74 41.46 25.03 41.53 24.98 41.27 50.02 41.21 49.97 41.16 54.19 44.68 56.69 45.07 18.17"/>
+          <polygon class="cls-6" points="41.46 25.03 41.5 20.74 17.9 37.67 41.16 54.19 41.21 49.97 37.75 47.52 23.86 37.65 37.95 27.54 41.46 25.03"/>
+        </g>
+      </g>
+      <g>
+        <polygon id="btn-left-4" data-name="btn-left" class="cls-5" points=".89 1.53 74.6 1.53 74.6 75.24 13.6 75.24 .89 62.53 .89 1.53"/>
+        <polygon id="btn-left-5" data-name="btn-left" class="cls-10" points=".89 1.53 74.6 1.53 74.6 75.24 13.6 75.24 .89 62.53 .89 1.53"/>
+        <rect class="cls-7" x="53.74" y="28.23" width="1.85" height="20.31"/>
+        <g>
+          <polygon class="cls-1" points="41.21 51.03 41.47 25.8 41.4 25.85 41.15 50.98 41.21 51.03"/>
+          <polygon class="cls-3" points="45.01 18.95 41.44 21.53 41.4 25.85 41.47 25.8 41.21 51.03 41.15 50.98 41.1 55.23 44.62 57.75 45.01 18.95"/>
+          <polygon class="cls-6" points="41.4 25.85 41.44 21.53 17.85 38.59 41.1 55.23 41.15 50.98 37.69 48.51 23.81 38.57 37.9 28.39 41.4 25.85"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

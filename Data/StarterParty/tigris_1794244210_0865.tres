@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="CatCharacter" load_steps=6 format=3]
+
+[ext_resource type="Resource" path="res://Data/Races/Abyssinian.tres" id="1_ojeac"]
+[ext_resource type="Resource" path="res://Data/Skills/SkStealthSearch.tres" id="2_0p0mu"]
+[ext_resource type="Resource" path="res://Data/Skills/SkShadowStep.tres" id="3_lrr67"]
+[ext_resource type="Resource" path="res://Data/Classes/Shade.tres" id="4_y305o"]
+[ext_resource type="Script" path="res://resources/CatCharacter.gd" id="5_j18yb"]
+
+[resource]
+script = ExtResource("5_j18yb")
+name = "Tigris"
+breed = ExtResource("1_ojeac")
+profession = ExtResource("4_y305o")
+portrait_path = "res://Data/Portraits/Shade.png"
+roster_id = "tigris_1794244210_0865"
+creation_dice = Array[int]([6, 4, 5])
+creation_allocation = {
+"dexterity": 3,
+"intelligence": 2,
+"speed": 4,
+"strength": 3,
+"vitality": 3
+}
+max_xp = 800
+strength = 10
+intelligence = 12
+piety = 7
+vitality = 10
+dexterity = 13
+speed = 16
+personality = 10
+current_hp = 20
+max_hp = 20
+current_energy = 19
+max_energy = 19
+known_skills = Array[Resource]([ExtResource("2_0p0mu"), ExtResource("3_lrr67")])
+abilities_initialized = true

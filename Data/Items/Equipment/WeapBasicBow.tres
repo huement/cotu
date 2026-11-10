@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://iy7e5g3qlf0u"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_0lu0c"]
+
+[resource]
+script = ExtResource("1_0lu0c")
+item_id = "weap_basic_bow"
+item_name = "Basic Bow"
+description = "A simple wooden bow. Needs arrows in the other hand."
+icon_path = "res://Data/Items/weapon.png"
+item_type = 1
+equipment_slot = 6
+weapon_type = 3
+attack_bonus = 8
+credit_value = 80

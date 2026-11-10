@@ -5,13 +5,15 @@ extends Node3D
 ## Spawns, positions, and animates 3D enemy models in front of the Player Camera3D
 ## during combat encounters.
 
+const _Formation = preload("res://Scripts/3D/CombatFormation.gd")
+
 # ==============================================================================
 # 1. EXPORTED CONFIGURATION & POSITION TUNING
 # ==============================================================================
 @export var camera_node: Camera3D
 
-## Distance in front of camera (-Z vector).
-@export var forward_distance: float = 2.5
+## Distance in front of camera (-Z vector) for formation slot 1 (front center).
+@export var forward_distance: float = 3.4
 
 ## Vertical offset (-Y vector). Lower to ground feet onto the floor plane.
 @export var vertical_offset: float = -0.85
@@ -22,7 +24,13 @@ extends Node3D
 ## Uniform scale multiplier for 3D enemy models.
 @export var model_scale: Vector3 = Vector3(0.4, 0.4, 0.4)
 
-## Horizontal spacing when multiple enemies are spawned.
+## Lateral gap between front-row slot centers (CombatFormation slots 2 / 1 / 3).
+@export var formation_spacing: float = 1.8
+
+## How much closer to the camera the back row (slots 4 / 5) sits.
+@export var back_row_pull: float = 0.75
+
+## Legacy export kept for scenes that still reference it; formation_spacing is used instead.
 @export var horizontal_spacing: float = 1.2
 
 
@@ -47,6 +55,10 @@ var enemy_group: Array[Resource]
 ## Per-level height correction for battle models, read from the active map's SpawnPoint
 ## metadata "battle_vertical_offset". Use it with a taller eye_height so enemies stay on the ground.
 var _level_battle_offset: float = 0.0
+## Formation slot (1–5) per enemy_group index for the current fight.
+var _formation_slots: PackedInt32Array = PackedInt32Array()
+## Avoid spamming layout logs across deferred / timed relayouts of the same fight.
+var _logged_layout: bool = false
 
 # ==============================================================================
 # 3. LIFECYCLE & INITIALIZATION
@@ -199,9 +211,11 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 
 	_clear_all_enemies()
 	visible = true
+	_logged_layout = false
 	_level_battle_offset = _read_level_battle_offset()
 
 	enemy_group = _resolve_enemy_resources(enemy_payload)
+	_formation_slots = _Formation.get_best_slots(enemy_group)
 
 	for i in range(enemy_group.size()):
 		var e_data: Resource = enemy_group[i] as Resource
@@ -221,7 +235,8 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 	get_tree().create_timer(0.6).timeout.connect(_relayout_if_fighting, CONNECT_ONE_SHOT)
 
 	if is_instance_valid(GameLogger):
-		GameLogger.combat("EnemyVisualManager spawning %d combat model(s)" % _spawned_enemies.size())
+		GameLogger.combat("EnemyVisualManager spawning %d combat model(s) slots=%s" % [
+			_spawned_enemies.size(), str(_formation_slots)])
 
 
 func _relayout_if_fighting() -> void:
@@ -271,37 +286,40 @@ func _spawn_or_adopt_combat_model(e_data: Resource, _enemy_id: String) -> Node3D
 func layout_combat_models() -> void:
 	if not _ensure_camera():
 		return
+	if _formation_slots.size() != enemy_group.size():
+		_formation_slots = _Formation.get_best_slots(enemy_group)
 
 	var ids: Array = _spawned_enemies.keys()
 	ids.sort()
-	var total: int = ids.size()
-	for i in range(total):
+	for i in range(ids.size()):
 		var enemy_id: String = str(ids[i])
 		var enemy_node: Node3D = _spawned_enemies[enemy_id] as Node3D
 		if not is_instance_valid(enemy_node):
 			continue
-		var slot_index: int = int(enemy_id.trim_prefix("enemy_"))
+		var pack_index: int = int(enemy_id.trim_prefix("enemy_"))
 		var e_data: Resource = null
-		if slot_index >= 0 and slot_index < enemy_group.size():
-			e_data = enemy_group[slot_index]
+		if pack_index >= 0 and pack_index < enemy_group.size():
+			e_data = enemy_group[pack_index]
 		if _uses_world_combat_node(e_data):
 			continue
-		_position_enemy(enemy_node, i, total, e_data)
+		var form_slot: int = 1
+		if pack_index >= 0 and pack_index < _formation_slots.size():
+			form_slot = int(_formation_slots[pack_index])
+		_position_enemy(enemy_node, form_slot, e_data, enemy_id)
+
+	if not _logged_layout and is_instance_valid(GameLogger) and not _spawned_enemies.is_empty():
+		_logged_layout = true
+		_log_formation_layout()
 
 
-func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int, e_data: Resource = null) -> void:
+func _position_enemy(enemy_node: Node3D, form_slot: int, e_data: Resource = null, enemy_id: String = "") -> void:
 	if not is_instance_valid(camera_node) or not is_instance_valid(enemy_node):
 		return
 
 	var is_world_model: bool = is_instance_valid(e_data) and e_data.has_meta(&"use_world_combat_model")
-
-	var effective_spacing: float = horizontal_spacing
-	if total_enemies >= 3:
-		effective_spacing = horizontal_spacing * 0.65
-
-	var horizontal_offset: float = 0.0
-	if total_enemies > 1:
-		horizontal_offset = (float(index) - (float(total_enemies - 1) / 2.0)) * effective_spacing
+	var offset: Vector2 = _Formation.slot_offset(form_slot, formation_spacing, back_row_pull)
+	var lateral: float = offset.x
+	var depth_delta: float = offset.y
 
 	var v_offset: float = vertical_offset
 	if is_instance_valid(e_data) and "vertical_offset" in e_data:
@@ -314,16 +332,17 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int, e_data:
 			target_scale = e_data.get("model_scale") as Vector3
 		enemy_node.scale = target_scale
 
-	var cam_distance: float = forward_distance
+	# Per-enemy combat_forward_distance > 0 replaces the base distance; formation depth still applies.
+	var cam_distance: float = forward_distance + depth_delta
 	if is_instance_valid(e_data) and "combat_forward_distance" in e_data:
 		var custom_dist: float = float(e_data.get("combat_forward_distance"))
 		if custom_dist > 0.0:
-			cam_distance = custom_dist
+			cam_distance = custom_dist + depth_delta
 
 	var cam_transform: Transform3D = camera_node.global_transform
 	var spawn_pos: Vector3 = cam_transform.origin \
 			- (cam_transform.basis.z * cam_distance) \
-			+ (cam_transform.basis.x * horizontal_offset) \
+			+ (cam_transform.basis.x * lateral) \
 			+ (cam_transform.basis.y * v_offset)
 
 	enemy_node.global_position = spawn_pos
@@ -339,6 +358,42 @@ func _position_enemy(enemy_node: Node3D, index: int, total_enemies: int, e_data:
 		enemy_node.rotate_object_local(Vector3.UP, deg_to_rad(yaw_offset_deg))
 
 	_push_back_from_camera(enemy_node)
+
+	if enemy_id.is_empty():
+		return
+	# Stash for the one-shot layout log (read after push-back).
+	enemy_node.set_meta(&"_formation_slot", form_slot)
+	enemy_node.set_meta(&"_formation_lateral", lateral)
+	enemy_node.set_meta(&"_formation_cam_dist", cam_distance)
+
+
+func _log_formation_layout() -> void:
+	var ids: Array = _spawned_enemies.keys()
+	ids.sort()
+	for enemy_id_v: Variant in ids:
+		var enemy_id: String = str(enemy_id_v)
+		var enemy_node: Node3D = _spawned_enemies[enemy_id] as Node3D
+		if not is_instance_valid(enemy_node):
+			continue
+		var pack_index: int = int(enemy_id.trim_prefix("enemy_"))
+		var e_data: Resource = null
+		if pack_index >= 0 and pack_index < enemy_group.size():
+			e_data = enemy_group[pack_index]
+		var name_str: String = str(e_data.get("enemy_name")) if is_instance_valid(e_data) and "enemy_name" in e_data else enemy_id
+		var data_scale: Vector3 = e_data.get("model_scale") as Vector3 if is_instance_valid(e_data) and "model_scale" in e_data else Vector3.ZERO
+		var form_slot: int = int(enemy_node.get_meta(&"_formation_slot", 0))
+		var lateral: float = float(enemy_node.get_meta(&"_formation_lateral", 0.0))
+		var cam_dist: float = float(enemy_node.get_meta(&"_formation_cam_dist", 0.0))
+		var pos: Vector3 = enemy_node.global_position
+		var gscale: Vector3 = enemy_node.scale
+		GameLogger.combat(
+			"Formation %s '%s' slot=%d data_scale=(%.2f,%.2f,%.2f) node_scale=(%.2f,%.2f,%.2f) lateral=%.2f cam_dist=%.2f pos=(%.2f,%.2f,%.2f)" % [
+				enemy_id, name_str, form_slot,
+				data_scale.x, data_scale.y, data_scale.z,
+				gscale.x, gscale.y, gscale.z,
+				lateral, cam_dist,
+				pos.x, pos.y, pos.z,
+			])
 
 
 func _push_back_from_camera(enemy_node: Node3D) -> void:
@@ -624,6 +679,8 @@ func _clear_all_enemies() -> void:
 			_spawned_enemies[enemy_id].queue_free()
 	_spawned_enemies.clear()
 	_adopted_world_models.clear()
+	_formation_slots = PackedInt32Array()
+	_logged_layout = false
 
 
 func play_target_vfx(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: float = 0.3) -> void:

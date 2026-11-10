@@ -26,3 +26,17 @@ class_name ProfessionData
 
 @export_group("Innate Skill Modification Hooks")
 @export var native_abilities: Array[String] = []
+
+@export_group("Weapon Restrictions")
+## Weapon types this class may equip (from Character_Classes.csv "Weapon Bonus").
+## Empty = unrestricted (legacy / missing data). WeaponType.NONE (armor, tools) always allowed.
+@export var allowed_weapon_types: Array[ItemData.WeaponType] = []
+
+
+## True when this profession can equip an item with the given weapon_type.
+func allows_weapon_type(weapon_type: ItemData.WeaponType) -> bool:
+	if weapon_type == ItemData.WeaponType.NONE:
+		return true
+	if allowed_weapon_types.is_empty():
+		return true
+	return allowed_weapon_types.has(weapon_type)

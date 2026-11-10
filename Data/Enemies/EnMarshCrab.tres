@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/crab_monster_-_animated.glb" id="1_wolxy"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_eujgi"]
+
+[resource]
+script = ExtResource("2_eujgi")
+enemy_id = "en_marsh_crab"
+enemy_type = "crab"
+enemy_name = "Marsh Crab"
+model_path = "res://resources/Enemies/crab_monster_-_animated.glb"
+model_scene = ExtResource("1_wolxy")
+model_scale = Vector3(0.65, 0.65, 0.65)
+combat_forward_distance = 3.2
+scale_with_player = false
+max_health = 22
+current_health = 22
+attack_damage = 6
+speed = 8.0
+initiative_speed = 9
+weakness_element = 5
+attack_element = 2
+min_group_size = 2
+max_group_size = 4
+movement_speed = 0.6
+aggro_range_tiles = 2
+xp_value = 15
+gold_value = 6
+drops_loot = false

@@ -12,18 +12,19 @@ func _run() -> void:
 	compile_enemies()
 
 
-func compile_enemies() -> void:
+## Callable from the editor (_run) or a headless SceneTree runner.
+static func compile_enemies() -> int:
 	var csv_path: String = _find_valid_csv_path()
 	if csv_path.is_empty():
 		printerr("EnemyCompiler Error: Cannot find 'Enemies.csv' in project root or Data folder!")
-		return
+		return 0
 
 	_ensure_directories_exist()
 
 	var file := FileAccess.open(csv_path, FileAccess.READ)
 	if file == null:
 		printerr("EnemyCompiler Error: Failed to open CSV file at ", csv_path)
-		return
+		return 0
 
 	var _header: PackedStringArray = file.get_csv_line()
 	var count: int = 0
@@ -92,9 +93,10 @@ func compile_enemies() -> void:
 			printerr("Failed to save Enemy resource for: ", enemy.enemy_name, " Error: ", err)
 
 	print("EnemyCompiler Success: Compiled ", count, " Enemy .tres files into ", OUTPUT_DIR)
+	return count
 
 
-func _create_or_load_material(tex_path: String, id_str: String) -> StandardMaterial3D:
+static func _create_or_load_material(tex_path: String, id_str: String) -> StandardMaterial3D:
 	var mat_file_name: String = id_str + "_mat.tres"
 	var full_mat_path: String = MATERIAL_DIR + mat_file_name
 
@@ -111,21 +113,21 @@ func _create_or_load_material(tex_path: String, id_str: String) -> StandardMater
 	return mat
 
 
-func _ensure_directories_exist() -> void:
+static func _ensure_directories_exist() -> void:
 	if not DirAccess.dir_exists_absolute(OUTPUT_DIR):
 		DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
 	if not DirAccess.dir_exists_absolute(MATERIAL_DIR):
 		DirAccess.make_dir_recursive_absolute(MATERIAL_DIR)
 
 
-func _find_valid_csv_path() -> String:
+static func _find_valid_csv_path() -> String:
 	for path in CSV_PATHS:
 		if FileAccess.file_exists(path):
 			return path
 	return ""
 
 
-func _parse_element(s: String) -> ItemData.EffectElement:
+static func _parse_element(s: String) -> ItemData.EffectElement:
 	match s.to_upper():
 		"BLADE":
 			return ItemData.EffectElement.BLADE
@@ -141,7 +143,7 @@ func _parse_element(s: String) -> ItemData.EffectElement:
 			return ItemData.EffectElement.NONE
 
 
-func _parse_string_list(s: String) -> Array[String]:
+static func _parse_string_list(s: String) -> Array[String]:
 	var result: Array[String] = []
 	if s.is_empty() or s.to_upper() == "NONE":
 		return result

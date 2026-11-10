@@ -29,7 +29,7 @@ func start_item_target_selection(item: ItemData, slot_index: int, acting_party_s
 
 	GameLogger.info("TargetSelectionManager: Started item selection for %s (Slot %d, Acting %d)" % [item.item_name, slot_index, acting_party_slot])
 
-	match item.target_type:
+	match item.get_battle_target_type() if acting_party_slot >= 0 else item.target_type:
 		ItemData.TargetType.NONE:
 			_execute_no_target_use()
 		ItemData.TargetType.ALL_PARTY:
@@ -189,6 +189,13 @@ func cancel_selection() -> void:
 	selection_mode_changed.emit(false, null)
 	_reset_selection_state()
 	selection_canceled.emit()
+
+
+## Ends a selection whose target was already picked elsewhere (the battle item popup's target cards).
+func finish_selection() -> void:
+	if _is_selecting_target:
+		selection_mode_changed.emit(false, null)
+	_reset_selection_state()
 
 
 func get_pending_item() -> ItemData:

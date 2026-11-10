@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://eu7mvyxnwhjo"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_1og5o"]
+
+[resource]
+script = ExtResource("1_1og5o")
+item_id = "pot_mana_vial"
+item_name = "Liquid Mana Shot"
+description = "Restores MP in a pinch"
+icon_path = "res://Assets/Icons/Items/mana_shot.png"
+item_type = 3
+credit_value = 50
+is_consumable = true
+energy_restore = 100
+stat_effect = {
+"energy": 100
+}

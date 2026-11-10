@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" uid="uid://cm4t8ntfsf5p4" path="res://Scripts/Enemies/BlobBossController.gd" id="1_ctrl"]
+[ext_resource type="Script" uid="uid://bxlxhe0eriek1" path="res://Scripts/3D/BlobBossJuice.gd" id="2_juice"]
+[ext_resource type="PackedScene" uid="uid://cvp5tl7sdodgi" path="res://resources/Enemies/beast.glb" id="3_model"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnBeastKing.tres" id="4_data"]
+[ext_resource type="AudioStream" uid="uid://dkwikb32kicgl" path="res://Audio/Enemies_Boss/fire_death.mp3" id="5_sound"]
+
+[node name="BeastKing" type="Node3D"]
+script = ExtResource("1_ctrl")
+base_data = ExtResource("4_data")
+boss_scale = 2.6
+boss_level = 7
+loop_model_animation = true
+model_animation = &"idle"
+face_player = true
+scale_affects_stats = false
+trigger_mode = 1
+rise_depth = 7.0
+rise_duration = 3.6
+earth_shake_size = 2
+earth_shake_loops = 3
+wait_for_quake_before_combat = true
+entrance_sound = ExtResource("5_sound")
+entrance_sound_delay = 0.0
+entrance_sound_volume_db = 2.0
+combat_view_distance = 4.0
+
+[node name="VisualJuice" type="Node3D" parent="."]
+script = ExtResource("2_juice")
+use_blob_shader = false
+squash_idle = false
+use_model_clips = true
+
+[node name="beast" parent="VisualJuice" instance=ExtResource("3_model")]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 0, 0)

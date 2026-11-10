@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="CatCharacter" load_steps=7 format=3]
+
+[ext_resource type="Resource" path="res://Data/Races/Sphynx.tres" id="1_kifsw"]
+[ext_resource type="Resource" path="res://Data/Skills/SkPurrRenewal.tres" id="2_rhsq2"]
+[ext_resource type="Resource" path="res://Data/Skills/SkAlchemy.tres" id="3_71spi"]
+[ext_resource type="Resource" path="res://Data/Spells/SpPlasmaDart.tres" id="4_32bif"]
+[ext_resource type="Resource" path="res://Data/Classes/Archanist.tres" id="5_vjc4i"]
+[ext_resource type="Script" path="res://resources/CatCharacter.gd" id="6_xh86y"]
+
+[resource]
+script = ExtResource("6_xh86y")
+name = "Sable"
+breed = ExtResource("1_kifsw")
+profession = ExtResource("5_vjc4i")
+portrait_path = "res://Data/Portraits/Archanist.png"
+roster_id = "sable_1794244548_0439"
+creation_dice = Array[int]([6, 2, 6])
+creation_allocation = {
+"dexterity": 1,
+"intelligence": 3,
+"personality": 1,
+"piety": 2,
+"speed": 3,
+"strength": 1,
+"vitality": 3
+}
+max_xp = 900
+strength = 6
+intelligence = 14
+vitality = 9
+dexterity = 11
+speed = 17
+personality = 13
+current_hp = 18
+max_hp = 18
+current_energy = 22
+max_energy = 22
+known_spells = Array[Resource]([ExtResource("4_32bif")])
+known_skills = Array[Resource]([ExtResource("2_rhsq2"), ExtResource("3_71spi")])
+abilities_initialized = true

@@ -16,6 +16,7 @@
 [ext_resource type="Resource" uid="uid://bht4gfrp5q7hm" path="res://Data/Items/Equipment/PlasmaBolts.tres" id="15_wtd7u"]
 [ext_resource type="Resource" uid="uid://dbkw5ny02dcli" path="res://Data/Items/Equipment/PlasmaCaster.tres" id="16_2qo55"]
 [ext_resource type="Script" uid="uid://co7xlukyxktxc" path="res://Scripts/Environment/EditorWorkLight.gd" id="99_editorworklight"]
+[ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="99_leveltitle"]
 
 [sub_resource type="Environment" id="Environment_cave"]
 background_mode = 1
@@ -55,6 +56,12 @@ unique_name_in_owner = true
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 19, 0, 9)
 metadata/eye_height = 1.5
 metadata/battle_vertical_offset = -0.5
+
+[node name="LevelTitle" parent="." instance=ExtResource("99_leveltitle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 9)
+level_title = "Gloom
+Caves III"
+play_new_area_sound = true
 
 [node name="ExitArrival" type="Marker3D" parent="."]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 57, 0, 43)

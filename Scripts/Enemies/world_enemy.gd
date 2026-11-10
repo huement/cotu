@@ -12,11 +12,17 @@ extends Node3D
 ## Uniform scale multiplier applied to the enemy 3D model
 @export var model_scale: Vector3 = Vector3(0.08, 0.08, 0.08)
 
+## World-space radius that starts a fight (meters). Larger = easier to bump into.
+@export var encounter_radius: float = 2.5
+
 ## Movement speed interval (seconds between grid steps)
 @export var movement_speed: float = 2.5
 
 ## If true, this enemy only appears at night and burrows into the ground during the day
 @export var is_night_only: bool = true
+
+## Max grid steps from spawn (0 = unlimited). Keeps weak starter slimes near their spawn tile.
+@export var max_roam_tiles: int = 0
 
 ## Depth (meters below ground) when submerged
 @export var burrow_depth: float = 3.5
@@ -39,6 +45,7 @@ const PATROL_OFFSETS: Array[Vector2i] = [
 ]
 
 var _origin_y: float = 0.0
+var _spawn_grid: Vector2i = Vector2i.ZERO
 var _current_tween: Tween = null
 var _interaction_area: Area3D = null
 var _static_body: StaticBody3D = null
@@ -50,6 +57,7 @@ var _is_in_active_combat: bool = false
 func _ready() -> void:
 	add_to_group(&"world_enemies")
 	_origin_y = global_position.y
+	_spawn_grid = get_grid_pos()
 	_interaction_area = find_child("Area3D", true, false) as Area3D
 	_static_body = find_child("StaticBody3D", true, false) as StaticBody3D
 	
@@ -78,6 +86,7 @@ func _ready() -> void:
 func set_spawn_position(pos: Vector3) -> void:
 	global_position = pos
 	_origin_y = pos.y
+	_spawn_grid = get_grid_pos()
 	_evaluate_time_state(_check_initial_is_night())
 
 func get_grid_pos() -> Vector2i:
@@ -131,10 +140,31 @@ func _process(delta: float) -> void:
 		_step_patrol()
 
 func _step_patrol() -> void:
+	# Weak starter drones idle most of the time.
+	if max_roam_tiles > 0 and randf() < 0.55:
+		return
+
 	if randf() < 0.4:
 		_patrol_index = randi() % PATROL_OFFSETS.size()
 
 	var offset: Vector2i = PATROL_OFFSETS[_patrol_index]
+	var next_grid: Vector2i = get_grid_pos() + offset
+	if max_roam_tiles > 0:
+		var delta: Vector2i = next_grid - _spawn_grid
+		if absi(delta.x) + absi(delta.y) > max_roam_tiles:
+			# Face back toward spawn instead of wandering off.
+			var back: Vector2i = _spawn_grid - get_grid_pos()
+			if back == Vector2i.ZERO:
+				return
+			if absi(back.x) >= absi(back.y):
+				offset = Vector2i(signi(back.x), 0)
+			else:
+				offset = Vector2i(0, signi(back.y))
+			next_grid = get_grid_pos() + offset
+			delta = next_grid - _spawn_grid
+			if absi(delta.x) + absi(delta.y) > max_roam_tiles:
+				return
+
 	var target_pos: Vector3 = global_position + Vector3(offset.x * 2.0, 0.0, offset.y * 2.0)
 	target_pos.y = _origin_y
 
@@ -169,7 +199,7 @@ func _check_player_distance() -> void:
 
 	if is_instance_valid(player):
 		var dist: float = global_position.distance_to(player.global_position)
-		if dist <= 2.5:
+		if dist <= encounter_radius:
 			trigger_combat_encounter()
 
 func _check_audio_proximity() -> void:
@@ -206,8 +236,9 @@ func trigger_combat_encounter() -> void:
 
 	_is_in_active_combat = true
 
-	# Turn the party to face this enemy first (battle models appear in front of the camera).
-	await BattleFacing.orient_party(get_tree(), global_position)
+	# Dungeons: fade into the battle room. Elsewhere: turn the party to face this enemy first
+	# (battle models appear in front of the camera).
+	await BattleArena.prepare_party(get_tree(), global_position)
 	if not is_inside_tree():
 		return
 	var cm: Node = get_tree().root.get_node_or_null("CombatManager")

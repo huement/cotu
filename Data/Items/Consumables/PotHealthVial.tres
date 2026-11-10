@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://cn8h2dwulil7"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_6l5o1"]
+
+[resource]
+script = ExtResource("1_6l5o1")
+item_id = "pot_health_vial"
+item_name = "Neon-Tinged Health Vial"
+description = "Restores physical tissue using arcane-infused nanites."
+icon_path = "res://Assets/Icons/Items/health_vial.png"
+item_type = 3
+credit_value = 50
+is_consumable = true
+heal_amount = 200
+stat_effect = {
+"heal": 200
+}

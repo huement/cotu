@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://duw1k5t2rb5it"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_j5auh"]
+
+[resource]
+script = ExtResource("1_j5auh")
+item_id = "gem_glow_opal"
+item_name = "Glow-Opal"
+description = "Bioluminescent gem found in the toxic techno-caverns."
+icon_path = "res://Data/Items/loot_icons/opan.png"
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 250

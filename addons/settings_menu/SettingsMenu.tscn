@@ -1,0 +1,230 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/settings_menu/SettingsMenu.gd" id="1_menu"]
+
+[node name="SettingsMenu" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_menu")
+
+[node name="Dim" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.06, 0.72)
+
+[node name="Frame" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" type="PanelContainer" parent="Frame"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_type_variation = &"SettingsPanel"
+
+[node name="Layout" type="VBoxContainer" parent="Frame/Panel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="Header" type="VBoxContainer" parent="Frame/Panel/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Title" type="Label" parent="Frame/Panel/Layout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SettingsTitle"
+text = "Settings"
+
+[node name="Subtitle" type="Label" parent="Frame/Panel/Layout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SettingsSubtitle"
+text = "Tune sound and display to your liking."
+text_overrun_behavior = 3
+
+[node name="Tabs" type="TabContainer" parent="Frame/Panel/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Audio" type="ScrollContainer" parent="Frame/Panel/Layout/Tabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+metadata/_tab_index = 0
+
+[node name="AudioList" type="VBoxContainer" parent="Frame/Panel/Layout/Tabs/Audio"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Graphics" type="ScrollContainer" parent="Frame/Panel/Layout/Tabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+metadata/_tab_index = 1
+
+[node name="GraphicsList" type="VBoxContainer" parent="Frame/Panel/Layout/Tabs/Graphics"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ResolutionCard" type="PanelContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SettingsCard"
+
+[node name="Row" type="HBoxContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/ResolutionCard"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="Texts" type="VBoxContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/ResolutionCard/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="Name" type="Label" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/ResolutionCard/Row/Texts"]
+layout_mode = 2
+theme_type_variation = &"SettingsLabel"
+text = "Resolution"
+
+[node name="Hint" type="Label" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/ResolutionCard/Row/Texts"]
+layout_mode = 2
+theme_type_variation = &"SettingsHint"
+text = "Window size in windowed mode."
+text_overrun_behavior = 3
+
+[node name="ResolutionOption" type="OptionButton" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/ResolutionCard/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.7
+
+[node name="FullscreenCard" type="PanelContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SettingsCard"
+
+[node name="Row" type="HBoxContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/FullscreenCard"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="Texts" type="VBoxContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/FullscreenCard/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="Name" type="Label" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/FullscreenCard/Row/Texts"]
+layout_mode = 2
+theme_type_variation = &"SettingsLabel"
+text = "Fullscreen"
+
+[node name="Hint" type="Label" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/FullscreenCard/Row/Texts"]
+layout_mode = 2
+theme_type_variation = &"SettingsHint"
+text = "Switch between fullscreen and windowed."
+text_overrun_behavior = 3
+
+[node name="FullscreenCheck" type="CheckButton" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/FullscreenCard/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="VSyncCard" type="PanelContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SettingsCard"
+
+[node name="Row" type="HBoxContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/VSyncCard"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="Texts" type="VBoxContainer" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/VSyncCard/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="Name" type="Label" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/VSyncCard/Row/Texts"]
+layout_mode = 2
+theme_type_variation = &"SettingsLabel"
+text = "Vertical Sync"
+
+[node name="Hint" type="Label" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/VSyncCard/Row/Texts"]
+layout_mode = 2
+theme_type_variation = &"SettingsHint"
+text = "VSync: removes screen tearing."
+text_overrun_behavior = 3
+
+[node name="VSyncCheck" type="CheckButton" parent="Frame/Panel/Layout/Tabs/Graphics/GraphicsList/VSyncCard/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Footer" type="HBoxContainer" parent="Frame/Panel/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="DefaultsButton" type="Button" parent="Frame/Panel/Layout/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "Defaults"
+
+[node name="StatusLabel" type="Label" parent="Frame/Panel/Layout/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SettingsStatus"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="CloseButton" type="Button" parent="Frame/Panel/Layout/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "Close"
+
+[node name="SaveButton" type="Button" parent="Frame/Panel/Layout/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 44)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Save"

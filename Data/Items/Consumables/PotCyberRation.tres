@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://gtdyx13ndtoa"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_qover"]
+
+[resource]
+script = ExtResource("1_qover")
+item_id = "pot_cyber_ration"
+item_name = "Cyber-Ration"
+description = "Tasteless protein block enriched with healing magic."
+icon_path = "res://Assets/Icons/Items/cyber_ration.png"
+item_type = 4
+credit_value = 25
+is_consumable = true
+heal_amount = 50
+energy_restore = 20
+stat_effect = {
+"energy": 20,
+"heal": 50
+}

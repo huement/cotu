@@ -1,0 +1,167 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_rau4e"]
+[ext_resource type="Script" path="res://Scripts/Environment/EditorWorkLight.gd" id="2_888ud"]
+[ext_resource type="Script" path="res://Scripts/WorldSceneInitializerModule.gd" id="3_i3yhj"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="4_lcwjn"]
+[ext_resource type="Script" path="res://Scripts/Triggers/level_title_trigger.gd" id="5_d53da"]
+[ext_resource type="MeshLibrary" path="res://resources/mesh_library/nav_blocker_mesh_library.tres" id="6_1cy1b"]
+[ext_resource type="PackedScene" path="res://Scenes/Dungeons/Parts/LargeRoom.tscn" id="7_a10kd"]
+[ext_resource type="Script" path="res://Scripts/Dungeon/DungeonRoom.gd" id="8_uxpx6"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-end.glb" id="9_bcod3"]
+[ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor.glb" id="10_02etw"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/Stairs.tscn" id="11_w4g8y"]
+[ext_resource type="Script" path="res://Scripts/Objects/Stairs.gd" id="12_oxq1e"]
+[ext_resource type="PackedScene" path="res://Scenes/Environment/CryptHole.tscn" id="13_5fylr"]
+[ext_resource type="Script" path="res://Scripts/Environment/CryptHole.gd" id="14_mwfx6"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/BattleConfigTerminal.tscn" id="15_rf2ph"]
+[ext_resource type="Script" path="res://Scripts/Environment/BattleConfigTerminal.gd" id="16_vivla"]
+
+[sub_resource type="Environment" id="Environment_1vbry"]
+background_mode = 1
+background_color = Color(0.01, 0.01, 0.015, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.26, 0.27, 0.34, 1)
+ambient_light_energy = 0.9
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.012, 0.012, 0.018, 1)
+fog_density = 1.0
+fog_depth_begin = 14.0
+fog_depth_end = 40.0
+
+[node name="BattleTestArena" type="Node3D"]
+script = ExtResource("1_rau4e")
+level_seed = 7000
+room_count = 1
+enemy_count = 0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1vbry")
+
+[node name="EditorWorkLight" type="Node3D" parent="."]
+script = ExtResource("2_888ud")
+
+[node name="WorldSceneInitializer" type="Node3D" parent="."]
+script = ExtResource("3_i3yhj")
+create_floor = false
+create_ceiling = false
+setup_dark_retro_environment = false
+particle_color = Color(0.85, 0.85, 1, 0.3)
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 5, 0, 3)
+metadata/eye_height = 1.5
+metadata/battle_vertical_offset = -0.5
+
+[node name="LevelTitle" type="Node3D" parent="." instance=ExtResource("4_lcwjn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 3)
+script = ExtResource("5_d53da")
+level_title = "Battle
+Test Arena"
+play_new_area_sound = true
+
+[node name="FloorMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+cell_center_y = false
+
+[node name="WallMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+visible = false
+mesh_library = ExtResource("6_1cy1b")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 1, 2, 0, 2, 0, 0, 2, 2, 0, 3, 0, 0, 3, 2, 0, 4, 0, 0, 4, 2, 0, 5, 0, 0, 5, 2, 0, 6, 0, 0, 6, 2, 0, 7, 0, 0, 7, 2, 0, 8, 0, 0, 8, 2, 0, 12, 6, 0, 12, 7, 0, 12, 8, 0, 14, 6, 0, 14, 7, 0, 14, 8, 0, 12, 9, 0, 12, 10, 0, 13, 10, 0, 14, 9, 0, 14, 10, 0)
+}
+
+[node name="Rooms" type="Node3D" parent="."]
+
+[node name="Room1_LargeRoom" type="Node3D" parent="Rooms" instance=ExtResource("7_a10kd")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 27, 0, 3)
+script = ExtResource("8_uxpx6")
+footprint = Vector2i(20, 20)
+open_doors = 3
+removed_nodes = PackedStringArray("Environment/Barrel4", "Environment/Barrel2")
+id_prefix = "battletestarena_room1_largeroom"
+
+[node name="Corridors" type="Node3D" parent="."]
+
+[node name="Corridor1" type="Node3D" parent="Corridors" instance=ExtResource("9_bcod3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3)
+
+[node name="Corridor2" type="Node3D" parent="Corridors" instance=ExtResource("10_02etw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 3)
+
+[node name="Corridor3" type="Node3D" parent="Corridors" instance=ExtResource("10_02etw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, 3)
+
+[node name="Corridor4" type="Node3D" parent="Corridors" instance=ExtResource("10_02etw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 3)
+
+[node name="Corridor5" type="Node3D" parent="Corridors" instance=ExtResource("10_02etw")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 15)
+
+[node name="Corridor6" type="Node3D" parent="Corridors" instance=ExtResource("9_bcod3")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 19)
+
+[node name="EntryStairs" type="Node3D" parent="." instance=ExtResource("11_w4g8y")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 0, 3)
+script = ExtResource("12_oxq1e")
+prompt_message = "Climb the stairs back up to Gloom Reach?"
+target_scene = "res://Scenes/GloomReach.tscn"
+use_map_manager = true
+object_id = "battletestarena_entry_stairs"
+snap_to_floor_center = false
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="EntryLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3.2, 3)
+light_color = Color(1, 0.8, 0.55, 1)
+light_energy = 1.4
+omni_range = 8.0
+
+[node name="ExitLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 1.2, 19)
+light_color = Color(0.65, 0.35, 1, 1)
+light_energy = 1.6
+omni_range = 6.0
+
+[node name="ArenaLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 4, 3)
+light_color = Color(0.55, 0.75, 1, 1)
+light_energy = 1.8
+omni_range = 14.0
+
+[node name="Exit" type="Node3D" parent="." instance=ExtResource("13_5fylr")]
+transform = Transform3D(0.17, 0, 0, 0, 0.17, 0, 0, 0, 0.17, 27, 0.101, 19)
+script = ExtResource("14_mwfx6")
+target_dungeon_scene = "res://Scenes/GloomReach.tscn"
+prompt_text = "Leave the arena through the shaft?"
+object_id = "battletestarena_crypthole"
+snap_to_floor_center = false
+
+[node name="ExitArrival" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 17)
+
+[node name="Chests" type="Node3D" parent="."]
+
+[node name="Ghosts" type="Node3D" parent="."]
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="FightStart" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 7)
+
+[node name="EnemySpawn" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 1)
+
+[node name="BattleConfigTerminal" type="Node3D" parent="." node_paths=PackedStringArray("fight_start", "enemy_spawn") instance=ExtResource("15_rf2ph")]
+transform = Transform3D(-1.5, 0, -1.3113416e-07, 0, 1.5, 0, 1.3113416e-07, 0, -1.5, 7, 0, 1)
+script = ExtResource("16_vivla")
+fight_start = NodePath("../FightStart")
+enemy_spawn = NodePath("../EnemySpawn")
+object_id = "battle_test_arena_terminal"

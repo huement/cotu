@@ -1,0 +1,27 @@
+---
+description: Shards GDScript architecture — typing, SignalBus, party, grid, UI
+globs: "**/*.{gd,tscn}"
+alwaysApply: false
+---
+
+# GDScript architecture
+
+Full briefing: `AGENTS.md`. System details: `_documentation/`.
+
+## Must
+
+- Strict static types on every var, param, return.
+- `@onready` casts: `@onready var cam: Camera3D = $Camera3D as Camera3D`
+- UI nodes: Scene Unique Names via `%Name`
+- Logic ↔ UI only through `SignalBus` (never `get_node` into HUD from combat/world logic)
+- Grid steps: Vector math + Tweens + RayCast/GridMap — not CharacterBody3D forces
+- Party: 6 slots — front `0..2`, back `3..5` (`DungeonParty`)
+- Facings across signals/saves: `"NORTH"|"SOUTH"|"EAST"|"WEST"`
+- PNG UI frames: Expand Mode Ignore Size, texture filter Nearest
+
+## Must not
+
+- Untyped GDScript
+- New parallel event buses or direct CombatManager→UI calls
+- Invent Godot 4.5 APIs — use Context7 `/godotengine/godot-docs` (4.5)
+- Guess visual bugs — run game / logs / screenshot

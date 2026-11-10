@@ -31,6 +31,12 @@ extends Node3D
 
 @export var hasSpottedPlayer: bool = false
 
+## Difficulty dial for THIS enemy only (the shared .tres data is never changed).
+## 1.0 = as authored. 0.6 = a softer version for early areas, 1.8 = a tougher "boss" version.
+## Scales health, attack, magic power, mana and XP/gold rewards. Defense only moves a quarter
+## as much, because damage is (attack - defense) and a big defense makes an enemy unhittable.
+@export_range(0.1, 5.0, 0.05) var stat_multiplier: float = 1.0
+
 # ==============================================================================
 # 2. NODE REFERENCES & STATE
 # ==============================================================================
@@ -77,6 +83,7 @@ func _ready() -> void:
 	
 	_resolve_enemy_data()
 	_setup_enemy_group()
+	_apply_stat_multiplier()
 	_instantiate_world_model()
 	_connect_trigger_signals()
 	
@@ -149,13 +156,31 @@ func _setup_enemy_group() -> void:
 					dup.set("custom_material", template.get("custom_material"))
 				if "texture_path" in template and not str(template.get("texture_path")).is_empty():
 					dup.set("texture_path", template.get("texture_path"))
-				# Battle model is never smaller than the one walking around the map.
-				if "model_scale" in dup:
-					var data_scale: Vector3 = dup.get("model_scale") as Vector3
-					if model_scale.x > data_scale.x:
-						dup.set("model_scale", model_scale)
+				# Combat scale comes from EnemyData / CSV only. World model_scale is overworld visual.
 
 				enemy_group.append(dup)
+
+
+## Gives every pack member its own scaled copy of its EnemyData (see stat_multiplier).
+func _apply_stat_multiplier() -> void:
+	if is_equal_approx(stat_multiplier, 1.0):
+		return
+	var m: float = stat_multiplier
+	var defense_m: float = 1.0 + (m - 1.0) * 0.25
+	for i: int in range(enemy_group.size()):
+		var src: EnemyData = enemy_group[i] as EnemyData
+		if src == null:
+			continue
+		var d: EnemyData = src.duplicate(false) as EnemyData # shallow: keeps model/material refs
+		d.max_health = maxi(1, roundi(float(src.max_health) * m))
+		d.current_health = d.max_health
+		d.attack_damage = maxi(1, roundi(float(src.attack_damage) * m))
+		d.defense = maxi(0, roundi(float(src.defense) * defense_m))
+		d.magic_power = roundi(float(src.magic_power) * m)
+		d.max_mana = roundi(float(src.max_mana) * m)
+		d.xp_value = maxi(1, roundi(float(src.xp_value) * m))
+		d.gold_value = roundi(float(src.gold_value) * m)
+		enemy_group[i] = d
 
 
 func _align_to_grid() -> void:
@@ -484,8 +509,9 @@ func trigger_combat_encounter() -> void:
 
 	_is_in_active_combat = true
 
-	# Turn the party to face this enemy first (battle models appear in front of the camera).
-	await BattleFacing.orient_party(get_tree(), global_position)
+	# Dungeons: fade into the battle room. Elsewhere: turn the party to face this enemy first
+	# (battle models appear in front of the camera).
+	await BattleArena.prepare_party(get_tree(), global_position)
 	if not is_inside_tree():
 		return
 	var cm: Node = get_tree().root.get_node_or_null("CombatManager")

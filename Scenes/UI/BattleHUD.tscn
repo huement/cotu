@@ -1,4 +1,4 @@
-[gd_scene load_steps=431 format=3 uid="uid://ci4b8iodvo08n"]
+[gd_scene load_steps=436 format=3 uid="uid://ci4b8iodvo08n"]
 
 [ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
 [ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
@@ -13,19 +13,24 @@
 [ext_resource type="Texture2D" uid="uid://dedwywthvhbrg" path="res://ui/BATTLE/cmd_defense.png" id="9_55foo"]
 [ext_resource type="Script" uid="uid://baloa5l37brhf" path="res://Scripts/UI/BattleActionBar.gd" id="9_lrf55"]
 [ext_resource type="FontFile" uid="uid://c1112jnjnfk4y" path="res://ui/fonts/RedditMono-Regular.ttf" id="9_qdnyl"]
-[ext_resource type="Texture2D" uid="uid://bpmd16bustmsp" path="res://ui/BATTLE/playerCounterBG.png" id="10_55foo"]
 [ext_resource type="Texture2D" uid="uid://wxg36hnmjey4" path="res://ui/BATTLE/cmd_magic.png" id="10_gv3jx"]
 [ext_resource type="Texture2D" uid="uid://f7h57ejroclo" path="res://ui/BATTLE/cmd_item.png" id="11_gv3jx"]
 [ext_resource type="Texture2D" uid="uid://dt7menobwtt0h" path="res://ui/BATTLE/btnRight.png" id="12_28ab4"]
 [ext_resource type="Texture2D" uid="uid://cpl5l6wc3l6q1" path="res://ui/BATTLE/cmd_run.png" id="12_s15b2"]
 [ext_resource type="Texture2D" uid="uid://dyek5vtk5dj0r" path="res://ui/BATTLE/cmd_auto.png" id="15_lrf55"]
+[ext_resource type="Texture2D" uid="uid://ce86bnnb85o43" path="res://ui/BATTLE/turn_hud_btm.png" id="18_rwnwi"]
 [ext_resource type="Script" uid="uid://dp2c6nndb40o5" path="res://Scripts/UI/toast_notification_manager.gd" id="19_cvbxj"]
+[ext_resource type="Texture2D" uid="uid://cso7ep1o2wmmd" path="res://ui/portrait.png" id="19_gjgbi"]
+[ext_resource type="Texture2D" uid="uid://ba0448i8mnrbe" path="res://ui/BATTLE/turn_hud_top.png" id="19_oqcyr"]
 [ext_resource type="Texture2D" uid="uid://bkvuvelngdcyn" path="res://ui/animations/air_60f_320px-sheet.png" id="20_vhms3"]
 [ext_resource type="Texture2D" uid="uid://ba6r0h6nmrj8u" path="res://ui/animations/bolt_60f_320px-sheet.png" id="21_wgq8a"]
 [ext_resource type="Texture2D" uid="uid://hpgyivnmb44c" path="res://ui/animations/dark_60f_320px-sheet.png" id="22_mpqy4"]
 [ext_resource type="Texture2D" uid="uid://dlu621jtpv1lu" path="res://ui/animations/fire_60f_320px-sheet.png" id="23_28ab4"]
+[ext_resource type="Texture2D" uid="uid://dockh2fhdi881" path="res://ui/HUD/menu_button.png" id="23_mfbld"]
+[ext_resource type="Texture2D" uid="uid://1xbwaw2vwxnn" path="res://ui/HUD/menu_button_pressed.png" id="24_gf2ej"]
 [ext_resource type="Texture2D" uid="uid://cm4rs2u8nn7je" path="res://ui/animations/life_ring_60f_320px-sheet.png" id="24_rwnwi"]
 [ext_resource type="Texture2D" uid="uid://d370tgajiw10q" path="res://ui/animations/water_60f_320px-sheet.png" id="25_oqcyr"]
+[ext_resource type="Texture2D" uid="uid://0r32xf12mm4" path="res://ui/HUD/menu_button_hover.png" id="25_osa3y"]
 [ext_resource type="Texture2D" uid="uid://glx0il76w00y" path="res://ui/animations/smoke_60f_320px-sheet.png" id="25_wgq8a"]
 [ext_resource type="Shader" uid="uid://ddae7co6523v3" path="res://Shaders/screen_slice.gdshader" id="27_mpqy4"]
 
@@ -3100,46 +3105,78 @@ layout_mode = 2
 icon_texture = ExtResource("15_lrf55")
 
 [node name="TurnCounter" type="Control" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -77.0
-offset_right = 188.0
+offset_top = -92.0
+offset_right = 278.0
 grow_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="TurnCounter"]
+[node name="TurnHudBtm" type="TextureRect" parent="TurnCounter"]
 layout_mode = 0
-offset_right = 219.0
-offset_bottom = 85.0
-texture = ExtResource("10_55foo")
+offset_left = 7.0
+offset_top = 8.0
+offset_right = 275.0
+offset_bottom = 87.0
+texture = ExtResource("18_rwnwi")
+
+[node name="ActivePortrait" type="TextureRect" parent="TurnCounter"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 14.0
+offset_top = 16.0
+offset_right = 76.0
+offset_bottom = 78.0
+texture = ExtResource("19_gjgbi")
+expand_mode = 2
+
+[node name="TurnHudTop" type="TextureRect" parent="TurnCounter"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = -1.0
+offset_right = 277.0
+offset_bottom = 92.0
+texture = ExtResource("19_oqcyr")
 
 [node name="TurnInfo" type="Label" parent="TurnCounter"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 13.0
-offset_right = 198.0
-offset_bottom = 34.0
-theme_override_colors/font_color = Color(0.12689295, 0.5175071, 0.38339102, 1)
+offset_left = 82.0
+offset_top = 45.0
+offset_right = 264.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(0.8627451, 0.94509804, 0.9490196, 1)
 theme_override_colors/font_outline_color = Color(0.2821932, 0.0008392078, 0.4767928, 1)
 theme_override_fonts/font = ExtResource("9_qdnyl")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 16
 text = "ACTIVE"
 
 [node name="TurnCharacter" type="Label" parent="TurnCounter"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 22.0
-offset_top = 34.0
-offset_right = 199.0
-offset_bottom = 57.0
-theme_override_colors/font_color = Color(0.15487596, 0.154876, 0.15487596, 1)
+offset_left = 82.0
+offset_top = 18.0
+offset_right = 264.0
+offset_bottom = 43.0
+theme_override_colors/font_color = Color(0.8627451, 0.94509804, 0.9490196, 1)
 theme_override_fonts/font = ExtResource("4_tbwvx")
+theme_override_font_sizes/font_size = 18
 text = "CHARACTER NAME"
 
 [node name="ToastController" type="CanvasLayer" parent="."]
 script = ExtResource("19_cvbxj")
+
+[node name="GameMenuButton" type="TextureButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 5.0
+offset_right = 46.0
+offset_bottom = 56.0
+texture_normal = ExtResource("23_mfbld")
+texture_pressed = ExtResource("24_gf2ej")
+texture_hover = ExtResource("25_osa3y")
 
 [node name="ElementalVFX" type="AnimatedSprite2D" parent="."]
 unique_name_in_owner = true
@@ -3163,6 +3200,7 @@ grow_vertical = 2
 
 [node name="SliceOverlay" type="ColorRect" parent="."]
 unique_name_in_owner = true
+visible = false
 z_index = 128
 material = SubResource("ShaderMaterial_28ab4")
 layout_mode = 1

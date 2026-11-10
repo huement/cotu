@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_o2r2k")
 item_id = "weap_spartan_advanced_primary"
-item_name = "Fusion Broadsword"
+item_name = "Spartan Advanced Broadsword"
 description = "Advanced primary weapon for the Spartan."
 icon_path = "res://Data/Items/weapon.png"
 item_type = 1

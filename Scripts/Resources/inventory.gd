@@ -158,6 +158,15 @@ func use_item(index: int, target_character: Resource) -> bool:
 		GameLogger.warning("Inventory: Item at slot %d is null." % index)
 		return false
 
+	# Spell Books / Skill Crystals open the learn picker instead; the item is only used up when the
+	# character actually learns something (handled asynchronously, so this returns false right away).
+	var learn_kind: StringName = AbilityLearnScreen.kind_for_item(item)
+	if learn_kind != &"":
+		var learner: CatCharacter = target_character as CatCharacter
+		if is_instance_valid(learner):
+			_learn_from_item(item, learner, learn_kind)
+		return false
+
 	# Usability check: CONSUMABLE, POTION, or marked is_consumable
 	var is_usable: bool = item.is_consumable or item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION
 	if is_usable:
@@ -215,6 +224,21 @@ func use_item_on_targets(index: int, targets: Array) -> bool:
 	GameLogger.info("Inventory: %s affected %d character(s)" % [item.item_name, affected])
 	consume_one(index)
 	return true
+
+
+func _learn_from_item(item: ItemData, learner: CatCharacter, learn_kind: StringName) -> void:
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var learned: Resource = await AbilityLearnScreen.open(tree, learner, learn_kind)
+	if learned == null:
+		return
+	var idx: int = _items.find(item)
+	if idx >= 0:
+		item_used.emit(item)
+		consume_one(idx)
+	if is_instance_valid(GameState):
+		GameState.save_game()
 
 
 ## Removes one from the stack at `index` (or the whole slot if it was the last one).

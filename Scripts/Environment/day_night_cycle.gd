@@ -24,15 +24,24 @@ extends Node3D
 @export_group("Ambient Colors")
 @export var day_ambient: Color = Color(0.62, 1.0, 0.85, 1.0)
 @export var night_ambient: Color = Color(0.04, 0.06, 0.12, 1.0)
+## Peak daytime ambient energy (lower for overcast / spooky maps).
+@export_range(0.05, 1.5) var day_ambient_energy: float = 1.0
+## Peak daytime sky/background brightness (lower keeps heavy cloud cover readable).
+@export_range(0.05, 1.5) var day_background_energy: float = 1.0
 
 signal time_changed(current_time: float)
 signal period_changed(is_night: bool)
 signal period_name_changed(period_name: String)
 
+const PIXEL_SKY_SHADER: String = "res://Shaders/pixel_sky.gdshader"
+
 var is_night: bool = false
 var current_period: String = ""
 
 func _ready() -> void:
+	# One clock for the whole world (GameState.world_time), so changing maps doesn't reset the time.
+	if is_instance_valid(GameState) and "world_time" in GameState:
+		time_of_day = GameState.world_time
 	_setup_moon_material()
 	_update_cycle()
 
@@ -40,9 +49,14 @@ func _process(delta: float) -> void:
 	if day_duration <= 0.0:
 		return
 
-	time_of_day += delta / day_duration
-	if time_of_day >= 1.0:
-		time_of_day -= 1.0
+	# GameState.world_time is the master clock: anything (resting, scripts, loading) can set it.
+	if is_instance_valid(GameState) and "world_time" in GameState:
+		GameState.world_time = fmod(GameState.world_time + delta / day_duration, 1.0)
+		time_of_day = GameState.world_time
+	else:
+		time_of_day += delta / day_duration
+		if time_of_day >= 1.0:
+			time_of_day -= 1.0
 
 	_update_cycle()
 
@@ -92,11 +106,20 @@ func _update_cycle() -> void:
 	if world_environment and world_environment.environment:
 		var env: Environment = world_environment.environment
 		
-		env.background_energy_multiplier = lerpf(0.02, 1.0, day_factor)
-		
+		var sky_mat: ShaderMaterial = null
+		if env.sky != null and env.sky.sky_material is ShaderMaterial:
+			sky_mat = env.sky.sky_material as ShaderMaterial
+		if sky_mat != null and sky_mat.shader != null and sky_mat.shader.resource_path == PIXEL_SKY_SHADER:
+			# Pixel sky darkens itself (and draws night stars), so don't dim it to 2% here.
+			sky_mat.set_shader_parameter(&"day_amount", day_factor)
+			sky_mat.set_shader_parameter(&"sun_direction", sun_pos.normalized() if not sun_pos.is_zero_approx() else Vector3.UP)
+			env.background_energy_multiplier = day_background_energy
+		else:
+			env.background_energy_multiplier = lerpf(0.02, day_background_energy, day_factor)
+
 		var current_ambient: Color = night_ambient.lerp(day_ambient, day_factor)
 		env.ambient_light_color = current_ambient
-		env.ambient_light_energy = lerpf(0.08, 1.0, day_factor)
+		env.ambient_light_energy = lerpf(0.08, day_ambient_energy, day_factor)
 		
 		if env.volumetric_fog_enabled:
 			env.volumetric_fog_albedo = current_ambient * 0.5

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/diamond.png" id="1_7s6vl"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_26bwk"]
+
+[resource]
+script = ExtResource("2_26bwk")
+item_id = "token_party_gear_adv"
+item_name = "Advanced Party Gear"
+description = "Placeholder chest loot. Expands into one random armor or weapon usable by the current party (advanced tier)."
+icon_path = "res://Data/Items/loot_icons/diamond.png"
+icon = ExtResource("1_7s6vl")
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+max_durability = 1
+current_durability = 1
+effects = "PartyGear:advanced"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dn261vpmv2h6o"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_3tj12"]
+
+[resource]
+script = ExtResource("1_3tj12")
+item_id = "pot_mana_stim"
+item_name = "Mana-Stim"
+description = "Injectable liquid mana. Tastes like ozone."
+icon_path = "res://Assets/Icons/Items/mana_stim.png"
+item_type = 3
+credit_value = 75
+is_consumable = true
+energy_restore = 150
+stat_effect = {
+"energy": 150
+}

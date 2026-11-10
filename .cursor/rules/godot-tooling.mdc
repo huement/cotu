@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Godot tooling
 
+Project briefing: **`AGENTS.md`**. Skill: `.cursor/skills/godot-shards`.
+
 - Engine: Godot **4.5.1** at `/Applications/Godot.app/Contents/MacOS/Godot` (also `godot` on PATH).
 - Docs: Context7 library `/godotengine/godot-docs` (prefer version `__branch__4.5`). Engine source: `/godotengine/godot`.
 - MCP `godot` (`@coding-solo/godot-mcp`): launch editor, run project, read debug output, inspect/create scenes and nodes, UID helpers.

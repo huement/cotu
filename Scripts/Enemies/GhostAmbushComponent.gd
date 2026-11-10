@@ -4,6 +4,12 @@ extends Node
 
 ## Manages invisible proximity zones, heartbeat screen shake, audio alerts,
 ## and reaction-time combat ambushes for Ghost enemies.
+##
+## The jump scare: when the reaction window runs out, the ghost appears on the open cell right
+## BEHIND the party, facing them (scream + inverted-screen pulse + shake). The party then spins
+## round to face it (BattleFacing) and a second, bigger pulse hits as the battle opens.
+## Ghost difficulty in battle: set `stat_multiplier` on the ghost's WorldEnemy node
+## (e.g. 0.6 for an early dungeon). `ghost_level` here only changes how fast/often it strikes.
 
 # ==============================================================================
 # 1. EXPORTED CONFIGURATION
@@ -32,6 +38,9 @@ extends Node
 ## Subtle screen shake trauma applied periodically while inside the haunt zone
 @export_range(0.3, 0.7) var heartbeat_shake_trauma: float = 0.5
 
+## Inverted-screen pulse when the ghost appears and again when the battle starts.
+@export var scare_screen_pulse: bool = true
+
 # ==============================================================================
 # 2. RUNTIME STATE
 # ==============================================================================
@@ -46,6 +55,13 @@ var _reaction_timer: float = 0.0
 var _heartbeat_timer: float = 0.0
 var _initial_player_yaw: float = 0.0
 var _initial_player_cell: Vector2i = Vector2i(-9999, -9999)
+## True from the moment the ghost is revealed until the battle has started (or was refused).
+var _is_revealing: bool = false
+## True while the ghost is out of hiding because of a jump scare (until it hides again).
+var _has_revealed: bool = false
+
+const OFF_GRID_CELL: Vector2i = Vector2i(-9999, -9999)
+const OFF_GRID_POSITION: Vector3 = Vector3(0, -9999, 0)
 
 # ==============================================================================
 # 3. LIFECYCLE & SETUP
@@ -75,8 +91,7 @@ func _setup_ghost_overrides() -> void:
 		_haunt_center_cell = _parent_enemy.initial_cell
 
 	# 2. Move parent enemy's registered tile AND physical 3D body off-grid
-	_parent_enemy.set("_grid_position", Vector2i(-9999, -9999))
-	_parent_enemy.global_position = Vector3(0, -9999, 0)
+	_park_off_grid()
 
 	# 3. Stop standard overworld AI & movement
 	_parent_enemy.set_process(false)
@@ -117,8 +132,17 @@ func can_trigger_combat() -> bool:
 
 
 func _process(delta: float) -> void:
-	if not is_instance_valid(_parent_enemy) or not _parent_enemy.visible or _parent_enemy.is_queued_for_deletion():
+	if not is_instance_valid(_parent_enemy) or _parent_enemy.is_queued_for_deletion():
 		set_process(false)
+		return
+	# Hidden = mid-battle (or ambush in progress). Don't stop processing for good: after a
+	# lost or fled battle the ghost must be able to haunt again.
+	if _is_revealing or not _parent_enemy.visible:
+		return
+	# Back on the map after a lost / fled battle: vanish again and resume haunting.
+	if _has_revealed and _parent_enemy.get("_is_in_active_combat") != true:
+		_has_revealed = false
+		_reset_ambush_state()
 		return
 
 	_find_player()
@@ -215,23 +239,7 @@ func _process_active_ambush(delta: float, current_player_cell: Vector2i) -> void
 		_is_ambush_active = false
 		_ambush_failed_combat_ready = true
 
-		if is_instance_valid(_parent_enemy) and is_instance_valid(_parent_enemy.model_holder):
-			_parent_enemy.model_holder.show()
-
-		if is_instance_valid(AudioManager):
-			var sound_to_play: String = [scream_sound_name, scream_sound_name + "-2"].pick_random()
-			AudioManager.play_enemy_sound(sound_to_play)
-
-		if is_instance_valid(GameLogger):
-			GameLogger.combat("The ghost caught you off-guard! Combat initiated!")
-
-		_flash_ghost_ambush()
-
-		var sb: Node = SignalBus
-		if is_instance_valid(sb) and sb.has_signal(&"camera_shake_requested"):
-			sb.camera_shake_requested.emit(0.8)
-
-		_parent_enemy.trigger_combat_encounter()
+		_spring_jump_scare()
 
 
 func _reset_ambush_state() -> void:
@@ -241,6 +249,85 @@ func _reset_ambush_state() -> void:
 	_ambush_interval_timer = get_next_ambush_interval()
 	if is_instance_valid(_parent_enemy) and is_instance_valid(_parent_enemy.model_holder):
 		_parent_enemy.model_holder.hide()
+	# Back into hiding (matters after a lost / fled battle, when the ghost was revealed).
+	if is_instance_valid(_parent_enemy) and _parent_enemy.get("_is_in_active_combat") != true:
+		_park_off_grid()
+
+
+func _park_off_grid() -> void:
+	if not is_instance_valid(_parent_enemy):
+		return
+	_parent_enemy.set("_grid_position", OFF_GRID_CELL)
+	_parent_enemy.global_position = OFF_GRID_POSITION
+
+
+# ==============================================================================
+# 4b. JUMP SCARE
+# ==============================================================================
+## Reveals the ghost behind the party, then starts the battle (the party turns to face it).
+func _spring_jump_scare() -> void:
+	_is_revealing = true
+	_has_revealed = true
+	_reveal_behind_player()
+
+	if is_instance_valid(AudioManager):
+		var sound_to_play: String = [scream_sound_name, scream_sound_name + "-2"].pick_random()
+		AudioManager.play_enemy_sound(sound_to_play)
+	if is_instance_valid(GameLogger):
+		GameLogger.combat("The ghost caught you off-guard! Combat initiated!")
+	if scare_screen_pulse:
+		GhostScareFX.play(get_tree(), 1, 0.85, 0.05)
+	_flash_ghost_ambush()
+	var sb: Node = SignalBus
+	if is_instance_valid(sb) and sb.has_signal(&"camera_shake_requested"):
+		sb.camera_shake_requested.emit(0.8)
+
+	# Turns the party round (BattleFacing) toward the ghost's new cell, then starts the battle.
+	await _parent_enemy.trigger_combat_encounter()
+	if not is_instance_valid(_parent_enemy):
+		return
+	var started: bool = _parent_enemy.get("_is_in_active_combat") == true
+	if started and scare_screen_pulse:
+		GhostScareFX.play(get_tree(), 2, 1.0, 0.07)
+	_is_revealing = false
+	if not started:
+		_reset_ambush_state() # encounter refused (another fight / cooldown): hide again
+
+
+## Puts the ghost on the open cell behind the party (else left, else right, else on the party's
+## own cell), facing the party, and shows its model.
+func _reveal_behind_player() -> void:
+	if not is_instance_valid(_parent_enemy) or not is_instance_valid(_player_ref):
+		return
+	var party_cell: Vector2i = _player_ref.get("current_grid_pos") as Vector2i
+	var forward: Vector2i = Vector2i(0, -1)
+	if _player_ref is DungeonPlayer:
+		forward = BattleFacing._facing_dir(_player_ref as DungeonPlayer)
+	var back: Vector2i = -forward
+	var left: Vector2i = Vector2i(forward.y, -forward.x)
+	var right: Vector2i = -left
+
+	var ghost_cell: Vector2i = party_cell
+	for dir: Vector2i in [back, left, right]:
+		if not BattleFacing._is_cell_blocked(get_tree(), party_cell + dir):
+			ghost_cell = party_cell + dir
+			break
+
+	var pos: Vector3 = _parent_enemy.call("_cell_to_world", ghost_cell) as Vector3
+	if ghost_cell == party_cell:
+		# Nowhere open around us: loom right at the party's back instead.
+		pos += Vector3(back.x, 0.0, back.y) * 0.9
+	_parent_enemy.set("_grid_position", ghost_cell)
+	_parent_enemy.global_position = pos
+
+	var to_party: Vector2i = party_cell - ghost_cell
+	if to_party == Vector2i.ZERO:
+		to_party = forward
+	var facing: int = int(_parent_enemy.call("_vec_to_facing", to_party))
+	_parent_enemy.set("_current_facing", facing)
+	if is_instance_valid(_parent_enemy.model_holder):
+		_parent_enemy.model_holder.rotation_degrees.y = float(_parent_enemy.call("_facing_to_angle", facing))
+		_parent_enemy.model_holder.show()
 
 
 func _find_player() -> void:

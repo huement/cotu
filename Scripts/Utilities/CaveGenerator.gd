@@ -66,7 +66,9 @@ class Alcove extends RefCounted:
 
 ## Builds a full layout. Returns null (with an error) if the grid is too small or no
 ## entrance/exit could be placed; try another seed in that case.
-static func generate(seed_value: int, size: Vector2i, room_count: int, enemy_count: int, exit_in_alcove: bool) -> CaveLayout:
+## start_at_west_end: rooms are chained west -> east and the entrance is the westernmost room,
+## so a long, wide grid becomes one long walk (the exit lands at the far east end).
+static func generate(seed_value: int, size: Vector2i, room_count: int, enemy_count: int, exit_in_alcove: bool, start_at_west_end: bool = false) -> CaveLayout:
 	if size.x < MIN_GRID_SIZE or size.y < MIN_GRID_SIZE:
 		push_error("CaveGenerator: grid_size must be at least %d x %d." % [MIN_GRID_SIZE, MIN_GRID_SIZE])
 		return null
@@ -102,6 +104,9 @@ static func generate(seed_value: int, size: Vector2i, room_count: int, enemy_cou
 				if ex * ex + ez * ez <= 1.0 + rng.randf_range(-0.3, 0.35):
 					_carve(layout.open_cells, bounds, Vector2i(x, z))
 		_carve(layout.open_cells, bounds, Vector2i(cx, cz))
+
+	if start_at_west_end:
+		layout.rooms.sort_custom(func(a: Vector4i, b: Vector4i) -> bool: return a.x < b.x)
 
 	if layout.rooms.size() < 2:
 		push_error("CaveGenerator: could only fit %d room(s); use a bigger grid_size." % layout.rooms.size())

@@ -1,191 +1,13 @@
 # res://Scripts/Managers/CombatManager.gd
 extends Node
 
-## Turn-meter (ATB style) combat. See res://Scripts/Managers/COMBAT_README.md for the full flow.
-
-
-# ==============================================================================
-# ACTIVE EFFECTS (buffs, debuffs, DoT/HoT, shields, crowd control)
-# ==============================================================================
-class ActiveEffect:
-	var id: String
-	var name: String
-	var duration: int # Remaining turns of the AFFECTED combatant
-	## &"STAT_BUFF" (flat), &"STAT_PCT" (percent), &"DOT", &"HOT",
-	## &"SHIELD", &"MAGIC_SHIELD", &"SKIP_TURN", &"LOCK_MAGIC"
-	var effect_type: StringName
-	## &"strength", &"defense", &"speed", &"magic", &"accuracy", &"dexterity"
-	var stat_target: StringName
-	var value: float
-	var caster_id: String
-
-
-	func _init(p_id: String, p_name: String, p_duration: int, p_type: StringName, p_stat: StringName = &"", p_val: float = 0.0, p_caster: String = "") -> void:
-		id = p_id
-		name = p_name
-		duration = p_duration
-		effect_type = p_type
-		stat_target = p_stat
-		value = p_val
-		caster_id = p_caster
-
-
-# ==============================================================================
-# COMBATANT (one per party member / enemy, stats are snapshotted at battle start)
-# ==============================================================================
-class Combatant:
-	var id: String
-	var name: String
-	## Base speed including equipment (before buffs)
-	var speed: float
-	var meter: float = 0.0
-	var is_player: bool
-	var slot_index: int
-	var current_hp: int
-	var max_hp: int
-	var current_mp: int
-	var max_mp: int
-	## Attack power before buffs. Players: effective STR + all equipment attack_bonus. Enemies: attack_damage.
-	var strength: int
-	## Defense before buffs. Players: base defense + all equipment defense_bonus. Enemies: defense.
-	var defense: int
-	var is_front_row: bool = true
-	var ref: Resource
-	var active_effects: Array[ActiveEffect] = []
-
-	## Attack bonus that comes from hand-held weapons (removed for UNARMED attacks, e.g. out of ammo)
-	var weapon_attack: int = 0
-	## ItemData.EffectElement -> fraction of that damage ignored (0.0 - 0.9). MAGIC = magic defense.
-	var element_resists: Dictionary = {}
-	## ItemData.EffectElement this combatant takes extra damage from (enemies)
-	var weakness: int = 0
-	## Multiplier on outgoing spell damage (equipment "Amplify")
-	var spell_amplify: float = 1.0
-	## Fraction of the target's defense ignored by weapon attacks (equipment "Pierce")
-	var pierce: float = 0.0
-	## [{ "id": status_id, "chance": 0..1 }] rolled on every weapon hit (equipment "Burn"/"Freeze"/"Stun")
-	var on_hit_statuses: Array[Dictionary] = []
-	## Enemy spellcasting
-	var can_cast_spells: bool = false
-	var spells: Array[Resource] = []
-	var magic_power: int = 0
-	## Physical attack type string: BLADE / BASH / RANGED / MAGIC / UNARMED
-	var attack_type: String = "UNARMED"
-
-
-	func _init(
-		p_id: String,
-		p_name: String,
-		p_speed: float,
-		p_is_player: bool,
-		p_slot: int,
-		p_hp: int,
-		p_max_hp: int,
-		p_mp: int,
-		p_max_mp: int,
-		p_str: int,
-		p_def: int,
-		p_ref: Resource,
-		p_is_front: bool = true,
-	) -> void:
-		id = p_id
-		name = p_name
-		speed = maxf(1.0, p_speed)
-		is_player = p_is_player
-		slot_index = p_slot
-		current_hp = p_hp
-		max_hp = max(1, p_max_hp)
-		current_mp = p_mp
-		max_mp = max(0, p_max_mp)
-		strength = p_str
-		defense = p_def
-		ref = p_ref
-		is_front_row = p_is_front
-
-
-	func add_effect(effect: ActiveEffect) -> void:
-		for existing: ActiveEffect in active_effects:
-			if existing.id == effect.id:
-				existing.duration = max(existing.duration, effect.duration)
-				existing.value = effect.value
-				return
-		active_effects.append(effect)
-
-
-	func has_effect_type(effect_type: StringName) -> bool:
-		for eff: ActiveEffect in active_effects:
-			if eff.effect_type == effect_type and eff.duration > 0:
-				return true
-		return false
-
-
-	## Applies flat (STAT_BUFF) then percent (STAT_PCT) modifiers for one stat.
-	func get_effective_stat(stat_name: StringName, base_val: int) -> int:
-		var flat: float = 0.0
-		var pct: float = 0.0
-		for eff: ActiveEffect in active_effects:
-			if eff.stat_target != stat_name:
-				continue
-			if eff.effect_type == &"STAT_BUFF":
-				flat += eff.value
-			elif eff.effect_type == &"STAT_PCT":
-				pct += eff.value
-		var result: float = (float(base_val) + flat) * maxf(0.0, 1.0 + pct / 100.0)
-		return maxi(0, roundi(result))
-
-
-	## Percent-only multiplier for stats that have no base number (magic power, accuracy)
-	func get_stat_multiplier(stat_name: StringName) -> float:
-		var pct: float = 0.0
-		for eff: ActiveEffect in active_effects:
-			if eff.stat_target == stat_name and eff.effect_type == &"STAT_PCT":
-				pct += eff.value
-		return maxf(0.0, 1.0 + pct / 100.0)
-
-
-	## Attack power used by physical attacks. Unarmed attacks drop the weapon's attack bonus.
-	func get_effective_attack(is_unarmed: bool = false) -> int:
-		var base_atk: int = strength - (weapon_attack if is_unarmed else 0)
-		return maxi(1, get_effective_stat(&"strength", base_atk))
-
-
-	func get_effective_strength() -> int:
-		return get_effective_attack(false)
-
-
-	func get_effective_defense() -> int:
-		return get_effective_stat(&"defense", defense)
-
-
-	func get_effective_speed() -> float:
-		return maxf(1.0, float(get_effective_stat(&"speed", roundi(speed))))
-
-
-	func get_resist(element: int) -> float:
-		return clampf(float(element_resists.get(element, 0.0)), 0.0, 0.9)
-
-
-	## Shields soak damage before HP. Returns the damage left over.
-	func absorb_with_shields(amount: int, is_magic: bool) -> int:
-		var remaining: int = amount
-		for eff: ActiveEffect in active_effects:
-			if remaining <= 0:
-				break
-			var soaks: bool = eff.effect_type == &"SHIELD" or (is_magic and eff.effect_type == &"MAGIC_SHIELD")
-			if not soaks or eff.value <= 0.0:
-				continue
-			var used: int = mini(remaining, int(eff.value))
-			eff.value -= float(used)
-			remaining -= used
-
-		var kept: Array[ActiveEffect] = []
-		for eff: ActiveEffect in active_effects:
-			var is_shield: bool = eff.effect_type == &"SHIELD" or eff.effect_type == &"MAGIC_SHIELD"
-			if is_shield and eff.value <= 0.0:
-				continue
-			kept.append(eff)
-		active_effects = kept
-		return remaining
+## Turn-meter (ATB style) combat. See res://_documentation/COMBAT_README.md for the full flow.
+## State + orchestration only. Pure pieces live in res://Scripts/Combat/ (read those instead of this file
+## when you only need a formula):
+##   Combatant / ActiveEffect - battle snapshot + stat/buff math
+##   CombatMath      - damage, potency, durations, flee, meters, elements
+##   CombatTargeting - who an action hits
+##   AbilityInfo     - name / id / category / status of a spell or skill
 
 
 # ==============================================================================
@@ -230,8 +52,10 @@ var _is_resolving_action: bool = false
 ## Incremented every battle so coroutines from an old battle never touch a new one.
 var _battle_serial: int = 0
 var _is_water_battle: bool = false
-## spell_id -> SpellData, built once from res://Data/Spells/
-var _spell_index: Dictionary = {}
+## Set when every party member is down, so _finish_battle can tell a wipe from fleeing.
+var _party_wiped: bool = false
+const BOSS_SPELL_BOOK_PATH: String = "res://Data/Items/Loot/LrnSpellBook.tres"
+const BOSS_SKILL_CRYSTAL_PATH: String = "res://Data/Items/Loot/LrnSkillCrystal.tres"
 
 
 func _ready() -> void:
@@ -308,7 +132,8 @@ func _is_same_battle(serial: int) -> bool:
 
 func _wait(seconds: float) -> void:
 	if seconds > 0.0:
-		await get_tree().create_timer(seconds).timeout
+		# process_always = false: battle timing freezes while the game menu (or anything else) pauses the tree.
+		await get_tree().create_timer(seconds, false).timeout
 
 
 # ==============================================================================
@@ -383,8 +208,8 @@ func _build_player_combatant(cat: Resource, slot: int) -> Combatant:
 		c_max_mp = int(cat.get("max_mana"))
 
 	# Core attributes INCLUDING "+stat" equipment (same numbers the character sheet shows)
-	var base_str: int = _get_cat_attribute(cat, &"strength", 10)
-	var base_spd: int = _get_cat_attribute(cat, &"speed", 8)
+	var base_str: int = CombatMath.cat_attribute(cat, &"strength", 10)
+	var base_spd: int = CombatMath.cat_attribute(cat, &"speed", 8)
 
 	var equip_atk: int = 0
 	var equip_def: int = 0
@@ -395,7 +220,8 @@ func _build_player_combatant(cat: Resource, slot: int) -> Combatant:
 	var pierce: float = 0.0
 	var on_hit: Array[Dictionary] = []
 
-	for entry: Dictionary in _get_equipped_items(cat):
+	var equipped: Array[Dictionary] = _get_equipped_items(cat)
+	for entry: Dictionary in equipped:
 		var item: Resource = entry["item"]
 		var slot_name: String = entry["slot"]
 		var atk_b: int = int(item.get("attack_bonus")) if "attack_bonus" in item else 0
@@ -413,18 +239,18 @@ func _build_player_combatant(cat: Resource, slot: int) -> Combatant:
 		var element: int = int(item.get("effect_element")) if "effect_element" in item else 0
 		match fx:
 			"RESIST":
-				resists[element] = float(resists.get(element, 0.0)) + _as_fraction(amount)
+				resists[element] = float(resists.get(element, 0.0)) + CombatMath.as_fraction(amount)
 			"AMPLIFY":
 				if amount > 0.0:
 					amplify *= amount
 			"PIERCE":
-				pierce += _as_fraction(amount)
+				pierce += CombatMath.as_fraction(amount)
 			"BURN":
-				on_hit.append({ "id": "eff_hp_burn_1", "chance": _as_fraction(amount) })
+				on_hit.append({ "id": "eff_hp_burn_1", "chance": CombatMath.as_fraction(amount) })
 			"FREEZE":
-				on_hit.append({ "id": "eff_freeze_1", "chance": _as_fraction(amount) })
+				on_hit.append({ "id": "eff_freeze_1", "chance": CombatMath.as_fraction(amount) })
 			"STUN":
-				on_hit.append({ "id": "eff_stun_1", "chance": _as_fraction(amount) })
+				on_hit.append({ "id": "eff_stun_1", "chance": CombatMath.as_fraction(amount) })
 
 	var c_is_front: bool = bool(cat.get("is_front_row")) if "is_front_row" in cat else (slot <= 2)
 
@@ -438,7 +264,39 @@ func _build_player_combatant(cat: Resource, slot: int) -> Combatant:
 	c.pierce = clampf(pierce, 0.0, 1.0)
 	c.on_hit_statuses = on_hit
 	c.attack_type = str(cat.call("get_attack_type_string")) if cat.has_method("get_attack_type_string") else "UNARMED"
+	_apply_equipped_granted_statuses(c, equipped)
 	return c
+
+
+## Permanent stacking STAT_PCT from ItemData.granted_status_effects (unique id per slot so pieces stack).
+func _apply_equipped_granted_statuses(c: Combatant, equipped: Array[Dictionary]) -> void:
+	for entry: Dictionary in equipped:
+		var item: Resource = entry["item"] as Resource
+		var slot_name: String = str(entry["slot"])
+		if not is_instance_valid(item) or not ("granted_status_effects" in item):
+			continue
+		var granted: Variant = item.get("granted_status_effects")
+		if not (granted is Array):
+			continue
+		for raw_id: Variant in granted as Array:
+			var effect_id: String = str(raw_id).strip_edges()
+			if effect_id.is_empty():
+				continue
+			var data: StatusEffectData = StatusEffectDatabase.get_effect(effect_id)
+			if not is_instance_valid(data):
+				continue
+			if data.modifier_type != StatusEffectData.ModifierType.MULTIPLIER:
+				continue
+			var unique_id: String = "%s@%s" % [effect_id, slot_name]
+			c.add_effect(ActiveEffect.new(
+				unique_id,
+				data.name,
+				-1,
+				&"STAT_PCT",
+				CombatMath.modifier_stat_name(data.modifier_stat),
+				data.modifier_value,
+				c.id
+			))
 
 
 func _build_enemy_combatant(raw_e_data: Resource, e_idx: int, pack_size: int) -> Combatant:
@@ -474,17 +332,8 @@ func _build_enemy_combatant(raw_e_data: Resource, e_idx: int, pack_size: int) ->
 	c.can_cast_spells = bool(e_data.get("can_cast_spells")) if "can_cast_spells" in e_data else false
 	if c.can_cast_spells:
 		c.spells = _resolve_enemy_spells(e_data)
-	c.attack_type = _attack_type_from_element(int(e_data.get("attack_element")) if "attack_element" in e_data else ItemData.EffectElement.BASH)
+	c.attack_type = CombatMath.attack_type_from_element(int(e_data.get("attack_element")) if "attack_element" in e_data else ItemData.EffectElement.BASH)
 	return c
-
-
-## Reads a core attribute the way the character sheet does (includes "+stat" equipment).
-func _get_cat_attribute(cat: Resource, stat: StringName, fallback: int) -> int:
-	if cat.has_method("get_effective_stat"):
-		return int(cat.call("get_effective_stat", stat))
-	if str(stat) in cat:
-		return int(cat.get(str(stat)))
-	return fallback
 
 
 ## Every equipped item, including ARMS / FEET / BOTH_HANDS, de-duplicated.
@@ -519,37 +368,6 @@ func _is_hand_weapon(item: Resource, slot_name: String) -> bool:
 	return "item_type" in item and int(item.get("item_type")) == ItemData.ItemType.WEAPON
 
 
-## effect_amount values <= 1 are fractions (0.2 = 20%), larger values are percents (50 = 50%).
-func _as_fraction(amount: float) -> float:
-	if amount > 1.0:
-		return clampf(amount / 100.0, 0.0, 1.0)
-	return clampf(amount, 0.0, 1.0)
-
-
-func _attack_type_from_element(element: int) -> String:
-	match element:
-		ItemData.EffectElement.BLADE:
-			return "BLADE"
-		ItemData.EffectElement.RANGED:
-			return "RANGED"
-		ItemData.EffectElement.MAGIC:
-			return "MAGIC"
-		_:
-			return "BASH"
-
-
-func _element_for_attack_type(attack_type: String) -> int:
-	match attack_type:
-		"BLADE":
-			return ItemData.EffectElement.BLADE
-		"RANGED":
-			return ItemData.EffectElement.RANGED
-		"MAGIC":
-			return ItemData.EffectElement.MAGIC
-		_:
-			return ItemData.EffectElement.BASH # BASH and UNARMED
-
-
 # ==============================================================================
 # TURN METERS & TURN QUEUE
 # ==============================================================================
@@ -557,7 +375,7 @@ func _tick_turn_meters(delta: float) -> void:
 	for c: Combatant in combatants:
 		if c.current_hp <= 0 or c.meter >= MAX_TURN_METER:
 			continue
-		c.meter = minf(c.meter + c.get_effective_speed() * base_tick_rate * delta, MAX_TURN_METER)
+		c.meter = CombatMath.next_meter(c.meter, c.get_effective_speed(), base_tick_rate, delta, MAX_TURN_METER)
 		SignalBus.turn_meter_updated.emit(c.id, c.meter / MAX_TURN_METER)
 		if c.meter >= MAX_TURN_METER and not turn_queue.has(c) and active_combatant != c:
 			turn_queue.append(c)
@@ -609,6 +427,9 @@ func _tick_effects_at_turn_start(c: Combatant) -> bool:
 		elif eff.effect_type == &"HOT":
 			_heal_combatant(c, int(eff.value), eff.name)
 
+		# duration < 0 = permanent (e.g. equipment-granted STAT_PCT); never tick/expire
+		if eff.duration < 0:
+			continue
 		eff.duration -= 1
 		if eff.duration <= 0:
 			expired.append(eff)
@@ -682,9 +503,9 @@ func _execute_physical_attack(attacker: Combatant, target_index: int, serial: in
 	if target == null:
 		return
 
-	# 1. Start the swing / attack animation
+	# 1. Start the swing / attack animation (flask throwers are RANGED but get the potion throw)
 	if attacker.is_player:
-		_emit_weapon_swing(attack_type)
+		_emit_weapon_swing("POTION_THROW" if attack_type == "RANGED" and _throws_flasks(attacker) else attack_type)
 	else:
 		SignalBus.enemy_attack_started.emit(attacker.id)
 		_play_enemy_type_sound(attacker, "attack")
@@ -740,8 +561,7 @@ func execute_guard_action(caster_index: int) -> void:
 
 ## Process a Run / Flee Command
 func execute_run_action(caster_speed: int, enemy_avg_speed: int) -> void:
-	var speed_diff: int = caster_speed - enemy_avg_speed
-	var final_flee_chance: float = clampf(base_flee_chance + (speed_diff * 0.05), 0.15, 0.95)
+	var final_flee_chance: float = CombatMath.flee_chance(base_flee_chance, caster_speed, enemy_avg_speed)
 
 	if randf() <= final_flee_chance:
 		GameLogger.combat("The party successfully fled from battle!")
@@ -806,20 +626,7 @@ func _load_spell_by_id(spell_id: String) -> Resource:
 	if spell_id.begins_with("res://"):
 		return load(spell_id) as Resource if ResourceLoader.exists(spell_id) else null
 
-	if _spell_index.is_empty():
-		var dir := DirAccess.open("res://Data/Spells/")
-		if dir:
-			dir.list_dir_begin()
-			var file_name: String = dir.get_next()
-			while file_name != "":
-				if not dir.current_is_dir() and (file_name.ends_with(".tres") or file_name.ends_with(".tres.remap")):
-					var res: Resource = load("res://Data/Spells/" + file_name.trim_suffix(".remap")) as Resource
-					if is_instance_valid(res) and "spell_id" in res:
-						_spell_index[str(res.get("spell_id"))] = res
-				file_name = dir.get_next()
-			dir.list_dir_end()
-
-	return _spell_index.get(spell_id, null) as Resource
+	return AbilityLibrary.spell_by_id(spell_id)
 
 
 # ==============================================================================
@@ -830,8 +637,8 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 		GameLogger.combat("%s tried to use an ability, but none was selected." % caster.name)
 		return
 
-	var ability_name: String = _get_ability_name(ability)
-	var category: String = _get_ability_category(ability)
+	var ability_name: String = AbilityInfo.display_name(ability)
+	var category: String = AbilityInfo.category(ability)
 
 	if kind == &"SPELL" and caster.has_effect_type(&"LOCK_MAGIC"):
 		_toast("%s is silenced and can't cast %s!" % [caster.name, ability_name], true)
@@ -865,7 +672,9 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 
 	# Cast VFX once, then wind up
 	var anim_name: String = str(ability.get("animation")) if "animation" in ability else "NONE"
-	if anim_name != "NONE" and not anim_name.is_empty():
+	if anim_name == "potion_throw" or ability_name == "Alchemy Bomb":
+		SignalBus.weapon_swing_requested.emit("potion_throw")
+	elif anim_name != "NONE" and not anim_name.is_empty():
 		var vfx_element: ItemData.ElementalBase = ItemData.ElementalBase.NONE
 		if ability is SpellData:
 			vfx_element = (ability as SpellData).element
@@ -878,9 +687,9 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 	if not _is_same_battle(serial):
 		return
 
-	var power: float = _get_ability_power(caster, ability, kind)
-	var status_id: String = _get_status_id(ability)
-	var duration: int = _get_ability_duration(ability, kind)
+	var power: float = CombatMath.ability_power(caster, ability, kind)
+	var status_id: String = AbilityInfo.status_id(ability)
+	var duration: int = CombatMath.ability_duration(ability, kind)
 
 	for t: Combatant in targets:
 		if t.current_hp <= 0 and not is_revive:
@@ -898,18 +707,18 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 				if not status_id.is_empty():
 					_apply_status(t, status_id, caster, duration)
 				elif kind == &"SPELL" and duration > 1:
-					t.add_effect(ActiveEffect.new(_get_ability_id(ability), ability_name, duration - 1, &"HOT", &"", power, caster.id))
+					t.add_effect(ActiveEffect.new(AbilityInfo.id(ability), ability_name, duration - 1, &"HOT", &"", power, caster.id))
 			"BUFF":
 				if not status_id.is_empty():
 					_apply_status(t, status_id, caster, duration)
 				else:
-					t.add_effect(ActiveEffect.new(_get_ability_id(ability), ability_name, duration, &"STAT_BUFF", &"defense", power, caster.id))
+					t.add_effect(ActiveEffect.new(AbilityInfo.id(ability), ability_name, duration, &"STAT_BUFF", &"defense", power, caster.id))
 					GameLogger.combat("%s: %s gains +%.0f defense for %d turns" % [ability_name, t.name, power, duration])
 			"DEBUFF":
 				if not status_id.is_empty():
 					_apply_status(t, status_id, caster, duration)
 				else:
-					t.add_effect(ActiveEffect.new(_get_ability_id(ability), ability_name, duration, &"STAT_BUFF", &"defense", -power, caster.id))
+					t.add_effect(ActiveEffect.new(AbilityInfo.id(ability), ability_name, duration, &"STAT_BUFF", &"defense", -power, caster.id))
 					GameLogger.combat("%s: %s loses %.0f defense for %d turns" % [ability_name, t.name, power, duration])
 			_:
 				if not status_id.is_empty():
@@ -918,144 +727,15 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 					GameLogger.combat("%s used %s (no combat effect)" % [caster.name, ability_name])
 
 
-## "DAMAGE" / "HEAL" / "BUFF" / "DEBUFF" / "UTILITY" from the resource's effect_type enum.
-func _get_ability_category(ability: Resource) -> String:
-	if ability is SpellData:
-		match (ability as SpellData).effect_type:
-			SpellData.EffectType.HEAL:
-				return "HEAL"
-			SpellData.EffectType.BUFF:
-				return "BUFF"
-			SpellData.EffectType.DEBUFF:
-				return "DEBUFF"
-			SpellData.EffectType.UTILITY:
-				return "UTILITY"
-			_:
-				return "DAMAGE"
-	if ability is SkillData:
-		match (ability as SkillData).effect_type:
-			SkillData.EffectType.DAMAGE:
-				return "DAMAGE"
-			SkillData.EffectType.HEAL:
-				return "HEAL"
-			_:
-				return "UTILITY"
-	var raw: String = str(ability.get("effect_type")).to_upper() if "effect_type" in ability else "DAMAGE"
-	for cat_name: String in ["HEAL", "BUFF", "DEBUFF", "UTILITY"]:
-		if cat_name in raw:
-			return cat_name
-	return "DAMAGE"
-
-
-## Potency before the target's defenses.
-func _get_ability_power(caster: Combatant, ability: Resource, kind: StringName) -> float:
-	if ability.has_method("calculate_potency"):
-		var caster_stat: int = caster.magic_power
-		if caster.is_player and is_instance_valid(caster.ref):
-			var stat_key: String = str(ability.get("stat_scaling")).to_lower() if "stat_scaling" in ability else "int"
-			caster_stat = _get_cat_attribute(caster.ref, StringName(stat_key), 10)
-		var potency: float = float(ability.call("calculate_potency", caster_stat))
-		if kind == &"SPELL":
-			potency *= caster.get_stat_multiplier(&"magic") * caster.spell_amplify
-		return potency
-	if "effect_amount" in ability:
-		return float(ability.get("effect_amount"))
-	if "base_amount" in ability:
-		return float(ability.get("base_amount"))
-	return 10.0
-
-
+## Ability damage to one target (formula: CombatMath.ability_damage). Adds guard state + logging.
 func _calculate_ability_damage(caster: Combatant, target: Combatant, ability: Resource, kind: StringName, power: float) -> int:
-	var dmg: float = power
-
-	if kind == &"SPELL":
-		# Magic: weakness MAGIC (or LIFE for life spells), reduced by magic resist (magic defense)
-		var is_life: bool = ability is SpellData and (ability as SpellData).element == ItemData.ElementalBase.LIFE
-		var weak: bool = target.weakness == ItemData.EffectElement.MAGIC or (is_life and target.weakness == ItemData.EffectElement.LIFE)
-		if weak:
-			dmg *= weakness_multiplier
-			GameLogger.combat("%s is weak to magic!" % target.name)
-		dmg *= 1.0 - target.get_resist(ItemData.EffectElement.MAGIC)
-	else:
-		# Physical skill: row, guard, weakness and element resist apply (defense does not)
-		var element: int = int(ability.get("element")) if "element" in ability else 0
-		if element == ItemData.EffectElement.NONE:
-			element = _element_for_attack_type(caster.attack_type)
-		if not target.is_front_row:
-			dmg *= 0.5
-		if target.is_player and guarding_characters.has(target.slot_index):
-			dmg *= 0.5
-		if target.weakness != ItemData.EffectElement.NONE and target.weakness == element:
-			dmg *= weakness_multiplier
-		dmg *= 1.0 - target.get_resist(element)
-
-	return maxi(1, roundi(dmg))
+	if kind == &"SPELL" and CombatMath.spell_hits_weakness(target, ability):
+		GameLogger.combat("%s is weak to magic!" % target.name)
+	return CombatMath.ability_damage(caster, target, ability, kind, power, _is_guarding(target), weakness_multiplier)
 
 
 func _resolve_ability_targets(caster: Combatant, ability: Resource, target_index: int, allow_dead_ally: bool) -> Array[Combatant]:
-	var target_type: int = int(ability.get("target_type")) if "target_type" in ability else 0
-	var foes: Array[Combatant] = []
-	var allies: Array[Combatant] = []
-	for c: Combatant in combatants:
-		if c.is_player == caster.is_player:
-			if c.current_hp > 0 or allow_dead_ally:
-				allies.append(c)
-		elif c.current_hp > 0:
-			foes.append(c)
-
-	var result: Array[Combatant] = []
-	match target_type:
-		1: # ALL_ENEMY
-			result = foes
-		3: # ALL_ALLY
-			result = allies
-		4, 5: # SELF / NONE
-			result.append(caster)
-		2: # SINGLE_ALLY
-			var ally: Combatant = null
-			if caster.is_player:
-				ally = _find_combatant_by_slot(target_index, true)
-			else:
-				for c: Combatant in allies:
-					if ally == null or c.current_hp < ally.current_hp:
-						ally = c
-			if ally == null or not allies.has(ally):
-				ally = caster
-			result.append(ally)
-		_: # SINGLE_ENEMY
-			var foe: Combatant = _pick_opponent(caster, target_index)
-			if foe != null:
-				result.append(foe)
-	return result
-
-
-func _get_ability_name(ability: Resource) -> String:
-	for key: String in ["spell_name", "skill_name", "name"]:
-		if key in ability and not str(ability.get(key)).is_empty():
-			return str(ability.get(key))
-	return "Ability"
-
-
-func _get_ability_id(ability: Resource) -> String:
-	for key: String in ["spell_id", "skill_id", "id"]:
-		if key in ability and not str(ability.get(key)).is_empty():
-			return str(ability.get(key))
-	return _get_ability_name(ability).to_snake_case()
-
-
-func _get_status_id(ability: Resource) -> String:
-	var status: String = str(ability.get("status_effect")).strip_edges() if "status_effect" in ability else ""
-	if status.is_empty() or status.to_upper() == "NONE":
-		return ""
-	return status
-
-
-## Generic buff/HoT duration: ability duration x spell tier (status effects use their own duration).
-func _get_ability_duration(ability: Resource, kind: StringName) -> int:
-	var base_duration: int = int(ability.get("duration")) if "duration" in ability else 1
-	if kind == &"SPELL" and "tier" in ability:
-		base_duration *= maxi(1, int(ability.get("tier")))
-	return maxi(1, base_duration)
+	return CombatTargeting.resolve_ability_targets(combatants, caster, ability, target_index, allow_dead_ally)
 
 
 # ==============================================================================
@@ -1074,7 +754,7 @@ func _apply_status(target: Combatant, status_id: String, caster: Combatant = nul
 
 	match data.modifier_type:
 		StatusEffectData.ModifierType.MULTIPLIER:
-			effect = ActiveEffect.new(data.effect_id, data.name, duration, &"STAT_PCT", _modifier_stat_name(data.modifier_stat), value, caster_id)
+			effect = ActiveEffect.new(data.effect_id, data.name, duration, &"STAT_PCT", CombatMath.modifier_stat_name(data.modifier_stat), value, caster_id)
 		StatusEffectData.ModifierType.PERCENT_MAX_HP_HEAL:
 			effect = ActiveEffect.new(data.effect_id, data.name, duration, &"HOT", &"", maxf(1.0, target.max_hp * value / 100.0), caster_id)
 		StatusEffectData.ModifierType.PERCENT_MAX_HP_TICK:
@@ -1097,24 +777,6 @@ func _apply_status(target: Combatant, status_id: String, caster: Combatant = nul
 	_toast("%s: %s" % [target.name, data.name], target.is_player and data.type == StatusEffectData.EffectType.NEGATIVE)
 
 
-func _modifier_stat_name(stat: int) -> StringName:
-	match stat:
-		StatusEffectData.ModifierStat.DEF:
-			return &"defense"
-		StatusEffectData.ModifierStat.ATK:
-			return &"strength"
-		StatusEffectData.ModifierStat.ACC:
-			return &"accuracy"
-		StatusEffectData.ModifierStat.DEX:
-			return &"dexterity"
-		StatusEffectData.ModifierStat.MAG:
-			return &"magic"
-		StatusEffectData.ModifierStat.SPD:
-			return &"speed"
-		_:
-			return &""
-
-
 # ==============================================================================
 # ITEMS
 # ==============================================================================
@@ -1134,7 +796,7 @@ func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int)
 	if not is_instance_valid(item):
 		return
 
-	match item.target_type:
+	match item.get_battle_target_type():
 		ItemData.TargetType.ALL_PARTY:
 			var party_refs: Array = []
 			for c: Combatant in combatants:
@@ -1168,7 +830,7 @@ func _execute_item_use_in_combat(acting_char: Combatant, target_slot_index: int)
 ## plus any granted_status_effects. ALL_ENEMIES hits every enemy, SINGLE_ENEMY hits target_index.
 func _use_offensive_item(acting_char: Combatant, inv: Inventory, item_slot_idx: int, item: ItemData, target_index: int) -> void:
 	var targets: Array[Combatant] = []
-	if item.target_type == ItemData.TargetType.ALL_ENEMIES:
+	if item.get_battle_target_type() == ItemData.TargetType.ALL_ENEMIES:
 		for c: Combatant in combatants:
 			if not c.is_player and c.current_hp > 0:
 				targets.append(c)
@@ -1178,6 +840,14 @@ func _use_offensive_item(acting_char: Combatant, inv: Inventory, item_slot_idx: 
 			targets.append(foe)
 	if targets.is_empty():
 		_toast("No enemies to target!", true)
+		return
+
+	if item.is_throwable:
+		SignalBus.weapon_swing_requested.emit("potion_throw")
+		await _wait(player_attack_windup)
+		_throw_item(acting_char, item, targets)
+		inv.item_used.emit(item)
+		inv.consume_one(item_slot_idx)
 		return
 
 	var damage: int = int(item.effect_amount)
@@ -1200,6 +870,38 @@ func _use_offensive_item(acting_char: Combatant, inv: Inventory, item_slot_idx: 
 
 	inv.item_used.emit(item)
 	inv.consume_one(item_slot_idx)
+
+
+## Thrown items (ItemData.is_throwable): each target rolls to hit off the thrower's DEX vs the target's
+## speed, then takes CombatMath.throw_damage (DEX-scaled, ignores half the armour), maybe a DEX crit,
+## plus the item's granted_status_effects. Formulas + tuning: CombatMath "Throwing".
+func _throw_item(acting_char: Combatant, item: ItemData, targets: Array[Combatant]) -> void:
+	var dex: int = _thrower_dexterity(acting_char)
+	var element: int = int(item.effect_element) if item.effect_element != ItemData.EffectElement.NONE else int(ItemData.EffectElement.RANGED)
+	_toast("%s threw %s!" % [acting_char.name, item.item_name], false)
+	for t: Combatant in targets:
+		var hit_chance: float = CombatMath.throw_hit_chance(dex, t.speed)
+		if randf() > hit_chance:
+			GameLogger.combat("%s's %s missed %s (%d%% to hit)" % [acting_char.name, item.item_name, t.name, roundi(hit_chance * 100.0)])
+			_toast("%s missed %s!" % [item.item_name, t.name], true)
+			continue
+		var dmg: int = CombatMath.throw_damage(item.get_throw_power(), dex, t, weakness_multiplier, element)
+		var crit: bool = randf() < CombatMath.throw_crit_chance(dex)
+		if crit:
+			dmg = roundi(float(dmg) * CombatMath.THROW_CRIT_MULT)
+			_toast("Critical throw!", false)
+		GameLogger.combat("%s threw %s at %s: %d damage%s (DEX %d, %d%% to hit)" % [
+			acting_char.name, item.item_name, t.name, dmg, " CRIT" if crit else "", dex, roundi(hit_chance * 100.0)])
+		_apply_damage_to_combatant(t, dmg, acting_char, item, false, "RANGED")
+		if t.current_hp > 0:
+			for status_id: String in item.granted_status_effects:
+				_apply_status(t, status_id, acting_char)
+
+
+func _thrower_dexterity(c: Combatant) -> int:
+	if c.is_player and is_instance_valid(c.ref):
+		return CombatMath.cat_attribute(c.ref, &"dexterity", 10)
+	return roundi(c.speed)
 
 
 ## Pulls HP/MP back from the CatCharacter resources after an item changed them.
@@ -1258,16 +960,7 @@ func _consume_ranged_ammo(acting_char: Combatant) -> bool:
 
 
 func _is_ammo_resource(item: ItemData) -> bool:
-	if not is_instance_valid(item):
-		return false
-	if item.quantity > 1:
-		return true
-	var name_upper: String = item.item_name.to_upper()
-	var id_upper: String = item.item_id.to_upper()
-	for word: String in ["ARROW", "BOLT", "AMMO", "QUIVER", "DART"]:
-		if word in name_upper or word in id_upper:
-			return true
-	return false
+	return CombatMath.is_ammo_item(item)
 
 
 func _notify_out_of_ammo(acting_char: Combatant, weapon_or_ammo_name: String) -> void:
@@ -1279,35 +972,20 @@ func _notify_out_of_ammo(acting_char: Combatant, weapon_or_ammo_name: String) ->
 # ==============================================================================
 # DAMAGE & HEALING
 # ==============================================================================
-## Physical damage: (ATK - DEF*(1-pierce)) x row x guard x weakness x (1 - resist), minimum 1.
+## Weapon damage (formula: CombatMath.physical_damage). Adds guard state + logging.
 func _calculate_physical_damage(attacker: Combatant, defender: Combatant, attack_type: String = "UNARMED") -> int:
 	if attacker == null or defender == null:
 		return 1
-
-	var is_unarmed: bool = attack_type == "UNARMED"
-	var atk: float = float(attacker.get_effective_attack(is_unarmed))
-	var pierce: float = 0.0 if is_unarmed else attacker.pierce
-	var def: float = float(defender.get_effective_defense()) * (1.0 - pierce)
-	var dmg: float = maxf(1.0, atk - def)
-
-	# Back-row melee attacker: 50%
-	if not attacker.is_front_row and attack_type in ["BLADE", "BASH", "UNARMED"]:
-		dmg *= 0.5
-	# Back-row defender: 50%
-	if not defender.is_front_row:
-		dmg *= 0.5
-	# Guarding party member: 50%
-	if defender.is_player and guarding_characters.has(defender.slot_index):
-		dmg *= 0.5
+	if _is_guarding(defender):
 		GameLogger.combat("%s is guarding! (50%% damage)" % defender.name)
-
-	var element: int = _element_for_attack_type(attack_type)
-	if defender.weakness != ItemData.EffectElement.NONE and defender.weakness == element:
-		dmg *= weakness_multiplier
+	if CombatMath.is_weak_to(defender, CombatMath.element_for_attack_type(attack_type)):
 		GameLogger.combat("%s is weak to %s!" % [defender.name, attack_type])
-	dmg *= 1.0 - defender.get_resist(element)
+	return CombatMath.physical_damage(attacker, defender, attack_type, _is_guarding(defender), weakness_multiplier)
 
-	return maxi(1, roundi(dmg))
+
+## Guarding party members take half damage until their next turn.
+func _is_guarding(target: Combatant) -> bool:
+	return target.is_player and guarding_characters.has(target.slot_index)
 
 
 ## hit_kind: BLADE / BASH / RANGED / MAGIC / UNARMED for weapon hits, "SPELL" for magic, "DOT" for ticks.
@@ -1336,7 +1014,7 @@ func _apply_damage_to_combatant(target: Combatant, damage: int, attacker: Combat
 	else:
 		var msg: String = "💥 %s took %d damage!" % [target.name, final_damage]
 		if not attacker_name.is_empty():
-			msg = "💥 %s %s %s for %d damage!" % [attacker_name, _get_attack_verb(hit_kind), target.name, final_damage]
+			msg = "💥 %s %s %s for %d damage!" % [attacker_name, AbilityInfo.hit_verb(hit_kind), target.name, final_damage]
 		GameLogger.combat(msg)
 		_toast(msg, false)
 
@@ -1380,31 +1058,30 @@ func _on_combatant_defeated(target: Combatant) -> void:
 		AudioManager.play_enemy_death_sound(e_type)
 
 
-func _get_attack_verb(hit_kind: String) -> String:
-	match hit_kind:
-		"RANGED":
-			return "SHOT"
-		"BLADE":
-			return "SLASHED"
-		"BASH":
-			return "BASHED"
-		"SPELL":
-			return "BLASTED"
-		_:
-			return "hit"
-
-
 # ==============================================================================
 # VISUAL / AUDIO FEEDBACK
 # ==============================================================================
 ## Weapon animation at the START of a player attack (the hit lands after player_attack_windup).
+## True when the party member's ranged ammo is alchemy flasks (thrown by hand, no bow).
+func _throws_flasks(attacker: Combatant) -> bool:
+	if not is_instance_valid(attacker.ref) or not attacker.ref.has_method("get_equipped_item"):
+		return false
+	for hand: String in ["RIGHT_HAND", "LEFT_HAND"]:
+		var item: ItemData = attacker.ref.call("get_equipped_item", hand) as ItemData
+		if is_instance_valid(item) and "FLASK" in (item.item_name + item.item_id).to_upper():
+			return true
+	return false
+
+
 func _emit_weapon_swing(attack_type: String) -> void:
 	match attack_type:
 		"BASH", "MAGIC":
 			SignalBus.weapon_swing_requested.emit("staff_bash")
 		"RANGED":
 			SignalBus.weapon_swing_requested.emit("bow_shot")
-		"BLADE":
+		"POTION", "BOMB", "ALCHEMY_BOMB", "POTION_THROW":
+			SignalBus.weapon_swing_requested.emit("potion_throw")
+		"BLADE", _:
 			SignalBus.weapon_swing_requested.emit("sword_swing")
 
 
@@ -1486,6 +1163,7 @@ func _check_battle_state() -> bool:
 		return true
 	if not any_party_alive:
 		_toast("The party has been defeated...", true)
+		_party_wiped = true
 		_finish_battle(false)
 		return true
 	return false
@@ -1510,9 +1188,17 @@ func _finish_battle(victory: bool) -> void:
 			return
 
 	var gs: Node = get_tree().root.get_node_or_null("GameState")
+	var wiped: bool = _party_wiped
+	_party_wiped = false
+	if not victory:
+		GameState.take_boss_rewards() # lost / fled: the boss keeps its loot until beaten
 	_reset_battle_state()
 	SignalBus.combat_ended.emit(victory)
 
+	if wiped:
+		# Never save a dead party - the Game Over screen offers the last good save.
+		SignalBus.party_defeated.emit()
+		return
 	if is_instance_valid(gs) and gs.has_method("save_game"):
 		gs.save_game()
 	if victory:
@@ -1570,6 +1256,8 @@ func _collect_victory_rewards() -> Dictionary:
 	if is_instance_valid(gs) and gs.has_method("add_gold"):
 		gs.add_gold(total_gold)
 
+	items_dropped.append_array(_grant_boss_rewards())
+
 	return {
 		"enemies_killed": enemies_killed,
 		"total_xp": total_xp,
@@ -1578,6 +1266,28 @@ func _collect_victory_rewards() -> Dictionary:
 		"living_members": max(1, living_party_members),
 		"total_members": max(1, total_party_members),
 	}
+
+
+## Spell Books / Skill Crystals a boss registered for this fight (GameState.register_boss_rewards).
+## Adds them to the inventory and returns one entry per item for the victory screen.
+func _grant_boss_rewards() -> Array[ItemData]:
+	var granted: Array[ItemData] = []
+	var rewards: Dictionary = GameState.take_boss_rewards()
+	var plan: Array = [
+		[BOSS_SPELL_BOOK_PATH, int(rewards.get("spell_books", 0))],
+		[BOSS_SKILL_CRYSTAL_PATH, int(rewards.get("skill_crystals", 0))],
+	]
+	for entry: Array in plan:
+		var count: int = int(entry[1])
+		if count <= 0 or not ResourceLoader.exists(str(entry[0])):
+			continue
+		var item: ItemData = load(str(entry[0])) as ItemData
+		if GameState.inventory != null:
+			GameState.inventory.add_item(item, count)
+		for i: int in range(count):
+			granted.append(item)
+		GameLogger.combat("Boss reward: %d x %s" % [count, item.item_name])
+	return granted
 
 
 func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
@@ -1592,12 +1302,12 @@ func _resolve_enemy_loot(enemy_ref: Resource) -> Array[ItemData]:
 func _generate_fallback_loot() -> Array[ItemData]:
 	var drops: Array[ItemData] = []
 	var item_paths: Array[String] = [
-		"res://Data/Items/GemDataQuartz.tres",
-		"res://Data/Items/ConHealthVial.tres",
-		"res://Data/Items/ConCyberRation.tres",
-		"res://Data/Items/ConManaStim.tres",
-		"res://Data/Items/GemNeonRuby.tres",
-		"res://Data/Items/GemGlowOpal.tres",
+		"res://Data/Items/Loot/GemDataQuartz.tres",
+		"res://Data/Items/Consumables/PotHealthVial.tres",
+		"res://Data/Items/Consumables/PotCyberRation.tres",
+		"res://Data/Items/Consumables/PotManaStim.tres",
+		"res://Data/Items/Loot/GemNeonRuby.tres",
+		"res://Data/Items/Loot/GemGlowOpal.tres",
 	]
 	var pool: Array[ItemData] = []
 	for p: String in item_paths:
@@ -1613,22 +1323,9 @@ func _generate_fallback_loot() -> Array[ItemData]:
 # ==============================================================================
 # HELPERS
 # ==============================================================================
-## Picks a living opponent of `attacker`. Players use target_index (enemy_N); enemies pick a random party member.
+## Picks a living opponent of `attacker` (rules: CombatTargeting.pick_opponent).
 func _pick_opponent(attacker: Combatant, target_index: int) -> Combatant:
-	if attacker.is_player:
-		var chosen: Combatant = _find_combatant_by_id("enemy_%d" % target_index)
-		if chosen != null and chosen.current_hp > 0:
-			return chosen
-		for c: Combatant in combatants:
-			if not c.is_player and c.current_hp > 0:
-				return c
-		return null
-
-	var alive_party: Array[Combatant] = []
-	for c: Combatant in combatants:
-		if c.is_player and c.current_hp > 0:
-			alive_party.append(c)
-	return alive_party.pick_random() if not alive_party.is_empty() else null
+	return CombatTargeting.pick_opponent(combatants, attacker, target_index)
 
 
 func _sync_hp_to_ref(c: Combatant) -> void:
@@ -1658,27 +1355,15 @@ func _reset_combatant_meter(combatant: Combatant) -> void:
 
 
 func _find_combatant_by_id(id: String) -> Combatant:
-	for c: Combatant in combatants:
-		if c.id == id:
-			return c
-	return null
+	return CombatTargeting.find_by_id(combatants, id)
 
 
 func _find_combatant_by_slot(slot_idx: int, is_player_target: bool) -> Combatant:
-	for c: Combatant in combatants:
-		if c.is_player == is_player_target and c.slot_index == slot_idx:
-			return c
-	return null
+	return CombatTargeting.find_by_slot(combatants, slot_idx, is_player_target)
 
 
 func _get_average_enemy_speed() -> int:
-	var total_speed: float = 0.0
-	var enemy_count: int = 0
-	for c: Combatant in combatants:
-		if not c.is_player and c.current_hp > 0:
-			total_speed += c.get_effective_speed()
-			enemy_count += 1
-	return int(total_speed / maxf(1.0, float(enemy_count)))
+	return CombatMath.average_speed(combatants, false)
 
 
 ## Resolves any enemy payload variant (Array, WorldEnemy node, EnemyGroupData, or single Resource) into a typed Array[Resource]

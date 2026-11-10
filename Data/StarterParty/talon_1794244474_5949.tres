@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="CatCharacter" load_steps=7 format=3]
+
+[ext_resource type="Resource" path="res://Data/Races/Ocelot.tres" id="1_qehov"]
+[ext_resource type="Resource" path="res://Data/Skills/SkCampMastery.tres" id="2_bt5nm"]
+[ext_resource type="Resource" path="res://Data/Spells/SpNanoRepair.tres" id="3_gmeel"]
+[ext_resource type="Resource" path="res://Data/Spells/SpAdrenalineSurge.tres" id="4_8nyg6"]
+[ext_resource type="Resource" path="res://Data/Classes/Soulwright.tres" id="5_bqt6r"]
+[ext_resource type="Script" path="res://resources/CatCharacter.gd" id="6_8r26o"]
+
+[resource]
+script = ExtResource("6_8r26o")
+name = "Talon"
+breed = ExtResource("1_qehov")
+profession = ExtResource("5_bqt6r")
+portrait_path = "res://Data/Portraits/Soulwright.png"
+roster_id = "talon_1794244474_5949"
+creation_dice = Array[int]([6, 6, 5])
+creation_allocation = {
+"dexterity": 2,
+"intelligence": 2,
+"personality": 3,
+"piety": 3,
+"speed": 3,
+"vitality": 4
+}
+max_xp = 900
+strength = 10
+intelligence = 9
+piety = 16
+vitality = 14
+dexterity = 10
+speed = 9
+personality = 9
+current_hp = 28
+max_hp = 28
+current_energy = 25
+max_energy = 25
+known_spells = Array[Resource]([ExtResource("3_gmeel"), ExtResource("4_8nyg6")])
+known_skills = Array[Resource]([ExtResource("2_bt5nm")])
+abilities_initialized = true

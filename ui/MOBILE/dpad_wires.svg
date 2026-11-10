@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 179.89 111">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #64dfdf;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_6" data-name="Layer 6">
+    <g>
+      <rect class="cls-1" x="89.45" y="3.5" width="3.39" height="17.35"/>
+      <rect class="cls-1" x="84.68" y="19.41" width="12.92" height="5.98"/>
+      <rect class="cls-1" x="83.71" width="15.69" height="6.99"/>
+      <polygon class="cls-1" points="91.56 15.68 9.15 15.68 2.57 6.94 4.16 5.74 10.14 13.7 91.56 13.7 91.56 15.68"/>
+      <polygon class="cls-1" points="171.86 12.55 89.45 12.55 89.45 10.57 170.87 10.57 174.49 5.74 176.08 6.94 171.86 12.55"/>
+      <rect class="cls-1" x="45.3" y="43.92" width="11.38" height="1.49" transform="translate(-16.49 38.23) rotate(-35.77)"/>
+      <rect class="cls-1" x="145.62" y="30.2" width="1.49" height="13.05" transform="translate(16.9 114.25) rotate(-45)"/>
+      <rect class="cls-1" y="2.66" width="9.21" height="4.75"/>
+      <rect class="cls-1" x="170.68" y="1.81" width="9.21" height="4.75"/>
+      <rect class="cls-1" x="148.77" y="39.61" width="6.71" height="3.46" transform="translate(193.46 -110.78) rotate(90)"/>
+      <rect class="cls-1" x="136.88" y="30.38" width="6.71" height="3.46" transform="translate(172.35 -108.13) rotate(90)"/>
+      <rect class="cls-1" x="41.17" y="46.11" width="6.71" height="3.46" transform="translate(92.36 3.32) rotate(90)"/>
+      <rect class="cls-1" x="53.58" y="39.61" width="6.71" height="3.46" transform="translate(98.27 -15.59) rotate(90)"/>
+      <g>
+        <rect class="cls-1" x="125.94" y="89.57" width="2.87" height="21.43"/>
+        <rect class="cls-1" x="131.44" y="84.96" width="4.91" height="26.04"/>
+        <rect class="cls-1" x="138.01" y="80.73" width="2.67" height="30.27"/>
+      </g>
+      <polygon class="cls-1" points="129.22 92.98 125.94 89.57 137.85 78.13 140.68 81.45 129.22 92.98"/>
+    </g>
+  </g>
+</svg>

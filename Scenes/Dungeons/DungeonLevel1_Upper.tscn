@@ -1,9 +1,8 @@
-[gd_scene load_steps=21 format=3 uid="uid://pwvrre2qwmwm"]
+[gd_scene load_steps=20 format=3 uid="uid://pwvrre2qwmwm"]
 
 [ext_resource type="Script" uid="uid://bcvr81rbuqpc2" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_init"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="2_n7xw1"]
-[ext_resource type="AudioStream" uid="uid://bpdf50t4880cm" path="res://Audio/Environment/new-area.mp3" id="3_40oa4"]
 [ext_resource type="Script" uid="uid://co7xlukyxktxc" path="res://Scripts/Environment/EditorWorkLight.gd" id="3_worklight"]
 [ext_resource type="MeshLibrary" uid="uid://wkj1vx74cd3c" path="res://resources/mesh_library/nav_blocker_mesh_library.tres" id="4_navlib"]
 [ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="5_stairs"]
@@ -42,12 +41,10 @@ enemy_count = 5
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_dungeon")
 
-[node name="LevelTitleArea" parent="." instance=ExtResource("2_n7xw1")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 6.7458744, 0.856941, -2.862204)
+[node name="LevelTitle" parent="." instance=ExtResource("2_n7xw1")]
 level_title = "Gloom
-Dungeon
-"
-trigger_sound = ExtResource("3_40oa4")
+Dungeon Top"
+play_new_area_sound = true
 
 [node name="EditorWorkLight" type="Node3D" parent="."]
 script = ExtResource("3_worklight")

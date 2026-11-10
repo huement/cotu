@@ -1,20 +1,23 @@
 # res://Scripts/Utilities/LootCompiler.gd
 @tool
 extends EditorScript
+class_name LootCompiler
+## Compiles gem_* / lrn_* / token_* rows from Data/Loot.csv into Data/Items/Loot/*.tres
 
 const CSV_PATHS: Array[String] = ["res://Data/Loot.csv"]
-const OUTPUT_DIR: String = "res://Data/Items/"
+const OUTPUT_DIR: String = "res://Data/Items/Loot/"
 
 
 func _run() -> void:
 	compile_loot()
 
 
-func compile_loot() -> void:
+## Callable from the editor (_run) or a headless SceneTree runner.
+static func compile_loot() -> int:
 	var csv_path: String = _find_valid_csv_path()
 	if csv_path.is_empty():
 		printerr("Loot Compiler Error: Cannot find 'Loot.csv' in project root or Data directory!")
-		return
+		return 0
 
 	if not DirAccess.dir_exists_absolute(OUTPUT_DIR):
 		DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
@@ -22,7 +25,7 @@ func compile_loot() -> void:
 	var file := FileAccess.open(csv_path, FileAccess.READ)
 	if file == null:
 		printerr("Loot Compiler Error: Failed to open CSV file at ", csv_path)
-		return
+		return 0
 
 	var _header: PackedStringArray = file.get_csv_line()
 	var count: int = 0
@@ -32,8 +35,20 @@ func compile_loot() -> void:
 		if line.size() < 26 or line[0].strip_edges().is_empty():
 			continue
 
+		var item_id: String = line[0].strip_edges()
+		if not (
+			item_id.begins_with("gem_")
+			or item_id.begins_with("lrn_")
+			or item_id.begins_with("token_")
+		):
+			push_warning(
+				"LootCompiler: skipping '%s' (Loot.csv should only contain gem_* / lrn_* / token_*)."
+				% item_id
+			)
+			continue
+
 		var item := ItemData.new()
-		item.item_id = line[0].strip_edges()
+		item.item_id = item_id
 		item.item_name = line[1].strip_edges()
 		item.description = line[2].strip_edges()
 		item.item_type = _parse_item_type(line[3].strip_edges())
@@ -59,34 +74,46 @@ func compile_loot() -> void:
 		item.effect_element = _parse_effect_element(line[23].strip_edges())
 		item.effect_stat = line[24].strip_edges()
 		item.icon_path = line[25].strip_edges()
+		item.is_throwable = line.size() > 26 and _parse_bool(line[26])
 
 		if not item.icon_path.is_empty() and ResourceLoader.exists(item.icon_path):
 			item.icon = load(item.icon_path) as Texture2D
 
 		var save_path: String = OUTPUT_DIR + item.item_id.to_pascal_case() + ".tres"
+		# Prefer UID from the new Loot/ path; fall back to the old root path so scenes keep working.
+		var old_uid: int = ResourceUID.INVALID_ID
+		if ResourceLoader.exists(save_path):
+			old_uid = ResourceLoader.get_resource_uid(save_path)
+		else:
+			var legacy_path: String = "res://Data/Items/" + item.item_id.to_pascal_case() + ".tres"
+			if ResourceLoader.exists(legacy_path):
+				old_uid = ResourceLoader.get_resource_uid(legacy_path)
 
 		var err := ResourceSaver.save(item, save_path)
 		if err == OK:
+			if old_uid != ResourceUID.INVALID_ID:
+				ResourceSaver.set_uid(save_path, old_uid)
 			count += 1
 		else:
 			printerr("Failed to save Item resource for: ", item.item_name, " Error: ", err)
 
 	print("Loot Compiler Success: Generated ", count, " Item .tres files into ", OUTPUT_DIR)
+	return count
 
 
-func _find_valid_csv_path() -> String:
+static func _find_valid_csv_path() -> String:
 	for path in CSV_PATHS:
 		if FileAccess.file_exists(path):
 			return path
 	return ""
 
 
-func _parse_bool(s: String) -> bool:
+static func _parse_bool(s: String) -> bool:
 	var cleaned: String = s.strip_edges().to_upper()
 	return cleaned == "TRUE" or cleaned == "1" or cleaned == "YES"
 
 
-func _parse_item_type(s: String) -> ItemData.ItemType:
+static func _parse_item_type(s: String) -> ItemData.ItemType:
 	match s.to_upper():
 		"WEAPON":
 			return ItemData.ItemType.WEAPON
@@ -104,7 +131,7 @@ func _parse_item_type(s: String) -> ItemData.ItemType:
 			return ItemData.ItemType.MISC
 
 
-func _parse_target_type(s: String) -> ItemData.TargetType:
+static func _parse_target_type(s: String) -> ItemData.TargetType:
 	match s.to_upper():
 		"ALL_PARTY":
 			return ItemData.TargetType.ALL_PARTY
@@ -118,7 +145,7 @@ func _parse_target_type(s: String) -> ItemData.TargetType:
 			return ItemData.TargetType.SINGLE_PARTY_MEMBER
 
 
-func _parse_equipment_slot(s: String) -> ItemData.EquipmentSlot:
+static func _parse_equipment_slot(s: String) -> ItemData.EquipmentSlot:
 	match s.to_upper():
 		"BODY":
 			return ItemData.EquipmentSlot.BODY
@@ -142,7 +169,7 @@ func _parse_equipment_slot(s: String) -> ItemData.EquipmentSlot:
 			return ItemData.EquipmentSlot.NONE
 
 
-func _parse_weapon_type(s: String) -> ItemData.WeaponType:
+static func _parse_weapon_type(s: String) -> ItemData.WeaponType:
 	match s.to_upper():
 		"BLADE":
 			return ItemData.WeaponType.BLADE
@@ -154,7 +181,7 @@ func _parse_weapon_type(s: String) -> ItemData.WeaponType:
 			return ItemData.WeaponType.NONE
 
 
-func _parse_effect_element(s: String) -> ItemData.EffectElement:
+static func _parse_effect_element(s: String) -> ItemData.EffectElement:
 	match s.to_upper():
 		"MAGIC":
 			return ItemData.EffectElement.MAGIC

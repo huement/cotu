@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://bkyt2fymsg4yk"]
+[gd_scene load_steps=19 format=3 uid="uid://bkyt2fymsg4yk"]
 
 [ext_resource type="Script" uid="uid://bcvr81rbuqpc2" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_init"]
@@ -16,7 +16,6 @@
 [ext_resource type="Resource" uid="uid://bb7x20wwbb0ou" path="res://Data/Enemies/EnZombieGuard.tres" id="17_enemydata0"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="17_wnrhp"]
 [ext_resource type="Resource" uid="uid://b3472gtr5bafr" path="res://Data/Enemies/EnZombieKnight.tres" id="18_enemydata1"]
-[ext_resource type="AudioStream" uid="uid://bpdf50t4880cm" path="res://Audio/Environment/new-area.mp3" id="18_ykfb2"]
 [ext_resource type="Resource" uid="uid://b5pcgltvaqu3y" path="res://Data/Enemies/EnZombieSaber.tres" id="19_enemydata2"]
 
 [sub_resource type="Environment" id="Environment_dungeon"]
@@ -214,8 +213,7 @@ model_scale = Vector3(1, 1, 1)
 vertical_offset = -1.0
 enemy_type = "zombie"
 
-[node name="LevelTitleArea" parent="." instance=ExtResource("17_wnrhp")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.190306, 0.7494415, 3.0201478)
-level_title = "Gloom 
+[node name="LevelTitle" parent="." instance=ExtResource("17_wnrhp")]
+level_title = "Gloom
 Dungeon Btm"
-trigger_sound = ExtResource("18_ykfb2")
+play_new_area_sound = true

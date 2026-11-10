@@ -4,6 +4,13 @@ extends WorldEnemy
 
 ## Specialized stationary boss enemy with model scaling, fixed facing alignment,
 ## and automatic minion party layout for combat.
+## Inside a BossChamber it plays the chamber's boss: beating it opens the reward room and
+## unlocks the exit gate (BossChamber listens to `boss_defeated`).
+
+const _Formation = preload("res://Scripts/3D/CombatFormation.gd")
+
+## Emitted when the party wins the fight against this boss (just before it is removed).
+signal boss_defeated(boss: BossEnemy)
 
 # ==============================================================================
 # 1. EXPORTED BOSS CONFIGURATION
@@ -24,6 +31,12 @@ extends WorldEnemy
 # ==============================================================================
 # 2. LIFECYCLE & COMBAT PARTY SETUP
 # ==============================================================================
+@export_group("Boss Rewards")
+## Spell Books / Skill Crystals added to the loot when this boss is beaten (shown on the victory screen).
+@export_range(0, 10) var reward_spell_books: int = 1
+@export_range(0, 10) var reward_skill_crystals: int = 1
+@export_group("")
+
 func _ready() -> void:
 	_current_facing = default_facing
 	# Apply scale multiplier before base script instantiates the 3D mesh
@@ -32,8 +45,9 @@ func _ready() -> void:
 
 
 func _setup_enemy_group() -> void:
-	# If enemy_group was manually populated in the Inspector, preserve it
+	# If enemy_group was manually populated in the Inspector, preserve it and mark the boss.
 	if not enemy_group.is_empty():
+		_mark_boss_in_group()
 		return
 
 	var primary_boss_resource: Resource = data if data != null else enemy_data
@@ -43,7 +57,8 @@ func _setup_enemy_group() -> void:
 
 	enemy_group.clear()
 
-	# Build party array: Minions on left, Boss in center, Minions on right
+	# Build party array: Minions on left, Boss in center, Minions on right.
+	# Combat model_scale stays on EnemyData (CSV); model_scale_multiplier is overworld-only.
 	if is_instance_valid(minion_data) and minion_count > 0:
 		var left_count: int = minion_count / 2
 		var right_count: int = minion_count - left_count
@@ -51,13 +66,27 @@ func _setup_enemy_group() -> void:
 		for i in range(left_count):
 			enemy_group.append(minion_data.duplicate())
 
-		enemy_group.append(primary_boss_resource.duplicate())
+		var boss_dup: Resource = primary_boss_resource.duplicate()
+		_Formation.mark_boss(boss_dup)
+		enemy_group.append(boss_dup)
 
 		for i in range(right_count):
 			enemy_group.append(minion_data.duplicate())
 	else:
-		# Solo boss encounter
-		enemy_group.append(primary_boss_resource.duplicate())
+		var solo: Resource = primary_boss_resource.duplicate()
+		_Formation.mark_boss(solo)
+		enemy_group.append(solo)
+
+
+## Marks the center (or only) pack member as the formation boss when the group was hand-authored.
+func _mark_boss_in_group() -> void:
+	if enemy_group.is_empty():
+		return
+	for entry: Resource in enemy_group:
+		if _Formation.is_boss(entry):
+			return
+	var mid: int = enemy_group.size() / 2
+	_Formation.mark_boss(enemy_group[mid])
 
 
 # ==============================================================================
@@ -73,3 +102,18 @@ func _check_pursuit_range() -> void:
 	# Trigger combat when player walks into adjacent tile without moving boss from tile
 	if dist_to_player <= 1:
 		trigger_combat_encounter()
+
+
+# ==============================================================================
+# 4. DEFEAT
+# ==============================================================================
+func _on_combat_ended(victory: bool) -> void:
+	if victory and _is_in_active_combat:
+		boss_defeated.emit(self)
+	super._on_combat_ended(victory)
+
+
+## Boss fights also pay out Spell Books / Skill Crystals (see reward_* exports).
+func trigger_combat_encounter() -> void:
+	GameState.register_boss_rewards(reward_spell_books, reward_skill_crystals)
+	super.trigger_combat_encounter()

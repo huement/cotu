@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/GameMenus/MenuScreenTemplate.tscn" id="1_tmpl"]
+
+[node name="HelpScreen" instance=ExtResource("1_tmpl")]
+screen_title = "HELP"
+subtitle = "How to play"
+body_file = "res://Data/Help/help.md"

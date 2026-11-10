@@ -230,3 +230,22 @@ The battle log (`GameLogger.combat`) prints every combatant's final ATK / DEF / 
 - DEX and accuracy don't affect normal attacks (no hit/miss or crits for ATTACK); only skills roll accuracy.
 - Every party member defaults to `is_front_row = true`, so back-row rules only matter if you set rows.
 - Skills don't scale with STR / weapons, and spells ignore physical DEF (by design above; change in `_calculate_ability_damage` if you want otherwise).
+
+## Pure helpers (`Scripts/Combat/`)
+
+CombatManager keeps battle state, timing, signals and logging. Everything that is just math lives in small
+static, typed classes that need no scene tree, so they can be read and unit-tested on their own:
+
+| File | What |
+|---|---|
+| `Combatant.gd` / `ActiveEffect.gd` | Battle snapshot of a fighter + buffs; effective stats (flat then %), shields |
+| `CombatMath.gd` | `physical_damage`, `ability_power`, `ability_damage`, `ability_duration`, `flee_chance`, `next_meter`, `average_speed`, element/attack-type maps, `as_fraction`, `cat_attribute`, `modifier_stat_name` |
+| `CombatTargeting.gd` | `resolve_ability_targets`, `pick_opponent`, `find_by_id` / `find_by_slot`, `living` |
+| `AbilityInfo.gd` | `category`, `display_name`, `id`, `status_id`, `hit_verb` |
+
+State the helpers need (guard state, `weakness_multiplier`, `base_tick_rate`, the combatant list) is passed in
+by CombatManager's thin wrappers (`_calculate_physical_damage`, `_calculate_ability_damage`, `_is_guarding`,
+`_resolve_ability_targets`, `_pick_opponent`, …).
+
+Tests: `tests/combat/` (GUT, fixtures in `combat_fixtures.gd`):
+`godot --path . --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit`

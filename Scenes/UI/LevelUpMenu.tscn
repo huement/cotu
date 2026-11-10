@@ -1,0 +1,188 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/LevelUpMenu.gd" id="1_levelup"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.03137255, 0.0627451, 0.078431375, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.78431374, 0.654902, 1)
+
+[node name="LevelUpMenu" type="CanvasLayer"]
+layer = 90
+script = ExtResource("1_levelup")
+
+[node name="OverlayPanel" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="OverlayPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.04, 0.82)
+mouse_filter = 2
+
+[node name="Frame" type="PanelContainer" parent="OverlayPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -260.0
+offset_right = 420.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="OverlayPanel/Frame"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 16
+
+[node name="MainVBox" type="VBoxContainer" parent="OverlayPanel/Frame/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="HeaderHBox" type="HBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PortraitTexture" type="TextureRect" parent="OverlayPanel/Frame/Margin/MainVBox/HeaderHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InfoVBox" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox/HeaderHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="CharNameLabel" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/HeaderHBox/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_font_sizes/font_size = 22
+text = "NAME"
+
+[node name="LevelLabel" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/HeaderHBox/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "LEVEL 1"
+
+[node name="ProfessionLabel" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/HeaderHBox/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "CLASS"
+
+[node name="PointsLabel" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/HeaderHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_font_sizes/font_size = 13
+text = "STAT POINTS: 0  |  SKILL POINTS: 0  |  SPELL POINTS: 0"
+horizontal_alignment = 2
+
+[node name="Columns" type="HBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="StatsColumn" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="StatsTitle" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/Columns/StatsColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_font_sizes/font_size = 16
+text = "STATS"
+
+[node name="StatsList" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox/Columns/StatsColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="AbilitiesColumn" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="AbilitiesTitle" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/Columns/AbilitiesColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_font_sizes/font_size = 16
+text = "SKILLS / SPELLS"
+
+[node name="SelectHint" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/Columns/AbilitiesColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.7, 0.65, 1)
+theme_override_font_sizes/font_size = 12
+text = "SELECT TO LEVEL UP:"
+
+[node name="AbilitiesScroll" type="ScrollContainer" parent="OverlayPanel/Frame/Margin/MainVBox/Columns/AbilitiesColumn"]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="AbilitiesList" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox/Columns/AbilitiesColumn/AbilitiesScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Footer" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConfirmPrompt" type="Label" parent="OverlayPanel/Frame/Margin/MainVBox/Footer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "CONFIRM ALL INCREASES?"
+horizontal_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="OverlayPanel/Frame/Margin/MainVBox/Footer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="ConfirmButton" type="Button" parent="OverlayPanel/Frame/Margin/MainVBox/Footer/ButtonRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+text = "CONFIRM"
+
+[node name="CancelButton" type="Button" parent="OverlayPanel/Frame/Margin/MainVBox/Footer/ButtonRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+text = "CANCEL"

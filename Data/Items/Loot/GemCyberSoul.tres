@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dt5834ua4y3sm"]
+
+[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/cybersoul.png" id="1_fdlf8"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_36rgj"]
+
+[resource]
+script = ExtResource("2_36rgj")
+item_id = "gem_cyber_soul"
+item_name = "Cyber-Soul Gem"
+description = "A synthetic gemstone that traps wandering digital spirits."
+icon_path = "res://Data/Items/loot_icons/cybersoul.png"
+icon = ExtResource("1_fdlf8")
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+credit_value = 500

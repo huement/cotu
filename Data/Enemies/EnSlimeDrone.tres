@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://bi1jysscfdfwt"]
+
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/SlimeDroneModel.tscn" id="1_model"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_slime_drone"
+enemy_type = "slime"
+enemy_name = "Slime Drone"
+model_path = "res://Scenes/Enemies/SlimeDroneModel.tscn"
+model_scene = ExtResource("1_model")
+model_scale = Vector3(0.65, 0.65, 0.65)
+combat_forward_distance = 3.2
+vertical_offset = -1.0
+scale_with_player = false
+max_health = 18
+current_health = 18
+attack_damage = 4
+defense = 0
+speed = 6.0
+initiative_speed = 6
+weakness_element = 4
+occurs_in_groups = false
+max_group_size = 1
+movement_speed = 0.35
+aggro_range_tiles = 1
+xp_value = 36
+gold_value = 5
+drops_loot = false

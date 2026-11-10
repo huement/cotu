@@ -4,6 +4,9 @@ class_name MapManager
 ## The main GridMap node
 @export var dungeon_grid: GridMap
 @export var floor_grid: GridMap
+## Optional second floor layer named "Bridges" (same 2 m grid as FloorMap). A bridge tile
+## over a river/water cell makes that cell walkable.
+var bridge_grid: GridMap = null
 @export var active_map_instance: Node3D
 @export var default_map_scene: PackedScene
 @export var ceiling_tile_scene: PackedScene = preload("res://Scenes/CeilingTile.tscn") 
@@ -13,6 +16,18 @@ class_name MapManager
 @export var map_type: String = "forest"
 @export var grid_map: GridMap
 
+@export_group("Level Title")
+## Seconds to wait after a map loads before showing the title banner.
+@export var level_title_delay: float = 2.0
+## Seconds the banner stays visible before fading out.
+@export var level_title_hold: float = 3.0
+## Pool for LevelTitleTrigger.play_new_area_sound — one is picked at random per map load.
+@export var new_area_sounds: Array[AudioStream] = [
+	preload("res://Audio/Environment/new-area.mp3"),
+	preload("res://Audio/Environment/new-area-2.mp3"),
+	preload("res://Audio/Environment/new-area-3.mp3"),
+]
+
 ## Maps out standard cardinal direction vectors to help calculate steps.
 const DIRECTION_MAP: Dictionary = {
 	"NORTH": Vector3i(0, 0, -1),
@@ -21,10 +36,24 @@ const DIRECTION_MAP: Dictionary = {
 	"WEST": Vector3i(-1, 0, 0)
 }
 
+const GROUP_LEVEL_TITLE: StringName = &"level_title"
+
 var _blocked_tiles: Dictionary = {}
+## [GridMap, cell] wall registrations received while a map is being added (see _install_map).
+var _pending_grid_blocks: Array = []
+var _is_installing_map: bool = false
+var _level_title_token: int = 0
 
 func _ready() -> void:
-	if default_map_scene:
+	var saved: Dictionary = GameState.consume_pending_location() if is_instance_valid(GameState) else {}
+	var saved_path: String = str(saved.get("map_scene_path", ""))
+	if not saved_path.is_empty() and ResourceLoader.exists(saved_path):
+		# Continue a save: open the map the party was on, then put them back on their tile.
+		switch_map(saved_path)
+		_restore_saved_position.call_deferred(saved)
+	elif default_map_scene:
+		if not saved_path.is_empty():
+			push_warning("MapManager: saved map '%s' is missing - starting on the default map." % saved_path)
 		switch_map_from_resource(default_map_scene)
 	else:
 		_resolve_active_wall_map()
@@ -40,16 +69,12 @@ func switch_map_from_resource(map_resource: PackedScene) -> void:
 		push_error("MapManager: Invalid PackedScene passed to switch_map_from_resource.")
 		return
 
-	if is_instance_valid(active_map_instance):
-		active_map_instance.queue_free()
-
-	_blocked_tiles.clear()
-	active_map_instance = map_resource.instantiate() as Node3D
-	add_child(active_map_instance)
-
-	_resolve_dungeon_grid(active_map_instance)
+	_unload_active_map()
+	_install_map(map_resource.instantiate() as Node3D)
+	_sync_world_environment(active_map_instance)
 	_notify_player_map_changed()
 	_apply_map_audio(active_map_instance)
+	_present_level_title(active_map_instance)
 
 
 func switch_map(scene_path: String) -> void:
@@ -58,17 +83,98 @@ func switch_map(scene_path: String) -> void:
 		push_error("MapManager: Failed to load map scene at " + scene_path)
 		return
 
-	if is_instance_valid(active_map_instance):
-		active_map_instance.queue_free()
-
-	_blocked_tiles.clear()
-	active_map_instance = map_resource.instantiate() as Node3D
-	add_child(active_map_instance)
-
-	_resolve_dungeon_grid(active_map_instance)
+	_unload_active_map()
+	_install_map(map_resource.instantiate() as Node3D)
+	_sync_world_environment(active_map_instance)
 	_notify_player_map_changed()
 	GameLogger.info("SWITCH MAP FIRED. NOW STARTING AUDIO")
 	_apply_map_audio(active_map_instance)
+	_present_level_title(active_map_instance)
+
+
+## Drops the previous map's WorldEnvironment immediately so outdoor (fog-off) settings
+## cannot linger into the next map while queue_free is still pending.
+func _unload_active_map() -> void:
+	if not is_instance_valid(active_map_instance):
+		return
+	var old_we: WorldEnvironment = _find_world_environment(active_map_instance)
+	if is_instance_valid(old_we):
+		active_map_instance.remove_child(old_we)
+		old_we.free()
+	active_map_instance.queue_free()
+	active_map_instance = null
+	bridge_grid = null
+	floor_grid = null
+	dungeon_grid = null
+
+
+## Godot only applies one WorldEnvironment. world.tscn also has one, so map fog/sky was
+## losing to the root (or to a deferred outdoor env). Keep a single active Environment on
+## the root WorldEnvironment, copied from the map; disable the map-local duplicate.
+func _sync_world_environment(map_instance: Node3D) -> void:
+	var root: Node = get_tree().current_scene
+	if not is_instance_valid(root):
+		return
+	var root_we: WorldEnvironment = root.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	var map_we: WorldEnvironment = _find_world_environment(map_instance)
+	if not is_instance_valid(map_we) or map_we.environment == null:
+		return
+	if is_instance_valid(root_we):
+		root_we.environment = map_we.environment
+		map_we.environment = null
+	# Day/night on outdoor maps still holds a NodePath to the map WE — re-point it at root.
+	_retarget_day_night_environment(map_instance, root_we)
+
+
+func _find_world_environment(host: Node) -> WorldEnvironment:
+	if not is_instance_valid(host):
+		return null
+	for child: Node in host.get_children():
+		if child is WorldEnvironment:
+			return child as WorldEnvironment
+	return null
+
+
+func _retarget_day_night_environment(map_instance: Node3D, root_we: WorldEnvironment) -> void:
+	if not is_instance_valid(map_instance) or not is_instance_valid(root_we):
+		return
+	for child: Node in map_instance.get_children():
+		if child is DayNightCycle:
+			(child as DayNightCycle).world_environment = root_we
+
+
+func _restore_saved_position(saved: Dictionary) -> void:
+	var player: DungeonPlayer = get_tree().get_first_node_in_group(&"player") as DungeonPlayer
+	if not is_instance_valid(player):
+		return
+	# New game: start on a named marker (e.g. GreenGrove's SpawnPointNewGame) instead of a saved cell.
+	var marker_name: String = str(saved.get("spawn_marker", ""))
+	if not marker_name.is_empty():
+		var marker: Node3D = active_map_instance.get_node_or_null(NodePath(marker_name)) as Node3D if is_instance_valid(active_map_instance) else null
+		if marker != null:
+			player.move_to_marker(marker)
+		else:
+			push_warning("MapManager: spawn marker '%s' not found - using the map's SpawnPoint." % marker_name)
+		return
+	player.restore_location(saved.get("player_cell", Vector2i.ZERO) as Vector2i, str(saved.get("player_facing", "NORTH")))
+
+
+## Adds a freshly instanced map and resolves its grids. Wall layers register their blocked cells in
+## their own _ready() (during add_child) - BEFORE this map's FloorMap is known - so those registrations
+## are queued and converted to nav cells only once the grids are resolved. (Converting them early used
+## the previous map's FloorMap, or none at all on the first map, which blocked random "invisible" tiles.)
+func _install_map(map_instance: Node3D) -> void:
+	_blocked_tiles.clear()
+	_pending_grid_blocks.clear()
+	_is_installing_map = true
+	active_map_instance = map_instance
+	add_child(active_map_instance)
+	_resolve_dungeon_grid(active_map_instance)
+	_is_installing_map = false
+	for pending: Array in _pending_grid_blocks:
+		if is_instance_valid(pending[0]):
+			register_blocked_grid_cell(pending[0] as GridMap, pending[1] as Vector3i)
+	_pending_grid_blocks.clear()
 
 
 func _notify_player_map_changed() -> void:
@@ -102,6 +208,14 @@ func _resolve_dungeon_grid(map_instance: Node3D) -> void:
 	else:
 		floor_grid = null
 
+	# Resolve optional Bridges layer (bridges over FloorMap water)
+	if map_instance.has_node("%Bridges"):
+		bridge_grid = map_instance.get_node("%Bridges") as GridMap
+	elif map_instance.has_node("Bridges"):
+		bridge_grid = map_instance.get_node("Bridges") as GridMap
+	else:
+		bridge_grid = null
+
 	# Update active map_type for audio/footsteps
 	if "map_type" in map_instance and not str(map_instance.get("map_type")).is_empty():
 		map_type = str(map_instance.get("map_type"))
@@ -125,6 +239,95 @@ func _apply_map_audio(map_instance: Node) -> void:
 			track_name = str(map_instance.get("bgm_track_name"))
 
 	AudioManager.play_bgm(track_name)
+
+
+## Shows the map's level title once after a short delay. Cancels any prior in-flight title.
+func _present_level_title(map_instance: Node3D) -> void:
+	_level_title_token += 1
+	var token: int = _level_title_token
+	_present_level_title_async(map_instance, token)
+
+
+func _present_level_title_async(map_instance: Node3D, token: int) -> void:
+	if not is_instance_valid(map_instance):
+		return
+
+	var marker: Node = _find_level_title_marker(map_instance)
+	var title_text: String = map_instance.name
+	var play_sound: bool = true
+	if is_instance_valid(marker):
+		if "level_title" in marker and not str(marker.get("level_title")).strip_edges().is_empty():
+			title_text = str(marker.get("level_title"))
+		if "play_new_area_sound" in marker:
+			play_sound = bool(marker.get("play_new_area_sound"))
+
+	if level_title_delay > 0.0:
+		await get_tree().create_timer(level_title_delay).timeout
+	if token != _level_title_token or not is_instance_valid(map_instance) or map_instance != active_map_instance:
+		return
+
+	var hud: Node = _find_level_hud_label()
+	if is_instance_valid(hud) and hud.has_method("show_level_banner"):
+		hud.call("show_level_banner", title_text)
+
+	if play_sound:
+		_play_level_title_sound(_pick_new_area_sound())
+
+	if level_title_hold > 0.0:
+		await get_tree().create_timer(level_title_hold).timeout
+	if token != _level_title_token:
+		return
+
+	if is_instance_valid(hud) and hud.has_method("hide_level_banner"):
+		hud.call("hide_level_banner")
+
+
+func _find_level_title_marker(map_instance: Node3D) -> Node:
+	if not is_instance_valid(map_instance):
+		return null
+	for node: Node in get_tree().get_nodes_in_group(GROUP_LEVEL_TITLE):
+		if is_instance_valid(node) and (map_instance.is_ancestor_of(node) or node == map_instance):
+			return node
+	return _find_level_title_marker_recursive(map_instance)
+
+
+func _find_level_title_marker_recursive(node: Node) -> Node:
+	if "level_title" in node and node != active_map_instance:
+		return node
+	for child: Node in node.get_children():
+		var found: Node = _find_level_title_marker_recursive(child)
+		if is_instance_valid(found):
+			return found
+	return null
+
+
+func _find_level_hud_label() -> Node:
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	if is_instance_valid(player):
+		var under_player: Node = player.find_child("LevelHUDLabel", true, false)
+		if is_instance_valid(under_player):
+			return under_player
+	return get_tree().root.find_child("LevelHUDLabel", true, false)
+
+
+func _pick_new_area_sound() -> AudioStream:
+	var pool: Array[AudioStream] = []
+	for stream: AudioStream in new_area_sounds:
+		if stream != null:
+			pool.append(stream)
+	if pool.is_empty():
+		return null
+	return pool[randi() % pool.size()]
+
+
+func _play_level_title_sound(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	var audio_player := AudioStreamPlayer.new()
+	add_child(audio_player)
+	audio_player.stream = stream
+	audio_player.play()
+	audio_player.finished.connect(audio_player.queue_free)
 
 
 # ==============================================================================
@@ -175,6 +378,9 @@ func nav_cell_to_grid_cell(grid: GridMap, nav_cell: Vector3i) -> Vector3i:
 
 ## Blocks every navigation cell covered by `cell` of `grid` (handles scaled wall layers).
 func register_blocked_grid_cell(grid: GridMap, cell: Vector3i) -> void:
+	if _is_installing_map:
+		_pending_grid_blocks.append([grid, cell]) # converted once the new map's FloorMap is resolved
+		return
 	var nav: GridMap = get_nav_grid()
 	if not is_instance_valid(grid) or not is_instance_valid(nav) or grid == nav:
 		register_blocked_tile(Vector3i(cell.x, 0, cell.z))
@@ -213,22 +419,28 @@ func grid_to_world(grid_position: Vector3i) -> Vector3:
 
 ## Checks if a target grid cell contains a blocking wall tile, water, enemy, or 3D physics obstacle.
 func is_tile_blocked(grid_position: Vector3i) -> bool:
+	return not get_tile_block_reason(grid_position).is_empty()
+
+
+## Why a tile can't be entered ("" = walkable). Used for movement and for the [NAV] log, e.g.
+## "wall tile 'forest_wall' on WallMap", "physics: BigTimbers/BigTimber5 (StaticBody3D)".
+func get_tile_block_reason(grid_position: Vector3i) -> String:
 	if _blocked_tiles.get(grid_position, false):
-		return true
+		return "tile marked blocked (MapManager._blocked_tiles)"
 
 	var ground_cell := Vector3i(grid_position.x, 0, grid_position.z)
 
 	# 1. Check WallMap for trees or walls
 	if is_instance_valid(dungeon_grid):
-		var wall_item_index: int = dungeon_grid.get_cell_item(nav_cell_to_grid_cell(dungeon_grid, ground_cell))
+		var wall_cell: Vector3i = nav_cell_to_grid_cell(dungeon_grid, ground_cell)
+		var wall_item_index: int = dungeon_grid.get_cell_item(wall_cell)
 		if wall_item_index != GridMap.INVALID_CELL_ITEM:
+			var wall_item_name: String = dungeon_grid.mesh_library.get_item_name(wall_item_index) if is_instance_valid(dungeon_grid.mesh_library) else str(wall_item_index)
 			if dungeon_grid.name == "WallMap" or dungeon_grid.name == "%WallMap":
-				return true
-
-			if is_instance_valid(dungeon_grid.mesh_library):
-				var wall_item_name: String = dungeon_grid.mesh_library.get_item_name(wall_item_index).to_lower()
-				if wall_item_name.contains("wall") or wall_item_name.contains("placeholder"):
-					return true
+				return "wall tile '%s' on %s cell %s" % [wall_item_name, dungeon_grid.name, wall_cell]
+			var lower_name: String = wall_item_name.to_lower()
+			if lower_name.contains("wall") or lower_name.contains("placeholder"):
+				return "wall tile '%s' on %s cell %s" % [wall_item_name, dungeon_grid.name, wall_cell]
 
 	# 2. Check FloorMap for river/water tiles
 	if is_instance_valid(floor_grid):
@@ -236,17 +448,18 @@ func is_tile_blocked(grid_position: Vector3i) -> bool:
 		if floor_item_index != GridMap.INVALID_CELL_ITEM and is_instance_valid(floor_grid.mesh_library):
 			var floor_item_name: String = floor_grid.mesh_library.get_item_name(floor_item_index).to_lower()
 			if floor_item_name.contains("river") or floor_item_name.contains("water"):
-				return true
+				if not _has_bridge(ground_cell):
+					return "water tile '%s' on %s (no bridge)" % [floor_item_name, floor_grid.name]
 
 	# 3. Check for dynamic enemies
 	var enemy: Node3D = get_enemy_at_grid_pos(grid_position)
 	if is_instance_valid(enemy):
-		return true
+		return "enemy %s" % _describe_node(enemy)
 
 	# 4. Check for blocking interactable objects
 	var interactable: DungeonInteractable = get_interactable_at_grid_pos(grid_position)
 	if is_instance_valid(interactable) and interactable.is_blocking:
-		return true
+		return "interactable %s (is_blocking)" % _describe_node(interactable)
 
 	# 5. Check for 3D physics obstacles (e.g. BigTimber trees, barrels, StaticBody3D props)
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
@@ -263,13 +476,42 @@ func is_tile_blocked(grid_position: Vector3i) -> bool:
 		var hits: Array[Dictionary] = space_state.intersect_shape(shape_query)
 		for hit: Dictionary in hits:
 			var collider: Object = hit.get("collider")
-			if collider == floor_grid:
+			if collider == floor_grid or (bridge_grid != null and collider == bridge_grid):
 				continue
 			if collider is Node and (collider as Node).is_in_group(&"player"):
 				continue
-			return true
+			return "physics: %s" % _describe_node(collider as Node)
 
-	return false
+	return ""
+
+
+## "BigTimbers/BigTimber5/StaticBody3D (StaticBody3D)" - path inside the active map when possible.
+func _describe_node(node: Node) -> String:
+	if not is_instance_valid(node):
+		return "<freed>"
+	var path: String = str(active_map_instance.get_path_to(node)) if is_instance_valid(active_map_instance) and active_map_instance.is_ancestor_of(node) else str(node.get_path())
+	return "%s (%s)" % [path, node.get_class()]
+
+
+## True when the Bridges layer has a tile on this ground cell.
+func _has_bridge(ground_cell: Vector3i) -> bool:
+	return is_instance_valid(bridge_grid) and bridge_grid.get_cell_item(ground_cell) != GridMap.INVALID_CELL_ITEM
+
+
+## Public: party is standing on (or stepping onto) a Bridges-layer tile.
+func is_bridge_at(ground_cell: Vector3i) -> bool:
+	return _has_bridge(ground_cell)
+
+
+## MeshLibrary item name for the Bridges tile at this cell, or "" if none.
+func get_bridge_item_name(ground_cell: Vector3i) -> String:
+	if not _has_bridge(ground_cell):
+		return ""
+	var mesh_library: MeshLibrary = bridge_grid.mesh_library
+	if not is_instance_valid(mesh_library):
+		return ""
+	var item_id: int = bridge_grid.get_cell_item(ground_cell)
+	return mesh_library.get_item_name(item_id)
 
 
 ## Returns an enemy node located at the specified 3D grid coordinate if present.

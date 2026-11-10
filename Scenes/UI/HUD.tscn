@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://dqkr2j65k83yc"]
+[gd_scene load_steps=30 format=3 uid="uid://dqkr2j65k83yc"]
 
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_cn5rm"]
 [ext_resource type="Texture2D" uid="uid://dn0f5ac8pbppq" path="res://ui/HUD/sidebar.png" id="2_ako3u"]
@@ -15,8 +15,11 @@
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="13_iub3o"]
 [ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_eedsi"]
 [ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="15_u1rxn"]
+[ext_resource type="Texture2D" uid="uid://dockh2fhdi881" path="res://ui/HUD/menu_button.png" id="15_yd1yt"]
+[ext_resource type="Texture2D" uid="uid://1xbwaw2vwxnn" path="res://ui/HUD/menu_button_pressed.png" id="16_5h4o4"]
 [ext_resource type="Script" uid="uid://ckoiskavvtx6f" path="res://Scripts/minimap_camera.gd" id="16_wjwn1"]
 [ext_resource type="Texture2D" uid="uid://btil8atds3nsj" path="res://ui/minimap-indicator.png" id="17_lyj15"]
+[ext_resource type="Texture2D" uid="uid://0r32xf12mm4" path="res://ui/HUD/menu_button_hover.png" id="17_p4bpa"]
 [ext_resource type="Texture2D" uid="uid://btj1qk47hrys6" path="res://ui/HUD/mini-map-cover.png" id="18_ako3u"]
 [ext_resource type="PackedScene" uid="uid://c7djkhvfbkv60" path="res://Scenes/UI/NineHUD.tscn" id="19_ako3u"]
 [ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="19_ralih"]
@@ -209,6 +212,34 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 1
 
+[node name="GameMenuAnchor" type="Control" parent="MainHUDLayout"]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 176.0
+offset_top = 17.0
+offset_right = 234.0
+offset_bottom = 77.0
+
+[node name="GameMenuButton" type="TextureButton" parent="MainHUDLayout/GameMenuAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 3.0
+offset_top = 8.0
+offset_right = 49.0
+offset_bottom = 59.0
+texture_normal = ExtResource("15_yd1yt")
+texture_pressed = ExtResource("16_5h4o4")
+texture_hover = ExtResource("17_p4bpa")
+
+[node name="GameMenuButtonLabel" type="Label" parent="MainHUDLayout/GameMenuAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 46.0
+offset_top = 18.0
+offset_right = 142.0
+offset_bottom = 41.0
+text = "MAIN MENU"
+
 [node name="MinimapAnchor" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 3
@@ -268,6 +299,10 @@ texture = ExtResource("18_ako3u")
 
 [node name="NineHud" parent="." instance=ExtResource("19_ako3u")]
 unique_name_in_owner = true
+offset_left = -1148.0
+offset_top = -458.0
+offset_right = -952.0
+offset_bottom = -304.0
 
 [node name="CompassLabel" type="Label" parent="."]
 unique_name_in_owner = true
@@ -297,6 +332,48 @@ theme_override_fonts/font = ExtResource("21_khvou")
 theme_override_font_sizes/font_size = 16
 text = "MORN"
 
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1113.0
+offset_top = 41.0
+offset_right = 1153.0
+offset_bottom = 81.0
+
+[node name="GoldLabel" type="Label" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -98.0
+offset_top = 9.0
+offset_right = -17.0
+offset_bottom = 32.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_fonts/font = ExtResource("21_khvou")
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 2
+
+[node name="GoldIcon" type="Label" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -18.0
+offset_top = 8.0
+offset_right = -3.0
+offset_bottom = 33.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_fonts/font = ExtResource("21_khvou")
+theme_override_font_sizes/font_size = 18
+text = "₡"
+horizontal_alignment = 2
+
 [node name="EdgeFlash" type="TextureRect" parent="."]
 unique_name_in_owner = true
 visible = false
@@ -309,6 +386,7 @@ texture = ExtResource("20_p5q14")
 
 [node name="SliceOverlay" type="ColorRect" parent="."]
 unique_name_in_owner = true
+visible = false
 z_index = 128
 material = SubResource("ShaderMaterial_yd1yt")
 anchors_preset = 15

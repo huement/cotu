@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" uid="uid://b06t4o2t4g4in" path="res://resources/Enemies/minataur.glb" id="1_mesh"]
+
+[node name="MinotaurModel" type="Node3D"]
+
+[node name="minataur" parent="." instance=ExtResource("1_mesh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)

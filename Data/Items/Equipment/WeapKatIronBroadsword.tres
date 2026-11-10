@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://ca5a4iauw3v7v"]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_d7hyn"]
+
+[resource]
+script = ExtResource("1_d7hyn")
+item_id = "weap_kat_iron_broadsword"
+item_name = "Kat Iron Broadsword"
+description = "Legendary Sword forged of high quality metal"
+icon_path = "res://Data/Items/weapon.png"
+item_type = 1
+equipment_slot = 8
+weapon_type = 1
+attack_bonus = 18
+credit_value = 350
+effects = "+3 STR"
+effect_amount = 3.0
+effect_stat = "strength"

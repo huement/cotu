@@ -315,7 +315,7 @@ func _build_items_inventory_ui() -> void:
 	popup_instance.close_requested.connect(_on_cancel_pressed)
 	popup_instance.target_selection_requested.connect(
 		func(item_to_use: ItemData, inv_slot_idx: int, acting_slot_idx: int) -> void:
-			match item_to_use.target_type:
+			match item_to_use.get_battle_target_type() if acting_slot_idx >= 0 else item_to_use.target_type:
 				ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:
 					_execute_item_use_direct(item_to_use, inv_slot_idx, acting_slot_idx, -1)
 					_close_modal()
@@ -355,7 +355,8 @@ func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_s
 
 	if is_in_battle:
 		var combatants: Array = active_data.get("combatants", [])
-		var is_ally_target: bool = (item.target_type == ItemData.TargetType.SINGLE_PARTY_MEMBER or item.target_type == ItemData.TargetType.ALL_PARTY)
+		var battle_target: ItemData.TargetType = item.get_battle_target_type()
+		var is_ally_target: bool = (battle_target == ItemData.TargetType.SINGLE_PARTY_MEMBER or battle_target == ItemData.TargetType.ALL_PARTY)
 
 		var valid_targets: Array = []
 		for c in combatants:
@@ -494,6 +495,9 @@ func _execute_item_use_direct(item: ItemData, inv_slot_idx: int, acting_slot_idx
 
 		if get_tree().root.has_node("SignalBus"):
 			SignalBus.player_action_selected.emit(acting_slot_idx, &"ITEM", max(0, target_slot_idx))
+		# The target was picked on this popup's cards - don't leave the manager waiting for a portrait click.
+		if is_instance_valid(target_mgr) and target_mgr.has_method("finish_selection"):
+			target_mgr.call("finish_selection")
 	else:
 		var gs: Node = get_tree().root.get_node_or_null("GameState")
 		if is_instance_valid(gs) and "inventory" in gs and gs.inventory != null:
@@ -678,6 +682,18 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 			if is_equippable:
 				var equip_action := func() -> void:
 					if is_instance_valid(cat):
+						if cat.has_method("can_equip_item") and not bool(cat.call("can_equip_item", item)):
+							var type_name: String = ItemData.WeaponType.keys()[item.weapon_type]
+							var prof_name: String = "this class"
+							if "profession" in cat and is_instance_valid(cat.profession) and "profession_name" in cat.profession:
+								prof_name = str(cat.profession.profession_name)
+							if is_instance_valid(SignalBus) and SignalBus.has_signal(&"show_toast"):
+								SignalBus.show_toast.emit(
+									"%s cannot equip %s weapons." % [prof_name, type_name], true
+								)
+							_close_modal()
+							return
+
 						var target_slot: String = item.get_slot_string()
 						if target_slot.is_empty():
 							target_slot = "LEFT_HAND"
@@ -703,8 +719,16 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 
 						# Swap equipment in loadout
 						var unequipped: ItemData = cat.unequip_item(target_slot) as ItemData if cat.has_method("unequip_item") else null
+						var equipped_ok: bool = true
 						if cat.has_method("equip_item"):
-							cat.equip_item(target_slot, item)
+							equipped_ok = bool(cat.equip_item(target_slot, item))
+						if not equipped_ok:
+							if is_instance_valid(inv):
+								inv.add_item(item)
+								if is_instance_valid(unequipped) and cat.has_method("equip_item"):
+									cat.equip_item(target_slot, unequipped)
+							_close_modal()
+							return
 						if is_instance_valid(inv) and is_instance_valid(unequipped):
 							inv.add_item(unequipped)
 
@@ -981,6 +1005,7 @@ func _build_confirmation_ui(data: Dictionary) -> void:
 
 	btn_hbox.add_child(confirm_btn)
 	btn_hbox.add_child(cancel_btn)
+	cancel_btn.visible = not bool(data.get("hide_cancel", false)) # message-only popups: just OK
 	content_area.add_child(btn_hbox)
 
 	call_deferred("_center_popup")

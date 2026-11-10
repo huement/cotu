@@ -47,6 +47,10 @@ const DEFAULT_RUN: AudioStream = preload("res://Audio/Enemies/gravel_run.mp3")
 @export var capture_sound: AudioStream = DEFAULT_CAPTURE
 @export var yell_sound: AudioStream = DEFAULT_YELL
 @export var run_loop_sound: AudioStream = DEFAULT_RUN
+## Optional alternate emerge sounds; one may replace the capture/yell clip at random.
+@export var alt_emerge_sounds: Array[AudioStream] = []
+@export_range(0.0, 1.0) var alt_emerge_chance: float = 0.5
+var _used_alt_emerge: bool = false
 ## Seconds of the capture clip that play AFTER the enemy reaches the party (the impact beat).
 @export var capture_tail: float = 0.3
 ## Sprint speed in YELL_THEN_RUN_LOOP mode (meters per second).
@@ -67,6 +71,22 @@ const DEFAULT_RUN: AudioStream = preload("res://Audio/Enemies/gravel_run.mp3")
 ## After sinking, the enemy can ambush again the next time the party enters the area.
 @export var rearm_after_retreat: bool = true
 
+@export_group("Chase Escape")
+## Freeze the party during the ambush (GloomReach Enraged Azurian). Off for escapable marsh rushers.
+@export var lock_player_movement: bool = true
+## Rise from under the ground at home instead of stepping out of a wall.
+@export var emerge_from_ground: bool = false
+## Continuously retarget the player's current position while rushing (escapable chase).
+@export var retarget_while_rushing: bool = false
+## Max seconds spent rushing before giving up. 0 = unlimited (cinematic one-shot rush).
+@export var max_chase_time: float = 0.0
+## If chase time runs out without catching the party, sink and skip the battle.
+@export var sink_on_chase_timeout: bool = false
+## How close (meters) the rusher must get to the player to count as a catch when retargeting.
+@export var catch_distance: float = 2.5
+
+signal ambush_finished(caught: bool)
+
 var _state: State = State.IDLE
 var _serial: int = 0
 var _home: Vector3 = Vector3.ZERO
@@ -83,6 +103,8 @@ var _rush_target: Vector3 = Vector3.ZERO
 var _rush_elapsed: float = 0.0
 var _rush_duration: float = 1.0
 var _rush_accelerates: bool = true
+var _chase_elapsed: float = 0.0
+var _escape_sink: bool = false
 
 
 func _ready() -> void:
@@ -175,6 +197,21 @@ func _on_body_entered(body: Node) -> void:
 	_start_ambush(body as Node3D)
 
 
+## Public entry for spawners that start the ambush without a TriggerArea.
+func start_ambush_at(player: Node3D) -> void:
+	if _state != State.IDLE or not is_instance_valid(player):
+		return
+	if enemy_group.is_empty():
+		push_warning("RushEnemyController '%s': no enemy_data / enemy_group set, so no ambush (would be an empty battle)." % name)
+		return
+	if bool(CombatManager.get("is_combat_active")):
+		return
+	if GameState.has_method("can_begin_encounter") and not GameState.can_begin_encounter():
+		return
+	_home = global_position
+	_start_ambush(player)
+
+
 func _is_player(body: Node) -> bool:
 	return body.is_in_group(&"player") or body.name == "Player" or body is DungeonPlayer
 
@@ -184,25 +221,35 @@ func _start_ambush(player: Node3D) -> void:
 	var serial: int = _serial
 	_player = player
 	_state = State.EMERGING
+	_escape_sink = false
+	_chase_elapsed = 0.0
 
 	# Freeze the party and stop other enemies from starting a fight mid-rush
-	if is_instance_valid(_player) and _player.has_method("set_movement_locked"):
+	if lock_player_movement and is_instance_valid(_player) and _player.has_method("set_movement_locked"):
 		_player.call("set_movement_locked", true)
 	if GameState.has_method("lock_encounters"):
 		GameState.lock_encounters(30.0)
 
-	GameLogger.combat("%s bursts out of the rock!" % (enemy_data.enemy_name if is_instance_valid(enemy_data) else name))
+	var label: String = _display_name()
+	if emerge_from_ground:
+		GameLogger.combat("%s rises from the mud!" % label)
+		_pivot.global_position = _home + Vector3.DOWN * emerge_distance
+	else:
+		GameLogger.combat("%s bursts out of the rock!" % label)
+		# Start inside the wall and step out of it
+		var out_dir: Vector3 = global_basis.z
+		out_dir.y = 0.0
+		out_dir = out_dir.normalized() if out_dir.length_squared() > 0.0001 else Vector3.BACK
+		_pivot.global_position = _home - out_dir * emerge_distance
 
-	# Start inside the wall and step out of it
-	var out_dir: Vector3 = global_basis.z
-	out_dir.y = 0.0
-	out_dir = out_dir.normalized() if out_dir.length_squared() > 0.0001 else Vector3.BACK
-	_pivot.global_position = _home - out_dir * emerge_distance
 	_pivot.visible = true
 	_face_toward(_player.global_position)
 	_play_anim(&"idle", true)
 
-	if audio_mode == AudioMode.CAPTURE_CLIP:
+	_used_alt_emerge = not alt_emerge_sounds.is_empty() and randf() < alt_emerge_chance
+	if _used_alt_emerge:
+		_play_sound(alt_emerge_sounds.pick_random(), false)
+	elif audio_mode == AudioMode.CAPTURE_CLIP:
 		_play_sound(capture_sound, false)
 	else:
 		_play_sound(yell_sound, false)
@@ -239,9 +286,16 @@ func _begin_rush() -> void:
 	_rush_from = _pivot.global_position
 	_rush_target = _compute_rush_target()
 	_rush_elapsed = 0.0
+	_chase_elapsed = 0.0
 	var distance: float = _rush_from.distance_to(_rush_target)
 
-	if audio_mode == AudioMode.CAPTURE_CLIP and is_instance_valid(capture_sound):
+	if retarget_while_rushing:
+		# Continuous chase: move at run_speed toward the live player position.
+		_rush_duration = maxf(0.3, distance / maxf(0.5, run_speed))
+		_rush_accelerates = false
+		if audio_mode == AudioMode.YELL_THEN_RUN_LOOP or _used_alt_emerge or not is_instance_valid(capture_sound):
+			_play_sound(run_loop_sound, true)
+	elif audio_mode == AudioMode.CAPTURE_CLIP and not _used_alt_emerge and is_instance_valid(capture_sound):
 		# Arrive so the hit lands capture_tail seconds before the clip ends
 		var remaining: float = capture_sound.get_length() - emerge_time - taunt_time - capture_tail
 		_rush_duration = maxf(0.6, remaining)
@@ -255,7 +309,13 @@ func _begin_rush() -> void:
 
 
 ## Stops stop_distance in front of the camera, so the runner ends up where the battle model appears.
+## When retarget_while_rushing, aims at the player's current position instead.
 func _compute_rush_target() -> Vector3:
+	if retarget_while_rushing and is_instance_valid(_player):
+		var chase_target: Vector3 = _player.global_position
+		chase_target.y = _home.y
+		return chase_target
+
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	var origin: Vector3 = _player.global_position if is_instance_valid(_player) else _home
 	var forward: Vector3 = Vector3.FORWARD
@@ -279,6 +339,10 @@ func _process(delta: float) -> void:
 		_retreat(_serial)
 		return
 
+	if retarget_while_rushing:
+		_process_retarget_chase(delta)
+		return
+
 	_rush_elapsed += delta
 	var t: float = clampf(_rush_elapsed / _rush_duration, 0.0, 1.0)
 	# Capture clip: start slow, build up as the footsteps get louder
@@ -293,6 +357,33 @@ func _process(delta: float) -> void:
 		_anim.speed_scale = clampf(speed / maxf(0.1, sprint_anim_reference_speed), 0.7, 1.8)
 
 	if t >= 1.0:
+		_on_reached_party(_serial)
+
+
+func _process_retarget_chase(delta: float) -> void:
+	_chase_elapsed += delta
+	if sink_on_chase_timeout and max_chase_time > 0.0 and _chase_elapsed >= max_chase_time:
+		_escape_sink = true
+		_retreat(_serial)
+		return
+
+	if not is_instance_valid(_player):
+		_escape_sink = true
+		_retreat(_serial)
+		return
+
+	_rush_target = _compute_rush_target()
+	var previous: Vector3 = _pivot.global_position
+	var step: float = maxf(0.5, run_speed) * delta
+	_pivot.global_position = previous.move_toward(_rush_target, step)
+	_face_toward(_rush_target)
+
+	if is_instance_valid(_anim) and delta > 0.0:
+		var speed: float = previous.distance_to(_pivot.global_position) / delta
+		_anim.speed_scale = clampf(speed / maxf(0.1, sprint_anim_reference_speed), 0.7, 1.8)
+
+	var flat_player: Vector3 = Vector3(_player.global_position.x, _pivot.global_position.y, _player.global_position.z)
+	if _pivot.global_position.distance_to(flat_player) <= catch_distance:
 		_on_reached_party(_serial)
 
 
@@ -317,6 +408,8 @@ func _on_reached_party(serial: int) -> void:
 
 func _start_battle() -> void:
 	_state = State.IN_COMBAT
+	# Cut rush SFX immediately — capture/run clips often outlast a short chase.
+	_stop_sound()
 	_pivot.visible = false # EnemyVisualManager spawns the battle model centered on the camera
 	if GameState.has_method("clear_encounter_lock"):
 		GameState.clear_encounter_lock()
@@ -325,7 +418,7 @@ func _start_battle() -> void:
 	if "current_party" in GameState and GameState.current_party != null and "slots" in GameState.current_party:
 		party_slots = GameState.current_party.slots
 
-	GameLogger.combat("%s caught the party! Battle starts." % (enemy_data.enemy_name if is_instance_valid(enemy_data) else name))
+	GameLogger.combat("%s caught the party! Battle starts." % _display_name())
 	SignalBus.combat_started.emit(enemy_group, party_slots, "SOUTH")
 
 
@@ -333,7 +426,8 @@ func _on_combat_ended(victory: bool) -> void:
 	if _state != State.IN_COMBAT:
 		return
 	_unlock_player()
-	if victory:
+	ambush_finished.emit(true)
+	if victory or not rearm_after_retreat:
 		_state = State.DEFEATED
 		queue_free()
 		return
@@ -342,7 +436,7 @@ func _on_combat_ended(victory: bool) -> void:
 
 
 # ==============================================================================
-# TORCH RETREAT
+# TORCH / ESCAPE RETREAT
 # ==============================================================================
 ## Placeholder hook for the torch mechanic. Returns true while the party holds a lit torch.
 func _should_retreat() -> bool:
@@ -363,7 +457,10 @@ func _retreat(serial: int) -> void:
 	if is_instance_valid(_anim):
 		_anim.speed_scale = 1.0
 	_play_anim(&"idle", true)
-	GameLogger.combat("%s recoils from the torchlight and sinks into the ground!" % (enemy_data.enemy_name if is_instance_valid(enemy_data) else name))
+	if _escape_sink:
+		GameLogger.combat("%s loses the trail and sinks into the ground!" % _display_name())
+	else:
+		GameLogger.combat("%s recoils from the torchlight and sinks into the ground!" % _display_name())
 
 	var sunk: Vector3 = _pivot.global_position + Vector3.DOWN * 2.5
 	var tween: Tween = create_tween()
@@ -376,6 +473,7 @@ func _retreat(serial: int) -> void:
 	_unlock_player()
 	if GameState.has_method("clear_encounter_lock"):
 		GameState.clear_encounter_lock()
+	ambush_finished.emit(false)
 	if rearm_after_retreat:
 		_reset_to_hidden()
 	else:
@@ -396,7 +494,15 @@ func _reset_to_hidden() -> void:
 		_anim.speed_scale = 1.0
 
 
+func _display_name() -> String:
+	if is_instance_valid(enemy_data) and not enemy_data.enemy_name.is_empty():
+		return enemy_data.enemy_name
+	return str(name)
+
+
 func _unlock_player() -> void:
+	if not lock_player_movement:
+		return
 	if not is_instance_valid(_player):
 		_player = get_tree().get_first_node_in_group(&"player") as Node3D
 	if is_instance_valid(_player) and _player.has_method("set_movement_locked"):

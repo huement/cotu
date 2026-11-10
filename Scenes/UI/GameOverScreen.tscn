@@ -1,0 +1,65 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/GameOverScreen.gd" id="1_go"]
+[ext_resource type="Texture2D" path="res://ui/GAME/game_over.png" id="2_art"]
+
+[node name="GameOverScreen" type="CanvasLayer"]
+layer = 120
+script = ExtResource("1_go")
+
+[node name="Black" type="ColorRect" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Center" type="CenterContainer" parent="Black"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Black/Center"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="GameOverArt" type="TextureRect" parent="Black/Center/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(840, 469)
+layout_mode = 2
+texture = ExtResource("2_art")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Buttons" type="HBoxContainer" parent="Black/Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="LoadButton" type="Button" parent="Black/Center/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 52)
+layout_mode = 2
+text = "LOAD SAVE"
+
+[node name="QuitButton" type="Button" parent="Black/Center/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 52)
+layout_mode = 2
+text = "QUIT"
+
+[node name="StatusLabel" type="Label" parent="Black/Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Sound" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+process_mode = 3

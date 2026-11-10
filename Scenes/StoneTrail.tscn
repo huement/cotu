@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://dyftx0kemcc88"]
+[gd_scene load_steps=35 format=3 uid="uid://dyftx0kemcc88"]
 
 [ext_resource type="MeshLibrary" uid="uid://w6j6ksydupt" path="res://resources/mesh_library/knature_mesh_library.tres" id="1_83dqm"]
 [ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_pi64s"]
@@ -20,21 +20,21 @@
 [ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="16_rnoqb"]
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/MinotaurWorldEnemy.tscn" id="18_nrmpo"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="18_ojhip"]
-[ext_resource type="Resource" uid="uid://bxbc286tkd8c3" path="res://Data/Items/ConCyberRation.tres" id="19_mk8mb"]
+[ext_resource type="Resource" uid="uid://gtdyx13ndtoa" path="res://Data/Items/Consumables/PotCyberRation.tres" id="19_mk8mb"]
 [ext_resource type="MeshLibrary" uid="uid://cncj810ickx4v" path="res://resources/mesh_library/cliff_mesh_library.tres" id="19_vw72k"]
-[ext_resource type="Resource" uid="uid://dkjygghfuu3r2" path="res://Data/Items/ConHealthVial.tres" id="20_1lacx"]
+[ext_resource type="Resource" uid="uid://cn8h2dwulil7" path="res://Data/Items/Consumables/PotHealthVial.tres" id="20_1lacx"]
 [ext_resource type="Script" uid="uid://464km5lxyytl" path="res://Scripts/Environment/night_enemy_spawner.gd" id="21_6pdu7"]
-[ext_resource type="Resource" uid="uid://busd0qc3dbsf2" path="res://Data/Items/ConManaVial.tres" id="21_uwibm"]
+[ext_resource type="Resource" uid="uid://eu7mvyxnwhjo" path="res://Data/Items/Consumables/PotManaVial.tres" id="21_uwibm"]
 [ext_resource type="PackedScene" uid="uid://cjl0q48rpnael" path="res://Scenes/Enemies/BlobMonster.tscn" id="25_uwibm"]
 [ext_resource type="Resource" uid="uid://rmuneiaru3gq" path="res://Data/Enemies/EnBlob.tres" id="26_pmjde"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="27_8fle0"]
-[ext_resource type="AudioStream" uid="uid://bpdf50t4880cm" path="res://Audio/Environment/new-area.mp3" id="28_pmjde"]
 [ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="30_8r4xu"]
+[ext_resource type="Material" path="res://resources/Environment/pixel_sky.tres" id="90_pixelsky"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_x4sae"]
 
 [sub_resource type="Sky" id="Sky_bosie"]
-sky_material = SubResource("ProceduralSkyMaterial_x4sae")
+sky_material = ExtResource("90_pixelsky")
 
 [sub_resource type="Environment" id="Environment_4kg3n"]
 background_mode = 2
@@ -148,23 +148,6 @@ script = ExtResource("9_uwibm")
 target_dungeon_scene = "uid://bwdxpphry601f"
 prompt_text = "This massive gate labeled \"VERO WOODS\". Will you proceed?"
 
-[node name="CloudLayer" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
-script = ExtResource("7_sylal")
-min_scale = 0.5
-max_scale = 0.65
-
-[node name="low_poly_cloud" parent="CloudLayer" instance=ExtResource("8_8fle0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, -16.78)
-
-[node name="Sketchfab_Scene" parent="CloudLayer" instance=ExtResource("9_pmjde")]
-
-[node name="@Node3D@49228" parent="CloudLayer" instance=ExtResource("10_8r4xu")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 18.68, -3.9, -14.17)
-
-[node name="@Node3D@49229" parent="CloudLayer" instance=ExtResource("11_u0h4v")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -10.7, 0, -19.97)
-
 [node name="DayLightCycle" type="Node3D" parent="." node_paths=PackedStringArray("sun_light", "moon_light", "world_environment", "moon_mesh_node")]
 script = ExtResource("12_myjf8")
 sun_light = NodePath("../SunLight")
@@ -223,11 +206,12 @@ wall_maps = [NodePath("../WallMap"), NodePath("../WallMap2"), NodePath("../WallM
 spawn_point = NodePath("../SpawnPoint")
 enemy_scene = ExtResource("18_nrmpo")
 
-[node name="LevelTitleArea" parent="." instance=ExtResource("27_8fle0")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.956554, 1.191164, -43.56736)
+[node name="LevelTitle" parent="." instance=ExtResource("27_8fle0")]
 level_title = "STONE
 TRAIL TOP"
-trigger_sound = ExtResource("28_pmjde")
+play_new_area_sound = true
 
 [node name="Stairs" parent="." instance=ExtResource("30_8r4xu")]
 transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, -72.37514, -0.13296247, 109.834366)
+prompt_message = "Make the long climb up to Gloom Reach?"
+target_scene = "uid://0kgrwvgkp7h5"

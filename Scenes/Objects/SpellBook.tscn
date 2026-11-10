@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://dsv76l0psdljk"]
+
+[ext_resource type="PackedScene" uid="uid://bvys06ac73368" path="res://resources/Objects/spellbook_fire.glb" id="1_jbdge"]
+
+[ext_resource type="Script" path="res://Scripts/Environment/ItemPickup.gd" id="90_pickup"]
+[ext_resource type="Resource" path="res://Data/Items/Loot/LrnSpellBook.tres" id="91_item"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jbdge"]
+size = Vector3(0.83880615, 0.36816406, 0.58099365)
+
+[node name="SpellBook" type="Node3D"]
+script = ExtResource("90_pickup")
+item = ExtResource("91_item")
+glow_color = Color(1, 0.55, 0.2, 1)
+float_height = 0.45
+
+[node name="Fire_Model" parent="." instance=ExtResource("1_jbdge")]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0054626465, -0.008453369, -0.010345459)
+shape = SubResource("BoxShape3D_jbdge")
