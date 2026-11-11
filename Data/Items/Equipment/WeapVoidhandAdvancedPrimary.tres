@@ -13,3 +13,4 @@ equipment_slot = 6
 weapon_type = 2
 attack_bonus = 18
 credit_value = 350
+swing_anim = "claw_swing"

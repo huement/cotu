@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_q2non"]
+
+[resource]
+script = ExtResource("1_q2non")
+item_id = "weap_throwing_knife"
+item_name = "Throwing Knife"
+description = "A balanced steel knife made for throwing."
+icon_path = "res://Data/Items/ammo.png"
+item_type = 1
+target_type = 2
+weapon_type = 3
+attack_bonus = 6
+credit_value = 12
+is_consumable = true
+swing_anim = "knife_throw"
+is_throwable = true

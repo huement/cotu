@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/SkillData.gd" id="1_bg6fa"]
+
+[resource]
+script = ExtResource("1_bg6fa")
+skill_id = "sk_deadly_throw"
+skill_name = "Deadly Throw"
+description = "Hurls a throwing knife or star with lethal force. Consumes one from the pack."
+icon_path = "res://Data/Skills/Icons/craft_throwable.png"
+animation = "knife_throw"
+energy_cost = 5
+effect_amount = 45
+element = 3
+assigned_classes = Array[String](["Ghostblade", "Voidhand", "Ronin", "Shade", "Warden"])

@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://cts8emds4lj1h"]
+[gd_scene load_steps=27 format=3 uid="uid://cts8emds4lj1h"]
 
 [ext_resource type="MeshLibrary" uid="uid://w6j6ksydupt" path="res://resources/mesh_library/knature_mesh_library.tres" id="1_u2be4"]
 [ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_bgb78"]
@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://crhntawb0lghi" path="res://Scenes/Environment/forest_wall_chunk_thick.tscn" id="5_yi8a0"]
 [ext_resource type="PackedScene" uid="uid://cqjyi71f838u1" path="res://Scenes/Objects/BigTimber.tscn" id="6_kvfaw"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="8_wq7t2"]
-[ext_resource type="Script" uid="uid://dokbtyywp86kj" path="res://Scripts/Environment/cloud_layer.gd" id="9_b6s1m"]
 [ext_resource type="PackedScene" uid="uid://ekckcrvvkuqm" path="res://resources/OutdoorParts/low_poly_cloud.glb" id="10_snr3j"]
 [ext_resource type="PackedScene" uid="uid://bpn2rvnvip8cv" path="res://resources/OutdoorParts/low_poly_cloud-2.glb" id="11_h1ldq"]
 [ext_resource type="PackedScene" uid="uid://wlg457v4s706" path="res://resources/OutdoorParts/low_poly_cloud-3.glb" id="12_0t46o"]

@@ -72,14 +72,14 @@ reads **THROW**). Throwing stars, throwing knives, exploding potions... Set it i
 - **Target**: one enemy (pick from the target cards), or every enemy when `target_type = ALL_ENEMIES`
   (exploding potions). Battle only; one is used up per throw.
 - **Power**: `attack_bonus` (or `effect_amount` when attack_bonus is 0).
-- **DEX does everything** (formulas + tuning constants in `CombatMath.gd` → "Throwing"):
+- **DEX hits / crits; STR damages** (formulas + tuning in `CombatMath.gd` → "Throwing"):
   - hit chance = 80% + (DEX − target speed) × 2.5%, clamped 40–98%
-  - damage = (power × 2 + DEX) × (1 + DEX × 0.05) − half the target's defence (min 1); weakness / resist
+  - damage = (power × 2 + STR) × (1 + STR × 0.05) − half the target's defence (min 1); weakness / resist
     from `effect_element` (RANGED when none)
   - crit chance = DEX × 1% (max 35%), crits do ×1.5
   - plus any `granted_status_effects` on a hit
-- Example: Steel Shuriken (power 4) from a DEX 14 Ghostblade at a defence-6 enemy ≈ 34 damage
-  (a STR-28 melee swing does ~23), 90% to hit an enemy with speed 10.
+- Example: Steel Shuriken (power 4) from a STR 14 thrower at a defence-6 enemy ≈ 34 damage
+  (a STR-28 melee swing does ~23); hit chance still uses DEX.
 
 Throwable now: **Steel Shuriken** / **Holo-Shuriken** (Ghostblade kit — a new Ghostblade starts with 5 in the
-pack) and **Radium Dart** (Loot.csv).
+pack), **Throwing Knife** (seeded for Deadly Throw classes), and **Kunai**.

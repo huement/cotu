@@ -13,3 +13,4 @@ equipment_slot = 8
 weapon_type = 1
 attack_bonus = 18
 credit_value = 350
+swing_anim = "lance_swing"

@@ -13,3 +13,4 @@ equipment_slot = 6
 weapon_type = 1
 attack_bonus = 8
 credit_value = 80
+swing_anim = "katana_swing"

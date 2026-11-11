@@ -5,11 +5,12 @@
 [resource]
 script = ExtResource("1_b24gr")
 item_id = "weap_echo_advanced_primary"
-item_name = "Sonic Synth"
-description = "Advanced primary weapon for the Echo."
+item_name = "Holo-Lute"
+description = "Advanced resonant lute for the Echo class."
 icon_path = "res://Data/Items/weapon.png"
 item_type = 1
 equipment_slot = 8
 weapon_type = 2
 attack_bonus = 18
 credit_value = 350
+swing_anim = "lute_swing"

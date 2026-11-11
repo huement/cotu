@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://dyftx0kemcc88"]
+[gd_scene load_steps=34 format=3 uid="uid://dyftx0kemcc88"]
 
 [ext_resource type="MeshLibrary" uid="uid://w6j6ksydupt" path="res://resources/mesh_library/knature_mesh_library.tres" id="1_83dqm"]
 [ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_pi64s"]
@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://r2hd51nblgow" path="res://Scenes/Environment/forest_wall_chunk.tscn" id="4_mk8mb"]
 [ext_resource type="PackedScene" uid="uid://crhntawb0lghi" path="res://Scenes/Environment/forest_wall_chunk_thick.tscn" id="5_1lacx"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="6_uwibm"]
-[ext_resource type="Script" uid="uid://dokbtyywp86kj" path="res://Scripts/Environment/cloud_layer.gd" id="7_sylal"]
 [ext_resource type="PackedScene" uid="uid://dx4c3itu5r2ej" path="res://Scenes/Environment/StoneGate.tscn" id="8_1lacx"]
 [ext_resource type="PackedScene" uid="uid://ekckcrvvkuqm" path="res://resources/OutdoorParts/low_poly_cloud.glb" id="8_8fle0"]
 [ext_resource type="PackedScene" uid="uid://bpn2rvnvip8cv" path="res://resources/OutdoorParts/low_poly_cloud-2.glb" id="9_pmjde"]

@@ -161,7 +161,7 @@ func test_throw_crit_chance_from_dex() -> void:
 
 
 func test_throw_damage_formula() -> void:
-	# (4 x 2 + 14) x (1 + 14 x 0.05) = 22 x 1.7 = 37.4 ; - def 6 x 0.5 = 34.4 -> 34
+	# STR-scaled: (4 x 2 + 14) x (1 + 14 x 0.05) = 22 x 1.7 = 37.4 ; - def 6 x 0.5 = 34.4 -> 34
 	assert_eq(CombatMath.throw_damage(4, 14, CombatFixtures.enemy(0, 0, 6), 1.5), 34)
 	# weakness (RANGED) x1.5
 	var weak := CombatFixtures.enemy(0, 0, 6, 40, ItemData.EffectElement.RANGED)
@@ -170,7 +170,7 @@ func test_throw_damage_formula() -> void:
 
 
 func test_throw_beats_a_normal_attack() -> void:
-	# A DEX 14 thrower's Steel Shuriken (power 4) vs a STR 20 + weapon 8 melee swing, same armour.
+	# A STR 14 thrower's Steel Shuriken (power 4) vs a STR 20 + weapon 8 melee swing, same armour.
 	var foe := CombatFixtures.enemy(0, 0, 10)
 	var melee: int = CombatMath.physical_damage(CombatFixtures.party(0, 28), foe, "BLADE", false, 1.5)
 	assert_gt(CombatMath.throw_damage(4, 14, foe, 1.5), melee)
@@ -189,4 +189,10 @@ func test_item_throw_helpers() -> void:
 	assert_eq(star.get_battle_target_type(), ItemData.TargetType.ALL_ENEMIES, "exploding potions hit everyone")
 	var shuriken: ItemData = load("res://Data/Items/Equipment/WeapGhostbladeRegularAmmo.tres")
 	assert_true(shuriken.is_throwable)
-	assert_true((load("res://Data/Items/Equipment/WeapRaddart.tres") as ItemData).is_throwable)
+	var kunai: ItemData = load("res://Data/Items/Equipment/WeapKunai.tres") as ItemData
+	assert_true(kunai.is_throwable)
+	assert_eq(kunai.get_throw_anim(), "knife_throw")
+	var knife: ItemData = load("res://Data/Items/Equipment/WeapThrowingKnife.tres") as ItemData
+	assert_true(knife.is_throwable)
+	assert_eq(knife.get_throw_anim(), "knife_throw")
+	assert_eq(shuriken.get_throw_anim(), "star_throw")

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://uywsul4fqr7k"]
+[gd_scene load_steps=7 format=3 uid="uid://uywsul4fqr7k"]
 
 [ext_resource type="MeshLibrary" uid="uid://uxwaf0jjs4ea" path="res://resources/mesh_library/boss_floor_mesh_library.tres" id="1_wg2y7"]
 [ext_resource type="MeshLibrary" uid="uid://cqwro773enorh" path="res://resources/mesh_library/boss_wall_mesh_library.tres" id="2_2q348"]
 [ext_resource type="PackedScene" uid="uid://obtfq1vnf1h8" path="res://Scenes/Objects/Torch.tscn" id="3_i5a7v"]
 [ext_resource type="PackedScene" uid="uid://dquxxvchp5mey" path="res://Scenes/Objects/Barrel.tscn" id="4_2q348"]
 [ext_resource type="Texture2D" uid="uid://devj0vld35c7r" path="res://ui/LOGOS/smilodon.png" id="5_i5a7v"]
+[ext_resource type="PackedScene" uid="uid://bqsvcn2tt1sxq" path="res://Scenes/Objects/Column.tscn" id="6_05smb"]
 
 [node name="DungeonBattle" type="Node3D"]
 
@@ -14,7 +15,7 @@ mesh_library = ExtResource("1_wg2y7")
 cell_size = Vector3(4, 4, 4)
 cell_center_y = false
 data = {
-"cells": PackedInt32Array(65530, 65533, 0, 65530, 65534, 0, 65530, 65535, 0, 65530, 0, 0, 65530, 1, 0, 65530, 2, 0, 65530, 3, 0, 65531, 65533, 0, 65531, 65534, 0, 65531, 65535, 0, 65531, 0, 0, 65531, 1, 0, 65531, 2, 0, 65531, 3, 0, 65532, 65533, 0, 65532, 65534, 0, 65532, 65535, 0, 65532, 0, 0, 65532, 1, 0, 65532, 2, 0, 65532, 3, 0, 65533, 65533, 0, 65533, 65534, 0, 65533, 65535, 0, 65533, 0, 0, 65533, 1, 0, 65533, 2, 0, 65533, 3, 0, 65534, 65533, 0, 65534, 65534, 0, 65534, 65535, 0, 65534, 0, 0, 65534, 1, 0, 65534, 2, 0, 65534, 3, 0, 65535, 65533, 0, 65535, 65534, 0, 65535, 65535, 0, 65535, 0, 0, 65535, 1, 0, 65535, 2, 0, 65535, 3, 0, 0, 65533, 0, 0, 65534, 0, 0, 65535, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 1, 65533, 0, 1, 65534, 0, 1, 65535, 0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0)
+"cells": PackedInt32Array(65530, 65533, 0, 65530, 65534, 0, 65530, 65535, 0, 65530, 0, 0, 65530, 1, 0, 65530, 2, 0, 65530, 3, 0, 65531, 65533, 0, 65531, 65534, 0, 65531, 65535, 0, 65531, 0, 0, 65531, 1, 0, 65531, 2, 0, 65531, 3, 0, 65532, 65533, 0, 65532, 65534, 0, 65532, 65535, 1441794, 65532, 0, 0, 65532, 1, 1048577, 65532, 2, 0, 65532, 3, 0, 65533, 65533, 0, 65533, 65534, 1048578, 65533, 65535, 0, 65533, 0, 1, 65533, 1, 0, 65533, 2, 0, 65533, 3, 0, 65534, 65533, 0, 65534, 65534, 0, 65534, 65535, 1048577, 65534, 0, 0, 65534, 1, 0, 65534, 2, 1441794, 65534, 3, 0, 65535, 65533, 0, 65535, 65534, 0, 65535, 65535, 0, 65535, 0, 2, 65535, 1, 1, 65535, 2, 0, 65535, 3, 0, 0, 65533, 0, 0, 65534, 0, 0, 65535, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 1, 65533, 0, 1, 65534, 0, 1, 65535, 0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0)
 }
 
 [node name="GridMap" type="GridMap" parent="."]
@@ -27,36 +28,33 @@ data = {
 }
 
 [node name="Torch" parent="." instance=ExtResource("3_i5a7v")]
-transform = Transform3D(0.9970834, 0, 0.07631877, 0, 1, 0, -0.07631877, 0, 0.9970834, 0.7912712, 3.8228588, -5.4776416)
+transform = Transform3D(0.9970834, 0, 0.07631877, 0, 1, 0, -0.07631877, 0, 0.9970834, 0.7912712, 3.1552887, -5.4776416)
 
 [node name="Torch2" parent="." instance=ExtResource("3_i5a7v")]
-transform = Transform3D(0.9970834, 0, 0.07631877, 0, 1, 0, -0.07631877, 0, 0.9970834, -12.374961, 3.8228588, -5.4776416)
+transform = Transform3D(0.9970834, 0, 0.07631877, 0, 1, 0, -0.07631877, 0, 0.9970834, -12.374961, 2.8228588, -5.4776416)
 
 [node name="Torch3" parent="." instance=ExtResource("3_i5a7v")]
-transform = Transform3D(-0.9958907, 0, -0.090563126, 0, 1, 0, 0.090563126, 0, -0.9958907, -8.517042, 3.8228588, 13.488463)
+transform = Transform3D(-0.9958907, 0, -0.090563126, 0, 1, 0, 0.090563126, 0, -0.9958907, -8.517042, 3.1194658, 13.488463)
 
 [node name="SpawnPoint" type="Marker3D" parent="."]
 transform = Transform3D(-4.3711392e-08, 0, 0.9999999, 0, 1, 0, -1.0000001, 0, -4.3711385e-08, -1.0576785, 1, 4.5635877)
 
-[node name="BattleLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 3.4, 4.5)
-light_color = Color(1, 0.82, 0.62, 1)
-light_energy = 1.6
-omni_range = 13.0
-
 [node name="Extras" type="Node3D" parent="."]
 
 [node name="Barrel3" parent="Extras" instance=ExtResource("4_2q348")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1, 12.892662)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, -0.05536127, 12.892662)
 
 [node name="Barrel4" parent="Extras" instance=ExtResource("4_2q348")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.448109, 1, 12.287788)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.448109, 0, 12.287788)
 
 [node name="Barrel5" parent="Extras" instance=ExtResource("4_2q348")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.594845, 1, -2.2063084)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.594845, 0, -3.0470448)
+
+[node name="Barrel7" parent="Extras" instance=ExtResource("4_2q348")]
+transform = Transform3D(0.86714894, 0.4958873, -0.04635129, 0, -0.09306575, -0.99566007, -0.49804893, 0.86338556, -0.08070187, -16.491928, 0.3824954, -2.3204498)
 
 [node name="Barrel6" parent="Extras" instance=ExtResource("4_2q348")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.593985, 1, -0.03881073)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.593985, 0, -0.03881073)
 
 [node name="Smilo2" type="Sprite3D" parent="Extras"]
 transform = Transform3D(-2.1295534e-08, -4.916461e-09, 0.5, -0.11247552, 0.48718503, 0, -0.48718503, -0.11247552, -2.1855694e-08, -17.375603, 2.384697, 4.4966583)
@@ -71,3 +69,9 @@ sorting_offset = 0.1
 modulate = Color(1, 1, 1, 0.63529414)
 shaded = true
 texture = ExtResource("5_i5a7v")
+
+[node name="Column12" parent="Extras" instance=ExtResource("6_05smb")]
+transform = Transform3D(0.9970834, 0, 0.07631877, 0, 1, 0, -0.07631877, 0, 0.9970834, -15.355649, -0.13418913, 7.577178)
+
+[node name="Column13" parent="Extras" instance=ExtResource("6_05smb")]
+transform = Transform3D(0.9970834, 0, 0.07631877, 0, 1, 0, -0.07631877, 0, 0.9970834, -15.382213, 1.8166544, 7.577178)

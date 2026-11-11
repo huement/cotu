@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://0kgrwvgkp7h5"]
+[gd_scene load_steps=44 format=3 uid="uid://0kgrwvgkp7h5"]
 
 [ext_resource type="MeshLibrary" uid="uid://s2dw55y6ywp0" path="res://resources/mesh_library/mesa_floor_mesh_library.tres" id="1_6bu6g"]
 [ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_2kp4r"]
@@ -7,7 +7,6 @@
 [ext_resource type="MeshLibrary" uid="uid://bpv86cwgec2oe" path="res://resources/mesh_library/krock_mesh_library.tres" id="5_u21wj"]
 [ext_resource type="PackedScene" uid="uid://cqjyi71f838u1" path="res://Scenes/Objects/BigTimber.tscn" id="6_345s5"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="6_mc5bb"]
-[ext_resource type="Script" uid="uid://dokbtyywp86kj" path="res://Scripts/Environment/cloud_layer.gd" id="7_erp7x"]
 [ext_resource type="PackedScene" uid="uid://fbpo5yssdocm" path="res://Scenes/Objects/Campfire.tscn" id="7_mc5bb"]
 [ext_resource type="PackedScene" uid="uid://dcml7jcxd2e5q" path="res://Scenes/Objects/Bones.tscn" id="8_erp7x"]
 [ext_resource type="PackedScene" uid="uid://ekckcrvvkuqm" path="res://resources/OutdoorParts/low_poly_cloud.glb" id="8_uvfov"]
@@ -277,11 +276,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.37, -0.24, 11.4)
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="MinotaurWorldEnemy" parent="Enemies" instance=ExtResource("18_xutaf")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 28.442265, 0, 12.804966)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.442265, 0, 12.804966)
 is_night_only = false
 
 [node name="MinotaurWorldEnemy2" parent="Enemies" instance=ExtResource("18_xutaf")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 37.089275, 0, 40.89997)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.089275, 0, 40.89997)
 is_night_only = false
 
 [node name="Enemy" parent="Enemies" instance=ExtResource("18_6bu6g")]

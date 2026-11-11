@@ -213,8 +213,10 @@ func test_starter_kit_spares_go_to_the_pack() -> void:
 	var spare: Array[ItemData] = StarterKit.equip(warden)
 	assert_eq((warden.get_equipped_item("RIGHT_HAND") as ItemData).item_name, "Crossbow")
 	assert_eq((warden.get_equipped_item("LEFT_HAND") as ItemData).item_name, "Iron Arrows")
-	assert_eq(spare.size(), 1)
+	# Backup dagger + seeded Throwing Knives for Deadly Throw classes.
+	assert_eq(spare.size(), 2)
 	assert_eq(spare[0].item_name, "Iron Dagger")
+	assert_eq(spare[1].item_name, "Throwing Knife")
 
 
 func test_soulwright_starts_with_staff_no_shield() -> void:

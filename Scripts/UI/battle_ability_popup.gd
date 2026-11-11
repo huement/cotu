@@ -561,8 +561,10 @@ func _is_ally_targeting(ability_res: Resource) -> bool:
 	if not is_instance_valid(ability_res):
 		return false
 
-	if "skill_id" in ability_res and ability_res.get("skill_id") == &"sk_craft_ammo":
-		return true
+	if "skill_id" in ability_res:
+		var sid: String = str(ability_res.get("skill_id"))
+		if sid == "sk_craft_ammo" or sid == "sk_flask_brew":
+			return true
 
 	var raw_type: Variant = ability_res.get("target_type") if "target_type" in ability_res else ability_res.get("target")
 	if raw_type is String or raw_type is StringName:

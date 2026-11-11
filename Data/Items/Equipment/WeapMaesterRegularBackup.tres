@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_mbqm5"]
+
+[resource]
+script = ExtResource("1_mbqm5")
+item_id = "weap_maester_regular_backup"
+item_name = "Wooden Staff"
+description = "Backup melee staff for the Maester when flasks run dry."
+icon_path = "res://Data/Items/weapon.png"
+item_type = 1
+equipment_slot = 6
+weapon_type = 2
+attack_bonus = 6
+credit_value = 40

@@ -78,6 +78,9 @@ signal hazard_slash_requested()
 signal weapon_impact_occurred
 signal weapon_animation_finished
 signal weapon_swing_requested(anim_name: String)
+## ThrowAnimator clips: "big_potion_throw", "knife_throw", "star_throw".
+signal throw_requested(anim_name: String)
+signal throw_animation_finished
 
 ## Lore object scare: aura overlay + image flash (see LoreScareFX)
 signal lore_scare_requested(data: Dictionary)

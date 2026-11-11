@@ -97,14 +97,30 @@ enum ElementalBase {
 @export var effect_element: EffectElement = EffectElement.NONE
 @export var effect_stat: String = ""
 @export var attack_vfx: SpriteFrames
+## First-person WeaponAnimator clip override (e.g. "katana_swing"). Empty = type default.
+@export var swing_anim: String = ""
 @export var granted_status_effects: Array[String] = []
 
 @export_group("Throwing")
 ## Can be thrown at enemies from the battle ITEMS menu (throwing stars, knives, exploding potions...).
 ## Uses one from the stack. Power = attack_bonus (or effect_amount when attack_bonus is 0).
-## DEX decides whether it hits, how hard and how often it crits - see CombatMath.throw_*.
+## DEX decides hit / crit; STR scales damage - see CombatMath.throw_*.
 ## target_type ALL_ENEMIES = hits every enemy (e.g. an exploding potion); anything else = one enemy.
 @export var is_throwable: bool = false
+
+## Throw animation for this item. swing_anim wins if it names a ThrowAnimator clip
+## ("knife_throw", "star_throw", "big_potion_throw"); otherwise the name decides, and anything
+## else (potions, grenades) keeps the WeaponAnimator "potion_throw".
+func get_throw_anim() -> String:
+	var custom: String = swing_anim.strip_edges()
+	if not custom.is_empty():
+		return custom
+	var key: String = (item_name + " " + item_id).to_upper()
+	if "SHURIKEN" in key or "STAR" in key:
+		return "star_throw"
+	if "KNIFE" in key or "DAGGER" in key or "DART" in key or "KUNAI" in key:
+		return "knife_throw"
+	return "potion_throw"
 
 ## Returns string key matching CharacterLoadoutPanel slot keys ("BODY", "LEFT_HAND", "RIGHT_HAND", etc.)
 func get_slot_string() -> String:
@@ -147,7 +163,7 @@ func get_battle_target_type() -> TargetType:
 	return target_type
 
 
-## Base power of a thrown item (before DEX / defence): attack_bonus, else effect_amount, else 1.
+## Base power of a thrown item (before STR / defence): attack_bonus, else effect_amount, else 1.
 func get_throw_power() -> int:
 	if attack_bonus > 0:
 		return attack_bonus

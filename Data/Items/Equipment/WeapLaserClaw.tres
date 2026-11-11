@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("2_40a3e")
 item_id = "weap_laser_claw"
-item_name = "Laser Claw"
+item_name = "Ultra Claw"
 description = "A high-frequency energy claw standard among L.E.O. hazard cleaners."
 icon_path = "res://Data/Items/claws.png"
 icon = ExtResource("1_s780m")
@@ -16,3 +16,4 @@ weapon_type = 1
 attack_bonus = 8
 speed_bonus = 2
 credit_value = 150
+swing_anim = "claw_swing"

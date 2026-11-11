@@ -192,7 +192,7 @@ Listeners: the HUD hides, EnemyVisualManager clears models, world enemies/bosses
 
 | Moment | Signal | Who reacts |
 |---|---|---|
-| Player attack starts | `weapon_swing_requested` (sword_swing / staff_bash / bow_shot) | WeaponAnimator |
+| Player attack starts | `weapon_swing_requested` (`sword_swing` / `katana_swing` / `claw_swing` / `lance_swing` / `lute_swing` / `staff_bash` / `bow_shot` / `potion_throw`) | WeaponAnimator |
 | Enemy attack/spell starts | `enemy_attack_started` | EnemyVisualManager (attack anim, blob lunge) |
 | Spell cast starts | `spell_vfx_requested` + shake 0.6 | BattleHUD elemental VFX + edge flash |
 | Party member takes a physical hit | `screen_slice_requested` + shake 0.85 + chevrons red | BattleHUD slice shader |
@@ -202,6 +202,8 @@ Listeners: the HUD hides, EnemyVisualManager clears models, world enemies/bosses
 | Enemy HP 0 | `enemy_health_changed(…, 0)` | EnemyVisualManager death sink / death anim |
 
 The slice only plays for physical hits on the party, and BLADE hits on enemies (plus every hit in water fights). Each new slice restarts the shader cleanly.
+
+**FP weapon clip vs hit spark:** `ItemData.swing_anim` (CSV `swing_anim`, e.g. `katana_swing`) overrides the type-default swing when that weapon is equipped. `ItemData.attack_vfx` stays a `SpriteFrames` path for on-hit target sparks — do not put anim names there.
 
 ---
 

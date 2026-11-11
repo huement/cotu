@@ -13,4 +13,5 @@ weapon_type = 3
 attack_bonus = 4
 credit_value = 8
 is_consumable = true
+swing_anim = "star_throw"
 is_throwable = true

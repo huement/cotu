@@ -18,6 +18,11 @@ const TIER: String = "regular"
 const THROWABLE_STARTER_COUNT: int = 5
 ## Equipped ammo in a kit (Warden arrows, Maester flasks) starts as a stack of this many.
 const AMMO_STARTER_COUNT: int = 20
+## Classes that learn Deadly Throw get a starter stack of Throwing Knives in the pack.
+const THROW_SKILL_CLASSES: Array[String] = [
+	"GHOSTBLADE", "VOIDHAND", "RONIN", "SHADE", "WARDEN",
+]
+const THROWING_KNIFE_PATH: String = "res://Data/Items/Equipment/WeapThrowingKnife.tres"
 
 
 ## Equips the class's starter kit on an unequipped character. Returns the items that didn't fit.
@@ -25,7 +30,8 @@ static func equip(cat: CatCharacter) -> Array[ItemData]:
 	var spare: Array[ItemData] = []
 	if cat == null or not is_instance_valid(cat.profession):
 		return spare
-	for kit_item: ItemData in items_for_class(AbilityRules.class_name_of(cat)):
+	var class_name_str: String = AbilityRules.class_name_of(cat)
+	for kit_item: ItemData in items_for_class(class_name_str):
 		var item: ItemData = kit_item
 		if CombatMath.is_ammo_item(item):
 			# Own copy, so firing never drains the shared .tres; start with a full stack.
@@ -37,6 +43,7 @@ static func equip(cat: CatCharacter) -> Array[ItemData]:
 			continue
 		if not cat.equip_item(slot, item):
 			spare.append(item)
+	_append_throwing_knives(class_name_str, spare)
 	cat.equipment_changed.emit()
 	return spare
 
@@ -55,6 +62,19 @@ static func equip_party(party: DungeonParty, inventory: Inventory = null) -> Arr
 			if not inventory.add_item(item, THROWABLE_STARTER_COUNT if item.is_throwable else 1):
 				push_warning("StarterKit: pack full, dropped %s" % item.item_name)
 	return spare
+
+
+## Seeds Throwing Knives into the spare pile for classes that learn Deadly Throw.
+static func _append_throwing_knives(class_name_str: String, spare: Array[ItemData]) -> void:
+	var key: String = class_name_str.strip_edges().to_upper()
+	if key.is_empty() or not THROW_SKILL_CLASSES.has(key):
+		return
+	if not ResourceLoader.exists(THROWING_KNIFE_PATH):
+		push_warning("StarterKit: missing Throwing Knife at %s" % THROWING_KNIFE_PATH)
+		return
+	var knife: ItemData = load(THROWING_KNIFE_PATH) as ItemData
+	if knife != null:
+		spare.append(knife)
 
 
 ## The class's starter items in CSV order (armour first, then weapons).

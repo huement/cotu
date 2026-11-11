@@ -496,11 +496,11 @@ tufts_per_tile = 3
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="MinotaurWorldEnemy" parent="Enemies" instance=ExtResource("24_ql20s")]
-transform = Transform3D(0.28, 0, 0, 0, 0.28, 0, 0, 0, 0.28, 0, 0, -76)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -76)
 is_night_only = false
 
 [node name="MinotaurWorldEnemy2" parent="Enemies" instance=ExtResource("24_ql20s")]
-transform = Transform3D(-0.27106053, 0, -0.07018684, 0, 0.28, 0, 0.07018684, 0, -0.27106053, 8.032143, 0, 14.904701)
+transform = Transform3D(-0.9680733, 0, -0.25066728, 0, 1, 0, 0.25066728, 0, -0.9680733, 8.032143, 0, 14.904701)
 is_night_only = false
 
 [node name="NightEnemySpawner" type="Node3D" parent="." node_paths=PackedStringArray("floor_map", "wall_maps", "spawn_point")]

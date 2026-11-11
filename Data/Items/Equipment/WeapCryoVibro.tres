@@ -19,3 +19,4 @@ effects = "Freeze"
 effect_amount = 2.0
 effect_element = 1
 effect_stat = "speed"
+swing_anim = "katana_swing"

@@ -505,7 +505,10 @@ func _execute_physical_attack(attacker: Combatant, target_index: int, serial: in
 
 	# 1. Start the swing / attack animation (flask throwers are RANGED but get the potion throw)
 	if attacker.is_player:
-		_emit_weapon_swing("POTION_THROW" if attack_type == "RANGED" and _throws_flasks(attacker) else attack_type)
+		var swing_type: String = (
+			"POTION_THROW" if attack_type == "RANGED" and _throws_flasks(attacker) else attack_type
+		)
+		_emit_weapon_swing(attacker, swing_type)
 	else:
 		SignalBus.enemy_attack_started.emit(attacker.id)
 		_play_enemy_type_sound(attacker, "attack")
@@ -639,10 +642,24 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 
 	var ability_name: String = AbilityInfo.display_name(ability)
 	var category: String = AbilityInfo.category(ability)
+	var skill_id: String = AbilityInfo.id(ability)
+	var throw_anim_override: String = ""
+	var hit_count: int = 1
 
 	if kind == &"SPELL" and caster.has_effect_type(&"LOCK_MAGIC"):
 		_toast("%s is silenced and can't cast %s!" % [caster.name, ability_name], true)
 		return
+
+	# Ammo availability before spending mana (consume only after the accuracy check lands).
+	if kind == &"SKILL" and skill_id == "sk_deadly_throw":
+		if not is_instance_valid(_find_throw_blade_or_star(caster)):
+			_toast("%s has no knives or stars to throw!" % caster.name, true)
+			return
+	elif kind == &"SKILL" and skill_id == "sk_dual_flask":
+		if not _has_flask_ammo(caster, 2):
+			_toast("%s needs at least 2 flasks for Dual Flask!" % caster.name, true)
+			return
+		hit_count = 2
 
 	# Mana is spent ONLY here (the ability popup no longer subtracts it)
 	var cost: int = int(ability.get("energy_cost")) if "energy_cost" in ability else 0
@@ -664,6 +681,18 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 			_toast("%s's %s missed!" % [caster.name, ability_name], caster.is_player)
 			return
 
+	if kind == &"SKILL" and skill_id == "sk_deadly_throw":
+		var thrown: ItemData = _consume_throw_blade_or_star(caster)
+		if not is_instance_valid(thrown):
+			_toast("%s has no knives or stars to throw!" % caster.name, true)
+			return
+		throw_anim_override = thrown.get_throw_anim()
+	elif kind == &"SKILL" and skill_id == "sk_dual_flask":
+		if not _consume_flask_ammo(caster, 2):
+			_toast("%s needs at least 2 flasks for Dual Flask!" % caster.name, true)
+			return
+		throw_anim_override = "big_potion_throw"
+
 	var is_revive: bool = category == "HEAL" and ("revive" in ability_name.to_lower() or "revive" in str(ability.get("spell_id") if "spell_id" in ability else "").to_lower())
 	var targets: Array[Combatant] = _resolve_ability_targets(caster, ability, target_index, is_revive)
 	if targets.is_empty():
@@ -671,8 +700,12 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 		return
 
 	# Cast VFX once, then wind up
-	var anim_name: String = str(ability.get("animation")) if "animation" in ability else "NONE"
-	if anim_name == "potion_throw" or ability_name == "Alchemy Bomb":
+	var anim_name: String = throw_anim_override
+	if anim_name.is_empty():
+		anim_name = str(ability.get("animation")) if "animation" in ability else "NONE"
+	if ThrowAnimator.has_clip(anim_name):
+		SignalBus.throw_requested.emit(anim_name)
+	elif anim_name == "potion_throw" or ability_name == "Alchemy Bomb":
 		SignalBus.weapon_swing_requested.emit("potion_throw")
 	elif anim_name != "NONE" and not anim_name.is_empty():
 		var vfx_element: ItemData.ElementalBase = ItemData.ElementalBase.NONE
@@ -681,7 +714,7 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 		SignalBus.spell_vfx_requested.emit(anim_name, vfx_element)
 		SignalBus.camera_shake_requested.emit(0.6)
 	elif kind == &"SKILL" and caster.is_player and category == "DAMAGE":
-		_emit_weapon_swing(caster.attack_type)
+		_emit_weapon_swing(caster, caster.attack_type)
 
 	await _wait(spell_windup)
 	if not _is_same_battle(serial):
@@ -696,9 +729,12 @@ func _execute_ability(caster: Combatant, ability: Resource, kind: StringName, ta
 			continue
 		match category:
 			"DAMAGE":
-				var damage: int = _calculate_ability_damage(caster, t, ability, kind, power)
-				GameLogger.combat("%s used %s on %s for %d damage" % [caster.name, ability_name, t.name, damage])
-				_apply_damage_to_combatant(t, damage, caster, ability, kind == &"SPELL", "SPELL" if kind == &"SPELL" else caster.attack_type)
+				for _hit: int in range(hit_count):
+					if t.current_hp <= 0:
+						break
+					var damage: int = _calculate_ability_damage(caster, t, ability, kind, power)
+					GameLogger.combat("%s used %s on %s for %d damage" % [caster.name, ability_name, t.name, damage])
+					_apply_damage_to_combatant(t, damage, caster, ability, kind == &"SPELL", "SPELL" if kind == &"SPELL" else caster.attack_type)
 				if t.current_hp > 0 and not status_id.is_empty():
 					_apply_status(t, status_id, caster, duration)
 			"HEAL":
@@ -843,7 +879,7 @@ func _use_offensive_item(acting_char: Combatant, inv: Inventory, item_slot_idx: 
 		return
 
 	if item.is_throwable:
-		SignalBus.weapon_swing_requested.emit("potion_throw")
+		_emit_throw_anim(item.get_throw_anim())
 		await _wait(player_attack_windup)
 		_throw_item(acting_char, item, targets)
 		inv.item_used.emit(item)
@@ -873,10 +909,11 @@ func _use_offensive_item(acting_char: Combatant, inv: Inventory, item_slot_idx: 
 
 
 ## Thrown items (ItemData.is_throwable): each target rolls to hit off the thrower's DEX vs the target's
-## speed, then takes CombatMath.throw_damage (DEX-scaled, ignores half the armour), maybe a DEX crit,
+## speed, then takes CombatMath.throw_damage (STR-scaled, ignores half the armour), maybe a DEX crit,
 ## plus the item's granted_status_effects. Formulas + tuning: CombatMath "Throwing".
 func _throw_item(acting_char: Combatant, item: ItemData, targets: Array[Combatant]) -> void:
 	var dex: int = _thrower_dexterity(acting_char)
+	var strength: int = _thrower_strength(acting_char)
 	var element: int = int(item.effect_element) if item.effect_element != ItemData.EffectElement.NONE else int(ItemData.EffectElement.RANGED)
 	_toast("%s threw %s!" % [acting_char.name, item.item_name], false)
 	for t: Combatant in targets:
@@ -885,13 +922,13 @@ func _throw_item(acting_char: Combatant, item: ItemData, targets: Array[Combatan
 			GameLogger.combat("%s's %s missed %s (%d%% to hit)" % [acting_char.name, item.item_name, t.name, roundi(hit_chance * 100.0)])
 			_toast("%s missed %s!" % [item.item_name, t.name], true)
 			continue
-		var dmg: int = CombatMath.throw_damage(item.get_throw_power(), dex, t, weakness_multiplier, element)
+		var dmg: int = CombatMath.throw_damage(item.get_throw_power(), strength, t, weakness_multiplier, element)
 		var crit: bool = randf() < CombatMath.throw_crit_chance(dex)
 		if crit:
 			dmg = roundi(float(dmg) * CombatMath.THROW_CRIT_MULT)
 			_toast("Critical throw!", false)
-		GameLogger.combat("%s threw %s at %s: %d damage%s (DEX %d, %d%% to hit)" % [
-			acting_char.name, item.item_name, t.name, dmg, " CRIT" if crit else "", dex, roundi(hit_chance * 100.0)])
+		GameLogger.combat("%s threw %s at %s: %d damage%s (STR %d, DEX %d, %d%% to hit)" % [
+			acting_char.name, item.item_name, t.name, dmg, " CRIT" if crit else "", strength, dex, roundi(hit_chance * 100.0)])
 		_apply_damage_to_combatant(t, dmg, acting_char, item, false, "RANGED")
 		if t.current_hp > 0:
 			for status_id: String in item.granted_status_effects:
@@ -902,6 +939,12 @@ func _thrower_dexterity(c: Combatant) -> int:
 	if c.is_player and is_instance_valid(c.ref):
 		return CombatMath.cat_attribute(c.ref, &"dexterity", 10)
 	return roundi(c.speed)
+
+
+func _thrower_strength(c: Combatant) -> int:
+	if c.is_player and is_instance_valid(c.ref):
+		return CombatMath.cat_attribute(c.ref, &"strength", 10)
+	return roundi(c.attack)
 
 
 ## Pulls HP/MP back from the CatCharacter resources after an item changed them.
@@ -961,6 +1004,85 @@ func _consume_ranged_ammo(acting_char: Combatant) -> bool:
 
 func _is_ammo_resource(item: ItemData) -> bool:
 	return CombatMath.is_ammo_item(item)
+
+
+## First knife / kunai / shuriken in hands or pack (does not consume).
+func _find_throw_blade_or_star(acting_char: Combatant) -> ItemData:
+	if is_instance_valid(acting_char.ref) and acting_char.ref.has_method("get_equipped_item"):
+		for hand: String in ["LEFT_HAND", "RIGHT_HAND"]:
+			var equipped: ItemData = acting_char.ref.call("get_equipped_item", hand) as ItemData
+			if CombatMath.is_throw_blade_or_star(equipped) and equipped.quantity > 0:
+				return equipped
+	var inv: Inventory = GameState.inventory if is_instance_valid(GameState) else null
+	if not is_instance_valid(inv):
+		return null
+	for stack: ItemData in inv.get_items():
+		if CombatMath.is_throw_blade_or_star(stack) and stack.quantity > 0:
+			return stack
+	return null
+
+
+## Consumes one knife / kunai / shuriken from equipped hands or the party pack. Returns the item used.
+func _consume_throw_blade_or_star(acting_char: Combatant) -> ItemData:
+	if is_instance_valid(acting_char.ref) and acting_char.ref.has_method("get_equipped_item"):
+		for hand: String in ["LEFT_HAND", "RIGHT_HAND"]:
+			var equipped: ItemData = acting_char.ref.call("get_equipped_item", hand) as ItemData
+			if not CombatMath.is_throw_blade_or_star(equipped) or equipped.quantity <= 0:
+				continue
+			equipped.quantity -= 1
+			GameLogger.combat("%s used 1 %s for Deadly Throw (%d left)" % [
+				acting_char.name, equipped.item_name, equipped.quantity])
+			if equipped.quantity <= 0 and acting_char.ref.has_method("unequip_item"):
+				acting_char.ref.call("unequip_item", hand)
+			return equipped
+
+	var inv: Inventory = GameState.inventory if is_instance_valid(GameState) else null
+	if not is_instance_valid(inv):
+		return null
+	for stack: ItemData in inv.get_items():
+		if not CombatMath.is_throw_blade_or_star(stack) or stack.quantity <= 0:
+			continue
+		inv.remove_item(stack, 1)
+		GameLogger.combat("%s used 1 %s from the pack for Deadly Throw" % [acting_char.name, stack.item_name])
+		return stack
+	return null
+
+
+func _find_flask_ammo(acting_char: Combatant) -> Dictionary:
+	var result: Dictionary = {"item": null, "slot": ""}
+	if not is_instance_valid(acting_char.ref) or not acting_char.ref.has_method("get_equipped_item"):
+		return result
+	for hand: String in ["LEFT_HAND", "RIGHT_HAND"]:
+		var item: ItemData = acting_char.ref.call("get_equipped_item", hand) as ItemData
+		if is_instance_valid(item) and "FLASK" in (item.item_name + " " + item.item_id).to_upper():
+			result["item"] = item
+			result["slot"] = hand
+			break
+	return result
+
+
+func _has_flask_ammo(acting_char: Combatant, amount: int) -> bool:
+	var found: Dictionary = _find_flask_ammo(acting_char)
+	var ammo_item: ItemData = found.get("item") as ItemData
+	return is_instance_valid(ammo_item) and ammo_item.quantity >= amount
+
+
+## Spends `amount` flask ammo from either hand. Returns false when not enough.
+func _consume_flask_ammo(acting_char: Combatant, amount: int) -> bool:
+	if amount <= 0:
+		return true
+	var found: Dictionary = _find_flask_ammo(acting_char)
+	var ammo_item: ItemData = found.get("item") as ItemData
+	var ammo_slot: String = str(found.get("slot", ""))
+	if not is_instance_valid(ammo_item) or ammo_item.quantity < amount:
+		return false
+
+	ammo_item.quantity -= amount
+	GameLogger.combat("%s spent %d flasks (%d remaining)" % [acting_char.name, amount, ammo_item.quantity])
+	if ammo_item.quantity <= 0 and acting_char.ref.has_method("unequip_item"):
+		acting_char.ref.call("unequip_item", ammo_slot)
+		_toast("%s ran out of %s!" % [acting_char.name, ammo_item.item_name], true)
+	return true
 
 
 func _notify_out_of_ammo(acting_char: Combatant, weapon_or_ammo_name: String) -> void:
@@ -1073,7 +1195,21 @@ func _throws_flasks(attacker: Combatant) -> bool:
 	return false
 
 
-func _emit_weapon_swing(attack_type: String) -> void:
+## Throwing knives / stars / big potions go to ThrowAnimator; anything else (flasks) to WeaponAnimator.
+func _emit_throw_anim(anim_name: String) -> void:
+	if ThrowAnimator.has_clip(anim_name):
+		SignalBus.throw_requested.emit(anim_name)
+	else:
+		SignalBus.weapon_swing_requested.emit(anim_name)
+
+
+func _emit_weapon_swing(attacker: Combatant, attack_type: String) -> void:
+	var weapon: Resource = _get_weapon_resource(attacker, attack_type)
+	if is_instance_valid(weapon) and "swing_anim" in weapon:
+		var custom: String = str(weapon.get("swing_anim")).strip_edges()
+		if not custom.is_empty():
+			SignalBus.weapon_swing_requested.emit(custom)
+			return
 	match attack_type:
 		"BASH", "MAGIC":
 			SignalBus.weapon_swing_requested.emit("staff_bash")

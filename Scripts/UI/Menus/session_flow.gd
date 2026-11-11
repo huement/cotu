@@ -6,6 +6,8 @@ extends RefCounted
 
 const GAME_SCENE: String = "res://Scenes/world.tscn"
 const MAIN_MENU_SCENE: String = "res://Scenes/GameMenus/MainMenu.tscn"
+## Opening cinematic shown once when a new game starts; it opens GAME_SCENE when it ends / is skipped.
+const INTRO_SCENE: String = "res://Scenes/GameMenus/IntroVideo.tscn"
 
 
 ## True when a save file exists in user://.
@@ -38,6 +40,7 @@ static func start_new_game(tree: SceneTree) -> void:
 ## Wipes the save and starts a new game with characters from the roster (Character Creator).
 ## `slot_ids`: 6 roster ids, "" for an empty slot (0-2 front row, 3-5 back row). The game plays with
 ## copies; the roster characters are locked (no more edits) once the game starts.
+## Plays the intro video (INTRO_SCENE) before the world opens.
 static func start_new_game_with_roster(tree: SceneTree, slot_ids: Array) -> bool:
 	var party: DungeonParty = CharacterRoster.build_party(slot_ids)
 	if party.get_viable_combatants().is_empty():
@@ -45,7 +48,8 @@ static func start_new_game_with_roster(tree: SceneTree, slot_ids: Array) -> bool
 	_clear_running_session(tree)
 	GameState.start_new_game_with_party(party)
 	CharacterRoster.lock(slot_ids.filter(func(id: Variant) -> bool: return not str(id).is_empty()))
-	MenuKit.change_scene(GAME_SCENE)
+	# The new-game save (GreenGrove @ SpawnPointNewGame) is already written; play the intro, then the world.
+	MenuKit.change_scene(INTRO_SCENE)
 	return true
 
 

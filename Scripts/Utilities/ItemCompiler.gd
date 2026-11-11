@@ -80,6 +80,8 @@ static func compile_items() -> int:
 					if not effect_id.is_empty():
 						granted.append(effect_id)
 				item.granted_status_effects = granted
+		if line.size() >= 23:
+			item.swing_anim = line[22].strip_edges()
 
 		item.stat_effect = {}
 		if item.heal_amount > 0:

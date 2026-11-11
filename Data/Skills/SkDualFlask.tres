@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/SkillData.gd" id="1_gvwav"]
+
+[resource]
+script = ExtResource("1_gvwav")
+skill_id = "sk_dual_flask"
+skill_name = "Dual Flask"
+description = "Throws two alchemy flasks at once. Needs at least two flasks equipped."
+icon_path = "res://Data/Skills/Icons/alchemy.png"
+animation = "big_potion_throw"
+energy_cost = 6
+effect_amount = 28
+element = 3
+assigned_classes = Array[String](["Maester"])

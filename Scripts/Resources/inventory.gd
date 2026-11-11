@@ -89,11 +89,18 @@ func get_item_count(item_id_or_item: Variant) -> int:
 func is_stackable(item: ItemData) -> bool:
 	if not is_instance_valid(item):
 		return false
-	var low_id: String = item.item_id.to_lower()
-	return item.item_type in [ItemData.ItemType.CONSUMABLE, ItemData.ItemType.POTION, ItemData.ItemType.MISC, ItemData.ItemType.QUEST] \
-		or item.is_consumable \
-		or item.equipment_slot == ItemData.EquipmentSlot.NONE \
-		or "arrow" in low_id or "bolt" in low_id or "ammo" in low_id
+	# Throwables (shuriken) and named ammo always stack.
+	if item.is_throwable or CombatMath.is_ammo_item(item):
+		return true
+	# Weapons / armor never stack unless marked consumable ammo (arrows, flasks).
+	if item.item_type in [ItemData.ItemType.WEAPON, ItemData.ItemType.ARMOR, ItemData.ItemType.EQUIPMENT]:
+		return item.is_consumable
+	return item.item_type in [
+		ItemData.ItemType.CONSUMABLE,
+		ItemData.ItemType.POTION,
+		ItemData.ItemType.MISC,
+		ItemData.ItemType.QUEST,
+	] or item.is_consumable or item.equipment_slot == ItemData.EquipmentSlot.NONE
 
 
 ## The existing stack this item would merge into, or null.
@@ -134,9 +141,16 @@ func normalize_stacks() -> void:
 		seen_instances[it.get_instance_id()] = true
 		if is_stackable(it):
 			copy.quantity = int(counts[_stack_key(it)])
+			rebuilt.append(copy)
 		else:
-			copy.quantity = maxi(1, copy.quantity)
-		rebuilt.append(copy)
+			# Gear must be one piece per slot — split any mis-stacked quantity.
+			var pieces: int = maxi(1, it.quantity)
+			copy.quantity = 1
+			rebuilt.append(copy)
+			for _i: int in range(pieces - 1):
+				var extra: ItemData = _make_own_copy(it)
+				extra.quantity = 1
+				rebuilt.append(extra)
 	_items = rebuilt
 
 

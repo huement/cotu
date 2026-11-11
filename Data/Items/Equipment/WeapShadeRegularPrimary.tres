@@ -1,15 +1,18 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://dxqy8d3kfq38l"]
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dxqy8d3kfq38l"]
 
-[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_inb5g"]
+[ext_resource type="Texture2D" path="res://Data/Items/katana.png" id="1_eii5j"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_h6ede"]
 
 [resource]
-script = ExtResource("1_inb5g")
+script = ExtResource("2_h6ede")
 item_id = "weap_shade_regular_primary"
-item_name = "Steel Dagger"
-description = "Regular primary weapon for the Shade."
-icon_path = "res://Data/Items/weapon.png"
+item_name = "Shadow Katana"
+description = "A short curved blade favored by the Shade. Regular primary weapon."
+icon_path = "res://Data/Items/katana.png"
+icon = ExtResource("1_eii5j")
 item_type = 1
 equipment_slot = 6
 weapon_type = 1
 attack_bonus = 8
 credit_value = 80
+swing_anim = "katana_swing"

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/SkillData.gd" id="1_5dgun"]
+
+[resource]
+script = ExtResource("1_5dgun")
+skill_id = "sk_flask_brew"
+skill_name = "Crush Gems"
+skill_type = 2
+description = "Crushes a battle gem into gunpowder and refills alchemy flasks."
+icon_path = "res://Data/Skills/Icons/alchemy.png"
+target_type = 5
+effect_type = 5
+effect_amount = 5
+accuracy = 100
+assigned_classes = Array[String](["Maester"])

@@ -1,0 +1,274 @@
+[gd_scene load_steps=11 format=3 uid="uid://dtxcehktgyclv"]
+
+[ext_resource type="Script" uid="uid://bbsbk0i7wram" path="res://Scripts/3D/ThrowAnimator.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://dvshfij6hipis" path="res://resources/Weapons/potion.glb" id="2_potion"]
+[ext_resource type="Texture2D" uid="uid://c714wyhxnd4pq" path="res://resources/Weapons/explosion/explosion_spritesheet.png" id="3_exp"]
+[ext_resource type="PackedScene" uid="uid://oy42v0vh3esf" path="res://resources/Weapons/throwing_knife.glb" id="3_io7hj"]
+[ext_resource type="PackedScene" uid="uid://yhcojfde67vu" path="res://resources/Weapons/throwing_star.glb" id="4_ugbf1"]
+
+[sub_resource type="Animation" id="Anim_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0.4, -0.6, -0.4)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-0.34906584, 0.6981317, -0.6981317)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ExplosionSprite:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("ExplosionSprite:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Anim_big_potion_throw"]
+resource_name = "big_potion_throw"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.10006257, 0.2520495),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.3, -0.4), Vector3(0.1, -0.1, -0.4), Vector3(0, 0, -1.2)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2520495),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, -0.2617994), Vector3(-0.027925268, 0.054105207, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.2520495),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ExplosionSprite:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("ExplosionSprite:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.25, 0.28, 0.31, 0.34, 0.37, 0.40000004, 0.433, 0.4666667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+tracks/5/type = "method"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath(".")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.23333333),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"trigger_impact"
+}]
+}
+
+[sub_resource type="Animation" id="Anim_knife_throw"]
+resource_name = "knife_throw"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.16666667, 0.43333334),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.3, -0.4), Vector3(0.1, -0.1, -0.4), Vector3(0, 0, -1.6)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.43333334),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, -0.2617994), Vector3(-0.027925268, 0.054105207, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.46666667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="Animation" id="Anim_star_throw"]
+resource_name = "star_throw"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.033333335, 0.43333334),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.3, -0.4), Vector3(0.1, -0.1, -0.4), Vector3(0, 0, -1.5)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.0334799, 0.1339196, 0.27196684, 0.36919615, 0.43333334),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, -0.2617994), Vector3(-0.0021575391, 0.0041802526, -0.24157244), Vector3(0.15358898, 0.017453292, -0.18151425), Vector3(1.3613569, 0.033161256, -0.09773844), Vector3(2.893756, 0.045378562, -0.038397245), Vector3(5.6478853, 0.054105207, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.46666667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="Lib_throw"]
+_data = {
+&"RESET": SubResource("Anim_reset"),
+&"big_potion_throw": SubResource("Anim_big_potion_throw"),
+&"knife_throw": SubResource("Anim_knife_throw"),
+&"star_throw": SubResource("Anim_star_throw")
+}
+
+[node name="ThrowAnimator" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Pivot" type="Node3D" parent="."]
+transform = Transform3D(0.72813827, 0.32399178, 0.6040227, -0.60402256, 0.71984625, 0.3420201, -0.32399172, -0.61388147, 0.71984625, 0.4, -0.6, -0.4)
+
+[node name="BigPotionModel" type="Node3D" parent="Pivot"]
+
+[node name="potion" parent="Pivot/BigPotionModel" instance=ExtResource("2_potion")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0, 0)
+
+[node name="KnifeModel" type="Node3D" parent="Pivot"]
+visible = false
+
+[node name="throwing_knife" parent="Pivot/KnifeModel" instance=ExtResource("3_io7hj")]
+transform = Transform3D(-0.08193849, 0, -0.9966374, 0, 1, 0, 0.9966374, 0, -0.08193849, 0, 0, 0)
+
+[node name="StarModel" type="Node3D" parent="Pivot"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+visible = false
+
+[node name="throwing_star" parent="Pivot/StarModel" instance=ExtResource("4_ugbf1")]
+
+[node name="ExplosionSprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
+visible = false
+billboard = 1
+no_depth_test = true
+texture_filter = 0
+texture = ExtResource("3_exp")
+hframes = 8
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("Lib_throw")
+}

@@ -16,3 +16,4 @@ attack_bonus = 65
 speed_bonus = 15
 credit_value = 1500
 effect_element = 2
+swing_anim = "katana_swing"

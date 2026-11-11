@@ -20,10 +20,12 @@ const THROW_BASE_HIT: float = 0.80
 const THROW_HIT_PER_POINT: float = 0.025
 const THROW_MIN_HIT: float = 0.40
 const THROW_MAX_HIT: float = 0.98
-## Damage = (power x THROW_POWER_MULT + DEX) x (1 + DEX x THROW_DEX_SCALE) - defence x THROW_DEFENSE_FACTOR
-## (thrown items ignore half of the target's armour, and don't care about rows).
+## Damage = (power x THROW_POWER_MULT + STR) x (1 + STR x THROW_STR_SCALE) - defence x THROW_DEFENSE_FACTOR
+## (thrown items ignore half of the target's armour, and don't care about rows). Hit/crit stay on DEX.
 const THROW_POWER_MULT: float = 2.0
-const THROW_DEX_SCALE: float = 0.05
+const THROW_STR_SCALE: float = 0.05
+## Kept as an alias so older call sites / docs that still say DEX_SCALE keep compiling.
+const THROW_DEX_SCALE: float = THROW_STR_SCALE
 const THROW_DEFENSE_FACTOR: float = 0.5
 ## Crit chance = DEX x THROW_CRIT_PER_DEX (max THROW_MAX_CRIT); crits do THROW_CRIT_MULT damage.
 const THROW_CRIT_PER_DEX: float = 0.01
@@ -62,15 +64,25 @@ static func element_for_attack_type(attack_type: String) -> int:
 
 ## True when an equipped item is consumable ammo (arrows, bolts, alchemy flasks, etc.).
 ## Flasks are their own launcher: each throw uses one, and the last one leaves the hand empty.
+## Do not key off quantity — weapons must never look like ammo just because they were mis-stacked.
 static func is_ammo_item(item: ItemData) -> bool:
 	if not is_instance_valid(item):
 		return false
-	if item.quantity > 1:
-		return true
 	var name_upper: String = item.item_name.to_upper()
 	var id_upper: String = item.item_id.to_upper()
-	for word: String in ["ARROW", "BOLT", "AMMO", "QUIVER", "DART", "FLASK"]:
+	for word: String in ["ARROW", "BOLT", "AMMO", "QUIVER", "FLASK"]:
 		if word in name_upper or word in id_upper:
+			return true
+	return false
+
+
+## True when a throwable is a knife / kunai / shuriken / star (Deadly Throw ammo). Not flasks.
+static func is_throw_blade_or_star(item: ItemData) -> bool:
+	if not is_instance_valid(item) or not item.is_throwable:
+		return false
+	var key: String = (item.item_name + " " + item.item_id).to_upper()
+	for word: String in ["KNIFE", "KUNAI", "DAGGER", "SHURIKEN", "STAR"]:
+		if word in key:
 			return true
 	return false
 
@@ -280,9 +292,9 @@ static func throw_crit_chance(dexterity: int) -> float:
 	return clampf(float(dexterity) * THROW_CRIT_PER_DEX, 0.0, THROW_MAX_CRIT)
 
 
-## Damage of a throw that hit (before the crit roll). Min 1.
-static func throw_damage(power: int, dexterity: int, defender: Combatant, weakness_multiplier: float, element: int = -1) -> int:
-	var raw: float = (float(power) * THROW_POWER_MULT + float(dexterity)) * (1.0 + float(dexterity) * THROW_DEX_SCALE)
+## Damage of a throw that hit (before the crit roll). Scales with STR. Min 1.
+static func throw_damage(power: int, strength: int, defender: Combatant, weakness_multiplier: float, element: int = -1) -> int:
+	var raw: float = (float(power) * THROW_POWER_MULT + float(strength)) * (1.0 + float(strength) * THROW_STR_SCALE)
 	var def: float = float(defender.get_effective_defense()) * THROW_DEFENSE_FACTOR if defender != null else 0.0
 	var dmg: float = maxf(1.0, raw - def)
 	if defender != null and element >= 0:

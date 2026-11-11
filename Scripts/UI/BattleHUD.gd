@@ -332,9 +332,9 @@ func _setup_target_button_container() -> void:
 
 	_target_button_container.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_target_button_container.offset_left = -250.0
-	_target_button_container.offset_top = -120.0
+	_target_button_container.offset_top = -180.0
 	_target_button_container.offset_right = 250.0
-	_target_button_container.offset_bottom = -70.0
+	_target_button_container.offset_bottom = -130.0
 	_target_button_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_target_button_container.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_target_button_container.hide()

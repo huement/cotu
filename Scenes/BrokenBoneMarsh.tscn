@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://ci85qowpacn54"]
+[gd_scene load_steps=34 format=3 uid="uid://ci85qowpacn54"]
 
 [ext_resource type="MeshLibrary" uid="uid://dqts13bsdlync" path="res://resources/mesh_library/blackmarsh_mesh_library.tres" id="1_d2xv8"]
 [ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_8d3q7"]
@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="5_el5s5"]
 [ext_resource type="PackedScene" path="res://Scenes/Objects/MarshTimber.tscn" id="5_ibfws"]
 [ext_resource type="Script" uid="uid://bwoxtqd5tcduh" path="res://Scripts/Enemies/MarshTreeAmbushSpawner.gd" id="5_stalker"]
-[ext_resource type="Script" uid="uid://dokbtyywp86kj" path="res://Scripts/Environment/cloud_layer.gd" id="6_mj1w0"]
 [ext_resource type="PackedScene" path="res://Scenes/Objects/BigStones.tscn" id="7_el5s5"]
 [ext_resource type="PackedScene" uid="uid://ekckcrvvkuqm" path="res://resources/OutdoorParts/low_poly_cloud.glb" id="7_ibfws"]
 [ext_resource type="PackedScene" uid="uid://bpn2rvnvip8cv" path="res://resources/OutdoorParts/low_poly_cloud-2.glb" id="8_dacpu"]

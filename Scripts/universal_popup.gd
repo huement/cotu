@@ -698,24 +698,26 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 						if target_slot.is_empty():
 							target_slot = "LEFT_HAND"
 
-						# Aggregate total quantity of matching stack items in inventory
-						var total_qty: int = 0
-						var items_to_remove: Array[ItemData] = []
+						# Ammo / throwables: merge matching stacks into the equipped hand.
+						# Weapons / armor: equip only this one piece (never merge duplicates).
+						var stackable: bool = inv != null and inv.has_method("is_stackable") and bool(inv.call("is_stackable", item))
 						if is_instance_valid(inv):
-							for inv_item in inv.get_items():
-								if is_instance_valid(inv_item) and (
-									(not item.item_id.is_empty() and inv_item.item_id == item.item_id) or
-									(inv_item.item_name == item.item_name)
-								):
-									total_qty += inv_item.quantity
-									items_to_remove.append(inv_item)
-
-						item.quantity = max(1, total_qty)
-
-						# Remove all matching stack instances from inventory
-						if is_instance_valid(inv):
-							for r_item in items_to_remove:
-								inv.remove_item(r_item)
+							if stackable:
+								var total_qty: int = 0
+								var items_to_remove: Array[ItemData] = []
+								for inv_item in inv.get_items():
+									if is_instance_valid(inv_item) and (
+										(not item.item_id.is_empty() and inv_item.item_id == item.item_id) or
+										(inv_item.item_name == item.item_name)
+									):
+										total_qty += inv_item.quantity
+										items_to_remove.append(inv_item)
+								item.quantity = maxi(1, total_qty)
+								for r_item in items_to_remove:
+									inv.remove_item(r_item)
+							else:
+								item.quantity = 1
+								inv.remove_item(item)
 
 						# Swap equipment in loadout
 						var unequipped: ItemData = cat.unequip_item(target_slot) as ItemData if cat.has_method("unequip_item") else null

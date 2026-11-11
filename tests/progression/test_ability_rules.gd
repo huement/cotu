@@ -21,7 +21,7 @@ func _ids(list: Array) -> Array[String]:
 func test_library_loads_everything() -> void:
 	AbilityLibrary.reload()
 	assert_eq(AbilityLibrary.all_spells().size(), 22)
-	assert_eq(AbilityLibrary.all_skills().size(), 16)
+	assert_eq(AbilityLibrary.all_skills().size(), 19)
 	assert_not_null(AbilityLibrary.spell_by_id("sp_plasma_dart"))
 	assert_eq(AbilityLibrary.all_spells()[0].tier, 1)
 

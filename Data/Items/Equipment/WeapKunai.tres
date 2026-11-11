@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_2l42e"]
+
+[resource]
+script = ExtResource("1_2l42e")
+item_id = "weap_kunai"
+item_name = "Kunai"
+description = "A weighted throwing blade with a radium tip."
+icon_path = "res://Data/Items/ammo.png"
+item_type = 1
+target_type = 2
+weapon_type = 3
+attack_bonus = 10
+credit_value = 150
+is_consumable = true
+effect_amount = 1.5
+swing_anim = "knife_throw"
+is_throwable = true
