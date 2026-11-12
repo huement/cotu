@@ -2,9 +2,9 @@
 class_name GameOverScreen
 extends CanvasLayer
 ## Shown when the whole party falls (SignalBus.party_defeated). Fades to black, plays the game-over sting,
-## shows ui/GAME/game_over.png and offers LOAD SAVE / QUIT (to the title screen).
+## shows ui/GAME/game_over.png and offers Load Last Save / Quit to Main Menu.
 ## Lives in world.tscn. The game is paused while it's up; the dead party is never saved
-## (CombatManager skips the save on a wipe), so LOAD SAVE goes back to the last good save.
+## (CombatManager skips the save on a wipe), so Load Last Save goes back to the last good save.
 
 ## Seconds after the wipe before the screen starts (lets the defeat toast / death anims play).
 @export var start_delay: float = 1.2

@@ -126,6 +126,20 @@ static func as_fraction(amount: float) -> float:
 
 
 # ------------------------------------------------------------------------------
+# Enemy level damage bands
+# ------------------------------------------------------------------------------
+## Multiplier applied to enemy ATK (and magic_power) from EnemyData.base_level.
+## L1–3 → 1.2 · L4–6 → 1.4 · L7+ → 1.5. Keeps sheet numbers but turns up hits by band.
+static func enemy_level_damage_mult(base_level: int) -> float:
+	var lvl: int = maxi(1, base_level)
+	if lvl <= 3:
+		return 1.2
+	if lvl <= 6:
+		return 1.4
+	return 1.5
+
+
+# ------------------------------------------------------------------------------
 # Physical damage
 # ------------------------------------------------------------------------------
 ## (ATK - DEF*(1-pierce)), min 1, x back-row melee attacker 0.5 x back-row defender 0.5

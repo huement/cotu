@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://pdwg6dcniht"
 path.s3tc="res://.godot/imported/crypthole_Image_1.png-1f5cd73d5d9e2ef67001488f568de7a1.s3tc.ctex"
+path.etc2="res://.godot/imported/crypthole_Image_1.png-1f5cd73d5d9e2ef67001488f568de7a1.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/OutdoorParts/crypthole_Image_1.png"
-dest_files=["res://.godot/imported/crypthole_Image_1.png-1f5cd73d5d9e2ef67001488f568de7a1.s3tc.ctex"]
+dest_files=["res://.godot/imported/crypthole_Image_1.png-1f5cd73d5d9e2ef67001488f568de7a1.s3tc.ctex", "res://.godot/imported/crypthole_Image_1.png-1f5cd73d5d9e2ef67001488f568de7a1.etc2.ctex"]
 
 [params]
 

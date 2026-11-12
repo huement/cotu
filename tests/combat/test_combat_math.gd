@@ -2,6 +2,17 @@
 extends GutTest
 
 
+# --- enemy_level_damage_mult --------------------------------------------------
+func test_enemy_level_damage_bands() -> void:
+	assert_eq(CombatMath.enemy_level_damage_mult(1), 1.2)
+	assert_eq(CombatMath.enemy_level_damage_mult(3), 1.2)
+	assert_eq(CombatMath.enemy_level_damage_mult(4), 1.4)
+	assert_eq(CombatMath.enemy_level_damage_mult(6), 1.4)
+	assert_eq(CombatMath.enemy_level_damage_mult(7), 1.5)
+	assert_eq(CombatMath.enemy_level_damage_mult(99), 1.5)
+	assert_eq(CombatMath.enemy_level_damage_mult(0), 1.2) # clamped to band 1–3
+
+
 # --- physical_damage ----------------------------------------------------------
 func test_physical_basic_atk_minus_def() -> void:
 	var a := CombatFixtures.party(0, 20)

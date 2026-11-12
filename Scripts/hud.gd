@@ -41,7 +41,8 @@ extends CanvasLayer
 
 # In-game menu (Quit / Settings / Save / Party / Load / Help)
 const HUD_GAME_MENU_SCENE: PackedScene = preload("res://Scenes/GameMenus/HudGameMenu.tscn")
-## Seconds before the "MAIN MENU" hint next to the menu button fades out.
+const HUD_SHARD_MENU_SCENE: PackedScene = preload("res://Scenes/GameMenus/HudShardMenu.tscn")
+## Seconds before the "MAIN MENU" / "SHARDS" hint next to the menu buttons fades out.
 const GAME_MENU_LABEL_DELAY: float = 5.0
 const GAME_MENU_LABEL_FADE: float = 1.0
 ## Exploration-only menu button group (hidden in battle; BattleHUD has its own %GameMenuButton).
@@ -50,6 +51,12 @@ const GAME_MENU_LABEL_FADE: float = 1.0
 @onready var game_menu_button_label: Label = %GameMenuButtonLabel as Label
 var game_menu: HudGameMenu = null
 var _game_menu_label_tween: Tween = null
+## Exploration-only shard progress menu (not on BattleHUD).
+@onready var shard_menu_anchor: Control = %ShardMenuAnchor as Control
+@onready var shard_menu_button: TextureButton = %ShardMenuButton as TextureButton
+@onready var shard_menu_button_label: Label = %ShardMenuButtonLabel as Label
+var shard_menu: HudShardMenu = null
+var _shard_menu_label_tween: Tween = null
 
 var _current_enemy_tier: int = 0
 var _proximity_step_count: int = 0
@@ -74,6 +81,7 @@ func _ready() -> void:
 	_connect_signal_bus()
 	_connect_game_state()
 	_setup_game_menu()
+	_setup_shard_menu()
 	mobile_hud = MobileHUD.new()
 	mobile_hud.name = "MobileHUDController"
 	add_child(mobile_hud)
@@ -133,6 +141,44 @@ func _fade_game_menu_label(target_alpha: float, delay: float) -> void:
 		_game_menu_label_tween.tween_interval(delay)
 	var duration: float = GAME_MENU_LABEL_FADE if target_alpha <= 0.0 else 0.15
 	_game_menu_label_tween.tween_property(game_menu_button_label, "modulate:a", target_alpha, duration)
+
+
+## Creates the exploration-only shard menu and wires %ShardMenuButton (+ hint label).
+## Unlike the game menu, this is not present on BattleHUD.
+func _setup_shard_menu() -> void:
+	shard_menu = HUD_SHARD_MENU_SCENE.instantiate() as HudShardMenu
+	add_child(shard_menu)
+	_hook_shard_menu_button(shard_menu_button)
+	if is_instance_valid(shard_menu_button_label):
+		shard_menu_button_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_fade_shard_menu_label(0.0, GAME_MENU_LABEL_DELAY)
+
+
+func _hook_shard_menu_button(button: TextureButton) -> void:
+	if not is_instance_valid(button):
+		return
+	button.tooltip_text = "Shards"
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.pressed.connect(shard_menu.toggle_menu)
+	button.mouse_entered.connect(_on_shard_menu_button_hover.bind(button, true))
+	button.mouse_exited.connect(_on_shard_menu_button_hover.bind(button, false))
+
+
+func _on_shard_menu_button_hover(button: TextureButton, hovered: bool) -> void:
+	button.modulate = Color(1.25, 1.25, 1.25) if hovered else Color.WHITE
+	_fade_shard_menu_label(1.0 if hovered else 0.0, 0.0 if hovered else 0.6)
+
+
+func _fade_shard_menu_label(target_alpha: float, delay: float) -> void:
+	if not is_instance_valid(shard_menu_button_label):
+		return
+	if _shard_menu_label_tween != null:
+		_shard_menu_label_tween.kill()
+	_shard_menu_label_tween = create_tween()
+	if delay > 0.0:
+		_shard_menu_label_tween.tween_interval(delay)
+	var duration: float = GAME_MENU_LABEL_FADE if target_alpha <= 0.0 else 0.15
+	_shard_menu_label_tween.tween_property(shard_menu_button_label, "modulate:a", target_alpha, duration)
 
 
 ## Initial visual defaults for HUD components
@@ -216,6 +262,7 @@ func _cache_exploration_ui_nodes() -> void:
 		right_sidebar_anchor,
 		action_bar_anchor,
 		game_menu_anchor,
+		shard_menu_anchor,
 		time_label, # %DaytimeLabel — must not float over BattleHUD
 		gold_label, # %GoldLabel — exploration wallet readout
 		enemy_in_range,
@@ -530,7 +577,7 @@ func _on_party_gold_changed(new_total: int, _amount_changed: int) -> void:
 
 func _refresh_gold_label(total: int) -> void:
 	if is_instance_valid(gold_label):
-		gold_label.text = "₡ %d" % total
+		gold_label.text = "%d" % total
 
 
 func _update_time_display(period_text: String) -> void:

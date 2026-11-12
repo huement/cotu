@@ -286,12 +286,13 @@ func _on_level_up() -> void:
 
 ## Adds one level's worth of allocation pools.
 ## Points come from Data/Class_Progression.csv (per-level + milestone bonus; spell points only once
-## the class's spellbook is unlocked).
+## the class's spellbook is unlocked). Skill/spell grants are capped at half the abilities already
+## known (so you never bank more points than you can usefully spend on ranks).
 func grant_level_points() -> void:
 	var pts: Vector3i = ClassProgression.points_for_level(get_class_progression(), level)
 	unspent_stat_points += maxi(0, pts.x)
-	unspent_skill_points += maxi(0, pts.y)
-	unspent_spell_points += maxi(0, pts.z)
+	unspent_skill_points += _capped_ability_grant(pts.y, known_skills.size())
+	unspent_spell_points += _capped_ability_grant(pts.z, known_spells.size())
 
 
 ## Applies one level-up dice roll (see LevelUpDice): adds bonus stat / skill / spell points and
@@ -300,10 +301,12 @@ func apply_level_roll(roll: int) -> Dictionary:
 	var bonus: Dictionary = LevelUpDice.bonus_for_roll(roll)
 	unspent_stat_points += int(bonus["stat"])
 	var split: Vector2i = LevelUpDice.split_ability_points(int(bonus["ability"]), known_skills.size(), known_spells.size())
-	unspent_skill_points += split.x
-	unspent_spell_points += split.y
-	bonus["skill"] = split.x
-	bonus["spell"] = split.y
+	var skill_gain: int = _capped_ability_grant(split.x, known_skills.size())
+	var spell_gain: int = _capped_ability_grant(split.y, known_spells.size())
+	unspent_skill_points += skill_gain
+	unspent_spell_points += spell_gain
+	bonus["skill"] = skill_gain
+	bonus["spell"] = spell_gain
 	var hp_pct: float = float(bonus["hp_percent"])
 	if hp_pct > 0.0:
 		var old_max: int = max_hp
@@ -314,6 +317,11 @@ func apply_level_roll(roll: int) -> Dictionary:
 			current_hp = stats.health
 	pending_level_rolls = maxi(0, pending_level_rolls - 1)
 	return bonus
+
+
+## At most half the known abilities (integer), so 2 skills → max 1 point this grant.
+func _capped_ability_grant(raw: int, known_count: int) -> int:
+	return mini(maxi(0, raw), known_count / 2)
 
 
 func get_ability_rank(ability_id: String) -> int:

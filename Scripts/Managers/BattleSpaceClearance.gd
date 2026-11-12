@@ -47,8 +47,11 @@ static func ensure_space(tree: SceneTree) -> void:
 	if map_mgr == null or not is_instance_valid(map_mgr.active_map_instance):
 		return
 	var map: Node3D = map_mgr.active_map_instance
-	# Soft check (avoid class_name cycle with BattleArena): dungeon battle rooms are already empty.
+	# Soft check (avoid class_name cycle with BattleArena): dungeon / cave battle rooms are already empty.
 	if map is DungeonLevel:
+		return
+	# Caves use the battle room too, unless the map turned it off (then it fights in place).
+	if map is CaveLevel and not map.has_meta(&"use_battle_room"):
 		return
 	if map.has_meta(&"use_battle_room") and bool(map.get_meta(&"use_battle_room")):
 		return

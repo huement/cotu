@@ -1,0 +1,226 @@
+[gd_scene load_steps=10 format=3 uid="uid://b2nrin55id2o2"]
+
+[ext_resource type="Script" uid="uid://c8m7em0ot8y01" path="res://Scripts/UI/Menus/hud_shard_menu.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b233te3674exa" path="res://ui/patterns/blacktile.png" id="2_5ptat"]
+[ext_resource type="Texture2D" uid="uid://bdxf3tj3l3jgq" path="res://ui/HUD/leo_emblem_225.svg" id="2_leo"]
+[ext_resource type="Texture2D" uid="uid://c8cu3vq2kqely" path="res://ui/HUD/shard_menu_hud.svg" id="3_hud"]
+[ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="4_c8key"]
+[ext_resource type="FontFile" uid="uid://d0ksagavyqlt7" path="res://ui/fonts/Nexa-ExtraLight.otf" id="5_124oy"]
+[ext_resource type="Texture2D" uid="uid://crco0u6gbbfc" path="res://ui/icons/arrow_left.svg" id="5_back"]
+[ext_resource type="Texture2D" uid="uid://chcpf1lvsaye4" path="res://ui/HUD/shard_icon.png" id="9_jrkrh"]
+[ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="10_0d08e"]
+
+[node name="HudShardMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 90
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = -1.0
+offset_right = 2.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_5ptat")
+expand_mode = 3
+stretch_mode = 1
+
+[node name="ColorRect" type="ColorRect" parent="Root"]
+layout_mode = 0
+offset_left = 35.0
+offset_top = 32.0
+offset_right = 310.0
+offset_bottom = 108.0
+color = Color(0, 0, 0, 1)
+
+[node name="Content" type="MarginContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 36
+
+[node name="HBox" type="HBoxContainer" parent="Root/Content"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="LeftColumn" type="VBoxContainer" parent="Root/Content/HBox"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="StatsBlock" type="VBoxContainer" parent="Root/Content/HBox/LeftColumn"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TimeRow" type="HBoxContainer" parent="Root/Content/HBox/LeftColumn/StatsBlock"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TimeLabel" type="Label" parent="Root/Content/HBox/LeftColumn/StatsBlock/TimeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_124oy")
+theme_override_font_sizes/font_size = 20
+text = "TIME ON PLANET"
+
+[node name="TimeValue" type="Label" parent="Root/Content/HBox/LeftColumn/StatsBlock/TimeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
+theme_override_fonts/font = ExtResource("4_c8key")
+theme_override_font_sizes/font_size = 22
+text = "88:00"
+
+[node name="KillsRow" type="HBoxContainer" parent="Root/Content/HBox/LeftColumn/StatsBlock"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="KillsLabel" type="Label" parent="Root/Content/HBox/LeftColumn/StatsBlock/KillsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_124oy")
+theme_override_font_sizes/font_size = 20
+text = "ENEMIES KILLED"
+
+[node name="KillsValue" type="Label" parent="Root/Content/HBox/LeftColumn/StatsBlock/KillsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
+theme_override_fonts/font = ExtResource("4_c8key")
+theme_override_font_sizes/font_size = 22
+text = "999"
+
+[node name="TopSpacer" type="Control" parent="Root/Content/HBox/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeoBadge" type="TextureRect" parent="Root/Content/HBox/LeftColumn"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(180, 160)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+texture = ExtResource("2_leo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BottomSpacer" type="Control" parent="Root/Content/HBox/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackButton" type="Button" parent="Root/Content/HBox/LeftColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 52)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+text = "BACK"
+icon = ExtResource("5_back")
+
+[node name="ShardHud" type="Control" parent="Root/Content/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HudFrame" type="TextureRect" parent="Root/Content/HBox/ShardHud"]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_hud")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ScrollInset" type="MarginContainer" parent="Root/Content/HBox/ShardHud"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 27.0
+offset_top = 10.0
+offset_right = -18.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 48
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Root/Content/HBox/ShardHud/ScrollInset"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ScrollContent" type="VBoxContainer" parent="Root/Content/HBox/ShardHud/ScrollInset/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[node name="TitleRow" type="HBoxContainer" parent="Root/Content/HBox/ShardHud/ScrollInset/ScrollContainer/ScrollContent"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ShardIcon" type="TextureRect" parent="Root/Content/HBox/ShardHud/ScrollInset/ScrollContainer/ScrollContent/TitleRow"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("9_jrkrh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="Root/Content/HBox/ShardHud/ScrollInset/ScrollContainer/ScrollContent/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("10_0d08e")
+theme_override_font_sizes/font_size = 36
+text = "SHARDS COLLECTED"
+vertical_alignment = 1
+
+[node name="Divider" type="ColorRect" parent="Root/Content/HBox/ShardHud/ScrollInset/ScrollContainer/ScrollContent"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(1, 1, 1, 0.85)
+
+[node name="AreaList" type="VBoxContainer" parent="Root/Content/HBox/ShardHud/ScrollInset/ScrollContainer/ScrollContent"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14

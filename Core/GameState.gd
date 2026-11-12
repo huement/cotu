@@ -10,8 +10,22 @@ enum Mode {
 
 signal core_state_changed(new_mode: Mode)
 
-const SAVE_PATH: String = "user://save_game.tres"
+## The old single save file. Moved into slot 1 the first time the game runs with save slots.
+const LEGACY_SAVE_PATH: String = "user://save_game.tres"
+## Save slots: user://saves/slot_1.tres ... slot_N.tres. `save_slot` is the one this session uses.
+const SAVE_DIR: String = "user://saves"
+const SAVE_SLOT_COUNT: int = 5
+## Remembers the last used slot between runs.
+const SAVE_META_PATH: String = "user://saves/slots.cfg"
 const DEFAULT_SAVE_PATH: String = "res://Data/default_save.tres"
+## Dev-start sessions (MapManager.dev_start_override) save here, so they never touch the player save.
+const DEV_SAVE_PATH: String = "user://save_game_dev.tres"
+## Test party loadout (dev start / debug Quick Start / boot fallback only - real new games skip it).
+## Weapon equipped on every starter who can wield it; it grants Attack Up I (eff_attack_up_1).
+const TEST_PARTY_WEAPON_PATH: String = "res://Data/Items/Equipment/Broadsword.tres"
+const TEST_PARTY_REVIVE_PATH: String = "res://Data/Items/Consumables/PotRevive.tres"
+## Revive Potions added to the pack on top of default_save.tres's supplies.
+const TEST_PARTY_REVIVE_POTIONS: int = 5
 ## Extra items every new game starts with in the pack (one entry = one item).
 const STARTER_BONUS_ITEMS: Array[String] = [
 	"res://Data/Items/Equipment/WeapKatIronBroadsword.tres",
@@ -36,6 +50,8 @@ var current_mode: Mode = Mode.EXPLORING:
 			current_time_period = value
 			SignalBus.emit_signal("time_period_changed", current_time_period)
 			
+## Arcanum Shards collected so far: shard_id -> { "level", "map_id" }. Read / write through ShardLedger.
+var collected_shards: Dictionary = {}
 ## Shared day/night clock (0..1, 0.25 = morning). Every map's DayNightCycle reads and advances it,
 ## so time no longer resets when you change maps. Saved with the game.
 var world_time: float = 0.25
@@ -49,6 +65,15 @@ var pending_location: Dictionary = {}
 var pending_boss_rewards: Dictionary = {}
 ## Last place we knew the party was standing - used when saving from somewhere without a live map.
 var _last_location: Dictionary = {}
+
+## True once a session was started on purpose: main menu (new game / load) or a dev start.
+## The world scene opened without one sends the player to the main menu (see MapManager).
+var session_active: bool = false
+## True while playing a dev-start session (test party from default_save.tres, own save file).
+var dev_session: bool = false
+## The save slot (1..SAVE_SLOT_COUNT) this session saves to and loads from. Every save_game()
+## call in the game writes here. Change it with set_save_slot() (main menu: new game / load).
+var save_slot: int = 1
 
 var active_character_index: int = 0
 var post_combat_immunity_timer: float = 0.0
@@ -203,28 +228,29 @@ func _award_victory_xp(victory_data: Dictionary) -> void:
 
 func _initialize_active_session() -> void:
 	print("GameState: Initializing active session...")
+	_setup_save_slots()
 
-	if ResourceLoader.exists(SAVE_PATH):
+	if ResourceLoader.exists(get_save_path()):
 		if not load_game():
 			print("GameState: Existing save file in user:// invalid. Loading default_save.tres...")
-			_load_default_save()
+			_load_default_save(true, false)
 	else:
 		print("GameState: No save file found in user://. Loading default_save.tres...")
-		_load_default_save()
+		_load_default_save(true, false)
 
 
+## Fresh world with the starting supplies from default_save.tres (pack, gold, floor).
+## equip_starters = true: the TEST party - always the characters in Data/StarterParty (never
+## default_save's own party list), with class starter gear plus the test loadout (TEST_PARTY_*).
 ## equip_starters = false when the caller swaps in its own party right after (roster New Game).
-func _load_default_save(equip_starters: bool = true) -> void:
+## persist = false keeps it in memory only (game boot: opening the game must not create a save).
+func _load_default_save(equip_starters: bool = true, persist: bool = true) -> void:
 	if ResourceLoader.exists(DEFAULT_SAVE_PATH):
 		var default_save := load(DEFAULT_SAVE_PATH) as SaveGame
-		if default_save != null and default_save.party != null:
-			current_party = default_save.party.duplicate(true) as DungeonParty
-			# Starter characters are external .tres files (Data/StarterParty/) - duplicate(true) doesn't
-			# copy those, so copy each one or the game would edit the cached starter resources.
-			for i: int in current_party.slots.size():
-				var starter: Resource = current_party.slots[i]
-				if starter != null:
-					current_party.slots[i] = starter.duplicate(true)
+		if default_save != null:
+			current_party = CharacterRoster.starter_party()
+			if current_party.get_viable_combatants().is_empty():
+				printerr("GameState ERROR: no characters in %s - the test party is empty." % CharacterRoster.STARTER_PARTY_DIR)
 			inventory = default_save.inventory.duplicate(true) as Inventory if default_save.inventory != null else Inventory.new()
 			for path: String in STARTER_BONUS_ITEMS:
 				var bonus: ItemData = load(path) as ItemData
@@ -234,21 +260,105 @@ func _load_default_save(equip_starters: bool = true) -> void:
 			if equip_starters:
 				# Class starter gear (Data/basic_items.csv); spares go in the pack.
 				StarterKit.equip_party(current_party, inventory)
+				_apply_test_party_loadout()
 			current_floor_id = default_save.current_floor_id
 			party_gold = default_save.party_gold
 			# Fresh world: no opened chests / solved puzzles / beaten bosses, morning, start map.
 			environment_states = {}
+			collected_shards = {}
 			world_time = 0.25
 			current_time_period = "MORNING"
 			play_time_seconds = 0.0
 			pending_location = {}
 			_last_location = {}
 			_sync_party_references()
-			save_game(false) # the old world may still be loaded - don't record its map
-			print("GameState: Starter party successfully initialized from default_save.tres")
+			if persist:
+				save_game(false) # the old world may still be loaded - don't record its map
+			print("GameState: Starter party (%d from %s) initialized with default_save.tres supplies" % [current_party.get_viable_combatants().size(), CharacterRoster.STARTER_PARTY_DIR])
 			return
 
 	printerr("GameState ERROR: Failed to load default_save.tres from ", DEFAULT_SAVE_PATH)
+
+
+## Test party extras: the TEST_PARTY_WEAPON in the main hand of everyone whose class can use it
+## (the class weapon it replaces goes to the pack) and TEST_PARTY_REVIVE_POTIONS Revive Potions.
+func _apply_test_party_loadout() -> void:
+	var weapon: ItemData = load(TEST_PARTY_WEAPON_PATH) as ItemData
+	if weapon == null:
+		push_warning("GameState: test party weapon missing at %s" % TEST_PARTY_WEAPON_PATH)
+	else:
+		var slot: String = weapon.get_slot_string()
+		for member: Variant in current_party.slots:
+			var cat: CatCharacter = member as CatCharacter
+			if cat == null or not cat.can_equip_item(weapon):
+				continue
+			var replaced: ItemData = cat.get_equipped_item(slot) as ItemData
+			if cat.equip_item(slot, weapon.duplicate(true)):
+				if replaced != null:
+					inventory.add_item(replaced, 1)
+				cat.equipment_changed.emit()
+	var revive: ItemData = load(TEST_PARTY_REVIVE_PATH) as ItemData
+	if revive != null and TEST_PARTY_REVIVE_POTIONS > 0:
+		inventory.add_item(revive.duplicate(true), TEST_PARTY_REVIVE_POTIONS)
+	inventory.normalize_stacks()
+
+
+## The save file of the running session (dev starts use their own, see DEV_SAVE_PATH).
+func get_save_path() -> String:
+	return DEV_SAVE_PATH if dev_session else slot_path(save_slot)
+
+
+# ==============================================================================
+# Save slots
+# ==============================================================================
+static func slot_path(slot: int) -> String:
+	return "%s/slot_%d.tres" % [SAVE_DIR, slot]
+
+
+func slot_has_save(slot: int) -> bool:
+	return slot >= 1 and slot <= SAVE_SLOT_COUNT and FileAccess.file_exists(slot_path(slot))
+
+
+## Makes `slot` the session's save slot and remembers it for the next run.
+func set_save_slot(slot: int) -> void:
+	save_slot = clampi(slot, 1, SAVE_SLOT_COUNT)
+	var cfg := ConfigFile.new()
+	cfg.set_value("saves", "last_slot", save_slot)
+	cfg.save(SAVE_META_PATH)
+
+
+## Lowest-numbered slot with no save in it, or 0 when every slot is used.
+func first_empty_slot() -> int:
+	for slot: int in range(1, SAVE_SLOT_COUNT + 1):
+		if not slot_has_save(slot):
+			return slot
+	return 0
+
+
+func delete_slot(slot: int) -> void:
+	if slot_has_save(slot):
+		DirAccess.remove_absolute(slot_path(slot))
+
+
+## The slot's save file read fresh from disk (never the live party), or null.
+func read_slot(slot: int) -> SaveGame:
+	if not slot_has_save(slot):
+		return null
+	return ResourceLoader.load(slot_path(slot), "", ResourceLoader.CACHE_MODE_IGNORE) as SaveGame
+
+
+## Creates the saves folder, moves a pre-slots save into slot 1 and restores the last used slot.
+func _setup_save_slots() -> void:
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	if FileAccess.file_exists(LEGACY_SAVE_PATH) and not FileAccess.file_exists(slot_path(1)):
+		var err: Error = DirAccess.rename_absolute(LEGACY_SAVE_PATH, slot_path(1))
+		if err == OK:
+			print("GameState: Moved the old save into slot 1.")
+		else:
+			printerr("GameState ERROR: Could not move the old save into slot 1 (error %d)." % err)
+	var cfg := ConfigFile.new()
+	if cfg.load(SAVE_META_PATH) == OK:
+		save_slot = clampi(int(cfg.get_value("saves", "last_slot", 1)), 1, SAVE_SLOT_COUNT)
 
 
 ## include_location = false skips live capture (world may be unloading / not ready).
@@ -262,6 +372,7 @@ func save_game(include_location: bool = true) -> bool:
 	save.save_version = SaveGame.CURRENT_VERSION
 	save.party_gold = party_gold
 	save.environment_states = environment_states.duplicate(true)
+	save.collected_shards = collected_shards.duplicate(true)
 	save.world_time = world_time
 	save.time_period = current_time_period
 	save.play_time_seconds = play_time_seconds
@@ -273,9 +384,9 @@ func save_game(include_location: bool = true) -> bool:
 	save.spawn_marker = str(loc.get("spawn_marker", ""))
 	save.save_timestamp = Time.get_datetime_string_from_system()
 
-	var err := ResourceSaver.save(save, SAVE_PATH)
+	var err := ResourceSaver.save(save, get_save_path())
 	if err == OK:
-		print("GameState: Session successfully saved to ", SAVE_PATH)
+		print("GameState: Session successfully saved to ", get_save_path())
 		return true
 	else:
 		printerr("GameState ERROR: Failed to save session! Error code: ", err)
@@ -283,10 +394,10 @@ func save_game(include_location: bool = true) -> bool:
 
 
 func load_game() -> bool:
-	if not ResourceLoader.exists(SAVE_PATH):
+	if not ResourceLoader.exists(get_save_path()):
 		return false
 	# CACHE_MODE_IGNORE: read fresh copies, otherwise the cached (live, unsaved) party comes back.
-	var save := ResourceLoader.load(SAVE_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as SaveGame
+	var save := ResourceLoader.load(get_save_path(), "", ResourceLoader.CACHE_MODE_IGNORE) as SaveGame
 	if save == null or save.party == null or save.party.slots == null:
 		return false
 
@@ -304,6 +415,7 @@ func load_game() -> bool:
 	current_floor_id = save.current_floor_id
 	party_gold = save.party_gold
 	environment_states = save.environment_states.duplicate(true)
+	collected_shards = save.collected_shards.duplicate(true)
 	world_time = save.world_time
 	play_time_seconds = save.play_time_seconds
 	if not save.time_period.is_empty():
@@ -321,7 +433,7 @@ func load_game() -> bool:
 		_last_location = pending_location.duplicate()
 
 	_sync_party_references()
-	print("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, SAVE_PATH])
+	print("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, get_save_path()])
 	return true
 
 
@@ -382,8 +494,9 @@ const NEW_GAME_MARKER: String = "SpawnPointNewGame"
 ## class's starter kit (StarterKit). Starts with the test save's supplies (potions, gold) but none of
 ## its characters, on NEW_GAME_MAP at NEW_GAME_MARKER.
 func start_new_game_with_party(party: DungeonParty) -> void:
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
+	dev_session = false
+	session_active = true
+	delete_slot(save_slot) # the caller picked the slot (set_save_slot) before starting
 	_load_default_save(false)
 	current_party = party
 	# Class starter gear from Data/basic_items.csv; anything that doesn't fit a slot goes in the pack.
@@ -402,9 +515,19 @@ func start_new_game_with_party(party: DungeonParty) -> void:
 
 
 func reset_to_starter_party() -> void:
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
+	dev_session = false
+	session_active = true
+	delete_slot(save_slot) # the caller picked the slot (set_save_slot) before starting
 	_load_default_save()
+
+
+## Dev start (MapManager.dev_start_override, editor only): fresh test party from default_save.tres,
+## saved to DEV_SAVE_PATH so the real player save is left alone.
+func begin_dev_session() -> void:
+	dev_session = true
+	session_active = true
+	_load_default_save()
+	print("GameState: DEV START - test party loaded, saving to ", DEV_SAVE_PATH)
 
 
 func _sync_party_references() -> void:

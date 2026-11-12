@@ -318,6 +318,9 @@ func _build_enemy_combatant(raw_e_data: Resource, e_idx: int, pack_size: int) ->
 	elif "strength" in e_data:
 		e_atk = int(e_data.get("strength"))
 	var e_def: int = int(e_data.get("defense")) if "defense" in e_data else 8
+	var e_level: int = int(e_data.get("base_level")) if "base_level" in e_data else 1
+	var level_mult: float = CombatMath.enemy_level_damage_mult(e_level)
+	e_atk = maxi(1, roundi(float(e_atk) * level_mult))
 
 	var e_name: String = str(e_data.get("enemy_name")) if e_data.get("enemy_name") != null else "Enemy"
 	if pack_size > 1:
@@ -328,7 +331,8 @@ func _build_enemy_combatant(raw_e_data: Resource, e_idx: int, pack_size: int) ->
 	c.weakness = int(e_data.get("weakness_element")) if "weakness_element" in e_data else 0
 	if "magic_resist" in e_data:
 		c.element_resists[ItemData.EffectElement.MAGIC] = float(e_data.get("magic_resist"))
-	c.magic_power = int(e_data.get("magic_power")) if "magic_power" in e_data else 0
+	var e_magic: int = int(e_data.get("magic_power")) if "magic_power" in e_data else 0
+	c.magic_power = maxi(0, roundi(float(e_magic) * level_mult))
 	c.can_cast_spells = bool(e_data.get("can_cast_spells")) if "can_cast_spells" in e_data else false
 	if c.can_cast_spells:
 		c.spells = _resolve_enemy_spells(e_data)

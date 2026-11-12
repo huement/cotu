@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b4xfsxyfqbm2c"
 path.s3tc="res://.godot/imported/blob_corrupt_Image_2.png-b00d61367a7f3560b3066a6ac7567d13.s3tc.ctex"
+path.etc2="res://.godot/imported/blob_corrupt_Image_2.png-b00d61367a7f3560b3066a6ac7567d13.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/Enemies/blob_corrupt_Image_2.png"
-dest_files=["res://.godot/imported/blob_corrupt_Image_2.png-b00d61367a7f3560b3066a6ac7567d13.s3tc.ctex"]
+dest_files=["res://.godot/imported/blob_corrupt_Image_2.png-b00d61367a7f3560b3066a6ac7567d13.s3tc.ctex", "res://.godot/imported/blob_corrupt_Image_2.png-b00d61367a7f3560b3066a6ac7567d13.etc2.ctex"]
 
 [params]
 

@@ -841,7 +841,7 @@ func _build_lore_popup_ui(data: Dictionary) -> void:
 
 	content_area.add_child(scroll)
 
-	var close_btn := _create_modal_button("CLOSE", Color(0.0, 0.7, 0.8, 1.0))
+	var close_btn := _create_modal_button(str(data.get("button_text", "CLOSE")), Color(0.0, 0.7, 0.8, 1.0))
 	# Confirm (not just close) so scripted objects like BossStatue know the player read it
 	close_btn.pressed.connect(func() -> void: _emit_confirmation(&"LORE_POPUP", data))
 
@@ -870,6 +870,11 @@ func _configure_aura_preset(preset_type: String) -> void:
 			_aura_material.set_shader_parameter("albedo_color_a", Color(0.0, 0.5, 0.9, 0.85))
 			_aura_material.set_shader_parameter("albedo_color_b", Color(0.0, 0.85, 0.45, 0.85))
 			_aura_material.set_shader_parameter("emission_color", Color(0.1, 1.0, 0.8, 0.6))
+		"shard":
+			# Arcanum Shard: purple with a green highlight.
+			_aura_material.set_shader_parameter("albedo_color_a", ArcanumShard.AURA_COLOR_A)
+			_aura_material.set_shader_parameter("albedo_color_b", ArcanumShard.AURA_COLOR_B)
+			_aura_material.set_shader_parameter("emission_color", ArcanumShard.AURA_EMISSION)
 		"bad", _:
 			_aura_material.set_shader_parameter("albedo_color_a", Color(0.8, 0.05, 0.1, 0.85))
 			_aura_material.set_shader_parameter("albedo_color_b", Color(0.35, 0.0, 0.5, 0.85))

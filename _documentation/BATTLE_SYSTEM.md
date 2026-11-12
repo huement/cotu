@@ -81,11 +81,13 @@ Built in `WorldEnemy._setup_enemy_group()`:
 
 ## 3. Where the battle happens
 
-### 3a. Dungeons: the battle room (`Scripts/Managers/BattleArena.gd`)
+### 3a. Dungeons and caves: the battle room (`Scripts/Managers/BattleArena.gd`)
 
-Dungeon corridors are too tight to fit a pack, so dungeon fights move to `Scenes/Dungeons/DungeonBattle.tscn`.
+Dungeon corridors and cave tunnels are too tight to fit a pack, so those fights move to a battle room:
+dungeons → `Scenes/Dungeons/DungeonBattle.tscn`, caves → `Scenes/Caves/CaveBattle.tscn`.
 
-- **When:** the map root is a `DungeonLevel`, or has root metadata `use_battle_room = true`. Set it to `false` to turn it off for one map.
+- **When:** the map root is a `DungeonLevel` or a `CaveLevel`, or has root metadata `use_battle_room = true`. Set it to `false` to turn it off for one map.
+- **Which room:** `BattleArena.room_scene_path_for(map)`: root metadata `battle_room_scene` (a `res://` path) if set, else the cave room for a `CaveLevel`, else the dungeon room.
 - **Not when:** the party stands on a `BossChamber`'s `BossFloor`. That room is big enough, so the fight stays there.
 - **Enter:** fade to black (0.25 s) → wait for any step/turn tween to finish → `DungeonPlayer.enter_battle_view(pos, yaw)` on the room's `SpawnPoint` marker (looking along its −Z) → fade in (0.35 s) while the battle opens.
 - **Leave:** on `combat_ended` the view cuts to black, `leave_battle_view()` puts it back on the party's cell, then fades in.
@@ -96,9 +98,9 @@ Editing the room: keep **Center Y off** on both GridMaps (like BossChamber), kee
 
 ### 3b. Everywhere else: `BattleFacing.orient_party()` + `BattleSpaceClearance`
 
-Outdoor maps, caves and boss chambers fight in place. The party turns on the spot to face the enemy's cell (always open floor). If the enemy is on the party's own cell, it turns to the first open direction. A full about-face gets a quick dip to black.
+Outdoor maps and boss chambers fight in place. The party turns on the spot to face the enemy's cell (always open floor). If the enemy is on the party's own cell, it turns to the first open direction. A full about-face gets a quick dip to black.
 
-After facing, `BattleSpaceClearance.ensure_space()` (`Scripts/Managers/BattleSpaceClearance.gd`) shoves trees / wall-chunk props / StaticBody clutter out of a forward box (~8 m deep × 8 m wide) so combat models don't clip into the scenery. Cleared GridMap wall cells and moved nodes are restored on `combat_ended`. Dungeon battle-room fights skip this. Opt out per map with root metadata `use_battle_clearance = false`.
+After facing, `BattleSpaceClearance.ensure_space()` (`Scripts/Managers/BattleSpaceClearance.gd`) shoves trees / wall-chunk props / StaticBody clutter out of a forward box (~8 m deep × 8 m wide) so combat models don't clip into the scenery. Cleared GridMap wall cells and moved nodes are restored on `combat_ended`. Battle-room fights (dungeons, caves) skip this. Opt out per map with root metadata `use_battle_clearance = false`.
 
 ### 3c. Scripted arenas
 
@@ -248,6 +250,8 @@ Full detail: `COMBAT_README.md`.
 | Stop fights starting too soon after another | `GameState.POST_BATTLE_COOLDOWN` |
 | Use / skip the battle room on a map | Root metadata `use_battle_room` |
 | Redesign the dungeon battle room | `Scenes/Dungeons/DungeonBattle.tscn` (`SpawnPoint`, lights, props) |
+| Redesign the cave battle room | `Scenes/Caves/CaveBattle.tscn` (`SpawnPoint`, lights, props) |
+| Give one map its own battle room | Root metadata `battle_room_scene` = `res://...tscn` |
 | Move an enemy closer / bigger in battle | `EnemyData.combat_forward_distance`, `model_scale`, `vertical_offset` |
 | Spread enemies wider | EnemyVisualManager `formation_spacing`, `back_row_pull` |
 | Change slot order / boss placement | `CombatFormation.get_best_slots` + its test |

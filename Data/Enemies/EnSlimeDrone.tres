@@ -18,7 +18,6 @@ max_health = 18
 current_health = 18
 attack_damage = 4
 defense = 0
-speed = 6.0
 initiative_speed = 6
 weakness_element = 4
 occurs_in_groups = false

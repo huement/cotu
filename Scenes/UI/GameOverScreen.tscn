@@ -45,15 +45,15 @@ alignment = 1
 
 [node name="LoadButton" type="Button" parent="Black/Center/VBox/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(220, 52)
+custom_minimum_size = Vector2(260, 52)
 layout_mode = 2
-text = "LOAD SAVE"
+text = "Load Last Save"
 
 [node name="QuitButton" type="Button" parent="Black/Center/VBox/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(220, 52)
+custom_minimum_size = Vector2(280, 52)
 layout_mode = 2
-text = "QUIT"
+text = "Quit to Main Menu"
 
 [node name="StatusLabel" type="Label" parent="Black/Center/VBox"]
 unique_name_in_owner = true

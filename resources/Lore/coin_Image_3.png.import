@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://kttqapjyqpv5"
 path.s3tc="res://.godot/imported/coin_Image_3.png-8d7089c4827a423d671d9e6a1cb7fa9c.s3tc.ctex"
+path.etc2="res://.godot/imported/coin_Image_3.png-8d7089c4827a423d671d9e6a1cb7fa9c.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/Lore/coin_Image_3.png"
-dest_files=["res://.godot/imported/coin_Image_3.png-8d7089c4827a423d671d9e6a1cb7fa9c.s3tc.ctex"]
+dest_files=["res://.godot/imported/coin_Image_3.png-8d7089c4827a423d671d9e6a1cb7fa9c.s3tc.ctex", "res://.godot/imported/coin_Image_3.png-8d7089c4827a423d671d9e6a1cb7fa9c.etc2.ctex"]
 
 [params]
 

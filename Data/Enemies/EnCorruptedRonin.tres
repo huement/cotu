@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://dm68hq4n4ge1"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_corrupted_ronin_mat.tres" id="1_ssmvg"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-k.glb" id="2_wm3x1"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_ekprj"]
+[ext_resource type="Material" uid="uid://cdvx13hdil7cq" path="res://resources/Enemies/Kenny/Materials/en_corrupted_ronin_mat.tres" id="1_ssmvg"]
+[ext_resource type="PackedScene" uid="uid://c4i3cjpxmvrkq" path="res://resources/Enemies/Kenny/character-k.glb" id="2_wm3x1"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_ekprj"]
 
 [resource]
 script = ExtResource("3_ekprj")
@@ -18,7 +18,7 @@ max_health = 85
 current_health = 85
 attack_damage = 22
 defense = 7
-speed = 11.0
+speed = 14.0
 initiative_speed = 14
 weakness_element = 5
 attack_element = 2

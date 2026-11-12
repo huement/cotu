@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://47pcesh1mksk"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_plasma_sentinel_mat.tres" id="1_r2mqx"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-o.glb" id="2_nn25j"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_x6s6t"]
+[ext_resource type="Material" uid="uid://b34ynnumhyd3e" path="res://resources/Enemies/Kenny/Materials/en_plasma_sentinel_mat.tres" id="1_r2mqx"]
+[ext_resource type="PackedScene" uid="uid://cr8m5m2p0bker" path="res://resources/Enemies/Kenny/character-o.glb" id="2_nn25j"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_x6s6t"]
 
 [resource]
 script = ExtResource("3_x6s6t")
@@ -19,6 +19,7 @@ max_health = 100
 current_health = 100
 attack_damage = 28
 defense = 8
+speed = 14.0
 attack_element = 3
 equipped_weapon_id = "weap_magitek_railgun"
 movement_speed = 1.1

@@ -20,6 +20,9 @@ signal closed
 @export_file("*.md", "*.txt") var body_file: String = ""
 ## Frees the screen when it closes (otherwise it just hides).
 @export var free_on_close: bool = true
+## Adds a LOAD STARTER PARTY button to the header (Help screen): copies the ready-made characters
+## in Data/StarterParty into the player's roster (CharacterRoster.add_starter_party).
+@export var show_starter_party_button: bool = false
 
 @export_group("Space Background")
 ## Animated pixel-art space behind the window (Scenes/UI/SpaceBackground.tscn) instead of a flat dim.
@@ -31,6 +34,7 @@ signal closed
 @export_range(0.0, 2.0, 0.05) var window_intro_delay: float = 0.35
 
 var _space: SpaceBackground = null
+var _starter_button: Button = null
 
 @onready var _panel: PanelContainer = %Panel as PanelContainer
 @onready var _title_label: Label = %TitleLabel as Label
@@ -60,10 +64,46 @@ func _ready() -> void:
 	_back_button.focus_neighbor_top = _back_button.get_path_to(_back_button)
 	_back_button.focus_neighbor_bottom = _back_button.get_path_to(_back_button)
 	_back_button.pressed.connect(close)
+	if show_starter_party_button:
+		_add_starter_party_button()
 	visibility_changed.connect(_on_visibility_changed)
 	_on_visibility_changed()
 	if space_background:
 		_setup_space_background()
+
+
+func _add_starter_party_button() -> void:
+	_starter_button = ShardsMenuStyle.make_row_button("LOAD STARTER PARTY")
+	_starter_button.custom_minimum_size = Vector2(230.0, 52.0)
+	_starter_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_starter_button.tooltip_text = "Adds the ready-made starter characters to your roster."
+	_back_button.get_parent().add_child(_starter_button)
+	_starter_button.pressed.connect(_on_starter_party_pressed)
+	# Left / right move between Back and this button; up / down stay put.
+	_back_button.focus_neighbor_right = _back_button.get_path_to(_starter_button)
+	_back_button.focus_neighbor_left = _back_button.get_path_to(_starter_button)
+	_starter_button.focus_neighbor_left = _starter_button.get_path_to(_back_button)
+	_starter_button.focus_neighbor_right = _starter_button.get_path_to(_back_button)
+	_starter_button.focus_neighbor_top = _starter_button.get_path_to(_starter_button)
+	_starter_button.focus_neighbor_bottom = _starter_button.get_path_to(_starter_button)
+
+
+func _on_starter_party_pressed() -> void:
+	if is_instance_valid(AudioManager) and AudioManager.has_method("play_ui_sound"):
+		AudioManager.play_ui_sound("button-press")
+	var added: int = CharacterRoster.add_starter_party()
+	if added > 0:
+		_starter_button.text = "ADDED %d TO ROSTER" % added
+		_subtitle_label.text = "%d starter characters are now in your roster. Pick them under New Game." % added
+	elif CharacterRoster.starter_party_size() > 0:
+		_starter_button.text = "ALREADY IN ROSTER"
+		_subtitle_label.text = "The starter characters are already in your roster."
+	else:
+		_starter_button.text = "NONE FOUND"
+		_subtitle_label.text = "No starter characters ship with this build."
+	_subtitle_label.visible = true
+	_starter_button.disabled = true
+	_back_button.grab_focus()
 
 
 func _setup_space_background() -> void:

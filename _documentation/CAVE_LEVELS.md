@@ -74,6 +74,22 @@ next to floor; the piece is chosen by how many sides are open:
 1 = `cave-wall`/`-b`/`-c`, 2 adjacent = `cave-wall-corner`, 2 opposite = `cave-wall-double`,
 3 = `cave-wall-end`, 4 = `cave-pillar`.
 
+## Battle room (cave "battle mode")
+
+Cave tunnels are too tight to fit an enemy pack, so cave fights work exactly like dungeon fights:
+the screen fades to black, the party's view moves into `Scenes/Caves/CaveBattle.tscn`, the battle
+runs there, and when it ends the view cuts back to where the party was.
+
+- **Script.** `Scripts/Managers/BattleArena.gd` (shared with dungeons; full description in
+  `BATTLE_SYSTEM.md` §3a). Any map whose root is a `CaveLevel` uses the cave room, so every cave
+  level (GloomReach caves, Broken Bone Marsh cave, windmill cellars) and any new generated one gets it.
+- **Turn it off for one cave:** root metadata `use_battle_room = false` (the fight then happens in place).
+- **Different room for one map:** root metadata `battle_room_scene = "res://..."`.
+- **Editing the room.** The party stands on the scene's `SpawnPoint` marker and looks along its -Z;
+  enemies appear a few metres in front. Keep **Center Y off** on FloorMap / WallMap. The room only
+  has the lights you place in it (plus the party's torch), because it sits 2000 m away from the level.
+- **The party never leaves its cell.** Only the view moves; saves and the cave's other enemies are untouched.
+
 ## Editing a dark level
 
 Every cave has an **EditorWorkLight** node (`Scripts/Environment/EditorWorkLight.gd`, a `@tool`

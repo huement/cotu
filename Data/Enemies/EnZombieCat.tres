@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://cg0erkpbobxo8"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_zombie_cat_mat.tres" id="1_ht43a"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-d.glb" id="2_y8ty1"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_t13a8"]
+[ext_resource type="Material" uid="uid://d37hfmbiw1ujo" path="res://resources/Enemies/Kenny/Materials/en_zombie_cat_mat.tres" id="1_ht43a"]
+[ext_resource type="PackedScene" uid="uid://khgjcdfj1u0w" path="res://resources/Enemies/Kenny/character-d.glb" id="2_y8ty1"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_t13a8"]
 
 [resource]
 script = ExtResource("3_t13a8")
@@ -16,7 +16,7 @@ model_scale = Vector3(1, 1, 1)
 base_level = 2
 attack_damage = 10
 defense = 5
-speed = 7.0
+speed = 10.0
 initiative_speed = 9
 weakness_element = 2
 max_group_size = 4
@@ -24,4 +24,3 @@ movement_speed = 0.8
 aggro_range_tiles = 4
 can_be_surprised = false
 xp_value = 150
-gold_value = 25

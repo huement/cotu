@@ -193,9 +193,27 @@ func _leave_to_main_menu() -> void:
 	SessionFlow.quit_to_main_menu(get_tree())
 
 
+## Save tile: save to the session's slot, or pick another slot (the game then keeps saving there,
+## leaving the old slot as it was - a second copy of this playthrough).
 func _save_game() -> void:
+	if GameState.dev_session:
+		_write_save()
+		return
+	var choice: int = await _ask("SAVE GAME", "Current slot: %d" % GameState.save_slot, ["CANCEL", "OTHER SLOT", "SAVE"], 2)
+	if choice == 2:
+		_write_save()
+	elif choice == 1:
+		var screen := SaveSlotScreen.new()
+		screen.mode = SaveSlotScreen.Mode.SAVE
+		screen.slot_chosen.connect(func(slot: int) -> void:
+			GameState.set_save_slot(slot)
+			_write_save())
+		_open_sub_screen(screen)
+
+
+func _write_save() -> void:
 	if GameState.save_game():
-		_set_status("Game saved  ·  %s" % SessionFlow.get_save_timestamp())
+		_set_status("Game saved to slot %d  ·  %s" % [GameState.save_slot, SessionFlow.get_save_timestamp()])
 		if is_instance_valid(SignalBus):
 			SignalBus.show_toast.emit("Game saved", false)
 	else:

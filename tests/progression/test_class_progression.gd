@@ -2,14 +2,14 @@
 extends GutTest
 
 const SHEET: String = """Class ID,Name,Aliases,Difficulty,Base XP,XP Growth,Max Level,HP Per VIT,HP Per Level,MP Per Level,Stat Points Per Level,Skill Points Per Level,Spell Points Per Level,Spells Unlock At Level,Auto Stat Gains,Milestone Every,Milestone Stat Points
-1,Spartan,Fighter,1,240,1.40,50,3,4,0,4,6,0,0,"STR+1,VIT+1",5,2
-8,Psynic,Psionic,3,330,1.5,20,2,2,2,4,1,5,3,"INT+1,VIT+1",5,3
+1,Spartan,Fighter,1,360,1.40,50,3,4,0,4,6,0,0,"STR+1,VIT+1",5,2
+8,Psynic,Psionic,3,495,1.5,20,2,2,2,4,1,5,3,"INT+1,VIT+1",5,3
 """
 
 
 func test_parse_and_aliases() -> void:
 	var t: Dictionary = ClassProgression.parse_csv_text(SHEET)
-	assert_eq(t["spartan"]["base_xp"], 240)
+	assert_eq(t["spartan"]["base_xp"], 360)
 	assert_eq(t["psionic"]["name"], "Psynic")
 	assert_eq(t["psionic"]["max_level"], 20)
 	assert_eq(t["spartan"]["auto_stat_gains"], { "strength": 1, "vitality": 1 })
@@ -17,7 +17,7 @@ func test_parse_and_aliases() -> void:
 
 func test_xp_curve_grows_and_harder_costs_more() -> void:
 	var t: Dictionary = ClassProgression.parse_csv_text(SHEET)
-	assert_eq(ClassProgression.xp_to_next_level(t["spartan"], 1), 240)
+	assert_eq(ClassProgression.xp_to_next_level(t["spartan"], 1), 360)
 	assert_gt(ClassProgression.xp_to_next_level(t["spartan"], 5), ClassProgression.xp_to_next_level(t["spartan"], 4))
 	assert_gt(ClassProgression.xp_to_next_level(t["psynic"], 5), ClassProgression.xp_to_next_level(t["spartan"], 5))
 
@@ -52,7 +52,7 @@ func test_real_sheet_has_every_class_in_difficulty_order() -> void:
 	for n: String in ["Spartan", "Shade", "Soulwright", "Archanist", "Warden", "Echo", "Maester", "Psynic", "Amazon", "Wizard", "Crusader", "Ronin", "Voidhand", "Ghostblade"]:
 		assert_has(names, n)
 	assert_eq(ClassProgression.for_class("Psionic")["name"], "Psynic")
-	assert_eq(ClassProgression.for_class("Nope")["base_xp"], 300)
+	assert_eq(ClassProgression.for_class("Nope")["base_xp"], 450)
 
 
 func test_cat_levels_by_class() -> void:
@@ -61,13 +61,30 @@ func test_cat_levels_by_class() -> void:
 	spartan.profession_name = "Spartan"
 	var cat := CatCharacter.new()
 	cat.profession = spartan
+	# Sheet wants 6 skill pts; with 2 known skills the per-level cap is 1 (half).
+	cat.known_skills = [SkillData.new(), SkillData.new()]
 	cat.max_xp = cat.get_required_xp_for_level(1)
-	assert_eq(cat.max_xp, 240)
+	assert_eq(cat.max_xp, 360)
 	var str_before: int = cat.strength
-	cat.add_xp(240)
+	cat.add_xp(360)
 	assert_eq(cat.level, 2)
 	assert_eq(cat.strength, str_before + 1)
 	assert_eq(cat.unspent_stat_points, 4)
-	assert_eq(cat.unspent_skill_points, 6)
+	assert_eq(cat.unspent_skill_points, 1)
 	assert_eq(cat.unspent_spell_points, 0)
 	assert_eq(cat.max_hp, cat.vitality * 3 + 4)
+
+
+func test_skill_spell_grant_capped_at_half_known() -> void:
+	var cat := CatCharacter.new()
+	cat.known_skills = [SkillData.new(), SkillData.new()]
+	cat.known_spells = [SpellData.new()]
+	# Raw sheet would give more; cap: 2 skills → 1, 1 spell → 0.
+	cat.unspent_skill_points = 0
+	cat.unspent_spell_points = 0
+	# Simulate a fat grant through the same helper used by grant_level_points.
+	assert_eq(cat._capped_ability_grant(6, 2), 1)
+	assert_eq(cat._capped_ability_grant(5, 1), 0)
+	assert_eq(cat._capped_ability_grant(5, 0), 0)
+	assert_eq(cat._capped_ability_grant(3, 4), 2)
+	assert_eq(cat._capped_ability_grant(1, 4), 1)

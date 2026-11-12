@@ -42,7 +42,8 @@ func test_cat_apply_level_roll() -> void:
 	cat._calculate_vitals()
 	cat.current_hp = 100
 	cat.pending_level_rolls = 2
-	cat.known_spells = [SpellData.new()]
+	# Cap is half of known spells (4 → max 2), so a roll-6 ability bank still lands in full.
+	cat.known_spells = [SpellData.new(), SpellData.new(), SpellData.new(), SpellData.new()]
 	var bonus: Dictionary = cat.apply_level_roll(6)
 	assert_eq(cat.unspent_stat_points, 3)
 	assert_eq(cat.unspent_spell_points, 2)

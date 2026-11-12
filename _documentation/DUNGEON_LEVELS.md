@@ -115,7 +115,7 @@ Dungeon corridors are too tight to fit a whole enemy pack, so dungeon fights don
 
 - **What happens.** The screen fades to black, the party's view moves into `Scenes/Dungeons/DungeonBattle.tscn`, the battle runs there, and when it ends the view cuts back to where the party was.
 - **Script.** `Scripts/Managers/BattleArena.gd`. Enemies call `await BattleArena.prepare_party(get_tree(), global_position)` just before they emit `combat_started` (`enemy.gd`, `world_enemy.gd`; ghosts and BossEnemy go through `enemy.gd`).
-- **Which maps.** Any map whose root is a `DungeonLevel`. Set root metadata `use_battle_room` to `true` / `false` to force it on or off for one map. Other maps still just turn the party to face the enemy (`BattleFacing`).
+- **Which maps.** Any map whose root is a `DungeonLevel` (caves do the same with `Scenes/Caves/CaveBattle.tscn`, see `CAVE_LEVELS.md`). Set root metadata `use_battle_room` to `true` / `false` to force it on or off for one map. Other maps still just turn the party to face the enemy (`BattleFacing`).
 - **Boss chamber.** A fight that starts while the party stands on a BossChamber's `BossFloor` stays in the chamber. A boss met anywhere else goes to the battle room.
 - **The party never leaves its cell.** Only the Player node's transform moves (`DungeonPlayer.enter_battle_view` / `leave_battle_view`); `current_grid_pos`, saves and the dungeon's enemies are untouched.
 - **Editing the room.** The party stands on the scene's `SpawnPoint` marker and looks along its -Z. Enemies appear about 3.4 m in front. `BattleLight` lights the fight. Floor and wall GridMaps both need **Center Y off** (like BossChamber), or the floor sits 2 m up the walls.

@@ -18,7 +18,6 @@ max_health = 25
 current_health = 25
 attack_damage = 5
 defense = 1
-speed = 8.0
 initiative_speed = 10
 weakness_element = 5
 min_group_size = 2

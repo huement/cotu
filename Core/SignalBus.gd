@@ -96,3 +96,6 @@ signal enemy_proximity_changed(min_grid_distance: int, current_tier: int)
 
 ## Emitted when an enemy alarm or proximity clicker is triggered
 signal proximity_alert_triggered(alert_level: int) # 0 = Safe, 1 = Nearby (Clicker 1), 2 = Close (Clicker 2), 3 = Critical (Alarm)
+
+## An Arcanum Shard was collected (Scripts/Objects/ArcanumShard.gd -> ShardLedger.collect).
+signal shard_collected(shard_id: String, level_name: String)

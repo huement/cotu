@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://mjqk7iw3324y"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/loot_icons/diamond.png" id="1_7s6vl"]
-[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_26bwk"]
+[ext_resource type="Texture2D" uid="uid://dppoy606q8rkb" path="res://Data/Items/loot_icons/diamond.png" id="1_7s6vl"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_26bwk"]
 
 [resource]
 script = ExtResource("2_26bwk")

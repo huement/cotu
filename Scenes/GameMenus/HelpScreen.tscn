@@ -6,3 +6,4 @@
 screen_title = "HELP"
 subtitle = "How to play"
 body_file = "res://Data/Help/help.md"
+show_starter_party_button = true

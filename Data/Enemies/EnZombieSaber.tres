@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://ck2wubwp2hjon"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_zombie_saber_mat.tres" id="1_k2g2e"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-i.glb" id="2_5fxjj"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_3ofdj"]
+[ext_resource type="Material" uid="uid://cyvd3sexsufag" path="res://resources/Enemies/Kenny/Materials/en_zombie_saber_mat.tres" id="1_k2g2e"]
+[ext_resource type="PackedScene" uid="uid://b8w2o1wvp8o5q" path="res://resources/Enemies/Kenny/character-i.glb" id="2_5fxjj"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_3ofdj"]
 
 [resource]
 script = ExtResource("3_3ofdj")
@@ -18,6 +18,7 @@ max_health = 52
 current_health = 52
 attack_damage = 9
 defense = 3
+speed = 14.0
 initiative_speed = 13
 attack_element = 2
 equipped_item_id = "pot_mana_vial"

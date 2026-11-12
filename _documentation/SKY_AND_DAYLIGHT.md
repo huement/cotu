@@ -7,12 +7,14 @@ Every outdoor map draws its sky with one shader, `Shaders/pixel_sky.gdshader`, a
 | `Shaders/pixel_sky.gdshader` | The sky: gradient, sun, clouds, night space scene |
 | `resources/Environment/pixel_sky.tres` | Default material (clear day) |
 | `resources/Environment/pixel_sky_overcast.tres` | Greyer, heavier-cloud material for gloomy maps |
+| `resources/Environment/pixel_sky_feroshaw.tres` | FeroShaw only: dark teal-to-jaundice day sky under heavy slate cloud |
 | `Scripts/Environment/day_night_cycle.gd` | Orbits sun/moon lights, lerps ambient, drives the sky shader |
 | `Shaders/space_pixel.gdshader` | The 2D menu background the night scene was ported from (menus only) |
 
 | Map | Material |
 |---|---|
-| VeroWood, FeroShaw, StoneTrail | `pixel_sky.tres` |
+| VeroWood, StoneTrail | `pixel_sky.tres` |
+| FeroShaw | `pixel_sky_feroshaw.tres` (sick overcast day; night unchanged) |
 | GreenGrove, BrokenBoneMarsh, GloomReach | `pixel_sky_overcast.tres` |
 | Dungeons / caves | No sky: flat dark `Environment` + depth fog, no `DayNightCycle` |
 
@@ -81,7 +83,7 @@ On the Compatibility renderer, `TIME` only exists inside `sky()`. Helper functio
 | stars | `giant_glow`, `star_brightness`, `star_twinkle`, `twinkle_speed` | Glow size, brightness, twinkle |
 | stars | `star_cool`, `star_warm`, `star_hot` | Star colours (defaults match the menu) |
 
-Changes to `pixel_sky.tres` affect VeroWood, FeroShaw and StoneTrail; changes to `pixel_sky_overcast.tres` affect GreenGrove, BrokenBoneMarsh and GloomReach.
+Changes to `pixel_sky.tres` affect VeroWood and StoneTrail; `pixel_sky_feroshaw.tres` affects FeroShaw only; changes to `pixel_sky_overcast.tres` affect GreenGrove, BrokenBoneMarsh and GloomReach.
 
 ---
 
@@ -121,6 +123,7 @@ Each frame the script:
 | `day_ambient_energy` | Peak daytime ambient energy (lower = gloomier) |
 | `day_background_energy` | Sky brightness (applies day and night with the pixel sky) |
 | `moon_emission_energy` / `moon_rotation_degrees` | Moon glow and facing |
+| `day_fog_density` / `day_fog_color` | Daytime depth fog (0 = off). Thins to nothing at night. Used by FeroShaw |
 
 ### Other things that change time
 

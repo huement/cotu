@@ -7,7 +7,7 @@ extends Node
 ##   * Party portraits move from the right sidebar to a bottom-left panel: 2 rows of 3 between the
 ##     party_panel_top / party_panel_btm bars. Front row (slots 0-2) is the bottom row; the top row
 ##     (slots 3-5) only shows when someone is in it.
-##   * SEARCH / ITEMS / REST move to the bottom centre, spaced out for fingers.
+##   * The toolbar (background + SEARCH / REST / ITEMS) moves to the bottom centre, same spacing as desktop.
 ##   * A D-pad bottom-right: strafe left, forward, strafe right / turn left, back, turn right
 ##     (TouchScreenButtons, so several fingers work at once). They press the same input actions as the
 ##     keyboard (move_forward, move_backward, turn_left, turn_right, strafe_left, strafe_right), so
@@ -43,7 +43,6 @@ const PANEL_MARGIN: Vector2 = Vector2(12, 8)
 const PANEL_TOP_SIZE: Vector2 = Vector2(197.83, 6.81)
 const PANEL_BTM_SIZE: Vector2 = Vector2(197.05, 20.98)
 
-const ACTION_SPACING: int = 44
 const ACTION_BOTTOM_MARGIN: float = 14.0
 
 var enabled: bool = false
@@ -274,32 +273,26 @@ func _move_portraits_out() -> void:
 	_portrait_home.clear()
 
 
-func _action_buttons() -> HBoxContainer:
-	var search: Node = _hud.get_node_or_null(^"%SearchButton")
-	return search.get_parent() as HBoxContainer if search != null else null
+## The toolbar (background + SEARCH / REST / ITEMS) moves as one piece.
+func _action_toolbar() -> Control:
+	return _hud.get_node_or_null(^"%ActionToolbar") as Control
 
 
 func _move_actions_in() -> void:
-	var box: HBoxContainer = _action_buttons()
-	if box == null:
+	var bar: Control = _action_toolbar()
+	if bar == null:
 		return
-	_actions_home = {
-		"parent": box.get_parent(), "index": box.get_index(), "position": box.position,
-		"separation": box.get_theme_constant("separation"),
-	}
-	box.reparent(_actions_anchor, false)
-	box.add_theme_constant_override("separation", ACTION_SPACING)
-	# Centre it on the anchor, sitting on the bottom edge.
-	box.reset_size()
-	var sz: Vector2 = box.get_combined_minimum_size()
-	box.position = Vector2(-sz.x * 0.5, -sz.y - ACTION_BOTTOM_MARGIN)
+	_actions_home = { "parent": bar.get_parent(), "index": bar.get_index(), "position": bar.position }
+	bar.reparent(_actions_anchor, false)
+	# Centre it on the anchor, sitting on the bottom edge. Same spacing as desktop.
+	var sz: Vector2 = bar.custom_minimum_size
+	bar.position = Vector2(-sz.x * 0.5, -sz.y - ACTION_BOTTOM_MARGIN)
 
 
 func _move_actions_out() -> void:
-	var box: HBoxContainer = _action_buttons()
-	if box == null or _actions_home.is_empty():
+	var bar: Control = _action_toolbar()
+	if bar == null or _actions_home.is_empty():
 		return
-	box.reparent(_actions_home["parent"] as Node, false)
-	box.position = _actions_home["position"] as Vector2
-	box.add_theme_constant_override("separation", int(_actions_home["separation"]))
+	bar.reparent(_actions_home["parent"] as Node, false)
+	bar.position = _actions_home["position"] as Vector2
 	_actions_home.clear()

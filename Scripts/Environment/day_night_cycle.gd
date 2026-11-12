@@ -29,6 +29,12 @@ extends Node3D
 ## Peak daytime sky/background brightness (lower keeps heavy cloud cover readable).
 @export_range(0.05, 1.5) var day_background_energy: float = 1.0
 
+@export_group("Daytime Fog")
+## Depth fog thickness at full day. 0 = this script leaves the environment's fog alone.
+## The fog thins to nothing at night, so the night look is unchanged.
+@export_range(0.0, 0.1, 0.001) var day_fog_density: float = 0.0
+@export var day_fog_color: Color = Color(0.3, 0.34, 0.29, 1.0)
+
 signal time_changed(current_time: float)
 signal period_changed(is_night: bool)
 signal period_name_changed(period_name: String)
@@ -121,6 +127,11 @@ func _update_cycle() -> void:
 		env.ambient_light_color = current_ambient
 		env.ambient_light_energy = lerpf(0.08, day_ambient_energy, day_factor)
 		
+		if day_fog_density > 0.0:
+			env.fog_enabled = day_factor > 0.001
+			env.fog_light_color = day_fog_color
+			env.fog_density = day_fog_density * day_factor
+
 		if env.volumetric_fog_enabled:
 			env.volumetric_fog_albedo = current_ambient * 0.5
 			env.volumetric_fog_emission = Color.BLACK.lerp(Color(0.15, 0.25, 0.25), day_factor)

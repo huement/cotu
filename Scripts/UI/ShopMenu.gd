@@ -97,7 +97,7 @@ func _on_gold_changed(_new_total: int, _amount_changed: int) -> void:
 
 func _refresh_gold() -> void:
 	if is_instance_valid(gold_label):
-		gold_label.text = "₡ %d" % GameState.party_gold
+		gold_label.text = "%d" % GameState.party_gold
 
 
 func _load_stock(data: Dictionary) -> void:

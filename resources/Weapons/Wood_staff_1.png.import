@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cde4vem8rd6eq"
 path.s3tc="res://.godot/imported/Wood_staff_1.png-197c1f77e0477fe6bf03ea680d77e6d4.s3tc.ctex"
+path.etc2="res://.godot/imported/Wood_staff_1.png-197c1f77e0477fe6bf03ea680d77e6d4.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/Weapons/Wood_staff_1.png"
-dest_files=["res://.godot/imported/Wood_staff_1.png-197c1f77e0477fe6bf03ea680d77e6d4.s3tc.ctex"]
+dest_files=["res://.godot/imported/Wood_staff_1.png-197c1f77e0477fe6bf03ea680d77e6d4.s3tc.ctex", "res://.godot/imported/Wood_staff_1.png-197c1f77e0477fe6bf03ea680d77e6d4.etc2.ctex"]
 
 [params]
 

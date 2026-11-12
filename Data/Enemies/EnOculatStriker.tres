@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://b56g6t47mp0d0"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_oculat_striker_mat.tres" id="1_fdrf6"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-e.glb" id="2_3o3jx"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_h8snp"]
+[ext_resource type="Material" uid="uid://csvcgvr18pvhn" path="res://resources/Enemies/Kenny/Materials/en_oculat_striker_mat.tres" id="1_fdrf6"]
+[ext_resource type="PackedScene" uid="uid://li0uonfyxjgd" path="res://resources/Enemies/Kenny/character-e.glb" id="2_3o3jx"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_h8snp"]
 
 [resource]
 script = ExtResource("3_h8snp")
@@ -19,7 +19,7 @@ max_health = 60
 current_health = 60
 attack_damage = 12
 defense = 12
-speed = 12.0
+speed = 13.0
 attack_element = 0
 equipped_item_id = "pot_health_vial"
 can_cast_spells = true

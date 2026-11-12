@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://gasv2ai0xtts"
 path.s3tc="res://.godot/imported/crab_monster_-_animated_0.png-44abab28d6940a8cc586aa9c753634ab.s3tc.ctex"
+path.etc2="res://.godot/imported/crab_monster_-_animated_0.png-44abab28d6940a8cc586aa9c753634ab.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/Enemies/crab_monster_-_animated_0.png"
-dest_files=["res://.godot/imported/crab_monster_-_animated_0.png-44abab28d6940a8cc586aa9c753634ab.s3tc.ctex"]
+dest_files=["res://.godot/imported/crab_monster_-_animated_0.png-44abab28d6940a8cc586aa9c753634ab.s3tc.ctex", "res://.godot/imported/crab_monster_-_animated_0.png-44abab28d6940a8cc586aa9c753634ab.etc2.ctex"]
 
 [params]
 

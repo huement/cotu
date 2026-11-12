@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://88e45r3hqxfl"]
 
 [ext_resource type="PackedScene" uid="uid://cvp5tl7sdodgi" path="res://resources/Enemies/beast.glb" id="1_model"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
@@ -18,15 +18,13 @@ max_health = 220
 current_health = 220
 attack_damage = 18
 defense = 7
-speed = 11.0
-initiative_speed = 12
+speed = 15.0
 weakness_element = 2
 attack_element = 2
 occurs_in_groups = false
-min_group_size = 1
 max_group_size = 1
 movement_speed = 1.8
 aggro_range_tiles = 5
 can_surprise_player = true
-xp_value = 600
+xp_value = 666
 gold_value = 210

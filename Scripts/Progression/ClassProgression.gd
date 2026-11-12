@@ -20,7 +20,7 @@ const CSV_PATH: String = "res://Data/Class_Progression.csv"
 ## Used for unknown classes and empty cells (matches the old hard-coded behaviour).
 const DEFAULTS: Dictionary = {
 	"name": "", "difficulty": 1, "difficulty_label": "Normal",
-	"base_xp": 300, "xp_growth": 1.5, "max_level": 50,
+	"base_xp": 450, "xp_growth": 1.5, "max_level": 50,
 	"hp_per_vit": 2, "hp_per_level": 0, "mp_per_level": 0,
 	"stat_points_per_level": 5, "skill_points_per_level": 2, "spell_points_per_level": 1,
 	"spells_unlock_at_level": 1, "auto_stat_gains": { "strength": 1, "vitality": 1 },

@@ -10,10 +10,12 @@ config_version=5
 
 [application]
 
-config/name="Shards"
-run/main_scene="uid://ddug86d1wuau7"
+config/name="Shards Of Arcanum"
+config/version="0.1.1"
+run/main_scene="res://Scenes/Boot.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
-config/icon="res://icon.svg"
+boot_splash/image="uid://dj1476a6hb1e"
+config/icon="uid://dem6rrpb323ok"
 
 [autoload]
 
@@ -84,6 +86,7 @@ camera/apply_fov=false
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 
 [settings_menu]
 

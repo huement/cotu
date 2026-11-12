@@ -15,6 +15,9 @@ extends RefCounted
 
 const DEFAULT_DIR: String = "user://character_pool/"
 const PARTY_SIZE: int = 6
+## Ready-made characters shipped with the game (one roster-format .tres each). They are NOT in the
+## roster until the player asks for them: Help screen > LOAD STARTER PARTY (add_starter_party).
+const STARTER_PARTY_DIR: String = "res://Data/StarterParty/"
 
 ## Where the roster lives. Tests point this at a scratch folder.
 static var pool_dir: String = DEFAULT_DIR
@@ -139,6 +142,71 @@ static func build_party(slot_ids: Array) -> DungeonParty:
 		cat.current_energy = cat.max_energy
 		party.slots[i] = cat
 	return party
+
+
+## res:// paths of the shipped starter characters, in creation order (the first three are the
+## front row). At most PARTY_SIZE.
+static func starter_party_paths() -> Array[String]:
+	var ids: Array[String] = []
+	for file: String in DirAccess.get_files_at(STARTER_PARTY_DIR):
+		# Exported builds list "name.tres.remap"; the resource still loads by its .tres path.
+		var file_name: String = file.trim_suffix(".remap")
+		if file_name.ends_with(".tres"):
+			ids.append(file_name.get_basename())
+	ids.sort_custom(func(a: String, b: String) -> bool:
+		return _created_at(a) < _created_at(b) if _created_at(a) != _created_at(b) else a < b)
+	var paths: Array[String] = []
+	for id: String in ids.slice(0, PARTY_SIZE):
+		paths.append(STARTER_PARTY_DIR + id + ".tres")
+	return paths
+
+
+## The shipped starter characters as a ready 6-slot party of fresh copies (full HP / energy,
+## nothing equipped yet). Used for the test party (dev start, debug Quick Start).
+static func starter_party() -> DungeonParty:
+	var party := DungeonParty.new()
+	var paths: Array[String] = starter_party_paths()
+	for i: int in paths.size():
+		var source: CatCharacter = ResourceLoader.load(paths[i], "", ResourceLoader.CACHE_MODE_IGNORE) as CatCharacter
+		if source == null:
+			push_warning("CharacterRoster: %s is not a character, skipped." % paths[i])
+			continue
+		var cat: CatCharacter = source.duplicate(true) as CatCharacter
+		cat.is_front_row = i < 3
+		cat._calculate_vitals()
+		cat.current_hp = cat.max_hp
+		cat.stats.health = cat.max_hp
+		cat.current_energy = cat.max_energy
+		party.slots[i] = cat
+	return party
+
+
+## Copies the shipped starter characters (STARTER_PARTY_DIR) into the roster, unlocked, so they can
+## be picked under New Game. Ones already in the roster are left alone. Returns how many were added.
+static func add_starter_party() -> int:
+	var added: int = 0
+	for source_path: String in starter_party_paths():
+		var roster_id: String = source_path.get_file().get_basename()
+		if FileAccess.file_exists(path_for(roster_id)):
+			continue
+		var source: CatCharacter = ResourceLoader.load(source_path, "", ResourceLoader.CACHE_MODE_IGNORE) as CatCharacter
+		if source == null:
+			push_warning("CharacterRoster: %s is not a character, skipped." % source_path)
+			continue
+		var cat: CatCharacter = source.duplicate(true) as CatCharacter
+		cat.roster_id = roster_id
+		cat.roster_locked = false
+		_ensure_dir()
+		if ResourceSaver.save(cat, path_for(roster_id)) == OK:
+			added += 1
+		else:
+			push_error("CharacterRoster: couldn't add starter character '%s'." % cat.name)
+	return added
+
+
+## How many starter characters ship with the game.
+static func starter_party_size() -> int:
+	return starter_party_paths().size()
 
 
 static func _created_at(roster_id: String) -> int:

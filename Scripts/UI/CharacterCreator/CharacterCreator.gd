@@ -1,12 +1,12 @@
 # res://Scripts/UI/CharacterCreator/CharacterCreator.gd
 class_name CharacterCreator
 extends Control
-## The three-step character creator, over the space background:
-##   1  RACE & CLASS  - race list | fur  ⬢  class portrait | class list, INFO popups. Classes the race can't
-##                      reach even with the best roll are greyed out.
-##   2  ROLL & ASSIGN - roll 3 d6 (DiceRoll3D) for bonus points, re-roll any time, spend them with - / +,
-##                      pick starting spells / skills. CONFIRM only once the class minimums are met.
-##   3  NAME & CONFIRM - name, summary, CREATE -> CharacterRoster.save().
+## Two-step character creator over the space background:
+##   1  RACE & CLASS — race list | fur ⬢ class portrait | class list, INFO popups. Classes the race
+##                      can't reach even with a best birth die (+6 on primary) are greyed out.
+##   2  ABILITIES & NAME — starter spell/skill picks, name, summary. CREATE rolls one irrevocable
+##                      1d6 (DiceRollPopup), auto-applies primary-stat bonus (+ ability bank on 5/6),
+##                      then CharacterRoster.save(). Editing a rolled character skips the birth roll.
 ## Rules live in CharacterCreation (pure, tested); this file is only the screens.
 ##
 ##   var creator := CharacterCreator.new()
@@ -16,7 +16,7 @@ extends Control
 signal closed
 signal character_saved(cat: CatCharacter)
 
-const STEP_TITLES: Array[String] = ["CHOOSE RACE & CLASS", "ROLL & ASSIGN ATTRIBUTES", "NAME & CONFIRM"]
+const STEP_TITLES: Array[String] = ["CHOOSE RACE & CLASS", "ABILITIES & NAME"]
 const RANDOM_NAMES: Array[String] = [
 	"Whiskers", "Mittens", "Nyx", "Pounce", "Tigris", "Saber", "Lynx", "Mochi", "Ember", "Sable",
 	"Onyx", "Kit", "Rook", "Vesper", "Juno", "Bastet", "Felix", "Talon", "Cinder", "Pixel",
@@ -34,14 +34,12 @@ var _breed: CatBreed = null
 var _prof: ProfessionData = null
 var _dice: Array[int] = []
 var _alloc: Dictionary = {}
-var _alloc_for: Array = [null, null] # [breed, prof] the allocation / picks were made for
+var _ability_points: int = 0
+var _picks_for: Array = [null, null] # [breed, prof] the picks were made for
 var _spells: Array[SpellData] = []
 var _skills: Array[SkillData] = []
 var _char_name: String = ""
 var _rolling: bool = false
-## Re-rolls left for this character (first roll is free). Editing a rolled character = none.
-var _rerolls_left: int = CharacterCreation.REROLLS_PER_CHARACTER
-var _roll_wait_timer: Timer
 var _info: Control = null
 
 var _space: SpaceBackground
@@ -66,16 +64,6 @@ var _fit_label: Label
 var _req_grid: GridContainer
 
 # step 2
-var _dice_nodes: Array[DiceRoll3D] = []
-var _pool_label: Label
-var _pool_note: Label
-var _reroll_button: Button
-var _stat_value_labels: Dictionary = {}
-var _stat_min_labels: Dictionary = {}
-var _stat_minus: Dictionary = {}
-var _stat_plus: Dictionary = {}
-var _points_left: Label
-var _vitals_label: Label
 var _spell_header: Label
 var _spell_list: VBoxContainer
 var _skill_header: Label
@@ -83,8 +71,6 @@ var _skill_list: VBoxContainer
 var _race_skill_label: Label
 var _ability_detail: Label
 var _pick_buttons: Dictionary = {} # Button -> Resource
-
-# step 3
 var _name_edit: LineEdit
 var _confirm_fur: TextureRect
 var _confirm_portrait: TextureRect
@@ -92,6 +78,7 @@ var _summary_title: Label
 var _summary_sub: Label
 var _summary_stats: Label
 var _summary_abilities: Label
+var _summary_birth: Label
 var _problems: Label
 
 
@@ -101,15 +88,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	if editing != null:
 		_load_draft(CharacterCreation.draft_from_character(editing))
-		if not _dice.is_empty():
-			_rerolls_left = 0
 	_build()
-	_roll_wait_timer = Timer.new()
-	_roll_wait_timer.wait_time = 0.25
-	_roll_wait_timer.process_callback = Timer.TIMER_PROCESS_IDLE
-	_roll_wait_timer.timeout.connect(_on_roll_wait_tick)
-	add_child(_roll_wait_timer)
-	_roll_wait_timer.start()
 	_select_initial()
 	_go_to_step(0, false)
 	_window.modulate.a = 0.0
@@ -144,7 +123,8 @@ func _load_draft(d: Dictionary) -> void:
 	_prof = d.get("profession") as ProfessionData
 	_dice.assign(d.get("bonus_dice", []) as Array)
 	_alloc = (d.get("allocation", {}) as Dictionary).duplicate()
-	_alloc_for = [_breed, _prof]
+	_ability_points = int(d.get("ability_points", 0))
+	_picks_for = [_breed, _prof]
 	_spells.clear()
 	for s: Variant in d.get("spells", []):
 		if s is SpellData:
@@ -162,29 +142,33 @@ func _draft() -> Dictionary:
 		"breed": _breed,
 		"profession": _prof,
 		"bonus_dice": _dice.duplicate(),
-		"bonus_pool": _pool(),
+		"bonus_pool": CharacterCreation.sum_dice(_dice),
 		"allocation": _alloc.duplicate(),
+		"ability_points": _ability_points,
 		"spells": _spells.duplicate(),
 		"skills": _skills.duplicate(),
 	}
 
 
-func _pool() -> int:
-	return CharacterCreation.sum_dice(_dice)
+func _preview_stats() -> Dictionary:
+	if not _alloc.is_empty():
+		return CharacterCreation.apply_allocation(_breed, _alloc)
+	# Before birth roll: show race base (primary will bump on CREATE).
+	return CharacterCreation.base_stats(_breed)
 
 
-func _stats() -> Dictionary:
-	return CharacterCreation.apply_allocation(_breed, _alloc)
-
-
-## Race / class changed since the points were spent: redo the allocation and the default picks.
+## Race / class changed: reset default picks (keep name).
 func _sync_to_selection() -> void:
-	if _alloc_for[0] == _breed and _alloc_for[1] == _prof:
+	if _picks_for[0] == _breed and _picks_for[1] == _prof:
 		return
-	_alloc = CharacterCreation.auto_allocate(_breed, _prof, _pool()) if not _dice.is_empty() else {}
 	_spells = CharacterCreation.default_spell_picks(_breed, _prof)
 	_skills = CharacterCreation.default_skill_picks(_breed, _prof)
-	_alloc_for = [_breed, _prof]
+	# New selection invalidates a previous birth roll (editing keeps dice until race/class change).
+	if editing == null or _picks_for[0] != null:
+		_dice.clear()
+		_alloc.clear()
+		_ability_points = 0
+	_picks_for = [_breed, _prof]
 
 
 # ==============================================================================
@@ -217,7 +201,7 @@ func _build() -> void:
 	root.add_theme_constant_override("separation", 14)
 	_window.add_child(root)
 
-	_steps = CreationUI.step_indicator(3)
+	_steps = CreationUI.step_indicator(2)
 	var head: Array = CreationUI.header(STEP_TITLES[0], _steps)
 	root.add_child(head[0] as Control)
 	_step_title = head[1] as Label
@@ -225,7 +209,7 @@ func _build() -> void:
 	var pages := MarginContainer.new()
 	pages.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(pages)
-	_pages = [_build_step_race_class(), _build_step_stats(), _build_step_confirm()]
+	_pages = [_build_step_race_class(), _build_step_abilities_name()]
 	for p: Control in _pages:
 		pages.add_child(p)
 
@@ -247,19 +231,13 @@ func _build() -> void:
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_hint.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	_hint.clip_text = true
 	footer.add_child(_hint)
 
-	if show_background:
-		_window.resized.connect(func() -> void: _space.focus_on(_window, 0.45, 0.06))
 
-
-# --- Step 1 -------------------------------------------------------------------
 func _build_step_race_class() -> Control:
 	var page := HBoxContainer.new()
 	page.add_theme_constant_override("separation", 22)
 
-	# Races
 	var race_col: VBoxContainer = _list_column("RACE", 210)
 	var race_list: VBoxContainer = race_col.get_meta(&"list") as VBoxContainer
 	for breed: CatBreed in CharacterCreation.all_races():
@@ -276,7 +254,6 @@ func _build_step_race_class() -> Control:
 	race_col.add_child(race_info)
 	page.add_child(race_col)
 
-	# Centre: images, names, fit
 	var centre := VBoxContainer.new()
 	centre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	centre.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -326,7 +303,6 @@ func _build_step_race_class() -> Control:
 	CreationUI.wrap(_fit_label)
 	centre.add_child(_fit_label)
 
-	# Classes
 	var class_col: VBoxContainer = _list_column("CLASS", 250)
 	var class_list: VBoxContainer = class_col.get_meta(&"list") as VBoxContainer
 	for prof: ProfessionData in CharacterCreation.all_classes():
@@ -381,126 +357,6 @@ func _list_column(heading: String, width: float) -> VBoxContainer:
 	return col
 
 
-# --- Step 2 -------------------------------------------------------------------
-func _build_step_stats() -> Control:
-	var page := HBoxContainer.new()
-	page.add_theme_constant_override("separation", 20)
-
-	# Dice
-	var dice_col: VBoxContainer = _panel_column("BONUS ROLL", 290)
-	var dice_row := HBoxContainer.new()
-	dice_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	dice_row.add_theme_constant_override("separation", 0)
-	dice_col.add_child(dice_row)
-	for i: int in CharacterCreation.BONUS_DICE:
-		var d := DiceRoll3D.new()
-		d.custom_minimum_size = Vector2(94, 110)
-		d.die_scale = 0.8
-		d.roll_duration = 1.1 + 0.15 * i
-		d.drop_height = 1.8
-		d.visible_before_roll = true
-		dice_row.add_child(d)
-		_dice_nodes.append(d)
-	_pool_label = CreationUI.title("", 44, CreationUI.YELLOW)
-	_pool_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	dice_col.add_child(_pool_label)
-	_pool_note = CreationUI.wrap(CreationUI.body("", 13))
-	_pool_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	dice_col.add_child(_pool_note)
-	_reroll_button = CreationUI.action_button("RE-ROLL", CreationUI.YELLOW)
-	_reroll_button.pressed.connect(_roll_dice)
-	dice_col.add_child(_reroll_button)
-	var note: Label = CreationUI.wrap(CreationUI.body("Roll %dd6 for bonus points. You get %d re-rolls per character - a new roll resets where the points went." % [CharacterCreation.BONUS_DICE, CharacterCreation.REROLLS_PER_CHARACTER], 12, Color(CreationUI.WHITE, 0.5)))
-	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	dice_col.add_child(note)
-	page.add_child(dice_col)
-
-	# Attributes
-	var stat_col: VBoxContainer = _panel_column("ATTRIBUTES", 0)
-	stat_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var grid := GridContainer.new()
-	grid.columns = 5
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 6)
-	stat_col.add_child(grid)
-	for h: String in ["", "", "", "", "MIN"]:
-		var hl: Label = CreationUI.body(h, 11, Color(CreationUI.WHITE, 0.45))
-		hl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		grid.add_child(hl)
-	for stat: String in CharacterCreation.STATS:
-		var name_l: Label = CreationUI.title(str(CharacterCreation.STAT_LONG[stat]).to_upper(), 15)
-		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		grid.add_child(name_l)
-		var minus: Button = CreationUI.small_button("−", CreationUI.RED)
-		minus.custom_minimum_size = Vector2(38, 32)
-		minus.pressed.connect(_change_stat.bind(stat, -1))
-		grid.add_child(minus)
-		var value: Label = CreationUI.title("", 20)
-		value.custom_minimum_size = Vector2(70, 0)
-		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		grid.add_child(value)
-		var plus: Button = CreationUI.small_button("+", CreationUI.GREEN)
-		plus.custom_minimum_size = Vector2(38, 32)
-		plus.pressed.connect(_change_stat.bind(stat, 1))
-		grid.add_child(plus)
-		var min_l: Label = CreationUI.body("", 14)
-		min_l.custom_minimum_size = Vector2(44, 0)
-		min_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		grid.add_child(min_l)
-		_stat_value_labels[stat] = value
-		_stat_min_labels[stat] = min_l
-		_stat_minus[stat] = minus
-		_stat_plus[stat] = plus
-	var points_row := HBoxContainer.new()
-	points_row.add_theme_constant_override("separation", 10)
-	stat_col.add_child(points_row)
-	_points_left = CreationUI.title("", 18, CreationUI.YELLOW)
-	_points_left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	points_row.add_child(_points_left)
-	var auto_b: Button = CreationUI.small_button("AUTO", CreationUI.YELLOW)
-	auto_b.custom_minimum_size = Vector2(80, 32)
-	auto_b.tooltip_text = "Put points on what the class needs first"
-	auto_b.pressed.connect(_auto_assign)
-	points_row.add_child(auto_b)
-	var reset_b: Button = CreationUI.small_button("RESET", CreationUI.RED)
-	reset_b.custom_minimum_size = Vector2(80, 32)
-	reset_b.pressed.connect(func() -> void:
-		_alloc = {}
-		_refresh())
-	points_row.add_child(reset_b)
-	_vitals_label = CreationUI.body("", 14, CreationUI.GREEN)
-	stat_col.add_child(_vitals_label)
-	page.add_child(stat_col)
-
-	# Abilities
-	var ab_col: VBoxContainer = _panel_column("STARTING ABILITIES", 320)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	ab_col.add_child(scroll)
-	var ab := VBoxContainer.new()
-	ab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ab.add_theme_constant_override("separation", 6)
-	scroll.add_child(ab)
-	_spell_header = CreationUI.body("", 13, CreationUI.YELLOW)
-	ab.add_child(_spell_header)
-	_spell_list = VBoxContainer.new()
-	_spell_list.add_theme_constant_override("separation", 4)
-	ab.add_child(_spell_list)
-	_skill_header = CreationUI.body("", 13, CreationUI.YELLOW)
-	ab.add_child(_skill_header)
-	_skill_list = VBoxContainer.new()
-	_skill_list.add_theme_constant_override("separation", 4)
-	ab.add_child(_skill_list)
-	_race_skill_label = CreationUI.wrap(CreationUI.body("", 13, CreationUI.GREEN))
-	ab.add_child(_race_skill_label)
-	_ability_detail = CreationUI.wrap(CreationUI.body("", 12, Color(CreationUI.WHITE, 0.65)))
-	_ability_detail.custom_minimum_size = Vector2(0, 70)
-	ab_col.add_child(_ability_detail)
-	page.add_child(ab_col)
-	return page
-
-
 func _panel_column(heading: String, width: float) -> VBoxContainer:
 	var col := VBoxContainer.new()
 	col.custom_minimum_size = Vector2(width, 0)
@@ -509,22 +365,20 @@ func _panel_column(heading: String, width: float) -> VBoxContainer:
 	return col
 
 
-# --- Step 3 -------------------------------------------------------------------
-func _build_step_confirm() -> Control:
+func _build_step_abilities_name() -> Control:
 	var page := HBoxContainer.new()
-	page.alignment = BoxContainer.ALIGNMENT_CENTER
-	page.add_theme_constant_override("separation", 40)
+	page.add_theme_constant_override("separation", 24)
 
+	# Portrait + name
 	var left := VBoxContainer.new()
-	left.alignment = BoxContainer.ALIGNMENT_CENTER
+	left.custom_minimum_size = Vector2(280, 0)
 	left.add_theme_constant_override("separation", 12)
 	page.add_child(left)
-	# Portrait over the race's fur
 	var frame := PanelContainer.new()
 	var fs: StyleBoxFlat = CreationUI.flat(Color(0, 0, 0, 0.6), CreationUI.WHITE, 3, 4)
 	fs.set_content_margin_all(4)
 	frame.add_theme_stylebox_override("panel", fs)
-	frame.custom_minimum_size = Vector2(300, 300)
+	frame.custom_minimum_size = Vector2(260, 260)
 	left.add_child(frame)
 	_confirm_fur = TextureRect.new()
 	_confirm_fur.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -563,18 +417,48 @@ func _build_step_confirm() -> Control:
 		_refresh())
 	name_row.add_child(dice_name)
 
+	# Abilities
+	var ab_col: VBoxContainer = _panel_column("STARTING ABILITIES", 300)
+	ab_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.add_child(ab_col)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	ab_col.add_child(scroll)
+	var ab := VBoxContainer.new()
+	ab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ab.add_theme_constant_override("separation", 6)
+	scroll.add_child(ab)
+	_spell_header = CreationUI.body("", 13, CreationUI.YELLOW)
+	ab.add_child(_spell_header)
+	_spell_list = VBoxContainer.new()
+	_spell_list.add_theme_constant_override("separation", 4)
+	ab.add_child(_spell_list)
+	_skill_header = CreationUI.body("", 13, CreationUI.YELLOW)
+	ab.add_child(_skill_header)
+	_skill_list = VBoxContainer.new()
+	_skill_list.add_theme_constant_override("separation", 4)
+	ab.add_child(_skill_list)
+	_race_skill_label = CreationUI.wrap(CreationUI.body("", 13, CreationUI.GREEN))
+	ab.add_child(_race_skill_label)
+	_ability_detail = CreationUI.wrap(CreationUI.body("", 12, Color(CreationUI.WHITE, 0.65)))
+	_ability_detail.custom_minimum_size = Vector2(0, 70)
+	ab_col.add_child(_ability_detail)
+
+	# Summary
 	var right := VBoxContainer.new()
-	right.alignment = BoxContainer.ALIGNMENT_CENTER
-	right.custom_minimum_size = Vector2(420, 0)
+	right.custom_minimum_size = Vector2(340, 0)
 	right.add_theme_constant_override("separation", 10)
 	page.add_child(right)
-	_summary_title = CreationUI.title("", 38)
+	_summary_title = CreationUI.title("", 32)
 	right.add_child(_summary_title)
-	_summary_sub = CreationUI.title("", 18, CreationUI.PINK)
+	_summary_sub = CreationUI.title("", 16, CreationUI.PINK)
 	right.add_child(_summary_sub)
-	_summary_stats = CreationUI.body("", 15)
+	_summary_stats = CreationUI.body("", 14)
 	right.add_child(_summary_stats)
-	_summary_abilities = CreationUI.wrap(CreationUI.body("", 14, Color(CreationUI.WHITE, 0.8)))
+	_summary_birth = CreationUI.wrap(CreationUI.body("", 13, CreationUI.YELLOW))
+	right.add_child(_summary_birth)
+	_summary_abilities = CreationUI.wrap(CreationUI.body("", 13, Color(CreationUI.WHITE, 0.8)))
 	right.add_child(_summary_abilities)
 	_problems = CreationUI.wrap(CreationUI.body("", 14, CreationUI.RED))
 	right.add_child(_problems)
@@ -611,7 +495,7 @@ func _go_to_step(step: int, sound: bool = true) -> void:
 		_pages[i].visible = i == step
 	CreationUI.set_step(_steps, step)
 	_step_title.text = STEP_TITLES[step]
-	_confirm_button.text = "●  CONFIRM" if step < 2 else ("●  SAVE CHANGES" if editing != null else "●  CREATE")
+	_confirm_button.text = "●  CONFIRM" if step == 0 else ("●  SAVE CHANGES" if editing != null and not _dice.is_empty() else "●  CREATE")
 	_back_button.text = "CANCEL" if step == 0 else "BACK"
 	if sound:
 		CreationUI.play("button-confirm")
@@ -621,14 +505,6 @@ func _go_to_step(step: int, sound: bool = true) -> void:
 		1:
 			_sync_to_selection()
 			_rebuild_picks()
-			if _dice.is_empty():
-				_roll_dice.call_deferred()
-			else:
-				for i: int in _dice_nodes.size():
-					if i < _dice.size():
-						_dice_nodes[i].show_value(_dice[i])
-			_reroll_button.grab_focus.call_deferred()
-		2:
 			if _char_name.strip_edges().is_empty():
 				_char_name = RANDOM_NAMES[randi() % RANDOM_NAMES.size()]
 			_name_edit.text = _char_name
@@ -658,21 +534,52 @@ func _on_confirm_pressed() -> void:
 	if _rolling or _confirm_button.disabled:
 		return
 	match _step:
-		0, 1:
-			_go_to_step(_step + 1)
-		2:
+		0:
+			_go_to_step(1)
+		1:
 			_save()
 
 
 func _save() -> void:
-	var problems: Array[String] = CharacterCreation.validate_draft(_draft())
+	var problems: Array[String] = CharacterCreation.validate_selection(_draft())
 	if not problems.is_empty():
 		_problems.text = "\n".join(problems)
+		return
+	# Editing a character that already has a birth die: keep it.
+	var needs_birth_roll: bool = _dice.is_empty()
+	if needs_birth_roll:
+		_rolling = true
+		_confirm_button.disabled = true
+		_back_button.disabled = true
+		var primary: String = CharacterCreation.primary_stat(_prof)
+		var face: int = await DiceRollPopup.roll_d6(
+			get_tree(),
+			"BIRTH ROLL",
+			"%s  ·  primary %s" % [_prof.profession_name.to_upper(), str(CharacterCreation.STAT_SHORT[primary])],
+			0,
+			func(v: int) -> String:
+				var b: Dictionary = CharacterCreation.creation_bonus_for_roll(v)
+				var parts: PackedStringArray = ["+%d %s" % [int(b["stat"]), str(CharacterCreation.STAT_SHORT[primary])]]
+				if int(b["ability"]) > 0:
+					parts.append("+%d SKILL/SPELL (banks for level-up)" % int(b["ability"]))
+				return "  ·  ".join(parts),
+			2.0)
+		var birth: Dictionary = CharacterCreation.apply_birth_roll(_breed, _prof, face)
+		_dice = [int(birth["face"])]
+		_alloc = (birth["allocation"] as Dictionary).duplicate()
+		_ability_points = int(birth["ability"])
+		_rolling = false
+		_back_button.disabled = false
+	var final_problems: Array[String] = CharacterCreation.validate_draft(_draft())
+	if not final_problems.is_empty():
+		_problems.text = "\n".join(final_problems)
+		_confirm_button.disabled = false
 		return
 	var cat: CatCharacter = CharacterCreation.build_character(_draft(), editing)
 	var err: Error = CharacterRoster.save(cat)
 	if err != OK:
 		_problems.text = "Couldn't save the character (error %d)." % err
+		_confirm_button.disabled = false
 		return
 	CreationUI.play("button-confirm")
 	if is_instance_valid(SignalBus):
@@ -705,19 +612,19 @@ func _refresh_step_race_class() -> void:
 	CreationUI.set_portrait(_portrait_rect, CharacterCreation.portrait_texture(_prof))
 	_race_name.text = _breed.breed_name.to_upper() if _breed else ""
 	_class_name.text = _prof.profession_name.to_upper() if _prof else ""
-	# Grey out classes this race can never reach.
 	for b: Button in _class_buttons.keys():
 		var reachable: bool = CharacterCreation.is_class_reachable(_breed, _class_buttons[b] as ProfessionData)
 		b.modulate = Color(1, 1, 1, 1.0 if reachable else 0.35)
-		b.tooltip_text = "" if reachable else "A %s can't reach this class's minimum stats." % _breed.breed_name
-	# Base vs minimums
+		b.tooltip_text = "" if reachable else "A %s can't reach this class's minimums (birth die only boosts primary)." % _breed.breed_name
 	for c: Node in _req_grid.get_children():
 		c.queue_free()
 	var base: Dictionary = CharacterCreation.base_stats(_breed)
 	var req: Dictionary = CharacterCreation.class_requirements(_prof)
+	var primary: String = CharacterCreation.primary_stat(_prof)
 	_req_grid.add_child(CreationUI.body("", 12))
 	for stat: String in CharacterCreation.STATS:
-		var h: Label = CreationUI.body(str(CharacterCreation.STAT_SHORT[stat]), 12, Color(CreationUI.WHITE, 0.5))
+		var accent: Color = CreationUI.YELLOW if stat == primary else Color(CreationUI.WHITE, 0.5)
+		var h: Label = CreationUI.body(str(CharacterCreation.STAT_SHORT[stat]), 12, accent)
 		h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_req_grid.add_child(h)
 	_req_grid.add_child(CreationUI.body("RACE", 12, Color(CreationUI.WHITE, 0.5)))
@@ -732,16 +639,17 @@ func _refresh_step_race_class() -> void:
 		m.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_req_grid.add_child(m)
 
-	var need: int = CharacterCreation.points_needed(_breed, _prof)
+	var need: int = CharacterCreation.primary_points_needed(_breed, _prof)
 	if not CharacterCreation.is_class_reachable(_breed, _prof):
-		_fit_label.text = "A %s can't reach the %s's minimums (needs %d bonus points, the best roll is %d)." % [
-			_breed.breed_name, _prof.profession_name, need, CharacterCreation.max_bonus()]
+		_fit_label.text = "A %s can't reach the %s (non-primary mins must be met by the race; primary needs ≤ +6)." % [
+			_breed.breed_name, _prof.profession_name]
 		_fit_label.add_theme_color_override("font_color", CreationUI.RED)
 	elif need == 0:
-		_fit_label.text = "A natural fit - every bonus point is yours to spend."
+		_fit_label.text = "Primary %s — birth die (+1..6) is pure bonus on CREATE." % str(CharacterCreation.STAT_SHORT[primary])
 		_fit_label.add_theme_color_override("font_color", CreationUI.GREEN)
 	else:
-		_fit_label.text = "Needs %d bonus points  ·  %d%% chance per roll" % [need, roundi(CharacterCreation.roll_success_chance(_breed, _prof) * 100.0)]
+		_fit_label.text = "Primary %s needs +%d (birth die +1..6 on CREATE covers it)." % [
+			str(CharacterCreation.STAT_SHORT[primary]), need]
 		_fit_label.add_theme_color_override("font_color", CreationUI.YELLOW)
 	_confirm_button.disabled = not CharacterCreation.is_class_reachable(_breed, _prof)
 	_hint.text = "Out of reach - choose another class or race" if _confirm_button.disabled else "%s %s" % [_breed.breed_name, _prof.profession_name]
@@ -750,114 +658,6 @@ func _refresh_step_race_class() -> void:
 # ==============================================================================
 # Step 2
 # ==============================================================================
-func _roll_dice() -> void:
-	if _rolling:
-		return
-	var first_roll: bool = _dice.is_empty()
-	if not first_roll and _rerolls_left <= 0:
-		return
-	if CharacterCreation.roll_wait_seconds() > 0.0:
-		_update_reroll_button()
-		return
-	CharacterCreation.register_roll()
-	if not first_roll:
-		_rerolls_left -= 1
-	_rolling = true
-	_set_rolling_ui(true)
-	CreationUI.play("button-confirm")
-	var values: Array[int] = CharacterCreation.roll_bonus_dice()
-	for i: int in _dice_nodes.size() - 1:
-		_dice_nodes[i].roll(values[i])
-	await _dice_nodes[_dice_nodes.size() - 1].roll(values[values.size() - 1])
-	await get_tree().create_timer(0.15, true, false, true).timeout
-	_dice = values
-	_alloc = CharacterCreation.auto_allocate(_breed, _prof, _pool())
-	_alloc_for = [_breed, _prof]
-	_rolling = false
-	_set_rolling_ui(false)
-	_refresh()
-	_update_reroll_button()
-
-
-func _on_roll_wait_tick() -> void:
-	if _rolling or _step != 1:
-		return
-	# First roll was blocked by the global limit: roll as soon as it's allowed.
-	if _dice.is_empty() and CharacterCreation.roll_wait_seconds() <= 0.0:
-		_roll_dice()
-		return
-	_update_reroll_button()
-
-
-func _update_reroll_button() -> void:
-	if not is_instance_valid(_reroll_button) or _rolling:
-		return
-	var wait: float = CharacterCreation.roll_wait_seconds()
-	if _dice.is_empty():
-		_reroll_button.disabled = true
-		_reroll_button.text = "WAIT %ds" % ceili(wait) if wait > 0.0 else "ROLLING..."
-		if wait > 0.0:
-			_pool_note.text = "Dice are cooling down - rolling in %ds." % ceili(wait)
-	elif _rerolls_left <= 0:
-		_reroll_button.disabled = true
-		_reroll_button.text = "NO RE-ROLLS LEFT"
-	elif wait > 0.0:
-		_reroll_button.disabled = true
-		_reroll_button.text = "WAIT %ds" % ceili(wait)
-	else:
-		_reroll_button.disabled = false
-		_reroll_button.text = "RE-ROLL (%d LEFT)" % _rerolls_left
-
-
-func _set_rolling_ui(on: bool) -> void:
-	_reroll_button.disabled = on
-	_confirm_button.disabled = on
-	_back_button.disabled = on
-	for stat: String in CharacterCreation.STATS:
-		(_stat_minus[stat] as Button).disabled = on
-		(_stat_plus[stat] as Button).disabled = on
-	if on:
-		_pool_label.text = "..."
-		_pool_note.text = "Rolling..."
-
-
-func _change_stat(stat: String, delta: int) -> void:
-	if _rolling:
-		return
-	if delta > 0 and CharacterCreation.can_raise(_breed, _alloc, stat, _pool()):
-		_alloc[stat] = int(_alloc.get(stat, 0)) + 1
-		CreationUI.play("button-hover")
-	elif delta < 0 and CharacterCreation.can_lower(_alloc, stat):
-		_alloc[stat] = int(_alloc[stat]) - 1
-		if int(_alloc[stat]) <= 0:
-			_alloc.erase(stat)
-		CreationUI.play("button-hover")
-	_refresh()
-
-
-## AUTO: class needs first, then the rest round-robin over the class's most useful stats.
-func _auto_assign() -> void:
-	_alloc = CharacterCreation.auto_allocate(_breed, _prof, _pool())
-	var order: Array[String] = []
-	var req: Dictionary = CharacterCreation.class_requirements(_prof)
-	for stat: String in CharacterCreation.STATS:
-		if int(req[stat]) > 0:
-			order.append(stat)
-	order.sort_custom(func(a: String, b: String) -> bool: return int(req[a]) > int(req[b]))
-	for stat: String in CharacterCreation.STATS:
-		if not order.has(stat):
-			order.append(stat)
-	var guard: int = 0
-	while CharacterCreation.points_spent(_alloc) < _pool() and guard < 200:
-		guard += 1
-		for stat: String in order:
-			if CharacterCreation.can_raise(_breed, _alloc, stat, _pool()):
-				_alloc[stat] = int(_alloc.get(stat, 0)) + 1
-				break
-	CreationUI.play("button-confirm")
-	_refresh()
-
-
 func _rebuild_picks() -> void:
 	for c: Node in _spell_list.get_children():
 		c.queue_free()
@@ -925,86 +725,29 @@ func _show_ability_detail(ability: Resource) -> void:
 	_ability_detail.text = "%s\n%s" % [AbilityInfo.display_name(ability).to_upper(), desc]
 
 
-func _refresh_step_stats() -> void:
-	var stats: Dictionary = _stats()
-	var req: Dictionary = CharacterCreation.class_requirements(_prof)
-	var pool: int = _pool()
-	var spent: int = CharacterCreation.points_spent(_alloc)
-	for stat: String in CharacterCreation.STATS:
-		var bonus: int = int(_alloc.get(stat, 0))
-		var value_l: Label = _stat_value_labels[stat] as Label
-		value_l.text = "%d" % int(stats[stat]) + ("  +%d" % bonus if bonus > 0 else "")
-		var ok: bool = int(stats[stat]) >= int(req[stat])
-		value_l.add_theme_color_override("font_color", CreationUI.WHITE if ok else CreationUI.RED)
-		if bonus > 0 and ok:
-			value_l.add_theme_color_override("font_color", CreationUI.GREEN)
-		var min_l: Label = _stat_min_labels[stat] as Label
-		min_l.text = str(req[stat]) if int(req[stat]) > 0 else "-"
-		min_l.add_theme_color_override("font_color", Color(CreationUI.PINK, 0.9) if int(req[stat]) > 0 else Color(CreationUI.WHITE, 0.3))
-		if not _rolling:
-			(_stat_minus[stat] as Button).disabled = not CharacterCreation.can_lower(_alloc, stat)
-			(_stat_plus[stat] as Button).disabled = not CharacterCreation.can_raise(_breed, _alloc, stat, pool)
-	if not _rolling:
-		_pool_label.text = str(pool) if not _dice.is_empty() else "-"
-		var need: int = CharacterCreation.points_needed(_breed, _prof)
-		if _dice.is_empty():
-			_pool_note.text = ""
-		elif pool >= need:
-			var faces: PackedStringArray = []
-			for d: int in _dice:
-				faces.append(str(d))
-			_pool_note.text = "%s  =  %d bonus points" % [" + ".join(faces), pool]
-			_pool_note.add_theme_color_override("font_color", CreationUI.GREEN)
-		else:
-			_pool_note.text = "%d points - the %s needs %d. Re-roll!" % [pool, _prof.profession_name, need]
-			_pool_note.add_theme_color_override("font_color", CreationUI.RED)
-	_points_left.text = "POINTS LEFT  %d" % (pool - spent)
-
-	var preview: CatCharacter = CharacterCreation.preview_character(_breed, _prof, stats)
-	_vitals_label.text = "HP %d    MP %d    ·    LEVEL 1 %s" % [preview.max_hp, preview.max_energy, _prof.profession_name.to_upper()]
-
-	for b: Button in _pick_buttons.keys():
-		var a: Resource = _pick_buttons[b] as Resource
-		b.set_pressed_no_signal((a is SpellData and _spells.has(a as SpellData)) or (a is SkillData and _skills.has(a as SkillData)))
-
-	if not _rolling:
-		var problems: Array[String] = _step2_problems()
-		_confirm_button.disabled = not problems.is_empty()
-		_hint.text = problems[0] if not problems.is_empty() else "Ready"
-
-
-func _step2_problems() -> Array[String]:
-	var out: Array[String] = []
-	if _dice.is_empty():
-		out.append("Roll the dice")
-		return out
-	var unmet: Array[String] = CharacterCreation.unmet_requirements(_stats(), _prof)
-	if not unmet.is_empty():
-		out.append("%s needs %s" % [_prof.profession_name, ", ".join(unmet)])
-	elif not CharacterCreation.is_allocation_valid(_breed, _prof, _alloc, _pool()):
-		out.append("Spend all bonus points")
-	if _spells.size() < CharacterCreation.spell_pick_count(_breed, _prof):
-		out.append("Choose %d spell(s)" % CharacterCreation.spell_pick_count(_breed, _prof))
-	if _skills.size() < CharacterCreation.skill_pick_count(_breed, _prof):
-		out.append("Choose %d skill(s)" % CharacterCreation.skill_pick_count(_breed, _prof))
-	return out
-
-
-# ==============================================================================
-# Step 3
-# ==============================================================================
-func _refresh_step_confirm() -> void:
+func _refresh_step_abilities_name() -> void:
 	_confirm_fur.texture = CharacterCreation.fur_texture(_breed)
 	CreationUI.set_portrait(_confirm_portrait, CharacterCreation.portrait_texture(_prof))
 	var shown_name: String = CharacterCreation.clean_name(_char_name)
 	_summary_title.text = shown_name.to_upper() if not shown_name.is_empty() else "UNNAMED"
 	_summary_sub.text = "%s  ·  %s  ·  LEVEL 1" % [_breed.breed_name.to_upper(), _prof.profession_name.to_upper()]
-	var stats: Dictionary = _stats()
+	var stats: Dictionary = _preview_stats()
+	var primary: String = CharacterCreation.primary_stat(_prof)
 	var parts: PackedStringArray = []
 	for stat: String in CharacterCreation.STATS:
-		parts.append("%s %d" % [CharacterCreation.STAT_SHORT[stat], int(stats[stat])])
+		var mark: String = " *" if stat == primary else ""
+		parts.append("%s %d%s" % [CharacterCreation.STAT_SHORT[stat], int(stats[stat]), mark])
 	var preview: CatCharacter = CharacterCreation.preview_character(_breed, _prof, stats)
 	_summary_stats.text = "  ".join(parts.slice(0, 4)) + "\n" + "  ".join(parts.slice(4)) + "\n\nHP %d   MP %d" % [preview.max_hp, preview.max_energy]
+	if _dice.is_empty():
+		_summary_birth.text = "CREATE rolls 1d6 → +1..6 to %s (5/6 also bank skill/spell for level-up). No re-roll." % str(CharacterCreation.STAT_SHORT[primary])
+	else:
+		var face: int = int(_dice[0])
+		var bonus: Dictionary = CharacterCreation.creation_bonus_for_roll(face)
+		var msg: String = "Birth die %d → +%d %s" % [face, int(bonus["stat"]), str(CharacterCreation.STAT_SHORT[primary])]
+		if int(bonus["ability"]) > 0:
+			msg += " · +%d skill/spell banked" % int(bonus["ability"])
+		_summary_birth.text = msg
 	var abilities: PackedStringArray = []
 	for s: SpellData in _spells:
 		abilities.append(s.spell_name)
@@ -1013,10 +756,16 @@ func _refresh_step_confirm() -> void:
 	for s: SkillData in _skills:
 		abilities.append(s.skill_name)
 	_summary_abilities.text = "KNOWS:  " + (", ".join(abilities) if not abilities.is_empty() else "nothing yet")
-	var problems: Array[String] = CharacterCreation.validate_draft(_draft())
-	_problems.text = "\n".join(problems)
-	_confirm_button.disabled = not problems.is_empty()
-	_hint.text = "Saved to your roster - edit it any time until it goes on an adventure." if problems.is_empty() else ""
+
+	for b: Button in _pick_buttons.keys():
+		var a: Resource = _pick_buttons[b] as Resource
+		b.set_pressed_no_signal((a is SpellData and _spells.has(a as SpellData)) or (a is SkillData and _skills.has(a as SkillData)))
+
+	if not _rolling:
+		var problems: Array[String] = CharacterCreation.validate_selection(_draft())
+		_problems.text = "\n".join(problems)
+		_confirm_button.disabled = not problems.is_empty()
+		_hint.text = "Saved to your roster - edit until it goes on an adventure." if problems.is_empty() else problems[0]
 
 
 func _refresh() -> void:
@@ -1026,9 +775,7 @@ func _refresh() -> void:
 		0:
 			_refresh_step_race_class()
 		1:
-			_refresh_step_stats()
-		2:
-			_refresh_step_confirm()
+			_refresh_step_abilities_name()
 
 
 # ==============================================================================
@@ -1058,10 +805,12 @@ func _show_class_info() -> void:
 	var row: Dictionary = ClassProgression.for_class(_prof.profession_name)
 	var text: Dictionary = CharacterCreation.class_text(_prof.profession_name)
 	var req: Dictionary = CharacterCreation.class_requirements(_prof)
+	var primary: String = CharacterCreation.primary_stat(_prof)
 	var mins: PackedStringArray = []
 	for stat: String in CharacterCreation.STATS:
 		if int(req[stat]) > 0:
-			mins.append("%s %d" % [CharacterCreation.STAT_SHORT[stat], int(req[stat])])
+			var tag: String = " (primary)" if stat == primary else ""
+			mins.append("%s %d%s" % [CharacterCreation.STAT_SHORT[stat], int(req[stat]), tag])
 	var body: String = "[color=#ffcc2e]%s[/color]  ·  based on the %s\n" % [str(row.get("difficulty_label", "")).to_upper(), str(text.get("based_on", "?"))]
 	if not str(text.get("features", "")).is_empty():
 		body += "\n" + str(text["features"]) + "\n"
@@ -1069,6 +818,7 @@ func _show_class_info() -> void:
 		if not str(text.get(pair[1], "")).is_empty():
 			body += "\n[color=#ffcc2e]%s[/color]  %s" % [pair[0], str(text[pair[1]])]
 	body += "\n\n[color=#ffcc2e]MINIMUM STATS[/color]  " + ("   ".join(mins) if not mins.is_empty() else "none")
+	body += "\n[color=#ffcc2e]BIRTH DIE[/color]  +1..6 to %s on CREATE (5/6 also bank skill/spell)" % str(CharacterCreation.STAT_SHORT[primary])
 	var unlock: int = int(row.get("spells_unlock_at_level", 0))
 	if not AbilityRules.parse_spellbooks(_prof.spellbook_type).is_empty():
 		body += "\n[color=#ffcc2e]SPELLBOOK[/color]  %s, opens at level %d" % [_prof.spellbook_type, unlock]

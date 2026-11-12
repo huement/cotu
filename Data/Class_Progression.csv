@@ -1,15 +1,15 @@
 Class ID,Name,Aliases,Difficulty,Difficulty Label,Base XP,XP Growth,Max Level,HP Per VIT,HP Per Level,MP Per Level,Stat Points Per Level,Skill Points Per Level,Spell Points Per Level,Spells Unlock At Level,Auto Stat Gains,Milestone Every,Milestone Stat Points,Notes
-1,Spartan,Fighter,1,Easy,240,1.40,50,3,4,0,4,6,0,0,"STR+1,VIT+1",5,2,Tanky front-liner. Cheapest XP curve.
-4,Shade,Thief,1,Easy,240,1.40,50,2,3,0,5,5,0,0,"DEX+1,SPD+1",5,2,Fast and evasive. Opens locks and traps.
-3,Soulwright,Priest,2,Normal,270,1.45,50,2,3,2,5,1,4,1,"PIE+1,VIT+1",5,2,Healer. Sturdy for a caster.
-2,Archanist,Mage,2,Normal,270,1.45,50,2,1,3,4,2,4,1,INT+1,5,2,Glass cannon. Lowest HP growth.
-5,Warden,Ranger,3,Tricky,315,1.50,50,2,3,1,5,1,4,3,"DEX+1,VIT+1",5,3,Archer. Maester spells from level 3.
-7,Echo,Bard,3,Tricky,315,1.50,50,2,2,1,6,3,1,3,"PER+1,DEX+1",5,3,Support. Archanist spells from level 3.
-6,Maester,Alchemist,3,Tricky,330,1.50,50,2,2,2,5,1,4,1,"INT+1,DEX+1",5,3,Fast caster. Cannot be silenced.
-8,Psynic,Psionic,3,Tricky,330,1.50,50,2,2,2,4,1,5,1,"INT+1,VIT+1",5,3,Mind magic. Balanced stats.
-9,Amazon,Valkyrie,4,Hard,375,1.55,50,3,4,1,5,5,0,3,"STR+1,VIT+1",5,4,Elite lancer. Soulwright spells from level 3.
-10,Wizard,Bishop,4,Hard,390,1.55,50,2,1,4,4,2,4,1,"INT+1,PIE+1",5,4,Both spellbooks. Slow but huge spell list.
-11,Crusader,Lord,4,Hard,390,1.55,50,3,4,2,4,4,2,3,"STR+1,PIE+1,VIT+1",5,4,Elite tank + secondary healer.
-12,Ronin,Samurai,5,Expert,435,1.60,50,2,4,1,5,3,2,5,"STR+1,SPD+1",5,5,Fast killer. Archanist spells from level 5.
-13,Voidhand,Monk,5,Expert,435,1.60,50,2,4,2,4,3,3,3,"STR+1,SPD+1,DEX+1",5,5,Unarmed master. Psynic spells from level 3.
-14,Ghostblade,Ninja,5,Expert,450,1.60,50,2,4,2,5,3,2,5,"DEX+1,SPD+1,STR+1",5,5,Assassin. Maester spells from level 5.
+1,Spartan,Fighter,1,Easy,360,1.40,50,3,4,0,4,6,0,0,"STR+1,VIT+1",5,2,Tanky front-liner. Cheapest XP curve.
+4,Shade,Thief,1,Easy,360,1.40,50,2,3,0,5,5,0,0,"DEX+1,SPD+1",5,2,Fast and evasive. Opens locks and traps.
+3,Soulwright,Priest,2,Normal,405,1.45,50,2,3,2,5,1,4,1,"PIE+1,VIT+1",5,2,Healer. Sturdy for a caster.
+2,Archanist,Mage,2,Normal,405,1.45,50,2,1,3,4,2,4,1,INT+1,5,2,Glass cannon. Lowest HP growth.
+5,Warden,Ranger,3,Tricky,480,1.50,50,2,3,1,5,1,4,3,"DEX+1,VIT+1",5,3,Archer. Maester spells from level 3.
+7,Echo,Bard,3,Tricky,480,1.50,50,2,2,1,6,3,1,3,"PER+1,DEX+1",5,3,Support. Archanist spells from level 3.
+6,Maester,Alchemist,3,Tricky,495,1.50,50,2,2,2,5,1,4,1,"INT+1,DEX+1",5,3,Fast caster. Cannot be silenced.
+8,Psynic,Psionic,3,Tricky,495,1.50,50,2,2,2,4,1,5,1,"INT+1,VIT+1",5,3,Mind magic. Balanced stats.
+9,Amazon,Valkyrie,4,Hard,560,1.55,50,3,4,1,5,5,0,3,"STR+1,VIT+1",5,4,Elite lancer. Soulwright spells from level 3.
+10,Wizard,Bishop,4,Hard,585,1.55,50,2,1,4,4,2,4,1,"INT+1,PIE+1",5,4,Both spellbooks. Slow but huge spell list.
+11,Crusader,Lord,4,Hard,585,1.55,50,3,4,2,4,4,2,3,"STR+1,PIE+1,VIT+1",5,4,Elite tank + secondary healer.
+12,Ronin,Samurai,5,Expert,650,1.60,50,2,4,1,5,3,2,5,"STR+1,SPD+1",5,5,Fast killer. Archanist spells from level 5.
+13,Voidhand,Monk,5,Expert,650,1.60,50,2,4,2,4,3,3,3,"STR+1,SPD+1,DEX+1",5,5,Unarmed master. Psynic spells from level 3.
+14,Ghostblade,Ninja,5,Expert,675,1.60,50,2,4,2,5,3,2,5,"DEX+1,SPD+1,STR+1",5,5,Assassin. Maester spells from level 5.

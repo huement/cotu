@@ -44,6 +44,7 @@ script = ExtResource("20_hmc15")
 [node name="MapManager" type="Node3D" parent="."]
 script = ExtResource("5_fo5ed")
 default_map_scene = ExtResource("5_ikia7")
+dev_start_override = true
 
 [node name="Popup" parent="." instance=ExtResource("22_pyn1s")]
 

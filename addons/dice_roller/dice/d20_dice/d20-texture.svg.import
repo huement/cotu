@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://lqhfo43ettaf"
 path.s3tc="res://.godot/imported/d20-texture.svg-19762b84773b083075319a7e0577996b.s3tc.ctex"
+path.etc2="res://.godot/imported/d20-texture.svg-19762b84773b083075319a7e0577996b.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://addons/dice_roller/dice/d20_dice/d20-texture.svg"
-dest_files=["res://.godot/imported/d20-texture.svg-19762b84773b083075319a7e0577996b.s3tc.ctex"]
+dest_files=["res://.godot/imported/d20-texture.svg-19762b84773b083075319a7e0577996b.s3tc.ctex", "res://.godot/imported/d20-texture.svg-19762b84773b083075319a7e0577996b.etc2.ctex"]
 
 [params]
 

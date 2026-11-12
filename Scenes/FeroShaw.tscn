@@ -31,7 +31,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/MinotaurWorldEnemy.tscn" id="24_ql20s"]
 [ext_resource type="Script" uid="uid://464km5lxyytl" path="res://Scripts/Environment/night_enemy_spawner.gd" id="25_5whj4"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="26_leveltitle"]
-[ext_resource type="Material" path="res://resources/Environment/pixel_sky.tres" id="90_pixelsky"]
+[ext_resource type="Material" path="res://resources/Environment/pixel_sky_feroshaw.tres" id="90_pixelsky"]
 
 [sub_resource type="Sky" id="Sky_lpcna"]
 sky_material = ExtResource("90_pixelsky")
@@ -40,7 +40,10 @@ sky_material = ExtResource("90_pixelsky")
 background_mode = 2
 sky = SubResource("Sky_lpcna")
 ambient_light_source = 3
-ambient_light_color = Color(0.6213014, 1, 0.8496877, 1)
+ambient_light_color = Color(0.56, 0.62, 0.58, 1)
+fog_light_color = Color(0.3, 0.34, 0.29, 1)
+fog_density = 0.0
+fog_sky_affect = 0.3
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mist"]
 transparency = 1
@@ -461,7 +464,7 @@ target_dungeon_scene = "res://Scenes/BrokenBoneMarsh.tscn"
 prompt_text = "Wetlands ahead. Head to the BROKEN BONE MARSH?"
 
 [node name="GroundMist" type="CPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.78273, 0.4, 16.88937)
 amount = 60
 lifetime = 8.0
 mesh = SubResource("QuadMesh_mist")
@@ -479,6 +482,9 @@ moon_light = NodePath("MoonLight")
 world_environment = NodePath("../WorldEnvironment")
 moon_mesh_node = NodePath("MoonLight/moon")
 moon_rotation_degrees = Vector3(0, 180, 0)
+day_ambient = Color(0.56, 0.62, 0.58, 1)
+day_ambient_energy = 0.55
+day_fog_density = 0.018
 
 [node name="MoonLight" type="DirectionalLight3D" parent="DayLightCycle"]
 light_color = Color(0.6651851, 0.7977378, 1, 1)
@@ -499,8 +505,12 @@ tufts_per_tile = 3
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -76)
 is_night_only = false
 
+[node name="MinotaurWorldEnemy3" parent="Enemies" instance=ExtResource("24_ql20s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.59399, 0, -49.080048)
+is_night_only = false
+
 [node name="MinotaurWorldEnemy2" parent="Enemies" instance=ExtResource("24_ql20s")]
-transform = Transform3D(-0.9680733, 0, -0.25066728, 0, 1, 0, 0.25066728, 0, -0.9680733, 8.032143, 0, 14.904701)
+transform = Transform3D(-0.9680733, 0, -0.25066727, 0, 1, 0, 0.25066727, 0, -0.9680733, 8.032143, 0, 14.904701)
 is_night_only = false
 
 [node name="NightEnemySpawner" type="Node3D" parent="." node_paths=PackedStringArray("floor_map", "wall_maps", "spawn_point")]
@@ -513,4 +523,3 @@ enemy_scene = ExtResource("24_ql20s")
 [node name="LevelTitle" parent="." instance=ExtResource("26_leveltitle")]
 level_title = "Fero
 Shaw"
-play_new_area_sound = true

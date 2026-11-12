@@ -43,7 +43,7 @@ Scripts/
   player.gd           DungeonPlayer — grid party controller
   MapManager.gd       Sub-map swap without tearing down World/Player/HUD
   Components/         GridMovementComponent, etc.
-  Managers/           CombatManager, LevelManager, BattleFacing, BattleArena (dungeon battle room), TargetSelection
+  Managers/           CombatManager, LevelManager, BattleFacing, BattleArena (dungeon / cave battle room), TargetSelection
   Combat/             Pure combat helpers: Combatant, ActiveEffect, CombatMath, CombatTargeting, AbilityInfo
   Dungeon/            Procedural dungeon rooms / generator / boss chamber
   Environment/        MapTransition, caves, chests, day/night, interactables
@@ -103,7 +103,21 @@ Targets in CSV / resources: `SINGLE_ENEMY | SINGLE_ALLY | ALL_ENEMY | ALL_ALLY |
 
 - Author in CSV under `Data/` when a compiler exists; compile to `.tres` (see Utilities `*Compiler.gd`).
 - Do not hand-edit huge generated `.translation` sidecars.
-- Default save template: `Data/default_save.tres`. Runtime save: `user://save_game.tres`.
+- Default save template (test party): `Data/default_save.tres`. Runtime saves: 5 slots, `user://saves/slot_1.tres` … `slot_5.tres`; the session uses `GameState.save_slot` (set from the main menu; an old `user://save_game.tres` is moved into slot 1). Dev-start sessions: `user://save_game_dev.tres`; always go through `GameState.get_save_path()`).
+
+### Startup / dev start / export
+
+- Main scene: `Scenes/Boot.tscn` → main menu. New Game → roster → `IntroVideo.tscn` → `world.tscn` (GreenGrove @ `SpawnPointNewGame`).
+- **Dev start**: tick **Dev Start Override** on `world.tscn` → MapManager. Editor runs then skip the menu and load the test party on MapManager's **Default Map Scene**. Untick to play like a player. Exported builds ignore it.
+- `world.tscn` opened without a session (`GameState.session_active`) redirects to the main menu.
+- Export presets: `export_presets.cfg` (Android, macOS, Windows, Linux → `build/`). Files read with `FileAccess` (CSV, markdown, ascii art) must be covered by the presets' include filter.
+
+### Arcanum Shards (collectibles)
+
+- Scene `Scenes/Objects/ArcanumShard.tscn` + `Scripts/Objects/ArcanumShard.gd`. Walk next to it: party frozen, aura + sound, message box, OK → shard vanishes and is recorded.
+- Per shard: `shard_id`, `level_name`, `dialog_text`, optional `boss` (hidden until that boss is beaten, then appears where it stood).
+- Tracking: `ShardLedger` (`Scripts/Progression/ShardLedger.gd`). `CATALOG` = every shard in the game (id, area, place, guardian, scene); collected ones → `GameState.collected_shards` (saved on pickup). Menus read `ShardLedger.areas()` and listen to `SignalBus.shard_collected` (see `HudShardMenu`).
+- New shard = node in the level **and** a `CATALOG` row with the same `shard_id` (`tests/progression/test_shard_ledger.gd` checks both directions).
 
 ### UI / CRT
 
@@ -121,6 +135,7 @@ Targets in CSV / resources: `SINGLE_ENEMY | SINGLE_ALLY | ALL_ENEMY | ALL_ALLY |
 | Combat formulas / targeting | `Scripts/Combat/*.gd` (each ≤ 210 LOC) + `tests/combat/` — not CombatManager |
 | Combat flow / abilities / turn meters | `_documentation/COMBAT_README.md`, `BATTLES.md` |
 | Skills / spells data shape | `_documentation/SKILLS_AND_SPELLS.md` |
+| XP / level-up / point grants | `_documentation/LEVELING.md`, `Data/Class_Progression.csv` |
 | Items / loot | `_documentation/ITEMS_AND_LOOT.md` |
 | Status effects | `_documentation/STATUS.md` (effects section) + `StatusEffectData.gd` |
 | Caves | `_documentation/CAVE_LEVELS.md` |

@@ -2,6 +2,9 @@
 .godot/
 /android/
 
+# Exported builds (export_presets.cfg writes here)
+/build/
+
 .DS_Store
 */.DS_Store/*
 **/.DS_Store
@@ -15,3 +18,4 @@ _backup**/*
 
 # CLAUDE.md is a thin pointer to AGENTS.md — keep both tracked.
 # Personal Claude overrides can live outside the repo.
+_export_tmp.tar.gz

@@ -6,6 +6,7 @@ extends Node3D
 ## during combat encounters.
 
 const _Formation = preload("res://Scripts/3D/CombatFormation.gd")
+const _HitReaction = preload("res://Scripts/3D/EnemyHitReaction.gd")
 
 # ==============================================================================
 # 1. EXPORTED CONFIGURATION & POSITION TUNING
@@ -226,6 +227,8 @@ func _on_combat_started(enemy_payload: Variant, _player_party: Array, _enemy_fac
 		if not is_instance_valid(enemy_node):
 			continue
 		_spawned_enemies[enemy_id] = enemy_node
+		if "hit_reaction" in e_data:
+			enemy_node.set_meta(&"_hit_reaction", str(e_data.get("hit_reaction")))
 		play_animation(enemy_node, &"idle", true)
 
 	layout_combat_models()
@@ -534,8 +537,9 @@ func play_animation(enemy_node: Node3D, action_key: StringName, loop: bool = tru
 			juice.call("play_hit_shake")
 		return
 
-	if action_key == &"damage" and enemy_node.has_method("on_take_hit"):
-		enemy_node.call("on_take_hit")
+	if action_key == &"damage":
+		_play_hit_reaction(enemy_node)
+		return
 
 	# 2. Locate AnimationPlayer
 	var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
@@ -586,10 +590,71 @@ func _resolve_animation_name(anim_player: AnimationPlayer, action_key: StringNam
 			if cand_str in anim_name.to_lower():
 				return StringName(anim_name)
 
+	# A model with no hurt / hit clip must not fall back to a random one: the first clip is
+	# usually the attack (e.g. the Minotaur), which looked like the enemy striking back.
+	# Same for death: the slime's only clip is its looping idle, so it never "finished dying".
+	if action_key == &"damage" or action_key == &"die":
+		return &""
+
 	if available.size() > 0:
 		return StringName(available[0])
 
 	return &""
+
+
+## Plays one enemy's death and returns when it is over (the caller then removes the model).
+## Models with a real death clip play it; the rest collapse in code (flash, shrink, sink).
+## Waits on a timer, never on animation_finished: clips are shared between copies of a model,
+## so another enemy re-looping the same clip would leave this one standing for the whole fight.
+func _play_death(enemy_node: Node3D) -> void:
+	var wait: float = _HitReaction.DEATH_TIME
+	var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var clip: StringName = &""
+	if is_instance_valid(anim_player):
+		clip = _resolve_animation_name(anim_player, &"die")
+
+	if clip.is_empty():
+		_HitReaction.collapse(enemy_node)
+	else:
+		var anim: Animation = anim_player.get_animation(clip)
+		if is_instance_valid(anim):
+			anim.loop_mode = Animation.LOOP_NONE
+			wait = anim.length / maxf(0.05, absf(anim_player.speed_scale))
+		anim_player.play(clip)
+	await get_tree().create_timer(wait).timeout
+
+
+## How one enemy shows it got hit. Every model flashes white once; then:
+##   AUTO  (default) - play the model's own hurt / hit clip if it has one, otherwise shake it.
+##   CLIP  - same as AUTO (kept so data can say "this one has a clip").
+##   SHAKE - always shake in code, even if the model has a hurt clip.
+## Set per enemy with EnemyData.hit_reaction (Enemies.csv column `hit_reaction`).
+func _play_hit_reaction(enemy_node: Node3D) -> void:
+	if enemy_node.has_method("on_take_hit"):
+		enemy_node.call("on_take_hit")
+
+	_HitReaction.flash(enemy_node)
+
+	var mode: String = str(enemy_node.get_meta(&"_hit_reaction", "AUTO")).to_upper()
+	var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var clip: StringName = &""
+	if mode != "SHAKE" and is_instance_valid(anim_player):
+		clip = _resolve_animation_name(anim_player, &"damage")
+
+	if clip.is_empty():
+		_HitReaction.shake(enemy_node)
+		return
+
+	var anim: Animation = anim_player.get_animation(clip)
+	if is_instance_valid(anim):
+		anim.loop_mode = Animation.LOOP_NONE
+	anim_player.play(clip)
+	anim_player.animation_finished.connect(
+		func(_finished_anim: StringName) -> void:
+			if is_instance_valid(enemy_node):
+				play_animation(enemy_node, &"idle", true),
+		CONNECT_ONE_SHOT
+	)
 
 
 ## Lets a world-placed combat node (e.g. BlobBossController and its minions)
@@ -636,12 +701,7 @@ func _on_enemy_health_changed(enemy_id: String, current_hp: int, _max_hp: int) -
 				sink_time = float(sink_depth) / maxf(0.1, float(sink_speed))
 			await get_tree().create_timer(sink_time).timeout
 		else:
-			play_animation(enemy_node, &"die", false)
-			var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
-			if is_instance_valid(anim_player):
-				var resolved_die: StringName = _resolve_animation_name(anim_player, &"die")
-				if not resolved_die.is_empty() and anim_player.has_animation(resolved_die):
-					await anim_player.animation_finished
+			await _play_death(enemy_node)
 
 		if is_instance_valid(enemy_node):
 			if _adopted_world_models.has(enemy_id):

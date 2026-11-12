@@ -27,6 +27,19 @@ extends Node3D
 ## Vertical Y offset above floor
 @export var Y_offset: float = 0.0
 
+@export_group("Nightfall Howl")
+## Play a random howl when night falls and this spawner has enemies to wake.
+@export var howl_at_nightfall: bool = true
+
+const HOWL_PATHS: Array[String] = [
+	"res://Audio/Enemies/night/howl-1.mp3",
+	"res://Audio/Enemies/night/howl-2.mp3",
+	"res://Audio/Enemies/night/howl-3.mp3",
+]
+
+## Shared by every spawner so a map with several of them howls once per nightfall.
+static var _last_howl_msec: int = -100000
+
 var _spawned_enemies: Array[Node3D] = []
 
 func _ready() -> void:
@@ -146,6 +159,26 @@ func _check_is_night() -> bool:
 
 func _on_day_night_changed(is_night: bool) -> void:
 	_update_enemies_time_state(is_night)
+	if is_night:
+		_play_nightfall_howl()
+
+
+func _play_nightfall_howl() -> void:
+	if not howl_at_nightfall or not _has_living_enemies():
+		return
+	var now: int = Time.get_ticks_msec()
+	if now - _last_howl_msec < 5000:
+		return
+	_last_howl_msec = now
+	if is_instance_valid(AudioManager):
+		AudioManager.play_audio_path(HOWL_PATHS[randi() % HOWL_PATHS.size()])
+
+
+func _has_living_enemies() -> bool:
+	for enemy: Node3D in _spawned_enemies:
+		if is_instance_valid(enemy):
+			return true
+	return false
 
 func _update_enemies_time_state(is_night: bool) -> void:
 	for enemy in _spawned_enemies:

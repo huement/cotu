@@ -1,10 +1,18 @@
 # res://Scripts/Utilities/level_default_starters.gd
 # One-shot: godot --path . --headless -s Scripts/Utilities/level_default_starters.gd
+## Points Data/default_save.tres at the characters in Data/StarterParty (in creation order, first
+## three = front row) and keeps its supplies (pack, gold, floor) as they are.
+##
+## The game itself no longer depends on this file's party list: the test party (dev start, debug
+## Quick Start) is always built from Data/StarterParty by GameState._load_default_save(), which also
+## adds the test loadout (GameState.TEST_PARTY_WEAPON_PATH on everyone who can use it, plus
+## TEST_PARTY_REVIVE_POTIONS Revive Potions). Run this after adding / removing a starter so
+## default_save.tres reads the same as what the game loads.
 extends SceneTree
 
 const SAVE_PATH: String = "res://Data/default_save.tres"
-const TARGET_LEVEL: int = 5
-const FIGHTER_CLASSES: Array[String] = ["Spartan", "Crusader", "Ghostblade", "Ronin", "Amazon"]
+const STARTER_PARTY_DIR: String = "res://Data/StarterParty/"
+const PARTY_SIZE: int = 6
 
 
 func _init() -> void:
@@ -12,149 +20,54 @@ func _init() -> void:
 
 
 func _run() -> void:
-	if not ResourceLoader.exists(SAVE_PATH):
-		push_error("Missing default save at %s" % SAVE_PATH)
+	var save: SaveGame = load(SAVE_PATH) as SaveGame if ResourceLoader.exists(SAVE_PATH) else null
+	if save == null:
+		push_error("level_default_starters: can't load %s" % SAVE_PATH)
 		quit(1)
 		return
 
-	var save: SaveGame = load(SAVE_PATH) as SaveGame
-	if not is_instance_valid(save) or not is_instance_valid(save.party):
-		push_error("Failed to load SaveGame party from %s" % SAVE_PATH)
+	var paths: Array[String] = _starter_paths()
+	if paths.is_empty():
+		push_error("level_default_starters: no characters in %s" % STARTER_PARTY_DIR)
 		quit(1)
 		return
 
-	# Re-load authored L1 baselines from git if this file was already leveled.
-	# We treat current level > 1 as "already processed" and abort unless forced.
-	var already_leveled: bool = false
-	for slot_variant: Variant in save.party.slots:
-		var probe: CatCharacter = slot_variant as CatCharacter
-		if is_instance_valid(probe) and probe.level >= TARGET_LEVEL:
-			already_leveled = true
-			break
-
-	if already_leveled:
-		print("level_default_starters: party already at level %d — restoring L1 baselines first is required." % TARGET_LEVEL)
-		print("Re-read from the pre-level tres values embedded below and re-apply.")
-		_restore_level_one_baselines(save)
-
-	for slot_variant: Variant in save.party.slots:
-		var cat: CatCharacter = slot_variant as CatCharacter
-		if not is_instance_valid(cat):
-			continue
-		_level_cat_to_target(cat)
+	# Loaded (not copied) so default_save.tres keeps referencing the starter files.
+	var party := DungeonParty.new()
+	for i: int in paths.size():
+		var cat: CatCharacter = load(paths[i]) as CatCharacter
+		if cat == null:
+			push_error("level_default_starters: %s is not a character" % paths[i])
+			quit(1)
+			return
+		party.slots[i] = cat
+		print("  slot %d (%s row): %s - %s" % [i, "front" if i < 3 else "back", cat.name, paths[i].get_file()])
+	save.party = party
 
 	var err: Error = ResourceSaver.save(save, SAVE_PATH)
 	if err != OK:
-		push_error("ResourceSaver failed (%s) writing %s" % [error_string(err), SAVE_PATH])
+		push_error("level_default_starters: couldn't write %s (%s)" % [SAVE_PATH, error_string(err)])
 		quit(1)
 		return
-
-	print("level_default_starters: wrote leveled starters to %s" % SAVE_PATH)
+	print("level_default_starters: %s now lists %d starters from %s" % [SAVE_PATH, paths.size(), STARTER_PARTY_DIR])
 	quit(0)
 
 
-## Authored L1 values from the original default_save (before this utility ran).
-func _restore_level_one_baselines(save: SaveGame) -> void:
-	var baselines: Dictionary = {
-		"Commander Whiskers": {
-			"level": 1, "current_xp": 0, "max_xp": 1000,
-			"strength": 14, "intelligence": 8, "piety": 8, "vitality": 25,
-			"dexterity": 8, "speed": 8, "personality": 8,
-			"current_energy": 16, "max_energy": 16,
-		},
-		"Sir Clawslot": {
-			"level": 1, "current_xp": 0, "max_xp": 1000,
-			"strength": 13, "intelligence": 8, "piety": 8, "vitality": 22,
-			"dexterity": 8, "speed": 12, "personality": 8,
-			"current_energy": 16, "max_energy": 16,
-		},
-		"Baron Von Hiss": {
-			"level": 1, "current_xp": 0, "max_xp": 1000,
-			"strength": 10, "intelligence": 8, "piety": 8, "vitality": 20,
-			"dexterity": 12, "speed": 14, "personality": 8,
-			"current_energy": 16, "max_energy": 16,
-		},
-		"Sage Psych-Meow": {
-			"level": 1, "current_xp": 0, "max_xp": 1000,
-			"strength": 8, "intelligence": 15, "piety": 15, "vitality": 15,
-			"dexterity": 8, "speed": 11, "personality": 8,
-			"current_energy": 30, "max_energy": 30,
-		},
-	}
-
-	for slot_variant: Variant in save.party.slots:
-		var cat: CatCharacter = slot_variant as CatCharacter
-		if not is_instance_valid(cat):
-			continue
-		if not baselines.has(cat.name):
-			continue
-		var data: Dictionary = baselines[cat.name] as Dictionary
-		for key: String in data.keys():
-			cat.set(key, data[key])
-		_seed_vitals_from_attributes(cat)
+## Same order as CharacterRoster.starter_party_paths(): by the creation time in the roster id
+## (name_<unix time>_<rand>), so the first three made are the front row.
+func _starter_paths() -> Array[String]:
+	var ids: Array[String] = []
+	for file: String in DirAccess.get_files_at(STARTER_PARTY_DIR):
+		if file.ends_with(".tres"):
+			ids.append(file.get_basename())
+	ids.sort_custom(func(a: String, b: String) -> bool:
+		return _created_at(a) < _created_at(b) if _created_at(a) != _created_at(b) else a < b)
+	var paths: Array[String] = []
+	for id: String in ids.slice(0, PARTY_SIZE):
+		paths.append(STARTER_PARTY_DIR + id + ".tres")
+	return paths
 
 
-func _level_cat_to_target(cat: CatCharacter) -> void:
-	# Keep authored attributes; only seed vitals so LevelManager HP/MP math has a real baseline.
-	_seed_vitals_from_attributes(cat)
-
-	var options: Dictionary = {
-		"stat_points": _stat_distribution_for(cat),
-		"notify_ui": false,
-		"persist_save": false,
-	}
-	while int(cat.level) < TARGET_LEVEL:
-		LevelManager.level_player(cat, options)
-
-	print(
-		"  %s => L%d | STR %d INT %d PIE %d VIT %d DEX %d SPD %d | HP %d/%d | EN %d/%d | XP %d/%d"
-		% [
-			cat.name,
-			cat.level,
-			cat.strength,
-			cat.intelligence,
-			cat.piety,
-			cat.vitality,
-			cat.dexterity,
-			cat.speed,
-			cat.current_hp,
-			cat.max_hp,
-			cat.current_energy,
-			cat.max_energy,
-			cat.current_xp,
-			cat.max_xp,
-		]
-	)
-
-
-func _seed_vitals_from_attributes(cat: CatCharacter) -> void:
-	var prof_name: String = ""
-	if is_instance_valid(cat.profession) and "profession_name" in cat.profession:
-		prof_name = str(cat.profession.get("profession_name"))
-
-	var max_hp: int = cat.vitality * 2
-	if prof_name in ["Spartan", "Crusader", "Amazon"]:
-		max_hp = cat.vitality * 3
-
-	cat.max_hp = max_hp
-	cat.current_hp = max_hp
-	# Energy stays as authored max_energy unless it was never set.
-	if cat.max_energy <= 0:
-		cat.max_energy = cat.intelligence + cat.piety
-	cat.current_energy = cat.max_energy
-
-
-func _stat_distribution_for(cat: CatCharacter) -> Dictionary:
-	var prof_name: String = ""
-	if is_instance_valid(cat.profession) and "profession_name" in cat.profession:
-		prof_name = str(cat.profession.get("profession_name"))
-
-	var is_fighter: bool = false
-	for f_class: String in FIGHTER_CLASSES:
-		if prof_name.nocasecmp_to(f_class) == 0:
-			is_fighter = true
-			break
-
-	if is_fighter:
-		return {"strength": 2, "vitality": 1, "dexterity": 1, "speed": 1}
-	return {"intelligence": 2, "piety": 1, "vitality": 1, "speed": 1}
+func _created_at(roster_id: String) -> int:
+	var parts: PackedStringArray = roster_id.split("_")
+	return int(parts[parts.size() - 2]) if parts.size() >= 3 else 0

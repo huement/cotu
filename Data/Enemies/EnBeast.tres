@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://vvx53rf818th"]
 
-[ext_resource type="PackedScene" path="res://resources/Enemies/beast.glb" id="1_cgssn"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_iojrp"]
+[ext_resource type="PackedScene" uid="uid://cvp5tl7sdodgi" path="res://resources/Enemies/beast.glb" id="1_cgssn"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_iojrp"]
 
 [resource]
 script = ExtResource("2_iojrp")
@@ -17,7 +17,7 @@ max_health = 110
 current_health = 110
 attack_damage = 22
 defense = 7
-speed = 11.0
+speed = 13.0
 weakness_element = 2
 attack_element = 2
 max_group_size = 2

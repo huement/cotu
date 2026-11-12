@@ -1,16 +1,14 @@
 # res://Scripts/Progression/CharacterCreation.gd
 class_name CharacterCreation
 extends RefCounted
-## Rules for making a new character (Wizardry style). Static and side-effect free; the Character Creator
+## Rules for making a new character. Static and side-effect free; the Character Creator
 ## screens (Scripts/UI/CharacterCreator/) only call into this. Tests: tests/progression/test_character_creation.gd
 ##
-##   1. Pick a race (CatBreed, Data/Races) and a class (ProfessionData, Data/Classes).
-##      Every combination can be picked, but a class whose minimum stats the race can't reach even with
-##      the best possible roll is greyed out (is_class_reachable).
-##   2. Roll BONUS_DICE d6 for a bonus pool (re-roll as often as you like) and spend it on stats.
-##      No stat above STAT_CAP; the class minimums must be met and the pool spent to continue.
-##      Pick starting spells / class skills from what the class can learn at level 1; race skills are free.
-##   3. Name it -> build_character() -> CharacterRoster.save().
+##   1. Pick a race (CatBreed) and a class (ProfessionData). Classes the race cannot reach
+##      even with a best birth die (+6 on primary) are greyed out (is_class_reachable).
+##   2. Pick starting spells / class skills; name the character.
+##   3. CREATE → one irrevocable 1d6 birth roll. Face value goes to the class primary stat;
+##      5/6 also bank skill/spell points for the first level-up. Then build_character() → roster.
 
 const RACES_DIR: String = "res://Data/Races/"
 const CLASSES_DIR: String = "res://Data/Classes/"
@@ -29,11 +27,13 @@ const STAT_LONG: Dictionary = {
 	"dexterity": "Dexterity", "speed": "Speed", "personality": "Personality",
 }
 
-## Bonus pool = the sum of this many d6 (3..18).
-const BONUS_DICE: int = 3
+## Birth roll is a single d6 (face 1..6).
+const BONUS_DICE: int = 1
 ## No stat can go above this at creation.
 const STAT_CAP: int = 18
 const NAME_MAX_LENGTH: int = 16
+## Fallback primary when a class has no req_* set.
+const DEFAULT_PRIMARY_STAT: String = "vitality"
 
 static var _class_text: Dictionary = {}
 
@@ -70,11 +70,11 @@ static func class_order(prof: ProfessionData) -> int:
 
 
 static func max_bonus() -> int:
-	return BONUS_DICE * 6
+	return 6
 
 
 static func min_bonus() -> int:
-	return BONUS_DICE
+	return 1
 
 
 # ------------------------------------------------------------------------------
@@ -96,7 +96,28 @@ static func class_requirements(prof: ProfessionData) -> Dictionary:
 	return out
 
 
-## Bonus points needed just to reach the class minimums from the race's base stats.
+## Highest req_* (ties: STATS order). All-zero → DEFAULT_PRIMARY_STAT.
+static func primary_stat(prof: ProfessionData) -> String:
+	var req: Dictionary = class_requirements(prof)
+	var best: String = DEFAULT_PRIMARY_STAT
+	var best_val: int = 0
+	for stat: String in STATS:
+		var v: int = int(req[stat])
+		if v > best_val:
+			best_val = v
+			best = stat
+	return best
+
+
+## Primary shortfall from race base (0 when already met). Used by reachability / UI copy.
+static func primary_points_needed(breed: CatBreed, prof: ProfessionData) -> int:
+	var primary: String = primary_stat(prof)
+	var base: int = int(base_stats(breed)[primary])
+	var req: int = int(class_requirements(prof)[primary])
+	return maxi(0, req - base)
+
+
+## Sum of all shortfalls (legacy helper; birth die only covers primary).
 static func points_needed(breed: CatBreed, prof: ProfessionData) -> int:
 	var base: Dictionary = base_stats(breed)
 	var req: Dictionary = class_requirements(prof)
@@ -106,86 +127,39 @@ static func points_needed(breed: CatBreed, prof: ProfessionData) -> int:
 	return total
 
 
-## False when even the best roll (max_bonus) can't meet the class minimums - greyed out on step 1.
+## Reachable when non-primary reqs are met by race base and primary shortfall ≤ 6.
 static func is_class_reachable(breed: CatBreed, prof: ProfessionData) -> bool:
+	if breed == null or prof == null:
+		return false
+	var base: Dictionary = base_stats(breed)
+	var req: Dictionary = class_requirements(prof)
+	var primary: String = primary_stat(prof)
 	for stat: String in STATS:
-		if int(class_requirements(prof)[stat]) > STAT_CAP:
+		var need: int = int(req[stat])
+		if need > STAT_CAP:
 			return false
-	return points_needed(breed, prof) <= max_bonus()
+		if stat == primary:
+			continue
+		if int(base[stat]) < need:
+			return false
+	return primary_points_needed(breed, prof) <= max_bonus()
 
 
-## Chance (0..1) that a single roll of the bonus pool is enough for this class.
-static func roll_success_chance(breed: CatBreed, prof: ProfessionData) -> float:
-	var need: int = points_needed(breed, prof)
-	if need <= min_bonus():
-		return 1.0
-	if not is_class_reachable(breed, prof):
-		return 0.0
-	var hits: int = 0
-	var total: int = 0
-	for a: int in range(1, 7):
-		for b: int in range(1, 7):
-			for c: int in range(1, 7):
-				total += 1
-				if a + b + c >= need:
-					hits += 1
-	return float(hits) / float(total)
+## Birth die outcomes: { "stat": int, "ability": int }.
+## 1–4 → +face primary; 5 → +5 primary +1 ability; 6 → +6 primary +2 ability.
+static func creation_bonus_for_roll(face: int) -> Dictionary:
+	var r: int = clampi(face, 1, 6)
+	if r <= 4:
+		return { "stat": r, "ability": 0 }
+	if r == 5:
+		return { "stat": 5, "ability": 1 }
+	return { "stat": 6, "ability": 2 }
 
 
-## Rolls the bonus dice: [d6, d6, d6].
-## --- Roll limits (anti re-roll farming) ---
-## Each new character gets its first roll plus this many re-rolls.
-const REROLLS_PER_CHARACTER: int = 2
-## Across ALL characters: at most this many rolls (first rolls included) per window.
-## Counting first rolls stops the "back out and make a new character" loophole.
-const GLOBAL_ROLL_LIMIT: int = 3
-const GLOBAL_ROLL_WINDOW_SEC: float = 30.0
-const ROLL_LIMIT_FILE: String = "user://roll_limit.cfg"
-
-static var _roll_times: Array[float] = []
-static var _roll_times_loaded: bool = false
-
-
-static func _load_roll_times() -> void:
-	if _roll_times_loaded:
-		return
-	_roll_times_loaded = true
-	var cfg := ConfigFile.new()
-	if cfg.load(ROLL_LIMIT_FILE) == OK:
-		for t: Variant in cfg.get_value("rolls", "times", []):
-			_roll_times.append(float(t))
-
-
-static func _prune_roll_times() -> void:
-	_load_roll_times()
-	var now: float = Time.get_unix_time_from_system()
-	var kept: Array = _roll_times.filter(func(t: float) -> bool:
-		return now - t < GLOBAL_ROLL_WINDOW_SEC and t <= now + 1.0)
-	_roll_times.assign(kept)
-
-
-## Seconds until another roll is allowed (0 = roll now).
-static func roll_wait_seconds() -> float:
-	_prune_roll_times()
-	if _roll_times.size() < GLOBAL_ROLL_LIMIT:
-		return 0.0
-	var oldest: float = _roll_times.min()
-	return maxf(0.0, GLOBAL_ROLL_WINDOW_SEC - (Time.get_unix_time_from_system() - oldest))
-
-
-static func register_roll() -> void:
-	_prune_roll_times()
-	_roll_times.append(Time.get_unix_time_from_system())
-	var cfg := ConfigFile.new()
-	cfg.set_value("rolls", "times", _roll_times)
-	cfg.save(ROLL_LIMIT_FILE)
-
-
+## Rolls the birth die: [d6].
 static func roll_bonus_dice(rng: RandomNumberGenerator = null) -> Array[int]:
-	var dice: Array[int] = []
-	for i: int in BONUS_DICE:
-		dice.append(rng.randi_range(1, 6) if rng != null else randi_range(1, 6))
-	return dice
+	var face: int = rng.randi_range(1, 6) if rng != null else randi_range(1, 6)
+	return [face]
 
 
 static func sum_dice(dice: Array[int]) -> int:
@@ -193,6 +167,31 @@ static func sum_dice(dice: Array[int]) -> int:
 	for d: int in dice:
 		total += d
 	return total
+
+
+## Allocation + final stats after applying a birth face to the class primary.
+## Floors primary to class req when the face alone would leave them short.
+## Returns { "allocation": Dictionary, "stats": Dictionary, "ability": int, "face": int, "primary": String }.
+static func apply_birth_roll(breed: CatBreed, prof: ProfessionData, face: int) -> Dictionary:
+	var primary: String = primary_stat(prof)
+	var bonus: Dictionary = creation_bonus_for_roll(face)
+	var base: Dictionary = base_stats(breed)
+	var req: Dictionary = class_requirements(prof)
+	var desired: int = mini(STAT_CAP, int(base[primary]) + int(bonus["stat"]))
+	var floor_req: int = int(req[primary])
+	if desired < floor_req:
+		desired = mini(STAT_CAP, floor_req)
+	var applied: int = maxi(0, desired - int(base[primary]))
+	var alloc: Dictionary = {}
+	if applied > 0:
+		alloc[primary] = applied
+	return {
+		"allocation": alloc,
+		"stats": apply_allocation(breed, alloc),
+		"ability": int(bonus["ability"]),
+		"face": clampi(face, 1, 6),
+		"primary": primary,
+	}
 
 
 ## Stats after adding `allocation` ({ "strength": 2 }) to the race base.
@@ -210,16 +209,6 @@ static func points_spent(allocation: Dictionary) -> int:
 	return total
 
 
-static func can_raise(breed: CatBreed, allocation: Dictionary, stat: String, pool: int) -> bool:
-	if points_spent(allocation) >= pool:
-		return false
-	return int(apply_allocation(breed, allocation)[stat]) < STAT_CAP
-
-
-static func can_lower(allocation: Dictionary, stat: String) -> bool:
-	return int(allocation.get(stat, 0)) > 0
-
-
 ## Short labels of the class minimums not met yet: ["INT 15", "PIE 15"].
 static func unmet_requirements(stats: Dictionary, prof: ProfessionData) -> Array[String]:
 	var out: Array[String] = []
@@ -232,42 +221,6 @@ static func unmet_requirements(stats: Dictionary, prof: ProfessionData) -> Array
 
 static func meets_requirements(stats: Dictionary, prof: ProfessionData) -> bool:
 	return unmet_requirements(stats, prof).is_empty()
-
-
-## Puts bonus points on the stats the class still needs (used by "AUTO" and when a roll first lands).
-## Returns a new allocation; points left over stay unspent.
-static func auto_allocate(breed: CatBreed, prof: ProfessionData, pool: int) -> Dictionary:
-	var alloc: Dictionary = {}
-	var base: Dictionary = base_stats(breed)
-	var req: Dictionary = class_requirements(prof)
-	var left: int = pool
-	for stat: String in STATS:
-		var need: int = mini(maxi(0, int(req[stat]) - int(base[stat])), STAT_CAP - int(base[stat]))
-		var give: int = mini(need, left)
-		if give > 0:
-			alloc[stat] = give
-			left -= give
-	return alloc
-
-
-## True when step 2 is complete: class minimums met, pool fully spent (unless every stat is capped).
-static func is_allocation_valid(breed: CatBreed, prof: ProfessionData, allocation: Dictionary, pool: int) -> bool:
-	if points_spent(allocation) > pool:
-		return false
-	var stats: Dictionary = apply_allocation(breed, allocation)
-	for stat: String in STATS:
-		if int(stats[stat]) > STAT_CAP:
-			return false
-	if not meets_requirements(stats, prof):
-		return false
-	return points_spent(allocation) == pool or _all_capped(stats)
-
-
-static func _all_capped(stats: Dictionary) -> bool:
-	for stat: String in STATS:
-		if int(stats[stat]) < STAT_CAP:
-			return false
-	return true
 
 
 # ------------------------------------------------------------------------------
@@ -360,8 +313,9 @@ static func default_skill_picks(breed: CatBreed, prof: ProfessionData) -> Array[
 # ------------------------------------------------------------------------------
 # Building
 # ------------------------------------------------------------------------------
-## Problems that block CREATE (empty = ok).
-static func validate_draft(draft: Dictionary) -> Array[String]:
+## Problems that block advancing past race/class or CREATE before the birth roll (empty = ok).
+## Does not require bonus_dice — those are rolled on CREATE.
+static func validate_selection(draft: Dictionary) -> Array[String]:
 	var problems: Array[String] = []
 	var breed: CatBreed = draft.get("breed") as CatBreed
 	var prof: ProfessionData = draft.get("profession") as ProfessionData
@@ -371,12 +325,8 @@ static func validate_draft(draft: Dictionary) -> Array[String]:
 		problems.append("Choose a class.")
 	if breed == null or prof == null:
 		return problems
-	var pool: int = int(draft.get("bonus_pool", 0))
-	var alloc: Dictionary = draft.get("allocation", {}) as Dictionary
-	if not meets_requirements(apply_allocation(breed, alloc), prof):
-		problems.append("%s needs %s." % [prof.profession_name, ", ".join(unmet_requirements(apply_allocation(breed, alloc), prof))])
-	elif not is_allocation_valid(breed, prof, alloc, pool):
-		problems.append("Spend all bonus points.")
+	if not is_class_reachable(breed, prof):
+		problems.append("A %s can't reach the %s's minimums." % [breed.breed_name, prof.profession_name])
 	var spells: Array = draft.get("spells", []) as Array
 	var skills: Array = draft.get("skills", []) as Array
 	if spells.size() != spell_pick_count(breed, prof):
@@ -388,13 +338,30 @@ static func validate_draft(draft: Dictionary) -> Array[String]:
 	return problems
 
 
+## Full CREATE validation (selection + birth die present + class mins met).
+static func validate_draft(draft: Dictionary) -> Array[String]:
+	var problems: Array[String] = validate_selection(draft)
+	if not problems.is_empty():
+		return problems
+	var breed: CatBreed = draft.get("breed") as CatBreed
+	var prof: ProfessionData = draft.get("profession") as ProfessionData
+	var dice: Array = draft.get("bonus_dice", []) as Array
+	if dice.is_empty():
+		problems.append("Birth die has not been rolled.")
+		return problems
+	var alloc: Dictionary = draft.get("allocation", {}) as Dictionary
+	if not meets_requirements(apply_allocation(breed, alloc), prof):
+		problems.append("%s needs %s." % [prof.profession_name, ", ".join(unmet_requirements(apply_allocation(breed, alloc), prof))])
+	return problems
+
+
 static func clean_name(raw: String) -> String:
 	var n: String = raw.strip_edges().replace("\n", " ")
 	return n.left(NAME_MAX_LENGTH)
 
 
 ## Makes (or, with `into`, rebuilds an unlocked roster character in place) a level-1 character.
-## draft: { name, breed, profession, bonus_dice: Array[int], bonus_pool, allocation, spells, skills }
+## draft: { name, breed, profession, bonus_dice: Array[int], allocation, ability_points?, spells, skills }
 static func build_character(draft: Dictionary, into: CatCharacter = null) -> CatCharacter:
 	var breed: CatBreed = draft.get("breed") as CatBreed
 	var prof: ProfessionData = draft.get("profession") as ProfessionData
@@ -408,18 +375,28 @@ static func build_character(draft: Dictionary, into: CatCharacter = null) -> Cat
 	cat.current_xp = 0
 	cat.max_xp = ClassProgression.xp_to_next_level(cat.get_class_progression(), 1)
 	cat.unspent_stat_points = 0
-	cat.unspent_skill_points = 0
-	cat.unspent_spell_points = 0
 	cat.pending_level_rolls = 0
 	cat.bonus_max_hp_percent = 0.0
 	cat.ability_ranks = {}
 	var dice: Array[int] = []
 	dice.assign(draft.get("bonus_dice", []) as Array)
 	cat.creation_dice = dice
-	cat.creation_allocation = (draft.get("allocation", {}) as Dictionary).duplicate()
-	var stats: Dictionary = apply_allocation(breed, cat.creation_allocation)
+	var alloc: Dictionary = (draft.get("allocation", {}) as Dictionary).duplicate()
+	var ability_bank: int = int(draft.get("ability_points", 0))
+	if not dice.is_empty() and alloc.is_empty():
+		var birth: Dictionary = apply_birth_roll(breed, prof, int(dice[0]))
+		alloc = (birth["allocation"] as Dictionary).duplicate()
+		ability_bank = int(birth["ability"])
+	cat.creation_allocation = alloc
+	var stats: Dictionary = apply_allocation(breed, alloc)
 	for stat: String in STATS:
 		cat.set(stat, int(stats[stat]))
+	var split: Vector2i = LevelUpDice.split_ability_points(
+		ability_bank,
+		(draft.get("skills", []) as Array).size() + race_skills(breed).size(),
+		(draft.get("spells", []) as Array).size())
+	cat.unspent_skill_points = split.x
+	cat.unspent_spell_points = split.y
 
 	var spells: Array[Resource] = []
 	for s: Variant in draft.get("spells", []):
@@ -462,6 +439,7 @@ static func draft_from_character(cat: CatCharacter) -> Dictionary:
 		"bonus_dice": dice,
 		"bonus_pool": sum_dice(dice),
 		"allocation": alloc,
+		"ability_points": cat.unspent_skill_points + cat.unspent_spell_points,
 		"spells": spells,
 		"skills": skills,
 	}
@@ -477,10 +455,7 @@ static func fur_path_for(breed: CatBreed) -> String:
 	return path if ResourceLoader.exists(path) else ""
 
 
-## Data/Portraits/<Class>.png, or "" when that class has no portrait yet. The file name is matched
-## without caring about case ("GhostBlade.png" for Ghostblade) and also by the class's name in
-## Class_Progression.csv (e.g. a portrait named after an alias). Case-insensitive matching matters for
-## exports: the .pck is case-sensitive even when the Mac editor isn't.
+## Data/Portraits/<Class>.png, or "" when that class has no portrait yet.
 static func portrait_path_for(prof: ProfessionData) -> String:
 	if prof == null:
 		return ""
@@ -531,8 +506,7 @@ static func portrait_texture(prof: ProfessionData) -> Texture2D:
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
 
 
-## Descriptive columns of Data/Character_Classes.csv for a class:
-## { based_on, weaponry, physical, academia, features, spell_level } (empty strings when missing).
+## Descriptive columns of Data/Character_Classes.csv for a class.
 static func class_text(class_name_str: String) -> Dictionary:
 	if _class_text.is_empty():
 		_load_class_text()

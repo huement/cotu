@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bfwvgn4i147is"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_dread_golem_mat.tres" id="1_kb8sp"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-q.glb" id="2_hqre6"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_bfgou"]
+[ext_resource type="Material" uid="uid://q5mfvxkludj7" path="res://resources/Enemies/Kenny/Materials/en_dread_golem_mat.tres" id="1_kb8sp"]
+[ext_resource type="PackedScene" uid="uid://botxyxge2vrye" path="res://resources/Enemies/Kenny/character-q.glb" id="2_hqre6"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_bfgou"]
 
 [resource]
 script = ExtResource("3_bfgou")
@@ -19,7 +19,7 @@ max_health = 140
 current_health = 140
 attack_damage = 32
 defense = 12
-speed = 5.0
+speed = 14.0
 initiative_speed = 6
 occurs_in_groups = false
 max_group_size = 1

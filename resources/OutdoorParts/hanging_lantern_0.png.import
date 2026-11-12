@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bimkc6ci0xual"
 path.s3tc="res://.godot/imported/hanging_lantern_0.png-2abfa75abcded3621514b5b340765ce8.s3tc.ctex"
+path.etc2="res://.godot/imported/hanging_lantern_0.png-2abfa75abcded3621514b5b340765ce8.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/OutdoorParts/hanging_lantern_0.png"
-dest_files=["res://.godot/imported/hanging_lantern_0.png-2abfa75abcded3621514b5b340765ce8.s3tc.ctex"]
+dest_files=["res://.godot/imported/hanging_lantern_0.png-2abfa75abcded3621514b5b340765ce8.s3tc.ctex", "res://.godot/imported/hanging_lantern_0.png-2abfa75abcded3621514b5b340765ce8.etc2.ctex"]
 
 [params]
 

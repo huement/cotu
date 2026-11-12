@@ -4,7 +4,8 @@ extends MenuKitMainMenu
 ## Title screen, built on Game Menu Kit Lite (neon style).
 ## New Game · Load Game · Settings · About · Help · Party Builder · Quit
 ##
-## New Game opens the roster (RosterScreen, START mode: create characters, pick a party, start).
+## New Game opens the roster (RosterScreen, START mode: create characters, pick a party, start);
+## it saves into the first empty save slot. Load Game opens the save-slot list (SaveSlotScreen).
 ## Party Builder opens the same roster to create / edit characters without starting a game.
 ## Settings uses the Settings Menu Lite addon; About / Help are MenuScreenTemplate screens.
 
@@ -62,11 +63,23 @@ func _on_button_pressed(id: StringName) -> void:
 			ask_quit()
 
 
+## A new game goes into the first empty save slot. With every slot used, the player picks which
+## save it replaces (SaveSlotScreen) before the roster opens.
 func _on_new_game_pressed() -> void:
-	if SessionFlow.has_save():
-		var choice: int = await ask("Start a new game?", "Your current save will be replaced when the new party sets out.", ["Cancel", "New Game"], 0)
-		if choice != 1:
-			return
+	var slot: int = GameState.first_empty_slot()
+	if slot == 0:
+		var picker := SaveSlotScreen.new()
+		picker.mode = SaveSlotScreen.Mode.PICK_NEW
+		picker.slot_chosen.connect(func(chosen: int) -> void:
+			# Deferred: the picker closes (and frees the overlay) right after this signal.
+			_start_new_game_in_slot.call_deferred(chosen))
+		_open_overlay(picker)
+		return
+	_start_new_game_in_slot(slot)
+
+
+func _start_new_game_in_slot(slot: int) -> void:
+	GameState.set_save_slot(slot)
 	new_game_requested.emit()
 	_open_overlay(_make_roster(RosterScreen.Mode.START))
 
@@ -77,21 +90,28 @@ func _make_roster(roster_mode: RosterScreen.Mode) -> Control:
 	return screen
 
 
+## Opens the save-slot list (pick a slot to load it, or delete one).
 func _on_load_game_pressed() -> void:
-	if not SessionFlow.has_save():
+	if not SessionFlow.has_any_save():
 		await ask("No save found", "Start a new game first. Saves are made from the in-game menu.", ["OK"])
 		return
-	if not SessionFlow.load_saved_game(get_tree()):
-		await ask("Couldn't load", "The save file is missing or damaged. Try starting a new game.", ["OK"])
+	var screen := SaveSlotScreen.new()
+	screen.mode = SaveSlotScreen.Mode.LOAD
+	_open_overlay(screen)
 
 
-## Shows the save date under "Load Game" (second line of the button).
+## Shows the newest save under "Load Game" (second line of the button).
 func _refresh_load_button() -> void:
 	var button: MenuKitMenuButton = get_button(&"load_game")
 	if button == null:
 		return
-	var stamp: String = SessionFlow.get_save_timestamp()
-	button.sub_text = "Saved %s" % stamp if not stamp.is_empty() else ("No save yet" if not SessionFlow.has_save() else "")
+	var latest: int = SessionFlow.latest_slot()
+	if latest == 0:
+		button.sub_text = "No save yet"
+	else:
+		var save: SaveGame = GameState.read_slot(latest)
+		var stamp: String = save.save_timestamp.replace("T", " ").left(16) if save != null else ""
+		button.sub_text = ("Slot %d  ·  %s" % [latest, stamp]) if not stamp.is_empty() else "Slot %d" % latest
 	update_buttons()
 
 

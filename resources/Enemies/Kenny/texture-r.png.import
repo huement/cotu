@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://x5o6k58nnt7u"
 path.s3tc="res://.godot/imported/texture-r.png-83f55a3664be0e2e8ed39d298a14a3a6.s3tc.ctex"
+path.etc2="res://.godot/imported/texture-r.png-83f55a3664be0e2e8ed39d298a14a3a6.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://resources/Enemies/Kenny/texture-r.png"
-dest_files=["res://.godot/imported/texture-r.png-83f55a3664be0e2e8ed39d298a14a3a6.s3tc.ctex"]
+dest_files=["res://.godot/imported/texture-r.png-83f55a3664be0e2e8ed39d298a14a3a6.s3tc.ctex", "res://.godot/imported/texture-r.png-83f55a3664be0e2e8ed39d298a14a3a6.etc2.ctex"]
 
 [params]
 

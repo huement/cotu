@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://c5tt6mh8u781x"
 path.s3tc="res://.godot/imported/crypt_Image_1.png-603a9aa62e22f282dd69ff05022fee34.s3tc.ctex"
+path.etc2="res://.godot/imported/crypt_Image_1.png-603a9aa62e22f282dd69ff05022fee34.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/OutdoorParts/crypt_Image_1.png"
-dest_files=["res://.godot/imported/crypt_Image_1.png-603a9aa62e22f282dd69ff05022fee34.s3tc.ctex"]
+dest_files=["res://.godot/imported/crypt_Image_1.png-603a9aa62e22f282dd69ff05022fee34.s3tc.ctex", "res://.godot/imported/crypt_Image_1.png-603a9aa62e22f282dd69ff05022fee34.etc2.ctex"]
 
 [params]
 

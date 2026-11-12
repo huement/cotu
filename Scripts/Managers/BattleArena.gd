@@ -1,11 +1,12 @@
 # res://Scripts/Managers/BattleArena.gd
 class_name BattleArena
 extends Node3D
-## Dungeon "battle mode": fights in a dungeon happen in a big open room instead of the corridor.
+## "Battle mode": fights in a dungeon or a cave happen in a big open room instead of the corridor.
 ##
-## Dungeon corridors are too tight to know whether a whole enemy pack fits in front of the party.
-## So before a dungeon battle the screen fades to black, the party's VIEW is moved into
-## Scenes/Dungeons/DungeonBattle.tscn, and when the battle ends it jumps straight back.
+## Corridors and tunnels are too tight to know whether a whole enemy pack fits in front of the party.
+## So before the battle the screen fades to black, the party's VIEW is moved into the battle room
+## (dungeons: Scenes/Dungeons/DungeonBattle.tscn, caves: Scenes/Caves/CaveBattle.tscn), and when
+## the battle ends it jumps straight back.
 ##
 ## The party never leaves its grid cell: only the Player node's transform moves
 ## (DungeonPlayer.enter_battle_view / leave_battle_view). Saves, the encounter logic and the
@@ -14,21 +15,25 @@ extends Node3D
 ## Fights that start inside a BossChamber stay there - that room is big enough. A boss met
 ## anywhere else is moved to the battle room like any other enemy.
 ##
-## Which maps use it: any map whose root is a DungeonLevel. Override per map with the root
-## metadata "use_battle_room" (true / false).
+## Which maps use it: any map whose root is a DungeonLevel or a CaveLevel. Override per map with
+## the root metadata "use_battle_room" (true / false). A map can also name its own room scene
+## with the root metadata "battle_room_scene" (a res:// path).
 ##
 ## Usage (before emitting combat_started, instead of BattleFacing.orient_party):
 ##     await BattleArena.prepare_party(get_tree(), global_position)
 ##
 ## The room is added once per map as a hidden child called "BattleArena", far away from the level.
-## Edit the room itself in DungeonBattle.tscn: the party stands on its "SpawnPoint" marker and
-## looks along the marker's -Z.
+## Edit the room itself in DungeonBattle.tscn / CaveBattle.tscn: the party stands on its
+## "SpawnPoint" marker and looks along the marker's -Z.
 
 const ROOM_SCENE_PATH: String = "res://Scenes/Dungeons/DungeonBattle.tscn"
+const CAVE_ROOM_SCENE_PATH: String = "res://Scenes/Caves/CaveBattle.tscn"
 const NODE_NAME: String = "BattleArena"
 ## Where the room sits relative to the level (far outside any generated dungeon).
 const ROOM_OFFSET: Vector3 = Vector3(2000.0, 0.0, 2000.0)
 const MAP_META: StringName = &"use_battle_room"
+## Optional root metadata: res:// path of the room scene this map fights in.
+const ROOM_SCENE_META: StringName = &"battle_room_scene"
 const FADE_OUT_SECONDS: float = 0.25
 const FADE_IN_SECONDS: float = 0.35
 
@@ -39,7 +44,7 @@ var _party_is_here: bool = false
 
 
 ## Gets the party ready for a battle against the enemy at `enemy_world_pos`.
-## Dungeon: fade to black and move the view to the battle room.
+## Dungeon / cave: fade to black and move the view to the battle room.
 ## Everywhere else (and inside a boss chamber): turn the party to face the enemy,
 ## then shove nearby trees/walls aside so combat models have room (BattleSpaceClearance).
 static func prepare_party(tree: SceneTree, enemy_world_pos: Vector3) -> void:
@@ -61,7 +66,19 @@ static func map_uses_battle_room(map: Node) -> bool:
 		return false
 	if map.has_meta(MAP_META):
 		return bool(map.get_meta(MAP_META))
-	return map is DungeonLevel
+	return map is DungeonLevel or map is CaveLevel
+
+
+## The room scene this map fights in: its own "battle_room_scene" metadata, else the cave room
+## for cave levels, else the dungeon room.
+static func room_scene_path_for(map: Node) -> String:
+	if is_instance_valid(map) and map.has_meta(ROOM_SCENE_META):
+		var custom: String = str(map.get_meta(ROOM_SCENE_META))
+		if not custom.is_empty():
+			return custom
+	if map is CaveLevel:
+		return CAVE_ROOM_SCENE_PATH
+	return ROOM_SCENE_PATH
 
 
 static func _find_or_create(tree: SceneTree) -> BattleArena:
@@ -75,9 +92,10 @@ static func _find_or_create(tree: SceneTree) -> BattleArena:
 	if existing != null:
 		return existing
 
-	var packed: PackedScene = load(ROOM_SCENE_PATH) as PackedScene if ResourceLoader.exists(ROOM_SCENE_PATH) else null
+	var room_path: String = room_scene_path_for(map)
+	var packed: PackedScene = load(room_path) as PackedScene if ResourceLoader.exists(room_path) else null
 	if packed == null:
-		push_warning("BattleArena: %s is missing - fighting in place." % ROOM_SCENE_PATH)
+		push_warning("BattleArena: %s is missing - fighting in place." % room_path)
 		return null
 	var room: Node3D = packed.instantiate() as Node3D
 	if room == null:
@@ -120,7 +138,7 @@ func enter(player: DungeonPlayer) -> void:
 	if is_instance_valid(GameState) and GameState.has_method("lock_encounters"):
 		GameState.lock_encounters(2.0) # nobody else may start a fight during the fade
 	if is_instance_valid(GameLogger):
-		GameLogger.combat("Moving the fight to the dungeon battle room.")
+		GameLogger.combat("Moving the fight to the battle room (%s)." % _room.name)
 
 	await _fade(1.0, FADE_OUT_SECONDS).finished
 

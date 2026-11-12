@@ -76,6 +76,9 @@ static func compile_enemies() -> int:
 			enemy.model_scale = Vector3(s, s, s)
 		if line.size() > 30 and not line[30].strip_edges().is_empty():
 			enemy.combat_forward_distance = float(line[30])
+		# Optional column (index 31): hit_reaction = AUTO | CLIP | SHAKE. Empty = AUTO.
+		if line.size() > 31 and not line[31].strip_edges().is_empty():
+			enemy.hit_reaction = line[31].strip_edges().to_upper()
 
 		# Load 3D GLB mesh
 		if not enemy.model_path.is_empty() and ResourceLoader.exists(enemy.model_path):

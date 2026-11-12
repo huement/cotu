@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://ddr06t2cc7vvd"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_hazard_cleaner_mat.tres" id="1_43r4r"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-j.glb" id="2_nb4l5"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_vjs05"]
+[ext_resource type="Material" uid="uid://biwxp1y0qp2np" path="res://resources/Enemies/Kenny/Materials/en_hazard_cleaner_mat.tres" id="1_43r4r"]
+[ext_resource type="PackedScene" uid="uid://dcw600hl4mocc" path="res://resources/Enemies/Kenny/character-j.glb" id="2_nb4l5"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_vjs05"]
 
 [resource]
 script = ExtResource("3_vjs05")
@@ -19,7 +19,7 @@ max_health = 70
 current_health = 70
 attack_damage = 18
 defense = 6
-speed = 7.5
+speed = 12.0
 initiative_speed = 9
 attack_element = 0
 movement_speed = 0.9

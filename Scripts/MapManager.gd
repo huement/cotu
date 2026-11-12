@@ -8,7 +8,13 @@ class_name MapManager
 ## over a river/water cell makes that cell walkable.
 var bridge_grid: GridMap = null
 @export var active_map_instance: Node3D
+## DEV START map. Only used when "Dev Start Override" below is on; a normal game always
+## begins on GameState.NEW_GAME_MAP (or wherever the save was made).
 @export var default_map_scene: PackedScene
+## DEV START switch. ON: running the project (in the editor) skips the main menu and drops the
+## test party (Data/default_save.tres) on "Default Map Scene". OFF: the game starts at the main
+## menu like it does for a player. Ignored in exported builds - those always start at the menu.
+@export var dev_start_override: bool = false
 @export var ceiling_tile_scene: PackedScene = preload("res://Scenes/CeilingTile.tscn") 
 @export var ceiling_height: float = 2.0
 @export var default_bgm_track: String = "Environment/forest-creepy"
@@ -43,18 +49,40 @@ var _blocked_tiles: Dictionary = {}
 var _pending_grid_blocks: Array = []
 var _is_installing_map: bool = false
 var _level_title_token: int = 0
+## Dev start: open default_map_scene instead of the normal start map.
+var _use_dev_map: bool = false
+## The world was opened without a session; the main menu is about to replace it.
+var _leaving_for_menu: bool = false
+
+## Runs before any _ready() in the world (HUD, Player), so the party is in place when they start.
+func _enter_tree() -> void:
+	_leaving_for_menu = false
+	var dev_allowed: bool = dev_start_override and OS.has_feature("editor")
+	if GameState.session_active:
+		_use_dev_map = dev_allowed and GameState.dev_session
+	elif dev_allowed:
+		GameState.begin_dev_session()
+		_use_dev_map = true
+	else:
+		# World opened without a session (e.g. "Run Current Scene" with dev start off): go to the menu.
+		_leaving_for_menu = true
+		get_tree().change_scene_to_file.call_deferred(SessionFlow.MAIN_MENU_SCENE)
+
 
 func _ready() -> void:
+	if _leaving_for_menu:
+		return
+	var start_map: PackedScene = default_map_scene if _use_dev_map and default_map_scene != null else load(GameState.NEW_GAME_MAP) as PackedScene
 	var saved: Dictionary = GameState.consume_pending_location() if is_instance_valid(GameState) else {}
 	var saved_path: String = str(saved.get("map_scene_path", ""))
 	if not saved_path.is_empty() and ResourceLoader.exists(saved_path):
 		# Continue a save: open the map the party was on, then put them back on their tile.
 		switch_map(saved_path)
 		_restore_saved_position.call_deferred(saved)
-	elif default_map_scene:
+	elif start_map:
 		if not saved_path.is_empty():
 			push_warning("MapManager: saved map '%s' is missing - starting on the default map." % saved_path)
-		switch_map_from_resource(default_map_scene)
+		switch_map_from_resource(start_map)
 	else:
 		_resolve_active_wall_map()
 
@@ -97,6 +125,13 @@ func switch_map(scene_path: String) -> void:
 func _unload_active_map() -> void:
 	if not is_instance_valid(active_map_instance):
 		return
+	# Stop outdoor day/night before the map is freed — it was retargeted at the root
+	# WorldEnvironment and would keep rewriting ambient (and fight the next map's fog).
+	for child: Node in active_map_instance.get_children():
+		if child is DayNightCycle:
+			var cycle: DayNightCycle = child as DayNightCycle
+			cycle.set_process(false)
+			cycle.world_environment = null
 	var old_we: WorldEnvironment = _find_world_environment(active_map_instance)
 	if is_instance_valid(old_we):
 		active_map_instance.remove_child(old_we)
@@ -108,9 +143,9 @@ func _unload_active_map() -> void:
 	dungeon_grid = null
 
 
-## Godot only applies one WorldEnvironment. world.tscn also has one, so map fog/sky was
-## losing to the root (or to a deferred outdoor env). Keep a single active Environment on
-## the root WorldEnvironment, copied from the map; disable the map-local duplicate.
+## Godot only allows one WorldEnvironment in the active tree. world.tscn already has one, so
+## map fog/sky was losing to the root (or to a second empty map WE after a null-out). Copy the
+## map Environment onto the root, then remove the map-local WorldEnvironment entirely.
 func _sync_world_environment(map_instance: Node3D) -> void:
 	var root: Node = get_tree().current_scene
 	if not is_instance_valid(root):
@@ -120,9 +155,12 @@ func _sync_world_environment(map_instance: Node3D) -> void:
 	if not is_instance_valid(map_we) or map_we.environment == null:
 		return
 	if is_instance_valid(root_we):
-		root_we.environment = map_we.environment
-		map_we.environment = null
-	# Day/night on outdoor maps still holds a NodePath to the map WE — re-point it at root.
+		# Duplicate so DayNightCycle / unload can't mutate the packed scene SubResource, and so
+		# freeing the map WE never drops the active fog/sky settings.
+		root_we.environment = map_we.environment.duplicate() as Environment
+	map_instance.remove_child(map_we)
+	map_we.free()
+	# Day/night on outdoor maps still holds a NodePath to the (now-gone) map WE — re-point it.
 	_retarget_day_night_environment(map_instance, root_we)
 
 

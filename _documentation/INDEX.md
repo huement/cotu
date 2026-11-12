@@ -11,6 +11,7 @@ Start with repo-root **`AGENTS.md`**. Then open the page for your task:
 | [SKILLS_AND_SPELLS.md](SKILLS_AND_SPELLS.md) | Skill/spell data |
 | [ITEMS_AND_LOOT.md](ITEMS_AND_LOOT.md) | Items, loot tables |
 | [STATUS.md](STATUS.md) | Broader systems overview (some sections older than COMBAT_README) |
+| [LEVELING.md](LEVELING.md) | XP curves, level-up grants, skill/spell point cap |
 | [CAVE_LEVELS.md](CAVE_LEVELS.md) | Generated caves / transitions |
 | [DUNGEON_LEVELS.md](DUNGEON_LEVELS.md) | Room-part dungeons |
 | [OVERWORLD_TOPOLOGY.md](OVERWORLD_TOPOLOGY.md) | Outdoor map graph |

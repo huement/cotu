@@ -29,6 +29,7 @@
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="27_8fle0"]
 [ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="30_8r4xu"]
 [ext_resource type="Material" path="res://resources/Environment/pixel_sky.tres" id="90_pixelsky"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/ArcanumShard.tscn" id="99_arcshard"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_x4sae"]
 
@@ -214,3 +215,9 @@ play_new_area_sound = true
 transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, -72.37514, -0.13296247, 109.834366)
 prompt_message = "Make the long climb up to Gloom Reach?"
 target_scene = "uid://0kgrwvgkp7h5"
+
+[node name="ArcanumShard" parent="." instance=ExtResource("99_arcshard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52.098324, 0, 113.96077)
+shard_id = "stonetrail_blob"
+level_name = "Stone Trail"
+boss = NodePath("../Enemies/BlobMonsterBoss")

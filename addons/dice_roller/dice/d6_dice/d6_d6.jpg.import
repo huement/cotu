@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dkyah25mynlxf"
 path.s3tc="res://.godot/imported/d6_d6.jpg-d87da70fefa3338e061d2ced32885b2f.s3tc.ctex"
+path.etc2="res://.godot/imported/d6_d6.jpg-d87da70fefa3338e061d2ced32885b2f.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://addons/dice_roller/dice/d6_dice/d6_d6.jpg"
-dest_files=["res://.godot/imported/d6_d6.jpg-d87da70fefa3338e061d2ced32885b2f.s3tc.ctex"]
+dest_files=["res://.godot/imported/d6_d6.jpg-d87da70fefa3338e061d2ced32885b2f.s3tc.ctex", "res://.godot/imported/d6_d6.jpg-d87da70fefa3338e061d2ced32885b2f.etc2.ctex"]
 
 [params]
 

@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://b4iq124cp8n4d"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_zombie_knight_mat.tres" id="1_1fqw6"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-h.glb" id="2_iojnm"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_8axnh"]
+[ext_resource type="Material" uid="uid://d3jmhbtfeoc5u" path="res://resources/Enemies/Kenny/Materials/en_zombie_knight_mat.tres" id="1_1fqw6"]
+[ext_resource type="PackedScene" uid="uid://d2a68umwkb2qb" path="res://resources/Enemies/Kenny/character-h.glb" id="2_iojnm"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_8axnh"]
 
 [resource]
 script = ExtResource("3_8axnh")

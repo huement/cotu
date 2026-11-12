@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://cts8emds4lj1h"]
+[gd_scene load_steps=24 format=3 uid="uid://cts8emds4lj1h"]
 
 [ext_resource type="MeshLibrary" uid="uid://w6j6ksydupt" path="res://resources/mesh_library/knature_mesh_library.tres" id="1_u2be4"]
 [ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_bgb78"]
@@ -7,10 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://crhntawb0lghi" path="res://Scenes/Environment/forest_wall_chunk_thick.tscn" id="5_yi8a0"]
 [ext_resource type="PackedScene" uid="uid://cqjyi71f838u1" path="res://Scenes/Objects/BigTimber.tscn" id="6_kvfaw"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="8_wq7t2"]
-[ext_resource type="PackedScene" uid="uid://ekckcrvvkuqm" path="res://resources/OutdoorParts/low_poly_cloud.glb" id="10_snr3j"]
-[ext_resource type="PackedScene" uid="uid://bpn2rvnvip8cv" path="res://resources/OutdoorParts/low_poly_cloud-2.glb" id="11_h1ldq"]
-[ext_resource type="PackedScene" uid="uid://wlg457v4s706" path="res://resources/OutdoorParts/low_poly_cloud-3.glb" id="12_0t46o"]
-[ext_resource type="PackedScene" uid="uid://bjfj4qtvjfvc2" path="res://resources/OutdoorParts/low_poly_cloud-4.glb" id="13_2asg2"]
 [ext_resource type="Script" uid="uid://c7mly1i66aig7" path="res://Scripts/Environment/day_night_cycle.gd" id="14_2jxoq"]
 [ext_resource type="PackedScene" uid="uid://buh6wg8d1ecdd" path="res://resources/OutdoorParts/moon.glb" id="15_56dvm"]
 [ext_resource type="Script" uid="uid://l05eb00qic0y" path="res://Scripts/Environment/grass_scatter.gd" id="16_gq866"]
@@ -20,8 +16,8 @@
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="20_m081q"]
 [ext_resource type="Script" uid="uid://b44ueltiggy42" path="res://Scripts/Environment/return_visit_enemy_spawner.gd" id="23_6wabc"]
 [ext_resource type="PackedScene" uid="uid://d24vqh5un81gu" path="res://Scenes/Enemies/SlimeDroneWorldEnemy.tscn" id="24_rx45y"]
-[ext_resource type="Material" path="res://resources/Environment/pixel_sky_overcast.tres" id="90_pixelsky"]
-[ext_resource type="Script" path="res://Scripts/Triggers/NineVoiceTrigger.gd" id="26_nine"]
+[ext_resource type="Script" uid="uid://ctyy4md0lu267" path="res://Scripts/Triggers/NineVoiceTrigger.gd" id="26_nine"]
+[ext_resource type="Material" uid="uid://bggklltd1x1f4" path="res://resources/Environment/pixel_sky_overcast.tres" id="90_pixelsky"]
 
 [sub_resource type="Sky" id="Sky_wy3s8"]
 sky_material = ExtResource("90_pixelsky")
@@ -188,7 +184,7 @@ particle_color = Color(0.94, 1.01, 0.77, 0.4)
 
 [node name="GroundMist" type="CPUParticles3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.397026, 0.4, -4)
 amount = 40
 lifetime = 8.0
 mesh = SubResource("QuadMesh_8d7nh")
@@ -209,7 +205,6 @@ moon_rotation_degrees = Vector3(0, 180, 0)
 day_ambient = Color(0.28, 0.34, 0.3, 1)
 night_ambient = Color(0.03, 0.04, 0.07, 1)
 day_ambient_energy = 0.45
-day_background_energy = 1.0
 
 [node name="MoonLight" type="DirectionalLight3D" parent="DayLightCycle"]
 light_color = Color(0.665, 0.798, 1, 1)
@@ -233,7 +228,6 @@ prompt_text = "Leave Green Grove and enter the FEROSHAW crossroads?"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.87, 1, 8.5)
 script = ExtResource("26_nine")
 object_id = "green_grove_nine_intro"
-clip_basename = "intro"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NineIntroTrigger"]
 shape = SubResource("BoxShape3D_nine_intro")
@@ -241,7 +235,6 @@ shape = SubResource("BoxShape3D_nine_intro")
 [node name="LevelTitle" parent="." instance=ExtResource("20_m081q")]
 level_title = "Green
 Grove"
-play_new_area_sound = true
 
 [node name="ReturnVisitEnemySpawner" type="Node3D" parent="." node_paths=PackedStringArray("floor_map", "wall_maps", "spawn_point")]
 script = ExtResource("23_6wabc")

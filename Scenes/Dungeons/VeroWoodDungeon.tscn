@@ -36,6 +36,7 @@
 [ext_resource type="Script" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="34_b4mmq"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnZombieSaber.tres" id="35_bf1fs"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnOculatStriker.tres" id="36_gyffx"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/ArcanumShard.tscn" id="99_arcshard"]
 
 [sub_resource type="Environment" id="Environment_thwxb"]
 background_mode = 1
@@ -334,3 +335,9 @@ script = ExtResource("32_evtbc")
 data = ExtResource("35_bf1fs")
 model_scale = Vector3(1, 1, 1)
 vertical_offset = -1.0
+
+[node name="ArcanumShard" parent="." instance=ExtResource("99_arcshard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67, 0, -21)
+shard_id = "verowood_dungeon"
+level_name = "Vero Wood Dungeon"
+boss = NodePath("../Rooms/BossChamber/Boss")

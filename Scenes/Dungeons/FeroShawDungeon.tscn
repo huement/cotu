@@ -36,6 +36,7 @@
 [ext_resource type="Resource" path="res://Data/Enemies/EnRageWraith.tres" id="34_l48px"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnSlimeDrone.tres" id="35_bq6t7"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="36_leveltitle"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/ArcanumShard.tscn" id="99_arcshard"]
 
 [sub_resource type="Environment" id="Environment_k5fg6"]
 background_mode = 1
@@ -152,6 +153,7 @@ decor_chance = 1.0
 [node name="Boss" type="Node3D" parent="Rooms/BossChamber" instance=ExtResource("12_h2q7h")]
 script = ExtResource("13_sics0")
 default_facing = 3
+rush_on_room_enter = true
 minion_data = ExtResource("14_nijsx")
 data = ExtResource("15_b01b3")
 model_scale = Vector3(1, 1, 1)
@@ -344,3 +346,9 @@ vertical_offset = -1.0
 level_title = "Fero Shaw
 Dungeon Btm"
 play_new_area_sound = true
+
+[node name="ArcanumShard" parent="." instance=ExtResource("99_arcshard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 0, -45)
+shard_id = "feroshaw_dungeon"
+level_name = "Fero Shaw Dungeon"
+boss = NodePath("../Rooms/BossChamber/Boss")

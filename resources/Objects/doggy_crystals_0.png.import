@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b05vmq3xidy07"
 path.s3tc="res://.godot/imported/doggy_crystals_0.png-aff823181d59c1bd26d03620d031be81.s3tc.ctex"
+path.etc2="res://.godot/imported/doggy_crystals_0.png-aff823181d59c1bd26d03620d031be81.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/Objects/doggy_crystals_0.png"
-dest_files=["res://.godot/imported/doggy_crystals_0.png-aff823181d59c1bd26d03620d031be81.s3tc.ctex"]
+dest_files=["res://.godot/imported/doggy_crystals_0.png-aff823181d59c1bd26d03620d031be81.s3tc.ctex", "res://.godot/imported/doggy_crystals_0.png-aff823181d59c1bd26d03620d031be81.etc2.ctex"]
 
 [params]
 

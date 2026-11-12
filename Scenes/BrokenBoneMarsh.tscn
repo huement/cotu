@@ -28,6 +28,7 @@
 [ext_resource type="Script" uid="uid://464km5lxyytl" path="res://Scripts/Environment/night_enemy_spawner.gd" id="92_nightspawn"]
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/BeastWorldEnemy.tscn" id="93_beastworld"]
 [ext_resource type="Material" path="res://resources/Environment/pixel_sky_overcast.tres" id="90_pixelsky"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/ArcanumShard.tscn" id="99_arcshard"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tg5oy"]
 
@@ -443,3 +444,9 @@ density_tile_ratio = 1500
 max_enemies = 7
 min_enemy_spacing = 14.0
 player_safe_radius = 16.0
+
+[node name="ArcanumShard" parent="." instance=ExtResource("99_arcshard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.75, 0, 58.94)
+shard_id = "brokenbonemarsh_beast"
+level_name = "Broken Bone Marsh"
+boss = NodePath("../BeastKing")

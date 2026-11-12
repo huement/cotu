@@ -45,3 +45,5 @@ const CURRENT_VERSION: int = 2
 @export var time_period: String = "MORNING"
 ## Total time played, in seconds.
 @export var play_time_seconds: float = 0.0
+## Arcanum Shards the party holds: shard_id -> { "level", "map_id" } (see ShardLedger).
+@export var collected_shards: Dictionary = {}

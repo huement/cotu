@@ -17,6 +17,7 @@ max_health = 75
 current_health = 75
 attack_damage = 20
 defense = 15
+speed = 12.0
 initiative_speed = 13
 attack_element = 2
 equipped_weapon_id = "wpn_plasma_katana"

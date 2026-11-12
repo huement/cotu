@@ -19,6 +19,8 @@ var _voice_player: AudioStreamPlayer
 var _active_enemy_loops: Dictionary = {}
 var _is_in_combat: bool = false
 var _current_bgm_request: Variant = null
+## resource_path of the track currently assigned to _bgm_player (for same-track checks after duplicate).
+var _current_bgm_path: String = ""
 
 var _is_left_foot: bool = true
 
@@ -123,16 +125,26 @@ func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true) -
 			return
 
 	if is_instance_valid(stream):
-		if _bgm_player.stream != stream or not _bgm_player.is_playing():
-			_bgm_player.stream = stream
-			_bgm_player.play()
-			GameLogger.combat("BGM playing successfully: %s" % stream.resource_path)
+		var track_path: String = stream.resource_path
+		if track_path == _current_bgm_path and _bgm_player.is_playing():
+			return
+		# Own a looping copy so BGM doesn't mutate the cached import used elsewhere.
+		var play_stream: AudioStream = stream.duplicate() as AudioStream
+		if play_stream != null and "loop" in play_stream:
+			play_stream.set("loop", true)
+		else:
+			play_stream = stream
+		_current_bgm_path = track_path
+		_bgm_player.stream = play_stream
+		_bgm_player.play()
+		GameLogger.combat("BGM playing successfully: %s" % track_path)
 
 
 ## Stops the currently playing background music.
 func stop_bgm() -> void:
 	if is_instance_valid(_bgm_player) and _bgm_player.is_playing():
 		_bgm_player.stop()
+	_current_bgm_path = ""
 
 
 ## Plays looping ambient environmental audio (e.g., "ghost", "dungeon_wind") without touching BGM.
@@ -241,9 +253,13 @@ func play_enemy_sound(enemy_sound_file_name: String) -> void:
 # ==============================================================================
 # BATTLE MUSIC OVERRIDES
 # ==============================================================================
-func play_battle_music() -> void:
+const BATTLE_MUSIC_PATH: String = "Environment/dungeon-battle"
+const BOSS_MUSIC_PATH: String = "Enemies_Boss/boss_music"
+
+
+func play_battle_music(is_boss_fight: bool = false) -> void:
 	# Pass false so _current_bgm_request is not overwritten
-	play_bgm("Environment/dungeon-battle", false)
+	play_bgm(BOSS_MUSIC_PATH if is_boss_fight else BATTLE_MUSIC_PATH, false)
 
 
 func stop_battle_music() -> void:
@@ -256,9 +272,33 @@ func stop_battle_music() -> void:
 func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array, _enemy_facing: String) -> void:
 	_is_in_combat = true
 	stop_all_enemy_loops()
-	play_battle_music()
+	play_battle_music(_is_boss_combat(_enemy_data_or_group))
 	if _combat_has_enemy_type(_enemy_data_or_group, "zombie") and randi() % 5 == 0:
 		play_enemy_sound("zombie_surprise")
+
+
+func _is_boss_combat(data: Variant) -> bool:
+	# BossEnemy / BlobBoss / TentacleBoss register rewards just before combat_started.
+	if is_instance_valid(GameState) and not GameState.pending_boss_rewards.is_empty():
+		return true
+	return _combat_has_boss_mark(data)
+
+
+func _combat_has_boss_mark(data: Variant) -> bool:
+	if data is Array:
+		for entry: Variant in data:
+			if _combat_has_boss_mark(entry):
+				return true
+		return false
+	# Matches CombatFormation.BOSS_META ("combat_is_boss") without coupling this autoload to it.
+	if data is Resource and (data as Resource).has_meta(&"combat_is_boss") and bool((data as Resource).get_meta(&"combat_is_boss")):
+		return true
+	if data is Object and is_instance_valid(data):
+		for field: String in ["enemies", "enemy_list", "members", "enemy_group"]:
+			var sub: Variant = data.get(field)
+			if sub is Array and _combat_has_boss_mark(sub):
+				return true
+	return false
 
 
 func _combat_has_enemy_type(data: Variant, type_key: String) -> bool:

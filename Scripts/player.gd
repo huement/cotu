@@ -57,6 +57,12 @@ var is_movement_locked: bool = false
 var battle_position_override: bool = false
 var _last_proximity_tier: int = 0
 
+## Heavy enemies whose footsteps shake the camera when they're in range (enemy_type keys).
+const HEAVY_ENEMY_TYPES: Array[String] = ["beast", "minotaur"]
+## Camera trauma per proximity check: nearby (yellow, 3-5 tiles) and close (red, 1-2 tiles).
+const HEAVY_SHAKE_NEARBY: float = 0.25
+const HEAVY_SHAKE_CLOSE: float = 0.4
+
 func _ready() -> void:
 	add_to_group(&"player") # Ensures WorldEnemy can locate player's current_grid_pos
 	call_deferred("_initialize_player")
@@ -741,6 +747,7 @@ func _update_bridge_camera(grid_pos: Vector3i, animate: bool) -> void:
 func _check_enemy_proximity() -> void:
 	var nearby_enemy_types: Array[String] = []
 	var min_grid_dist: int = 999
+	var min_heavy_dist: int = 999
 
 	var enemy_nodes: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
 	if enemy_nodes.is_empty():
@@ -779,6 +786,9 @@ func _check_enemy_proximity() -> void:
 			elif "enemy_data" in enemy_node and is_instance_valid(enemy_node.get("enemy_data")):
 				e_type = str(enemy_node.get("enemy_data").get("enemy_type")).to_lower()
 
+			if HEAVY_ENEMY_TYPES.has(e_type) and grid_dist < min_heavy_dist:
+				min_heavy_dist = grid_dist
+
 			if not e_type.is_empty() and not nearby_enemy_types.has(e_type):
 				nearby_enemy_types.append(e_type)
 
@@ -801,6 +811,11 @@ func _check_enemy_proximity() -> void:
 	if get_tree().root.has_node("SignalBus"):
 		GameLogger.combat("ALERT PROXIMITY %d TIER %d" % [min_grid_dist, current_tier])
 		SignalBus.enemy_proximity_changed.emit(min_grid_dist, current_tier)
+		# Heavy enemies (beasts, minotaurs) rattle the camera: a little when nearby, more when close.
+		if min_heavy_dist <= 2:
+			SignalBus.camera_shake_requested.emit(HEAVY_SHAKE_CLOSE)
+		elif min_heavy_dist <= 5:
+			SignalBus.camera_shake_requested.emit(HEAVY_SHAKE_NEARBY)
 
 
 ## Re-initializes GridMap references, spawn point, facing, and camera eye height when a map changes.

@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwhtxl7wl5072"
 path.s3tc="res://.godot/imported/rock_tentacle_0.png-0e16ea5dbe133832ca8b1f9ccf61530d.s3tc.ctex"
+path.etc2="res://.godot/imported/rock_tentacle_0.png-0e16ea5dbe133832ca8b1f9ccf61530d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/Enemies/rock_tentacle_0.png"
-dest_files=["res://.godot/imported/rock_tentacle_0.png-0e16ea5dbe133832ca8b1f9ccf61530d.s3tc.ctex"]
+dest_files=["res://.godot/imported/rock_tentacle_0.png-0e16ea5dbe133832ca8b1f9ccf61530d.s3tc.ctex", "res://.godot/imported/rock_tentacle_0.png-0e16ea5dbe133832ca8b1f9ccf61530d.etc2.ctex"]
 
 [params]
 

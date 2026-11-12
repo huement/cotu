@@ -141,6 +141,7 @@ Duration = the larger of the status's `duration` and the ability's duration.
 
 **Enemy** (`EnemyData`)
 - **Attack** = `attack_damage` · **Defense** = `defense` · **Speed** = `speed`
+- At battle start, ATK and `magic_power` are multiplied by a **level band** from `base_level` (`CombatMath.enemy_level_damage_mult`): L1–3 ×1.2 · L4–6 ×1.4 · L7+ ×1.5. Sheet values stay as authored; this is applied in `CombatManager._build_enemy_combatant`.
 - `weakness_element`: hits of that type do ×1.5 (MAGIC = every spell)
 - `magic_resist`: fraction of spell damage ignored (magic defense)
 - `attack_element`: its physical attack type (BLADE/BASH/RANGED)
@@ -204,6 +205,18 @@ Listeners: the HUD hides, EnemyVisualManager clears models, world enemies/bosses
 The slice only plays for physical hits on the party, and BLADE hits on enemies (plus every hit in water fights). Each new slice restarts the shader cleanly.
 
 **FP weapon clip vs hit spark:** `ItemData.swing_anim` (CSV `swing_anim`, e.g. `katana_swing`) overrides the type-default swing when that weapon is equipped. `ItemData.attack_vfx` stays a `SpriteFrames` path for on-hit target sparks — do not put anim names there.
+
+---
+
+### Enemy hit reaction
+
+When `enemy_damaged_visual` fires, `EnemyVisualManager._play_hit_reaction()` decides how the model reacts:
+
+- Models with a `VisualJuice` node (blobs, tentacle boss, lake monster, Slime Lord, Beast King) keep their own `play_hit_shake()`.
+- Every other model flashes white once (`Scripts/3D/EnemyHitReaction.gd`), then plays its own hurt/hit clip if it has one (aliases in `ANIM_MAPPINGS[&"damage"]`), otherwise it is shaken in code. A model with no hurt clip never falls back to another clip (the Minotaur used to play its attack).
+- Per-enemy override: `EnemyData.hit_reaction` = `AUTO` (default) / `CLIP` / `SHAKE`, also the optional last column `hit_reaction` in `Data/Enemies.csv`. `SHAKE` forces the code shake even when a clip exists.
+
+Flash colour/time and shake strength/time are constants at the top of `EnemyHitReaction.gd`.
 
 ---
 
