@@ -42,6 +42,7 @@ func _ready() -> void:
 	visible = false
 	if is_instance_valid(overlay_panel):
 		overlay_panel.visible = false
+		KeyboardModal.attach(overlay_panel, _on_close_pressed)
 
 	if is_instance_valid(close_button) and not close_button.pressed.is_connected(_on_close_pressed):
 		close_button.pressed.connect(_on_close_pressed)

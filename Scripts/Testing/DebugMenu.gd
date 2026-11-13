@@ -3,17 +3,16 @@ extends CanvasLayer
 ## Debug menu (autoload "DebugMenu"). Editor / debug builds only: in an exported release build it frees
 ## itself on start, so players never see it.
 ##
-## Open / close: ` (backtick, TOGGLE_KEY). The game pauses while it's open. This is the ONE debug hotkey -
-## the old BattleTest keys (B / N / H / V / L) are buttons in here now.
+## Open / close: ` (backtick, TOGGLE_KEY). The game pauses while it's open. This is the only debug hotkey.
 ##   WORLD      jump to an overworld map, at any of its spawn / arrival markers
 ##   DUNGEONS   jump to any dungeon floor
 ##   CAVES      jump to any cave floor
 ##   LEVEL UP   level up one party member (or everyone) through the real level-up path
 ##   PARTY      full heal + revive, +1000 gold, give any item, set the time of day, save now
+##   WEATHER    roll in a thunderstorm, clear weather, force a lightning flash (outdoors only)
 ##   DISPLAY    preview the touch-screen HUD (MobileHUD) on desktop
-##   BATTLE     BATTLE TEST ARENA (Scenes/Dungeons/BattleTestArena.tscn; any exit there returns you to
-##              where you were - MapTransition.set_return_point), test encounters / end battle (Scripts/Testing/BattleTest.gd, node "BattleTester" in world.tscn),
-##              Nine voice test; OPEN BATTLE TESTER appears once BattleTest.gd has open_debug_panel()
+##   BATTLE     Battle Test Arena (Scenes/Dungeons/BattleTestArena.tscn; any exit there returns you to
+##              where you were via MapTransition.set_return_point), end a running battle, Nine voice test
 ##
 ## Jumps use MapTransition.travel (same as a stone gate: swaps the map, places the party, autosaves).
 ## They need the game world (world.tscn) to be running - not available on the main menu or in battle.
@@ -35,6 +34,7 @@ const WORLD_MAPS: Array[Array] = [
 	["Vero Wood", "res://Scenes/VeroWood.tscn"],
 	["Gloom Reach", "res://Scenes/GloomReach.tscn"],
 	["Broken Bone Marsh", "res://Scenes/BrokenBoneMarsh.tscn"],
+	["Castle Hollow", "res://Scenes/CastleHollow.tscn"],
 	["Stone Trail", "res://Scenes/StoneTrail.tscn"],
 ]
 
@@ -68,8 +68,6 @@ var _status: Label
 var _was_paused: bool = false
 var _party_pick: OptionButton
 var _open_level_screen: CheckBox
-var _battle_box: VBoxContainer
-var _open_tester_button: Button
 var _item_pick: OptionButton
 var _item_qty: SpinBox
 var _mobile_toggle: CheckButton
@@ -112,8 +110,6 @@ func open() -> void:
 	_was_paused = get_tree().paused
 	get_tree().paused = true
 	_refresh_party()
-	var bt: Node = _battle_tester()
-	_open_tester_button.visible = bt != null and bt.has_method(&"open_debug_panel")
 	var hud: DungeonHUD = _hud()
 	_mobile_toggle.disabled = hud == null or hud.mobile_hud == null
 	_mobile_toggle.set_pressed_no_signal(hud != null and hud.mobile_hud != null and hud.mobile_hud.enabled)
@@ -327,6 +323,37 @@ func _set_time(t: float, label: String) -> void:
 	_set_status("Time set to %s." % label)
 
 
+func _storm_in() -> void:
+	var problem: String = _jump_blocker()
+	if not problem.is_empty():
+		_set_status(problem, true)
+		return
+	# Close so the tree unpauses — WeatherController tweens need process time.
+	close()
+	SignalBus.storm_requested.emit(1.0, 5.0)
+	SignalBus.show_toast.emit("DEBUG: Storm rolling in (5s)", false)
+
+
+func _weather_clear() -> void:
+	var problem: String = _jump_blocker()
+	if not problem.is_empty():
+		_set_status(problem, true)
+		return
+	close()
+	SignalBus.weather_clear_requested.emit(8.0)
+	SignalBus.show_toast.emit("DEBUG: Clearing weather (8s)", false)
+
+
+func _force_lightning() -> void:
+	var problem: String = _jump_blocker()
+	if not problem.is_empty():
+		_set_status(problem, true)
+		return
+	close()
+	SignalBus.lightning_flash_requested.emit(1.0)
+	SignalBus.show_toast.emit("DEBUG: Lightning flash", false)
+
+
 ## Every ItemData .tres in ITEM_DIRS, sorted by file name.
 static func all_item_paths() -> PackedStringArray:
 	var paths: PackedStringArray = []
@@ -341,24 +368,8 @@ func _hud() -> DungeonHUD:
 
 
 # ==============================================================================
-# Battle tester (BattleTest.gd)
+# Battle helpers
 # ==============================================================================
-func _battle_tester() -> Node:
-	return get_tree().root.find_child("BattleTester", true, false)
-
-
-## Calls `method` on the BattleTester node if it has it.
-## BattleTest.gd can add an `open_debug_panel()` method; when it exists the menu shows an
-## OPEN BATTLE TESTER button that calls it.
-func _call_battle_tester(method: StringName) -> void:
-	var bt: Node = _battle_tester()
-	if bt == null or not bt.has_method(method):
-		_set_status("BattleTester node / %s() not found (it lives in world.tscn)." % method, true)
-		return
-	close()
-	bt.call(method)
-
-
 ## Stops the running battle like a retreat (no victory screen / rewards), so you're straight back to exploring.
 func _end_battle() -> void:
 	if not bool(CombatManager.get("is_combat_active")):
@@ -366,6 +377,16 @@ func _end_battle() -> void:
 		return
 	close()
 	SignalBus.combat_ended.emit(false)
+
+
+func _test_nine_voice() -> void:
+	var nine_hud: Node = get_tree().root.find_child("NineHud", true, false)
+	if nine_hud == null or not nine_hud.has_method("make_nine_talk"):
+		_set_status("NineHud not found (start the game world first).", true)
+		return
+	close()
+	nine_hud.call("make_nine_talk", "cant-sleep-here")
+	_set_status("Nine voice: cant-sleep-here")
 
 
 # ==============================================================================
@@ -475,6 +496,15 @@ func _build() -> void:
 	for t: Array in TIMES:
 		times.add_child(_tool_button(str(t[0]).to_upper(), CreationUI.GREY, _set_time.bind(float(t[1]), str(t[0]))))
 
+	# Weather (outdoors — WeatherController ignores these indoors)
+	col.add_child(_section_title("WEATHER"))
+	var weather := HBoxContainer.new()
+	weather.add_theme_constant_override("separation", 6)
+	col.add_child(weather)
+	weather.add_child(_tool_button("STORM IN", CreationUI.GREEN, _storm_in))
+	weather.add_child(_tool_button("CLEAR", CreationUI.GREY, _weather_clear))
+	weather.add_child(_tool_button("LIGHTNING", CreationUI.YELLOW, _force_lightning))
+
 	# Display
 	col.add_child(_section_title("DISPLAY"))
 	_mobile_toggle = CheckButton.new()
@@ -490,26 +520,21 @@ func _build() -> void:
 		_set_status("Mobile HUD %s (mouse acts as a finger on the D-pad)." % ("on" if on else "off")))
 	col.add_child(_mobile_toggle)
 
-	# Battle (BattleTest.gd on the BattleTester node)
+	# Battle (arena lives at Scenes/Dungeons/BattleTestArena.tscn)
 	col.add_child(_section_title("BATTLE"))
-	_battle_box = VBoxContainer.new()
-	_battle_box.add_theme_constant_override("separation", 6)
-	col.add_child(_battle_box)
+	var battle_box := VBoxContainer.new()
+	battle_box.add_theme_constant_override("separation", 6)
+	col.add_child(battle_box)
 	var arena: Button = CreationUI.small_button("BATTLE TEST ARENA", CreationUI.PINK)
 	arena.custom_minimum_size = Vector2(0, 38)
 	arena.tooltip_text = "Go to the arena; any exit there brings you back to where you were."
 	arena.pressed.connect(_go_to_arena)
-	_battle_box.add_child(arena)
-	_open_tester_button = CreationUI.small_button("OPEN BATTLE TESTER", CreationUI.PINK)
-	_open_tester_button.pressed.connect(_call_battle_tester.bind(&"open_debug_panel"))
-	_battle_box.add_child(_open_tester_button)
+	battle_box.add_child(arena)
 	var fights := HBoxContainer.new()
 	fights.add_theme_constant_override("separation", 6)
-	_battle_box.add_child(fights)
-	fights.add_child(_tool_button("MIXED FIGHT", CreationUI.PINK, _call_battle_tester.bind(&"_toggle_combat_encounter")))
-	fights.add_child(_tool_button("GHOST FIGHT", CreationUI.PINK, _call_battle_tester.bind(&"_trigger_ghost_encounter")))
+	battle_box.add_child(fights)
 	fights.add_child(_tool_button("END BATTLE", CreationUI.RED, _end_battle))
-	_battle_box.add_child(_tool_button("NINE VOICE TEST", CreationUI.GREY, _call_battle_tester.bind(&"_test_nine_hud")))
+	fights.add_child(_tool_button("NINE VOICE TEST", CreationUI.GREY, _test_nine_voice))
 
 
 func _tool_button(text: String, accent: Color, action: Callable) -> Button:

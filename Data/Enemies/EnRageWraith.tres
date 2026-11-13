@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bnto3o8v1gspo"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://dw31h77gy0ytl"]
 
 [ext_resource type="Material" uid="uid://donolkord1605" path="res://resources/Enemies/Kenny/Materials/en_rage_wraith_mat.tres" id="1_cgoab"]
 [ext_resource type="PackedScene" uid="uid://cxvj28bx34438" path="res://resources/Enemies/Kenny/character-c.glb" id="2_qj1hm"]
@@ -14,10 +14,12 @@ texture_path = "res://resources/Enemies/Kenny/texture-c.png"
 model_scene = ExtResource("2_qj1hm")
 custom_material = ExtResource("1_cgoab")
 model_scale = Vector3(1, 1, 1)
+hit_reaction = "holding-both-shoot"
 base_level = 2
-max_health = 42
-current_health = 42
-attack_damage = 10
+max_health = 70
+current_health = 70
+attack_damage = 12
+defense = 5
 speed = 13.0
 initiative_speed = 13
 attack_element = 1
@@ -29,5 +31,5 @@ max_group_size = 4
 aggro_range_tiles = 6
 can_surprise_player = true
 can_be_surprised = false
-xp_value = 120
-gold_value = 0
+xp_value = 140
+gold_value = 10

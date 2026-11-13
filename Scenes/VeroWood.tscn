@@ -228,13 +228,13 @@ script = ExtResource("18_f7xvt")
 target_dungeon_scene = "uid://bo4mhc5u2lpss"
 prompt_text = "Walk through the stone gate and head into the FEROSHAW ?"
 
-[node name="StoneGate_WitchHollow" parent="." instance=ExtResource("17_orusf")]
+[node name="StoneGate_CastleHollow" parent="." instance=ExtResource("17_orusf")]
 transform = Transform3D(-2, 0, -1.7484555e-07, 0, 2, 0, 1.7484555e-07, 0, -2, 59.202747, 0, -11.546011)
 script = ExtResource("18_f7xvt")
-target_dungeon_scene = ""
-prompt_text = "Walk through the dark gate and head into the WITCH HOLLOW ?"
-locked_message = "This area is not part of the current demo."
-locked_title = "Not In The Demo"
+target_dungeon_scene = "res://Scenes/CastleHollow.tscn"
+prompt_text = "Walk through the dark gate and head into the CASTLE HOLLOW?"
+required_level = 4
+underleveled_message = "Castle Hollow is still under construction... "
 
 [node name="Enemies" type="Node3D" parent="."]
 
@@ -284,4 +284,3 @@ snap_to_floor_center = false
 [node name="LevelTitle" parent="." instance=ExtResource("25_p6bkk")]
 level_title = "Vero
 Wood"
-play_new_area_sound = true

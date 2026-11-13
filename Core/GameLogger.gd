@@ -65,8 +65,11 @@ func _dispatch_log(prefix: String, message: String, color_name: String) -> void:
 	var formatted_time: String = Time.get_time_string_from_system()
 	var full_text: String = "[%s] %s %s" % [formatted_time, prefix, message]
 
-	# 1. Console Rich Output (Colorized in Godot Editor Output Dock)
-	print_rich("[color=%s]%s[/color]" % [color_name, full_text])
+	# 1. Console Rich Output (Colorized in Godot Editor Output Dock).
+	# Skipped in release exports: console writes are costly on mobile and nobody reads them.
+	# Errors always print so crash reports still have context.
+	if OS.is_debug_build() or color_name == "red":
+		print_rich("[color=%s]%s[/color]" % [color_name, full_text])
 
 	# 2. Route to SignalBus for In-Game Combat Log UI windows
 	var sb: Node = SignalBus

@@ -220,19 +220,19 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 41, 
 [node name="Chests" type="Node3D" parent="."]
 
 [node name="Chest1" parent="Chests" instance=ExtResource("17_hx4r6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 0, 9)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 33, 0, 9)
 guaranteed_items = Array[ExtResource("19_ra2m7")]([ExtResource("20_whrha"), ExtResource("20_whrha"), ExtResource("21_06nci")])
 gold_amount = 60
 object_id = "feroshawdungeon_upper_chest_1"
 
 [node name="Chest2" parent="Chests" instance=ExtResource("17_hx4r6")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -21, 0, -19)
+transform = Transform3D(-2.18557e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.18557e-08, -21, 0, -19)
 guaranteed_items = Array[ExtResource("19_ra2m7")]([ExtResource("23_ldq2f"), ExtResource("19_ea3qp")])
 gold_amount = 90
 object_id = "feroshawdungeon_upper_chest_2"
 
 [node name="Chest3" parent="Chests" instance=ExtResource("17_hx4r6")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -23, 0, -11)
+transform = Transform3D(-0.5, 0, -4.37114e-08, 0, 0.5, 0, 4.37114e-08, 0, -0.5, -23, 0, -11)
 guaranteed_items = Array[ExtResource("19_ra2m7")]([ExtResource("25_0fy7g"), ExtResource("19_ea3qp"), ExtResource("19_ea3qp")])
 gold_amount = 120
 object_id = "feroshawdungeon_upper_chest_3"

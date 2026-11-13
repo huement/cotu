@@ -67,6 +67,7 @@ func _ready() -> void:
 	visible = false
 	if is_instance_valid(overlay_panel):
 		overlay_panel.visible = false
+		KeyboardModal.attach(overlay_panel, close)
 
 	if is_instance_valid(confirm_button) and not confirm_button.pressed.is_connected(_on_confirm_pressed):
 		confirm_button.pressed.connect(_on_confirm_pressed)

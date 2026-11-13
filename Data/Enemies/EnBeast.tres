@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://vvx53rf818th"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://bsbmvkbhqeycv"]
 
 [ext_resource type="PackedScene" uid="uid://cvp5tl7sdodgi" path="res://resources/Enemies/beast.glb" id="1_cgssn"]
 [ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_iojrp"]

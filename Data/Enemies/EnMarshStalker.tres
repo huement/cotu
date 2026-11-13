@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://clyy5i3sf207l"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bpd3qp6ued54v"]
 
 [ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_marsh_stalker_mat.tres" id="1_tous0"]
 [ext_resource type="PackedScene" uid="uid://bi0m4yncpfaqr" path="res://resources/Enemies/Kenny/character-g.glb" id="2_dqwwl"]
@@ -13,6 +13,7 @@ texture_path = "res://resources/Enemies/Kenny/texture-g.png"
 model_scene = ExtResource("2_dqwwl")
 custom_material = ExtResource("1_tous0")
 model_scale = Vector3(1, 1, 1)
+hit_reaction = "holding-both-shoot"
 base_level = 4
 max_health = 75
 current_health = 75

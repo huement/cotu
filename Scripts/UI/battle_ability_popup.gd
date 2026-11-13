@@ -41,6 +41,8 @@ var _combatants_list: Array = []
 
 func _ready() -> void:
 	_close_popup()
+	if is_instance_valid(panel_container):
+		KeyboardModal.attach(panel_container, _on_keyboard_cancel)
 
 	if is_instance_valid(skills_tab_btn):
 		skills_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SKILLS))
@@ -644,6 +646,16 @@ func _confirm_and_emit_action() -> void:
 		GameLogger.combat("BattleAbilityPopup: Executed %s on target index %d" % [action_type, _selected_target_index])
 
 	_close_popup()
+
+
+## Esc: from the target page go back to the ability list, otherwise close.
+func _on_keyboard_cancel() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-close")
+	if _current_page == Page.TARGET_SELECT:
+		_go_to_ability_page()
+	else:
+		_close_popup()
 
 
 func _close_popup() -> void:

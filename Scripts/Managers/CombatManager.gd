@@ -1345,7 +1345,7 @@ func _finish_battle(victory: bool) -> void:
 		SignalBus.popup_requested.emit(&"BATTLE_VICTORY", victory_data)
 
 
-## Only reached when something OTHER than this manager emits combat_ended (e.g. BattleTest).
+## Only reached when something OTHER than this manager emits combat_ended (e.g. DebugMenu END BATTLE).
 ## By the time our own emit fires, is_combat_active is already false.
 func _on_combat_ended(_victory: bool) -> void:
 	if is_combat_active:

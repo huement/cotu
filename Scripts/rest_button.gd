@@ -5,3 +5,4 @@ extends "res://Scripts/UI/hud_toolbar_button.gd"
 
 func _init() -> void:
 	action_type = "REST"
+	input_action = &"party_rest"

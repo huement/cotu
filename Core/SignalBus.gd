@@ -99,3 +99,14 @@ signal proximity_alert_triggered(alert_level: int) # 0 = Safe, 1 = Nearby (Click
 
 ## An Arcanum Shard was collected (Scripts/Objects/ArcanumShard.gd -> ShardLedger.collect).
 signal shard_collected(shard_id: String, level_name: String)
+
+
+# --- Weather & Atmosphere ---
+## Emitted by map events, bosses, or scripts to roll a storm in or shift intensity (0.0 to 1.0).
+signal storm_requested(target_amount: float, duration_sec: float)
+## Emitted to gradually clear active weather back to baseline (storm_amount -> 0.0).
+signal weather_clear_requested(duration_sec: float)
+## Emitted by cutscenes or scripted strikes to force an immediate lightning bolt (0.0 to 1.0).
+signal lightning_flash_requested(intensity: float)
+## Emitted by WeatherController whenever storm_amount updates so overlays and UI stay in sync.
+signal weather_changed(storm_amount: float)

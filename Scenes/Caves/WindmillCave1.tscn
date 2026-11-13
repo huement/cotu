@@ -197,35 +197,35 @@ stat_multiplier = 0.9
 [node name="Chests" type="Node3D" parent="."]
 
 [node name="Chest1" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 19, 0, 13)
+transform = Transform3D(-0.5, 0, -4.37114e-08, 0, 0.5, 0, 4.37114e-08, 0, -0.5, 19, 0, 13)
 script = ExtResource("17_61cgl")
 guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("19_shy1t"), ExtResource("19_shy1t")])
 gold_amount = 30
 object_id = "windmill_cave_1_chest_1"
 
 [node name="Chest2" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 25, 0, 27)
+transform = Transform3D(-0.5, 0, -4.37114e-08, 0, 0.5, 0, 4.37114e-08, 0, -0.5, 25, 0, 27)
 script = ExtResource("17_61cgl")
 guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("20_4ki2i"), ExtResource("21_k3yxe")])
 gold_amount = 25
 object_id = "windmill_cave_1_chest_2"
 
 [node name="Chest3" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
-transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 51, 0, 27)
+transform = Transform3D(5.96244e-09, 0, -0.5, 0, 0.5, 0, 0.5, 0, 5.96244e-09, 51, 0, 27)
 script = ExtResource("17_61cgl")
 guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("19_shy1t"), ExtResource("22_syc0c")])
 gold_amount = 40
 object_id = "windmill_cave_1_chest_3"
 
 [node name="Chest4" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0, 13)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 39, 0, 13)
 script = ExtResource("17_61cgl")
 guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("23_v1kn6")])
 gold_amount = 35
 object_id = "windmill_cave_1_chest_4"
 
 [node name="Chest5" type="Node3D" parent="Chests" instance=ExtResource("16_ms35w")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 37)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 9, 0, 37)
 script = ExtResource("17_61cgl")
 guaranteed_items = Array[ExtResource("18_sjju0")]([ExtResource("24_fsb0c"), ExtResource("25_mqu67")])
 gold_amount = 50

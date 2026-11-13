@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://b3w7x0f6y2w7x"]
+[gd_scene load_steps=21 format=3 uid="uid://b3w7x0f6y2w7x"]
 
 [ext_resource type="Script" uid="uid://dc51atgdj7ays" path="res://Scripts/UI/character_sheet_menu.gd" id="1_vlp1k"]
 [ext_resource type="Texture2D" uid="uid://dh25qbke4twje" path="res://ui/blue-poly.png" id="2_7h3lb"]
@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://c81ul2rggbys7" path="res://ui/buttons/arrow_basic_w_small.png" id="9_pxip7"]
 [ext_resource type="Texture2D" uid="uid://dnukx0cx6acnm" path="res://ui/buttons/arrow_basic_e_small.png" id="10_op2n6"]
 [ext_resource type="Texture2D" uid="uid://dotmxsmumrixb" path="res://ui/HUD/downed_display.png" id="15_2nv42"]
+[ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="16_ggc3c"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7h3lb"]
 bg_color = Color(0.03137255, 0.0627451, 0.078431375, 1)
@@ -34,6 +35,13 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0, 0.7372549, 0.73333335, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7d7ln"]
+shader = ExtResource("16_ggc3c")
+shader_parameter/scanline_count = 184.454008761565
+shader_parameter/scanline_intensity = 0.110000005225
+shader_parameter/scan_speed = 0.6270000297825
+shader_parameter/vignette_intensity = 0.21600001026
 
 [node name="CharacterSheetMenu" type="CanvasLayer"]
 script = ExtResource("1_vlp1k")
@@ -405,3 +413,13 @@ offset_right = 596.0
 offset_bottom = 229.0
 mouse_filter = 2
 texture = ExtResource("15_2nv42")
+
+[node name="CRTShader" type="ColorRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_7d7ln")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

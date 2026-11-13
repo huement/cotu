@@ -5,7 +5,7 @@ extends EditorScript
 ##
 ##   VeroWood CryptHole -> VeroWoodDungeon_Upper (SpawnPoint)
 ##       ... crypt hole at the far end -> VeroWoodDungeon (SpawnPoint)
-##       ... boss chamber: Rage Wraith + Cyclops minions (same setup as dungeon_map) ->
+##       ... boss chamber: Rage Wraith + Cyclops minions ->
 ##           north gate back up to VeroWood
 ##   Each floor's entry stairs lead back up (Upper -> VeroWood, boss floor -> Upper's ExitArrival).
 ##
@@ -92,7 +92,7 @@ const LOWER: Dictionary = {
 	],
 	"has_boss": true,
 	"boss_id": BOSS_ID,
-	## Same kind of boss as Scenes/dungeon_map.tscn: Rage Wraith + two Cyclops.
+	## Rage Wraith + two Cyclops.
 	"boss_enemy": {
 		"data": "res://Data/Enemies/EnRageWraith.tres",
 		"minion_data": "res://Data/Enemies/EnScavengerCyclops.tres",

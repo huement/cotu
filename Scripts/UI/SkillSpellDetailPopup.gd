@@ -36,6 +36,8 @@ var _selected_target_cat: CatCharacter = null
 
 func _ready() -> void:
 	_hide_popup()
+	if panel_container:
+		KeyboardModal.attach(panel_container, _hide_popup)
 
 	if close_button and not close_button.pressed.is_connected(_hide_popup):
 		close_button.pressed.connect(

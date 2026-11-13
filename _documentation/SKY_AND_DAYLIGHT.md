@@ -15,7 +15,7 @@ Every outdoor map draws its sky with one shader, `Shaders/pixel_sky.gdshader`, a
 |---|---|
 | VeroWood, StoneTrail | `pixel_sky.tres` |
 | FeroShaw | `pixel_sky_feroshaw.tres` (sick overcast day; night unchanged) |
-| GreenGrove, BrokenBoneMarsh, GloomReach | `pixel_sky_overcast.tres` |
+| GreenGrove, BrokenBoneMarsh, GloomReach, CastleHollow | `pixel_sky_overcast.tres` |
 | Dungeons / caves | No sky: flat dark `Environment` + depth fog, no `DayNightCycle` |
 
 ---
@@ -83,7 +83,7 @@ On the Compatibility renderer, `TIME` only exists inside `sky()`. Helper functio
 | stars | `giant_glow`, `star_brightness`, `star_twinkle`, `twinkle_speed` | Glow size, brightness, twinkle |
 | stars | `star_cool`, `star_warm`, `star_hot` | Star colours (defaults match the menu) |
 
-Changes to `pixel_sky.tres` affect VeroWood and StoneTrail; `pixel_sky_feroshaw.tres` affects FeroShaw only; changes to `pixel_sky_overcast.tres` affect GreenGrove, BrokenBoneMarsh and GloomReach.
+Changes to `pixel_sky.tres` affect VeroWood and StoneTrail; `pixel_sky_feroshaw.tres` affects FeroShaw only; changes to `pixel_sky_overcast.tres` affect GreenGrove, BrokenBoneMarsh, GloomReach and CastleHollow.
 
 ---
 
@@ -150,6 +150,8 @@ Each frame the script:
 **Stars only, no nebula** — `nebula_intensity = 0`.
 
 **More overcast day** — raise `cloud_coverage`.
+
+**Trigger a thunderstorm** — see [`WEATHER.md`](WEATHER.md). Outdoors: `SignalBus.storm_requested.emit(1.0, 5.0)`.
 
 ---
 

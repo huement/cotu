@@ -213,14 +213,12 @@ func _input(event: InputEvent) -> void:
 	# 🛑 LOCKOUT GUARD: Block movement while in combat, moving, or explicitly locked
 	if _is_in_combat or is_movement_locked or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
+	# A popup / character sheet is open: the arrow keys move its focus, not the party.
+	if KeyboardModal.is_any_open():
+		return
 		
 	# Ignore OS auto-repeat key echo events
 	if event.is_echo():
-		return
-
-	# / Key or "interact" action checks the tile directly in front of the player
-	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and event.keycode == KEY_SLASH):
-		_try_interact_facing_tile()
 		return
 
 	# --- Forward Step Initiator ---
@@ -306,23 +304,6 @@ func _check_continuous_movement() -> void:
 		grid_movement.try_step(self, Vector3.RIGHT, _get_cardinal_string())
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.is_echo():
-		match event.keycode:
-			KEY_M: # Press 'M' to switch between Main Dungeon and Testbed
-				if map_manager:
-					var testbed_scene: PackedScene = load("res://Scenes/dungeon_testbed.tscn")
-					map_manager.switch_map_from_resource(testbed_scene)
-					grid_map = map_manager.get_nav_grid()
-					print("Map swapped to Testbed!")
-			KEY_T: # Press 'T' to test FIRE VFX & Shake
-				SignalBus.camera_shake_requested.emit(0.5)
-				SignalBus.edge_flash_requested.emit(Color(0.15, 1.0, 0.15), 0.35)
-			KEY_Y: # Press 'Y' to test WATER VFX & Shake
-				SignalBus.camera_shake_requested.emit(1)
-				SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.95)
-
-
 # ==============================================================================
 # COMBAT SIGNAL CALLBACKS
 # ==============================================================================
@@ -384,7 +365,7 @@ func _execute_grid_step(input_direction: Vector3) -> void:
 				enemy_node.call("trigger_combat_encounter")
 				return
 
-		print("Movement blocked by structural layout block.")
+		GameLogger.nav("Movement blocked by structural layout block.")
 		return
 
 	is_moving = true

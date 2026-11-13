@@ -8,7 +8,7 @@
 [ext_resource type="Script" uid="uid://b8ywsg7wbn4ln" path="res://Scripts/item_button.gd" id="10_k3th7"]
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="13_iub3o"]
 [ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_eedsi"]
-[ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="15_u1rxn"]
+[ext_resource type="Shader" uid="uid://cjl40i4twnp5j" path="res://Shaders/minimap_crt.gdshader" id="15_u1rxn"]
 [ext_resource type="Texture2D" uid="uid://dockh2fhdi881" path="res://ui/HUD/menu_button.png" id="15_yd1yt"]
 [ext_resource type="Texture2D" uid="uid://1xbwaw2vwxnn" path="res://ui/HUD/menu_button_pressed.png" id="16_5h4o4"]
 [ext_resource type="Script" uid="uid://ckoiskavvtx6f" path="res://Scripts/minimap_camera.gd" id="16_wjwn1"]

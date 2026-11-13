@@ -32,6 +32,8 @@ const DEFAULT_ROOM_SCENES: Array[String] = [
 const CRYPT_SCALE: float = 0.17
 const CRYPT_LIFT: float = 0.101
 const CELL_SIZE: float = 2.0
+## chest.tscn's model is authored at 4×. Half of that fits a 2 m cell.
+const CHEST_SCALE: float = 0.5
 ## Generated dungeon floors sit at y = 0; enemy models need this to stand on them.
 const ENEMY_VERTICAL_OFFSET: float = -1.0
 
@@ -65,7 +67,7 @@ static func build_and_save(cfg: Dictionary) -> String:
 
 	var enemy_count: int = int(cfg.get("enemy_count", 6))
 	var chest_count: int = (cfg.get("chests", []) as Array).size()
-	var ghost_count: int = int(cfg.get("ghost_count", 0))
+	var ghost_count: int = int(cfg.get("ghost_count", 2))
 	var spots_wanted: int = enemy_count + chest_count + ghost_count
 	var layout: DungeonGenerator.Layout = DungeonGenerator.generate(int(cfg.get("seed", 1)), int(cfg.get("room_count", 6)),
 		templates, room_weights, boss_template, spots_wanted)
@@ -338,7 +340,9 @@ static func _build_boss_enemy(boss_cfg: Dictionary, chamber: Node3D, room: Dunge
 static func _build_chest(scene: PackedScene, chest_cfg: Dictionary, cell: Vector2i, index: int, level_name: String) -> Node3D:
 	var chest: Node3D = scene.instantiate() as Node3D
 	chest.name = "Chest%d" % (index + 1)
-	chest.transform = _xform(cell, [0, 90, 180, 270][index % 4], 0.0)
+	var placed: Transform3D = _xform(cell, [0, 90, 180, 270][index % 4], 0.0)
+	placed.basis = placed.basis.scaled(Vector3.ONE * CHEST_SCALE)
+	chest.transform = placed
 	chest.set("object_id", "%s_chest_%d" % [level_name.to_lower(), index + 1])
 	chest.set("gold_amount", int(chest_cfg.get("gold", 0)))
 	var items: Array[ItemData] = []

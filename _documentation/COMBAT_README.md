@@ -213,8 +213,8 @@ The slice only plays for physical hits on the party, and BLADE hits on enemies (
 When `enemy_damaged_visual` fires, `EnemyVisualManager._play_hit_reaction()` decides how the model reacts:
 
 - Models with a `VisualJuice` node (blobs, tentacle boss, lake monster, Slime Lord, Beast King) keep their own `play_hit_shake()`.
-- Every other model flashes white once (`Scripts/3D/EnemyHitReaction.gd`), then plays its own hurt/hit clip if it has one (aliases in `ANIM_MAPPINGS[&"damage"]`), otherwise it is shaken in code. A model with no hurt clip never falls back to another clip (the Minotaur used to play its attack).
-- Per-enemy override: `EnemyData.hit_reaction` = `AUTO` (default) / `CLIP` / `SHAKE`, also the optional last column `hit_reaction` in `Data/Enemies.csv`. `SHAKE` forces the code shake even when a clip exists.
+- Every other model flashes white once (`Scripts/3D/EnemyHitReaction.gd`), then plays its own hurt/hit clip if it has one (aliases in `ANIM_MAPPINGS[&"damage"]`), otherwise it is shaken in code. A model with no hurt clip never falls back to another clip (the Minotaur used to play its attack; the Kenny rigs used to play `interact-left` because that name was on the damage list).
+- Per-enemy override: `EnemyData.hit_reaction` = `AUTO` (default) / `CLIP` / `SHAKE`, or the exact clip name to play. Same optional last column `hit_reaction` in `Data/Enemies.csv`. Kenny enemies use `holding-both-shoot`. `SHAKE` forces the code shake even when a clip exists.
 
 Flash colour/time and shake strength/time are constants at the top of `EnemyHitReaction.gd`.
 

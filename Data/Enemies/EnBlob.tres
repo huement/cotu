@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://dow6rsw54mwpa"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
-[ext_resource type="PackedScene" uid="uid://besprmo44xlo4" path="res://resources/Enemies/blobby.glb" id="1_uf1iu"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_x3utc"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/blobby.glb" id="1_uf1iu"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_x3utc"]
 
 [resource]
 script = ExtResource("2_x3utc")

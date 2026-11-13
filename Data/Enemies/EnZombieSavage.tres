@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://dxl05qv754kfu"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://ych5aq6i31pi"]
 
 [ext_resource type="Material" uid="uid://7mqwvh7drkfx" path="res://resources/Enemies/Kenny/Materials/en_zombie_savage_mat.tres" id="1_6efj3"]
 [ext_resource type="PackedScene" uid="uid://d2rgrhaldmh6r" path="res://resources/Enemies/Kenny/character-f.glb" id="2_ko70x"]
@@ -13,6 +13,7 @@ texture_path = "res://resources/Enemies/Kenny/texture-f.png"
 model_scene = ExtResource("2_ko70x")
 custom_material = ExtResource("1_6efj3")
 model_scale = Vector3(1, 1, 1)
+hit_reaction = "holding-both-shoot"
 base_level = 3
 max_health = 80
 current_health = 80

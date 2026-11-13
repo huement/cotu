@@ -79,7 +79,7 @@ func _build_ui() -> void:
 	if is_instance_valid(inventory_grid_scene):
 		_items_grid_instance = inventory_grid_scene.instantiate() as CharacterInventoryGrid
 		_items_grid_instance.custom_minimum_size = Vector2(360, 240)
-		print("[DEBUG] UniversalPopup: Inventory grid instance created: ", 		_items_grid_instance)
+		GameLogger.ui(str("[DEBUG] UniversalPopup: Inventory grid instance created: ", 		_items_grid_instance))
 		add_child(_items_grid_instance)
 
 		if "inventory" in GameState and is_instance_valid(GameState.inventory):
@@ -144,6 +144,12 @@ func update_preview(item: ItemData, slot_idx: int) -> void:
 		_items_use_btn.text = "THROW" if item.is_throwable else "USE"
 	if _items_drop_btn:
 		_items_drop_btn.disabled = in_combat
+	# Keyboard: Enter on a grid slot selects it, then focus moves to USE (Esc / Shift+Tab to go back).
+	var focus: Control = get_viewport().gui_get_focus_owner() if is_inside_tree() else null
+	if is_usable and _items_use_btn and is_instance_valid(_items_grid_instance) \
+			and focus != null and _items_grid_instance.is_ancestor_of(focus):
+		_items_use_btn.focus_mode = Control.FOCUS_ALL
+		_items_use_btn.grab_focus()
 
 
 func _reset_preview() -> void:

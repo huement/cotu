@@ -3,7 +3,7 @@ extends DungeonInteractable
 
 ## File path filter for target map (.tscn files).
 ## Set the exact path in the Inspector (must start with res://)
-@export_file("*.tscn") var target_dungeon_scene: String = "res://Scenes/dungeon_map.tscn"
+@export_file("*.tscn") var target_dungeon_scene: String = ""
 
 ## Marker node in the target map where the party appears (faces the marker's -Z).
 @export var arrival_point_name: String = "SpawnPoint"

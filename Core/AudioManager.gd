@@ -11,6 +11,7 @@ var _sfx_index: int = 0
 var _sfx_3d_index: int = 0
 
 var _ambient_player: AudioStreamPlayer
+var _rain_player: AudioStreamPlayer
 var _bgm_player: AudioStreamPlayer
 var _ui_player: AudioStreamPlayer
 var _voice_player: AudioStreamPlayer
@@ -74,6 +75,12 @@ func _initialize_audio_channels() -> void:
 	_ambient_player.name = "AmbientPlayer"
 	_ambient_player.bus = &"Ambient" if AudioServer.get_bus_index("Ambient") != -1 else &"Master"
 	add_child(_ambient_player)
+
+	# Dedicated rain bed so storms layer over BGM + level ambient without stopping either.
+	_rain_player = AudioStreamPlayer.new()
+	_rain_player.name = "RainPlayer"
+	_rain_player.bus = &"Ambient" if AudioServer.get_bus_index("Ambient") != -1 else &"Master"
+	add_child(_rain_player)
 
 	_bgm_player = AudioStreamPlayer.new()
 	_bgm_player.name = "BGMPlayer"
@@ -163,6 +170,78 @@ func play_level_sound(sound_name: String) -> void:
 func stop_level_sound() -> void:
 	if is_instance_valid(_ambient_player) and _ambient_player.is_playing():
 		_ambient_player.stop()
+
+
+## Starts looping rain (Audio/Environment/rain-loop.mp3) on the Ambient bus without touching BGM or level ambient.
+func start_rain_loop(volume_linear: float = 1.0) -> void:
+	if not is_instance_valid(_rain_player):
+		return
+	var file_path: String = base_audio_dir.path_join("Environment").path_join("rain-loop.mp3")
+	if not ResourceLoader.exists(file_path):
+		push_warning("AudioManager: Rain loop not found at %s" % file_path)
+		return
+	if not _rain_player.is_playing() or _rain_player.stream == null:
+		var stream: AudioStream = load(file_path) as AudioStream
+		if not is_instance_valid(stream):
+			return
+		var play_stream: AudioStream = stream.duplicate() as AudioStream
+		if play_stream != null and "loop" in play_stream:
+			play_stream.set("loop", true)
+		else:
+			play_stream = stream
+		_rain_player.stream = play_stream
+		_rain_player.play()
+	set_rain_loop_volume(volume_linear)
+
+
+## Updates rain loop loudness (0..1 linear). Does not start playback.
+func set_rain_loop_volume(volume_linear: float) -> void:
+	if not is_instance_valid(_rain_player):
+		return
+	var clamped: float = clampf(volume_linear, 0.0, 1.0)
+	_rain_player.volume_db = linear_to_db(maxf(clamped, 0.0001))
+
+
+## Stops the looping rain bed.
+func stop_rain_loop() -> void:
+	if is_instance_valid(_rain_player) and _rain_player.is_playing():
+		_rain_player.stop()
+	if is_instance_valid(_rain_player):
+		_rain_player.stream = null
+
+
+## Plays one random thunder clip (thunder-1..thunder-4) on the SFX pool so it stacks over rain/BGM.
+func play_thunder(volume_db: float = 0.0, pitch_scale: float = 1.0, preferred_streams: Array[AudioStream] = []) -> void:
+	var stream: AudioStream = null
+	if not preferred_streams.is_empty():
+		var candidates: Array[AudioStream] = []
+		for s: AudioStream in preferred_streams:
+			if is_instance_valid(s):
+				candidates.append(s)
+		if not candidates.is_empty():
+			stream = candidates[randi() % candidates.size()]
+	if stream == null:
+		var paths: Array[String] = [
+			base_audio_dir.path_join("Environment").path_join("thunder-1.mp3"),
+			base_audio_dir.path_join("Environment").path_join("thunder-2.mp3"),
+			base_audio_dir.path_join("Environment").path_join("thunder-3.mp3"),
+			base_audio_dir.path_join("Environment").path_join("thunder-4.mp3"),
+		]
+		var existing: Array[String] = []
+		for p: String in paths:
+			if ResourceLoader.exists(p):
+				existing.append(p)
+		if existing.is_empty():
+			push_warning("AudioManager: No thunder-*.mp3 clips found under Audio/Environment/")
+			return
+		stream = load(existing[randi() % existing.size()]) as AudioStream
+	if not is_instance_valid(stream):
+		return
+	var player: AudioStreamPlayer = _get_next_sfx_player()
+	player.stream = stream
+	player.volume_db = volume_db
+	player.pitch_scale = pitch_scale
+	player.play()
 
 
 # ==============================================================================

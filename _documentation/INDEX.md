@@ -16,6 +16,7 @@ Start with repo-root **`AGENTS.md`**. Then open the page for your task:
 | [DUNGEON_LEVELS.md](DUNGEON_LEVELS.md) | Room-part dungeons |
 | [OVERWORLD_TOPOLOGY.md](OVERWORLD_TOPOLOGY.md) | Outdoor map graph |
 | [SKY_AND_DAYLIGHT.md](SKY_AND_DAYLIGHT.md) | Outdoor sky, day/night, CloudLayer vs stylized sky |
+| [WEATHER.md](WEATHER.md) | Thunderstorm / rain overlay, SignalBus triggers, rain+thunder audio |
 | [NINE_HUD.md](NINE_HUD.md) / [UI.md](UI.md) | HUD / UI |
 | [TILE_PIPELINE_README.md](TILE_PIPELINE_README.md) | Mesh libraries / tiles |
 | [AUDIO.md](AUDIO.md) | SFX checklist |

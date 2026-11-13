@@ -17,11 +17,6 @@ signal closed
 signal character_saved(cat: CatCharacter)
 
 const STEP_TITLES: Array[String] = ["CHOOSE RACE & CLASS", "ABILITIES & NAME"]
-const RANDOM_NAMES: Array[String] = [
-	"Whiskers", "Mittens", "Nyx", "Pounce", "Tigris", "Saber", "Lynx", "Mochi", "Ember", "Sable",
-	"Onyx", "Kit", "Rook", "Vesper", "Juno", "Bastet", "Felix", "Talon", "Cinder", "Pixel",
-	"Socks", "Marrow", "Quill", "Rune", "Shadowpaw", "Clawdia", "Purrcival", "Meowra",
-]
 
 ## The roster character being edited (null = make a new one).
 var editing: CatCharacter = null
@@ -412,7 +407,7 @@ func _build_step_abilities_name() -> Control:
 	var dice_name: Button = CreationUI.small_button("RANDOM", CreationUI.YELLOW)
 	dice_name.custom_minimum_size = Vector2(96, 42)
 	dice_name.pressed.connect(func() -> void:
-		_char_name = RANDOM_NAMES[randi() % RANDOM_NAMES.size()]
+		_char_name = _roll_name()
 		_name_edit.text = _char_name
 		_refresh())
 	name_row.add_child(dice_name)
@@ -506,11 +501,27 @@ func _go_to_step(step: int, sound: bool = true) -> void:
 			_sync_to_selection()
 			_rebuild_picks()
 			if _char_name.strip_edges().is_empty():
-				_char_name = RANDOM_NAMES[randi() % RANDOM_NAMES.size()]
+				_char_name = _roll_name()
 			_name_edit.text = _char_name
 			_name_edit.grab_focus.call_deferred()
 			_name_edit.caret_column = _char_name.length()
 	_refresh()
+
+
+## NameGenerator (Scripts/WorldData/name-maker.gd). Skips names already on the roster, and the
+## name currently in the field, so RANDOM doesn't repeat what the player just saw.
+func _roll_name() -> String:
+	var taken: Array[String] = []
+	var current: String = _char_name.strip_edges()
+	if not current.is_empty():
+		taken.append(current)
+	for cat: CatCharacter in CharacterRoster.list():
+		if editing != null and cat.roster_id == editing.roster_id:
+			continue
+		var existing: String = cat.name.strip_edges()
+		if not existing.is_empty() and not existing in taken:
+			taken.append(existing)
+	return NameGenerator.generate(taken)
 
 
 func _focus_selected(buttons: Dictionary) -> void:

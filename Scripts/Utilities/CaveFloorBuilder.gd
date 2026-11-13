@@ -21,6 +21,8 @@ const LEVEL_TITLE_SCENE: String = "res://Scenes/UI/LevelTitleTrigger.tscn"
 const CELL_SIZE: float = 2.0
 const CRYPT_SCALE: float = 0.17
 const CRYPT_LIFT: float = 0.101
+## chest.tscn's model is authored at 4×. Half of that fits a 2 m cell.
+const CHEST_SCALE: float = 0.5
 
 
 ## Builds and saves the level. Returns the saved path, or "" on failure.
@@ -203,7 +205,9 @@ static func _build(cfg: Dictionary, layout: CaveGenerator.CaveLayout) -> Node3D:
 		var chest_cfg: Dictionary = chest_cfgs[i] as Dictionary
 		var chest: Node3D = chest_scene.instantiate() as Node3D
 		chest.name = "Chest%d" % (i + 1)
-		chest.transform = _cell_transform(chest_cells[i], [0, 90, 180, 270][rng.randi_range(0, 3)])
+		var placed: Transform3D = _cell_transform(chest_cells[i], [0, 90, 180, 270][rng.randi_range(0, 3)])
+		placed.basis = placed.basis.scaled(Vector3.ONE * CHEST_SCALE)
+		chest.transform = placed
 		chest.set("object_id", "%s_chest_%d" % [level_name.to_snake_case(), i + 1])
 		chest.set("gold_amount", int(chest_cfg.get("gold", 0)))
 		var items: Array[ItemData] = []

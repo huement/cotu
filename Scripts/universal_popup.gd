@@ -53,10 +53,14 @@ func _ready() -> void:
 	if confirm_button:
 		confirm_button.pressed.connect(_on_confirm_pressed)
 
+	# Keyboard: Tab / arrows / Enter inside every popup, Esc = cancel (see KeyboardModal).
+	if panel_container:
+		KeyboardModal.attach(panel_container, _on_cancel_pressed)
+
 
 ## Catches incoming event requests and builds custom menus on the fly
 func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> void:
-	print("[DEBUG] UniversalPopup: Received request for action: ", action_type)
+	GameLogger.ui(str("[DEBUG] UniversalPopup: Received request for action: ", action_type))
 
 	# 🎯 Guard: Ignore ABILITY_INFO so UniversalPopup does not destroy its content
 	if action_type == &"ABILITY_INFO":
@@ -111,7 +115,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		background_dimmer.visible = true
 	if panel_container:
 		panel_container.visible = true
-		print("[DEBUG] UniversalPopup: Panel container visible.")
+		GameLogger.ui("[DEBUG] UniversalPopup: Panel container visible.")
 		_center_popup()
 
 
@@ -292,6 +296,9 @@ func _build_rest_ui() -> void:
 	btn_hbox.add_theme_constant_override("separation", 16)
 
 	var rest_btn := _create_modal_button("REST", Color(0.0, 0.9, 0.8, 1.0))
+	# Keyboard: focus starts on the slider (left/right = hours), Enter rests.
+	KeyboardModal.set_default(rest_btn)
+	KeyboardModal.set_default(slider)
 	rest_btn.pressed.connect(
 		func() -> void:
 			_emit_confirmation(&"REST", { "hours": int(slider.value) }),
@@ -554,7 +561,7 @@ func _reset_items_preview() -> void:
 ## Renders the styled popup scene inside the universal popup modal
 func _build_skills_spells_popup_ui(action_type: StringName, data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
-	print("UniversalPopup: Building Skills/Spells Popup for character: ", cat.name if is_instance_valid(cat) else "null", " with action_type: ", action_type)
+	GameLogger.ui(str("UniversalPopup: Building Skills/Spells Popup for character: ", cat.name if is_instance_valid(cat) else "null", " with action_type: ", action_type))
 
 	# 1. Determine initial tab mode
 	var initial_mode: SkillsSpellsPopup.Mode = SkillsSpellsPopup.Mode.SPELLS
@@ -613,7 +620,7 @@ func _center_popup() -> void:
 	panel_container.offset_right = 0
 	panel_container.offset_bottom = 0
 
-	print("[DEBUG] UniversalPopup Centered -> Position: ", panel_container.position, " | Size: ", panel_container.size)
+	GameLogger.ui(str("[DEBUG] UniversalPopup Centered -> Position: ", panel_container.position, " | Size: ", panel_container.size))
 
 		
 ## Helper method to adjust container margins for standard vs flush modals

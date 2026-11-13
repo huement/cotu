@@ -51,6 +51,20 @@ uniform vec3 cloud_day_shadow : source_color = vec3(0.56, 0.61, 0.70);
 uniform vec3 cloud_night_lit : source_color = vec3(0.085, 0.095, 0.14);
 uniform vec3 cloud_night_shadow : source_color = vec3(0.025, 0.03, 0.055);
 
+group_uniforms storm;
+/** 0 = clear weather, 1 = full thunderstorm */
+uniform float storm_amount : hint_range(0.0, 1.0, 0.01) = 0.0;
+/** Direction the storm approaches from on the XZ plane */
+uniform vec2 storm_front = vec2(1.0, 0.0);
+/** Flash intensity for sheet lightning (driven by WeatherController spikes) */
+uniform float lightning_flash : hint_range(0.0, 1.0, 0.01) = 0.0;
+/** Mild cool tint for the gradient — keep this subtle so clouds stay readable. */
+uniform vec3 storm_top : source_color = vec3(0.28, 0.34, 0.40);
+uniform vec3 storm_horizon : source_color = vec3(0.48, 0.52, 0.55);
+/** Storm cloud bands stay lighter/darker than the sky so the deck doesn't flatten into a solid slab. */
+uniform vec3 storm_cloud_lit : source_color = vec3(0.72, 0.76, 0.80);
+uniform vec3 storm_cloud_shadow : source_color = vec3(0.28, 0.32, 0.38);
+
 group_uniforms night_space;
 /** How much of the menu-style space scene shows at full night (0 = plain dark sky). */
 uniform float space_amount : hint_range(0.0, 1.0, 0.01) = 1.0;
@@ -242,22 +256,37 @@ vec3 night_space(vec2 cell, vec3 base, float tm) {
 void sky() {
 	vec3 sd = normalize(sun_direction);
 	float night = 1.0 - day_amount;
-	// Cross-fade: clouds out, space in, as night falls.
 	float space_fade = space_amount * smoothstep(0.1, 0.9, night);
 
 	// Snap the view direction to the art-pixel grid on the dome.
 	vec3 cell = floor(EYEDIR * pixel_density);
 	vec3 dir = AT_CUBEMAP_PASS ? EYEDIR : normalize((cell + 0.5) / pixel_density);
 
+	// --- Storm Rollout Calculation ---
+	vec2 storm_dir = normalize(storm_front);
+	// Guard against zenith NaN on GLES3/Compatibility renderers
+	vec2 horiz_dir = length(dir.xz) > 0.001 ? normalize(dir.xz) : storm_dir;
+	
+	// Factor in dir.y so the mask arches overhead properly from horizon to horizon
+	float sky_pos = dot(horiz_dir, storm_dir) * (1.0 - dir.y * 0.65);
+	float advance = mix(-1.2, 1.2, storm_amount);
+	float front_mask = smoothstep(advance - 0.45, advance + 0.35, -sky_pos);
+
+	// Mild sky cool-down only (not a solid repaint) so banded clouds keep reading as clouds.
+	float sky_tint = storm_amount * front_mask * 0.35;
+	vec3 cur_day_top = mix(day_top, storm_top, sky_tint);
+	vec3 cur_day_horizon = mix(day_horizon, storm_horizon, sky_tint);
+	float cur_sunset_strength = mix(sunset_strength, 0.0, storm_amount * front_mask);
+
 	// Banded gradient
 	float h = clamp(dir.y, 0.0, 1.0);
 	float t = band(sqrt(h), color_steps);
-	vec3 col = mix(mix(night_horizon, night_top, t), mix(day_horizon, day_top, t), day_amount);
+	vec3 col = mix(mix(night_horizon, night_top, t), mix(cur_day_horizon, cur_day_top, t), day_amount);
 
 	// Sunset / sunrise glow near the horizon on the sun's side
 	float sun_low = 1.0 - smoothstep(0.0, 0.4, abs(sd.y));
 	float toward = max(dot(dir, sd), 0.0);
-	float glow = band(pow(toward, 4.0) * (1.0 - h) * sun_low * sunset_strength, color_steps);
+	float glow = band(pow(toward, 4.0) * (1.0 - h) * sun_low * cur_sunset_strength, color_steps);
 	col += sunset_color * glow;
 
 	// Below the horizon (usually hidden by terrain)
@@ -269,21 +298,32 @@ void sky() {
 		// Ambient / reflection pass: gradient only (cheap, no flicker in lighting).
 		COLOR = col;
 	} else {
-		// Pixel sun disc
-		if (sun_size > 0.0 && sd.y > -0.05 && dot(dir, sd) > cos(sun_size)) {
+		// Pixel sun disc (occluded if storm rolls over it)
+		float cur_sun_size = mix(sun_size, 0.0, storm_amount * front_mask);
+		if (cur_sun_size > 0.0 && sd.y > -0.05 && dot(dir, sd) > cos(cur_sun_size)) {
 			col = mix(col, sun_color, clamp(day_amount * 1.5, 0.0, 1.0));
 		}
 
 		// Clouds projected on a flat ceiling
 		float cloud = 0.0;
 		if (dir.y > 0.0) {
-			vec2 uv = dir.xz / (dir.y + cloud_height) * cloud_scale + wind * TIME;
+			// Boost wind speed proportionally to storm front
+			vec2 cur_wind = wind * (1.0 + storm_amount * 2.0);
+			vec2 uv = dir.xz / (dir.y + cloud_height) * cloud_scale + cur_wind * TIME;
 			float n = fbm(uv);
-			float edge = 1.0 - cloud_coverage;
+			
+			// Increase coverage locally up to a dense 0.92 limit
+			float target_coverage = max(cloud_coverage, 0.92);
+			float cur_coverage = mix(cloud_coverage, target_coverage, storm_amount * front_mask);
+			
+			float edge = 1.0 - cur_coverage;
 			cloud = smoothstep(edge, edge + cloud_softness, n);
 			cloud *= smoothstep(0.0, 0.12, dir.y);
 			cloud = band(cloud, 3);
-			cloud *= 1.0 - space_fade * (1.0 - night_cloud_amount);
+			
+			// Retain heavy clouds through the night space-fade crossover
+			float cur_night_clouds = mix(night_cloud_amount, 1.0, storm_amount * front_mask);
+			cloud *= 1.0 - space_fade * (1.0 - cur_night_clouds);
 
 			// Lit on the sun side: compare density a little toward the sun.
 			vec2 light_dir = length(sd.xz) > 0.001 ? normalize(sd.xz) : vec2(0.0, 1.0);
@@ -292,8 +332,11 @@ void sky() {
 			shade = floor(shade * float(cloud_bands)) / float(cloud_bands - 1);
 			shade = clamp(shade, 0.0, 1.0);
 
-			vec3 lit = mix(cloud_night_lit, cloud_day_lit, day_amount);
-			vec3 shadow = mix(cloud_night_shadow, cloud_day_shadow, day_amount);
+			vec3 cur_cloud_day_lit = mix(cloud_day_lit, storm_cloud_lit, storm_amount * front_mask);
+			vec3 cur_cloud_day_shadow = mix(cloud_day_shadow, storm_cloud_shadow, storm_amount * front_mask);
+
+			vec3 lit = mix(cloud_night_lit, cur_cloud_day_lit, day_amount);
+			vec3 shadow = mix(cloud_night_shadow, cur_cloud_day_shadow, day_amount);
 			vec3 ccol = mix(shadow, lit, shade) + sunset_color * glow * 0.6;
 			col = mix(col, ccol, cloud);
 		}
@@ -304,6 +347,15 @@ void sky() {
 			float amount = space_fade * smoothstep(0.0, 0.25, EYEDIR.y) * (1.0 - cloud);
 			col = mix(col, night_space(floor(q), col, TIME), amount);
 		}
+		
+		// Render localized sheet lightning in the clouds (excluded from AT_CUBEMAP_PASS)
+		if (lightning_flash > 0.0) {
+			float flash_lobe = max(0.0, dot(horiz_dir, storm_dir));
+			// Exponential focus towards the horizon and the incoming storm vector
+			float flash_intensity = pow(flash_lobe, 3.0) * (1.0 - dir.y * 0.5) * lightning_flash;
+			col += vec3(0.7, 0.85, 1.0) * band(flash_intensity, 4);
+		}
+		
 		COLOR = col;
 	}
 }

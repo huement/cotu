@@ -48,7 +48,7 @@ const ANIM_MAPPINGS: Dictionary = {
 	&"attack": [&"ATTACK_1", &"Attack", &"attack", &"Armature|Attack", &"CastSpell", &"attack-melee-left", &"Cast", &"cast", &"ArmatureAction", &"Armature|ArmatureAction"],
 	&"attack_special": [&"ATTACK_SPECIAL", &"Armature|Attack Double", &"Attack Double", &"attack_double", &"SpecialAttack"],
 	&"attack_jump": [&"ATTACK_JUMP", &"Armature|Jump", &"Jump", &"jump", &"JumpAttack"],
-	&"damage": [&"TakeDamage", &"interact-left", &"Hit", &"hit", &"Damage", &"damage", &"GetHit", &"hurt", &"Hurt", &"HURT"],
+	&"damage": [&"TakeDamage", &"Hit", &"hit", &"Damage", &"damage", &"GetHit", &"hurt", &"Hurt", &"HURT"],
 	&"die": [&"DEATH", &"Die", &"die", &"Death", &"death", &"Armature|Death", &"Dead", &"dead"]
 }
 
@@ -628,6 +628,7 @@ func _play_death(enemy_node: Node3D) -> void:
 ##   AUTO  (default) - play the model's own hurt / hit clip if it has one, otherwise shake it.
 ##   CLIP  - same as AUTO (kept so data can say "this one has a clip").
 ##   SHAKE - always shake in code, even if the model has a hurt clip.
+##   anything else - play that animation by name (Enemies.csv `hit_reaction`, e.g. holding-both-shoot).
 ## Set per enemy with EnemyData.hit_reaction (Enemies.csv column `hit_reaction`).
 func _play_hit_reaction(enemy_node: Node3D) -> void:
 	if enemy_node.has_method("on_take_hit"):
@@ -635,10 +636,18 @@ func _play_hit_reaction(enemy_node: Node3D) -> void:
 
 	_HitReaction.flash(enemy_node)
 
-	var mode: String = str(enemy_node.get_meta(&"_hit_reaction", "AUTO")).to_upper()
+	var raw: String = str(enemy_node.get_meta(&"_hit_reaction", "AUTO")).strip_edges()
+	var mode: String = raw.to_upper()
 	var anim_player: AnimationPlayer = enemy_node.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	var clip: StringName = &""
-	if mode != "SHAKE" and is_instance_valid(anim_player):
+	if mode == "SHAKE" or not is_instance_valid(anim_player):
+		clip = &""
+	elif mode != "AUTO" and mode != "CLIP" and not raw.is_empty():
+		clip = _find_named_clip(anim_player, raw)
+		if clip.is_empty():
+			push_warning("EnemyVisualManager: hit clip '%s' not on %s" % [raw, enemy_node.name])
+			clip = _resolve_animation_name(anim_player, &"damage")
+	else:
 		clip = _resolve_animation_name(anim_player, &"damage")
 
 	if clip.is_empty():
@@ -655,6 +664,17 @@ func _play_hit_reaction(enemy_node: Node3D) -> void:
 				play_animation(enemy_node, &"idle", true),
 		CONNECT_ONE_SHOT
 	)
+
+
+## Exact clip name, then a case-insensitive match. Does not accept a partial name.
+func _find_named_clip(anim_player: AnimationPlayer, clip_name: String) -> StringName:
+	if anim_player.has_animation(clip_name):
+		return StringName(clip_name)
+	var wanted: String = clip_name.to_lower()
+	for anim_name: String in anim_player.get_animation_list():
+		if anim_name.to_lower() == wanted:
+			return StringName(anim_name)
+	return &""
 
 
 ## Lets a world-placed combat node (e.g. BlobBossController and its minions)

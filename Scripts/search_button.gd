@@ -5,6 +5,7 @@ extends "res://Scripts/UI/hud_toolbar_button.gd"
 
 func _init() -> void:
 	action_type = "SEARCH"
+	input_action = &"interact"
 
 
 func _activate() -> void:

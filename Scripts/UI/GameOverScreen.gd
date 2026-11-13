@@ -6,6 +6,10 @@ extends CanvasLayer
 ## Lives in world.tscn. The game is paused while it's up; the dead party is never saved
 ## (CombatManager skips the save on a wipe), so Load Last Save goes back to the last good save.
 
+const SHINE_SHADER: Shader = preload("res://Shaders/portrait_shine.gdshader")
+## BackButton uses icon_max_width 22. These sit at half that.
+const ICON_MAX_WIDTH: int = 11
+
 ## Seconds after the wipe before the screen starts (lets the defeat toast / death anims play).
 @export var start_delay: float = 1.2
 @export var fade_duration: float = 1.0
@@ -20,13 +24,15 @@ extends CanvasLayer
 @onready var _sound: AudioStreamPlayer = %Sound as AudioStreamPlayer
 
 var is_showing: bool = false
+var _shine_materials: Dictionary = {}
+var _shine_tweens: Dictionary = {}
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
-	ShardsMenuStyle.style_button(_load_button, ShardsMenuStyle.COLOR_ACCENT, 18)
-	ShardsMenuStyle.style_button(_quit_button, ShardsMenuStyle.COLOR_DANGER, 18)
+	_style_action_button(_load_button, ShardsMenuStyle.COLOR_ACCENT)
+	_style_action_button(_quit_button, ShardsMenuStyle.COLOR_DANGER)
 	ShardsMenuStyle.style_body(_status_label, 14, true)
 	_load_button.pressed.connect(_on_load_pressed)
 	_quit_button.pressed.connect(_on_quit_pressed)
@@ -114,3 +120,71 @@ func _release_audio() -> void:
 func _play_click() -> void:
 	if is_instance_valid(AudioManager) and AudioManager.has_method("play_ui_sound"):
 		AudioManager.play_ui_sound("button-press")
+
+
+## Outline row button, same shape as the shard-menu Back button, with a shine sweep.
+func _style_action_button(button: Button, accent: Color) -> void:
+	button.text = button.text.to_upper()
+	button.add_theme_stylebox_override("normal", _outline_box(ShardsMenuStyle.COLOR_TEXT, 2))
+	button.add_theme_stylebox_override("hover", _outline_box(accent, 2))
+	button.add_theme_stylebox_override("pressed", _outline_box(accent.lightened(0.2), 3))
+	button.add_theme_stylebox_override("disabled", _outline_box(ShardsMenuStyle.COLOR_DISABLED, 2))
+	var focus: StyleBoxFlat = _outline_box(accent, 2)
+	focus.draw_center = false
+	button.add_theme_stylebox_override("focus", focus)
+	button.add_theme_font_override("font", ShardsMenuStyle.TITLE_FONT)
+	button.add_theme_font_size_override("font_size", 18)
+	button.add_theme_color_override("font_color", ShardsMenuStyle.COLOR_TEXT)
+	button.add_theme_color_override("font_hover_color", accent)
+	button.add_theme_color_override("font_focus_color", accent)
+	button.add_theme_color_override("font_pressed_color", accent.lightened(0.2))
+	button.add_theme_color_override("font_disabled_color", ShardsMenuStyle.COLOR_DISABLED)
+	button.add_theme_color_override("icon_normal_color", ShardsMenuStyle.COLOR_TEXT)
+	button.add_theme_color_override("icon_hover_color", accent)
+	button.add_theme_color_override("icon_focus_color", accent)
+	button.add_theme_color_override("icon_pressed_color", accent.lightened(0.2))
+	button.add_theme_color_override("icon_disabled_color", ShardsMenuStyle.COLOR_DISABLED)
+	button.add_theme_constant_override("icon_max_width", ICON_MAX_WIDTH)
+	button.add_theme_constant_override("h_separation", 10)
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_setup_shine(button)
+	button.mouse_entered.connect(_play_shine.bind(button, 0.35))
+	button.button_down.connect(_play_shine.bind(button, 0.2))
+
+
+func _outline_box(border: Color, width: int) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.0, 0.0, 0.0, 0.35)
+	style.border_color = border
+	style.set_border_width_all(width)
+	style.set_corner_radius_all(0)
+	style.set_content_margin_all(12.0)
+	style.content_margin_left = 16.0
+	style.content_margin_right = 16.0
+	return style
+
+
+func _setup_shine(button: Button) -> void:
+	var mat: ShaderMaterial = ShaderMaterial.new()
+	mat.shader = SHINE_SHADER
+	mat.set_shader_parameter(&"shine_progress", -0.5)
+	mat.set_shader_parameter(&"shine_size", 0.35)
+	mat.set_shader_parameter(&"shine_color", Color(1.0, 1.0, 1.0, 0.9))
+	button.material = mat
+	_shine_materials[button] = mat
+
+
+func _play_shine(button: Button, duration: float) -> void:
+	if button.disabled:
+		return
+	var mat: ShaderMaterial = _shine_materials.get(button) as ShaderMaterial
+	if not is_instance_valid(mat):
+		return
+	var running: Tween = _shine_tweens.get(button) as Tween
+	if running != null and running.is_running():
+		running.kill()
+	mat.set_shader_parameter(&"shine_progress", -0.5)
+	var tween: Tween = create_tween()
+	tween.tween_property(mat, "shader_parameter/shine_progress", 1.5, duration) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_shine_tweens[button] = tween

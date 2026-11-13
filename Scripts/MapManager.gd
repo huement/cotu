@@ -19,6 +19,8 @@ var bridge_grid: GridMap = null
 @export var ceiling_height: float = 2.0
 @export var default_bgm_track: String = "Environment/forest-creepy"
 
+@export var weather_controller: WeatherController = null
+
 @export var map_type: String = "forest"
 @export var grid_map: GridMap
 
@@ -72,6 +74,10 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	if _leaving_for_menu:
 		return
+
+	if weather_controller == null:
+		weather_controller = get_node_or_null("%WeatherController") as WeatherController
+
 	var start_map: PackedScene = default_map_scene if _use_dev_map and default_map_scene != null else load(GameState.NEW_GAME_MAP) as PackedScene
 	var saved: Dictionary = GameState.consume_pending_location() if is_instance_valid(GameState) else {}
 	var saved_path: String = str(saved.get("map_scene_path", ""))
@@ -85,11 +91,11 @@ func _ready() -> void:
 		switch_map_from_resource(start_map)
 	else:
 		_resolve_active_wall_map()
-
+	
 	if not dungeon_grid:
 		push_error("MapManager: GridMap reference is missing in the Inspector!")
 	else:
-		print("MapManager: Space-Dungeon grid system online.")
+		GameLogger.info("MapManager: Space-Dungeon grid system online.")
 
 
 func switch_map_from_resource(map_resource: PackedScene) -> void:
@@ -100,6 +106,7 @@ func switch_map_from_resource(map_resource: PackedScene) -> void:
 	_unload_active_map()
 	_install_map(map_resource.instantiate() as Node3D)
 	_sync_world_environment(active_map_instance)
+	_rebind_weather(active_map_instance)
 	_notify_player_map_changed()
 	_apply_map_audio(active_map_instance)
 	_present_level_title(active_map_instance)
@@ -114,6 +121,7 @@ func switch_map(scene_path: String) -> void:
 	_unload_active_map()
 	_install_map(map_resource.instantiate() as Node3D)
 	_sync_world_environment(active_map_instance)
+	_rebind_weather(active_map_instance)
 	_notify_player_map_changed()
 	GameLogger.info("SWITCH MAP FIRED. NOW STARTING AUDIO")
 	_apply_map_audio(active_map_instance)
@@ -181,6 +189,25 @@ func _retarget_day_night_environment(map_instance: Node3D, root_we: WorldEnviron
 			(child as DayNightCycle).world_environment = root_we
 
 
+func _rebind_weather(map_instance: Node3D) -> void:
+	if weather_controller == null:
+		weather_controller = get_node_or_null("%WeatherController") as WeatherController
+	if not is_instance_valid(weather_controller):
+		return
+
+	var root: Node = get_tree().current_scene
+	var root_we: WorldEnvironment = root.get_node_or_null("WorldEnvironment") as WorldEnvironment if is_instance_valid(root) else null
+
+	var active_cycle: DayNightCycle = null
+	if is_instance_valid(map_instance):
+		for child: Node in map_instance.get_children():
+			if child is DayNightCycle:
+				active_cycle = child as DayNightCycle
+				break
+
+	weather_controller.bind_map_context(root_we, active_cycle)
+
+	
 func _restore_saved_position(saved: Dictionary) -> void:
 	var player: DungeonPlayer = get_tree().get_first_node_in_group(&"player") as DungeonPlayer
 	if not is_instance_valid(player):

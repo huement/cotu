@@ -1,7 +1,7 @@
 class_name StoneGate
 extends DungeonInteractable
 
-@export_file("*.tscn") var target_dungeon_scene: String = "res://Scenes/dungeon_map.tscn"
+@export_file("*.tscn") var target_dungeon_scene: String = ""
 ## Marker node in the target map where the party appears (faces the marker's -Z).
 @export var arrival_point_name: String = "SpawnPoint"
 @export_multiline var prompt_text: String = "You see a massive stone that appears to be movable. Move it and descend into the depths?"

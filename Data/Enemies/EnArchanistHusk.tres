@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://ba2hpgsy11xbo"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
 
-[ext_resource type="Material" uid="uid://snrc4u5yijy6" path="res://resources/Enemies/Kenny/Materials/en_archanist_husk_mat.tres" id="1_td0ir"]
-[ext_resource type="PackedScene" uid="uid://bxh86qkiiy5q2" path="res://resources/Enemies/Kenny/character-p.glb" id="2_nm1jv"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_iev4n"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_archanist_husk_mat.tres" id="1_td0ir"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-p.glb" id="2_nm1jv"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_iev4n"]
 
 [resource]
 script = ExtResource("3_iev4n")
@@ -14,6 +14,7 @@ texture_path = "res://resources/Enemies/Kenny/texture-p.png"
 model_scene = ExtResource("2_nm1jv")
 custom_material = ExtResource("1_td0ir")
 model_scale = Vector3(1, 1, 1)
+hit_reaction = "holding-both-shoot"
 base_level = 8
 max_health = 95
 current_health = 95

@@ -71,6 +71,13 @@ func _ready() -> void:
 	_setup_turn_info_scroller()
 	_connect_to_signal_bus()
 	_bind_action_buttons()
+	# Keyboard: arrows / Tab pick an action, Enter does it; target buttons the same, Esc = back.
+	if is_instance_valid(action_bar):
+		KeyboardModal.attach(action_bar)
+		action_bar.set_meta(KeyboardModal.META_ALLOW_PARTY_KEYS, true)
+	if is_instance_valid(_target_button_container):
+		KeyboardModal.attach(_target_button_container, _cancel_target_selection)
+		_target_button_container.set_meta(KeyboardModal.META_ALLOW_PARTY_KEYS, true)
 
 	if is_instance_valid(active_portrait):
 		_active_portrait_default = active_portrait.texture

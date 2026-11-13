@@ -24,8 +24,8 @@ Source diagram: `assets/MAP_DIAGRAM-*.png` (chat / Cursor assets). This markdown
                               |
                          Tutorial Exit
                               v
-  Forgotten Ruins <-- Witch's Hollow <-- VEROWOOD <-- West Gate(2) --+
-  (Ruins MVP)         (Interstitial)      (Built)                    |
+  Forgotten Ruins <-- Castle Hollow <-- VEROWOOD <-- West Gate(2) --+
+  (Ruins MVP)           (Built)             (Built)                  |
                                                                      |
   RED CRAG <-- Trail Exit(8) -- STONE TRAIL <-- SW Pass(4) -- FEROSHAW
   (Future)                      (Built)                      (Built hub)
@@ -59,14 +59,15 @@ Source diagram: `assets/MAP_DIAGRAM-*.png` (chat / Cursor assets). This markdown
 
 ### VeroWood — Dense Forest (Built)
 - **Scene:** `Scenes/VeroWood.tscn`
-- **Connections:** East Gate(6) ↔ Feroshaw · West Path(7) → Witch's Hollow
+- **Connections:** East Gate(6) ↔ Feroshaw · West Path(7) → Castle Hollow
 
-### Witch's Hollow — Deep Cursed Woods (Interstitial / planned)
-- **Role:** Buffer forest between VeroWood and Forgotten Ruins.
-- **Connections:** VeroWood ↔ Forgotten Ruins
+### Castle Hollow — Deep Woods (Built)
+- **Scene:** `Scenes/CastleHollow.tscn`
+- **Role:** Woods west of VeroWood. Was listed as Witch's Hollow. A river crosses the avenue on a wood bridge. The sunken castle model is not in yet (anchor `SunkenCastleAnchor` in the north court).
+- **Connections:** VeroWood west gate → entrance `SpawnPoint` · return gate → VeroWood `SpawnPointWest` · north gate locked (Forgotten Ruins) · cave mouth locked
 
 ### Forgotten Ruins — Above-Ground Dungeon (MVP goal)
-- **Connections:** East ← Witch's Hollow · South Exit (future)
+- **Connections:** East ← Castle Hollow · South Exit (future)
 
 ### Stone Trail — Canyon Switchback (Built)
 - **Scene:** `Scenes/StoneTrail.tscn`

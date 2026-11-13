@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://gfj25eh5qufe"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
 
-[ext_resource type="Material" uid="uid://vqti4pcc7r45" path="res://resources/Enemies/Kenny/Materials/en_zombie_punk_mat.tres" id="1_b1bn0"]
-[ext_resource type="PackedScene" uid="uid://bi0m4yncpfaqr" path="res://resources/Enemies/Kenny/character-g.glb" id="2_38ltp"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_stqss"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_zombie_punk_mat.tres" id="1_b1bn0"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-g.glb" id="2_38ltp"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_stqss"]
 
 [resource]
 script = ExtResource("3_stqss")
@@ -13,6 +13,7 @@ texture_path = "res://resources/Enemies/Kenny/texture-g.png"
 model_scene = ExtResource("2_38ltp")
 custom_material = ExtResource("1_b1bn0")
 model_scale = Vector3(1, 1, 1)
+hit_reaction = "holding-both-shoot"
 base_level = 4
 max_health = 75
 current_health = 75

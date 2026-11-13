@@ -144,7 +144,7 @@ func _on_popup_confirmed(action_type: StringName, extra_data: Dictionary) -> voi
 
 func start_post_combat_immunity(duration: float) -> void:
 	post_combat_immunity_timer = max(post_combat_immunity_timer, duration)
-	print("[GameState] 🛡️ Post-combat immunity initiated for %.1f seconds." % post_combat_immunity_timer)
+	GameLogger.combat("[GameState] 🛡️ Post-combat immunity initiated for %.1f seconds." % post_combat_immunity_timer)
 
 
 func lock_encounters(duration: float) -> void:
@@ -208,7 +208,7 @@ func _award_victory_xp(victory_data: Dictionary) -> void:
 		return
 
 	var xp_per_member: int = int(float(total_xp) / float(living_members))
-	print("[GameState] 🏆 Battle victory confirmed! Awarding %d XP to %d living party members..." % [xp_per_member, living_members])
+	GameLogger.combat("[GameState] 🏆 Battle victory confirmed! Awarding %d XP to %d living party members..." % [xp_per_member, living_members])
 
 	var party_slots: Array = current_party.slots
 	for i in range(party_slots.size()):
@@ -227,15 +227,15 @@ func _award_victory_xp(victory_data: Dictionary) -> void:
 
 
 func _initialize_active_session() -> void:
-	print("GameState: Initializing active session...")
+	GameLogger.info("GameState: Initializing active session...")
 	_setup_save_slots()
 
 	if ResourceLoader.exists(get_save_path()):
 		if not load_game():
-			print("GameState: Existing save file in user:// invalid. Loading default_save.tres...")
+			GameLogger.info("GameState: Existing save file in user:// invalid. Loading default_save.tres...")
 			_load_default_save(true, false)
 	else:
-		print("GameState: No save file found in user://. Loading default_save.tres...")
+		GameLogger.info("GameState: No save file found in user://. Loading default_save.tres...")
 		_load_default_save(true, false)
 
 
@@ -274,7 +274,7 @@ func _load_default_save(equip_starters: bool = true, persist: bool = true) -> vo
 			_sync_party_references()
 			if persist:
 				save_game(false) # the old world may still be loaded - don't record its map
-			print("GameState: Starter party (%d from %s) initialized with default_save.tres supplies" % [current_party.get_viable_combatants().size(), CharacterRoster.STARTER_PARTY_DIR])
+			GameLogger.info("GameState: Starter party (%d from %s) initialized with default_save.tres supplies" % [current_party.get_viable_combatants().size(), CharacterRoster.STARTER_PARTY_DIR])
 			return
 
 	printerr("GameState ERROR: Failed to load default_save.tres from ", DEFAULT_SAVE_PATH)
@@ -353,7 +353,7 @@ func _setup_save_slots() -> void:
 	if FileAccess.file_exists(LEGACY_SAVE_PATH) and not FileAccess.file_exists(slot_path(1)):
 		var err: Error = DirAccess.rename_absolute(LEGACY_SAVE_PATH, slot_path(1))
 		if err == OK:
-			print("GameState: Moved the old save into slot 1.")
+			GameLogger.info("GameState: Moved the old save into slot 1.")
 		else:
 			printerr("GameState ERROR: Could not move the old save into slot 1 (error %d)." % err)
 	var cfg := ConfigFile.new()
@@ -386,7 +386,7 @@ func save_game(include_location: bool = true) -> bool:
 
 	var err := ResourceSaver.save(save, get_save_path())
 	if err == OK:
-		print("GameState: Session successfully saved to ", get_save_path())
+		GameLogger.info(str("GameState: Session successfully saved to ", get_save_path()))
 		return true
 	else:
 		printerr("GameState ERROR: Failed to save session! Error code: ", err)
@@ -433,7 +433,7 @@ func load_game() -> bool:
 		_last_location = pending_location.duplicate()
 
 	_sync_party_references()
-	print("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, get_save_path()])
+	GameLogger.info("GameState: Successfully loaded saved session with %d cats from %s" % [valid_cat_count, get_save_path()])
 	return true
 
 
@@ -511,7 +511,7 @@ func start_new_game_with_party(party: DungeonParty) -> void:
 	}
 	_last_location = pending_location.duplicate()
 	save_game(false)
-	print("GameState: New game with %d created characters." % party.get_viable_combatants().size())
+	GameLogger.info("GameState: New game with %d created characters." % party.get_viable_combatants().size())
 
 
 func reset_to_starter_party() -> void:
@@ -527,7 +527,7 @@ func begin_dev_session() -> void:
 	dev_session = true
 	session_active = true
 	_load_default_save()
-	print("GameState: DEV START - test party loaded, saving to ", DEV_SAVE_PATH)
+	GameLogger.info(str("GameState: DEV START - test party loaded, saving to ", DEV_SAVE_PATH))
 
 
 func _sync_party_references() -> void:
@@ -576,7 +576,7 @@ func _process_party_rest(rest_data: Dictionary) -> void:
 	if hours <= 0 or current_party == null:
 		return
 
-	print("[GameState] 🏕️ Party resting for %d hours..." % hours)
+	GameLogger.info("[GameState] 🏕️ Party resting for %d hours..." % hours)
 
 	var party_slots: Array = current_party.slots
 	var sb: Node = get_tree().root.get_node_or_null("SignalBus")

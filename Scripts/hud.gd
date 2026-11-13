@@ -73,6 +73,27 @@ var mobile_hud: MobileHUD = null
 # ==============================================================================
 # 2. LIFECYCLE & INITIALIZATION
 # ==============================================================================
+## Keys 1-6 (input actions party_slot_1..6) act like clicking that party portrait: open the
+## character sheet (or switch it to that character) / pick that ally as a target in battle.
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or event.is_echo() or not event.is_pressed():
+		return
+	for i: int in 6:
+		if not event.is_action_pressed(StringName("party_slot_%d" % (i + 1))):
+			continue
+		if get_tree().paused or not KeyboardModal.party_hotkeys_allowed():
+			return
+		var focus: Control = get_viewport().gui_get_focus_owner()
+		if focus is LineEdit or focus is TextEdit:
+			return
+		if GameState.current_party == null or i >= GameState.current_party.slots.size() \
+				or not is_instance_valid(GameState.current_party.slots[i]):
+			return
+		get_viewport().set_input_as_handled()
+		SignalBus.portrait_clicked.emit(i)
+		return
+
+
 func _ready() -> void:
 	_verify_ui_nodes()
 	_cache_exploration_ui_nodes()

@@ -20,8 +20,9 @@ extends Resource
 ## Yaw applied after look_at. 180 faces most GLBs at the camera; 0 if the mesh already faces +Z.
 @export var combat_yaw_offset_degrees: float = 180.0
 ## How the battle model shows it got hit (it always flashes white once):
-## AUTO = play its hurt/hit clip if the model has one, else shake it in code. SHAKE = always shake.
-@export_enum("AUTO", "CLIP", "SHAKE") var hit_reaction: String = "AUTO"
+## AUTO = play its hurt/hit clip if the model has one, else shake it in code.
+## SHAKE = always shake. Any other value is an animation name to play (e.g. holding-both-shoot).
+@export var hit_reaction: String = "AUTO"
 
 @export_group("Base Stats & Scaling")
 @export var base_level: int = 1

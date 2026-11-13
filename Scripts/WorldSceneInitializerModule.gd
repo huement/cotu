@@ -53,7 +53,7 @@ func _verify_scene_dependencies() -> void:
 	if not is_instance_valid(visual_manager):
 		push_warning("[SceneInitializerModule] CRITICAL WARNING: EnemyVisualManager node not found in scene tree! 3D enemies will not render.")
 	else:
-		print("[SceneInitializerModule] EnemyVisualManager found and verified.")
+		GameLogger.info("[SceneInitializerModule] EnemyVisualManager found and verified.")
 		
 func _align_gridmap_to_player_grid(root: Node3D) -> void:
 	var gm: GridMap = root.get_node_or_null("GridMap") as GridMap
@@ -112,7 +112,7 @@ func _attach_player_torch(root: Node3D) -> void:
 			torch.omni_range = 14.0
 			torch.omni_attenuation = 1.6
 			camera.add_child.call_deferred(torch)
-			print("SceneInitializerModule: Tactical torch successfully mounted to Player Camera3D.")
+			GameLogger.info("SceneInitializerModule: Tactical torch successfully mounted to Player Camera3D.")
 
 func _setup_dust_particles(root: Node3D) -> void:
 	var player: Node3D = root.get_node_or_null("Player") as Node3D

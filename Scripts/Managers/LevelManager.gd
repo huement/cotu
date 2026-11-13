@@ -24,7 +24,8 @@ static func level_player(cat: Resource, options: Dictionary = {}) -> bool:
 		if stat_name in cat:
 			var old_val: int = int(cat.get(stat_name))
 			cat.set(stat_name, old_val + points_to_add)
-			print("LevelManager: %s +%d -> %d" % [stat_name.capitalize(), points_to_add, old_val + points_to_add])
+			if OS.is_debug_build():
+				print("LevelManager: %s +%d -> %d" % [stat_name.capitalize(), points_to_add, old_val + points_to_add])
 
 	# 3. Recalculate Derived Stats (Max HP & Max MP/Energy)
 	var vit: int = int(cat.get("vitality")) if "vitality" in cat else (int(cat.get("vit")) if "vit" in cat else 10)
@@ -79,9 +80,11 @@ static func level_player(cat: Resource, options: Dictionary = {}) -> bool:
 		cat.set("max_xp", next_max_xp)
 
 	var cat_name: String = str(cat.get("name")) if cat.get("name") != null else "Cat"
-	print("LevelManager: 🌟 %s REACHED LEVEL %d! HP: %d (+%d) | MP: %d (+%d) | Next XP: %d" % [
-		cat_name, new_lvl, new_max_hp, hp_gain, new_max_mp, mp_gain, next_max_xp
-	])
+	# Plain print (not GameLogger): batch editor tools call this without autoloads.
+	if OS.is_debug_build():
+		print("LevelManager: 🌟 %s REACHED LEVEL %d! HP: %d (+%d) | MP: %d (+%d) | Next XP: %d" % [
+			cat_name, new_lvl, new_max_hp, hp_gain, new_max_mp, mp_gain, next_max_xp
+		])
 
 	# 5. Notify Global System & Save Progress (skippable for batch tooling)
 	var notify_ui: bool = bool(options.get("notify_ui", true))

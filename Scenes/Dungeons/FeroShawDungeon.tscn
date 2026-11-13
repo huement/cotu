@@ -246,21 +246,21 @@ transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 95, 
 [node name="Chests" type="Node3D" parent="."]
 
 [node name="Chest1" type="Node3D" parent="Chests" instance=ExtResource("21_0um1g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, -23)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 21, 0, -23)
 script = ExtResource("22_7gi5k")
 guaranteed_items = Array[ExtResource("23_jex5a")]([ExtResource("24_bihoh"), ExtResource("25_kmrwb")])
 gold_amount = 100
 object_id = "feroshawdungeon_chest_1"
 
 [node name="Chest2" type="Node3D" parent="Chests" instance=ExtResource("21_0um1g")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 75, 0, -39)
+transform = Transform3D(-2.18557e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.18557e-08, 75, 0, -39)
 script = ExtResource("22_7gi5k")
 guaranteed_items = Array[ExtResource("23_jex5a")]([ExtResource("26_6au1k"), ExtResource("27_k0hvj")])
 gold_amount = 150
 object_id = "feroshawdungeon_chest_2"
 
 [node name="Chest3" type="Node3D" parent="Chests" instance=ExtResource("21_0um1g")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 47, 0, -39)
+transform = Transform3D(-0.5, 0, -4.37114e-08, 0, 0.5, 0, 4.37114e-08, 0, -0.5, 47, 0, -39)
 script = ExtResource("22_7gi5k")
 guaranteed_items = Array[ExtResource("23_jex5a")]([ExtResource("28_5jav2"), ExtResource("29_wr41n")])
 gold_amount = 200

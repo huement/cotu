@@ -1,7 +1,17 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3 uid="uid://bjvuowhvd4oqk"]
 
-[ext_resource type="Script" path="res://Scripts/UI/GameOverScreen.gd" id="1_go"]
-[ext_resource type="Texture2D" path="res://ui/GAME/game_over.png" id="2_art"]
+[ext_resource type="Script" uid="uid://b1s5n2f02x8n7" path="res://Scripts/UI/GameOverScreen.gd" id="1_go"]
+[ext_resource type="Texture2D" uid="uid://bvyhbsg2nwlln" path="res://ui/GAME/game_over.png" id="2_art"]
+[ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="3_qdhg4"]
+[ext_resource type="Texture2D" path="res://ui/icons/database.svg" id="4_load"]
+[ext_resource type="Texture2D" path="res://ui/icons/arrow_left.svg" id="5_quit"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5dykx"]
+shader = ExtResource("3_qdhg4")
+shader_parameter/scanline_count = 146.026006936235
+shader_parameter/scanline_intensity = 0.2150000102125
+shader_parameter/scan_speed = 0.54000002565
+shader_parameter/vignette_intensity = 0.6090000289275
 
 [node name="GameOverScreen" type="CanvasLayer"]
 layer = 120
@@ -16,30 +26,44 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="Center" type="CenterContainer" parent="Black"]
+[node name="GameOverArt" type="TextureRect" parent="Black"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(840, 469)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="Black/Center"]
-layout_mode = 2
-theme_override_constants/separation = 18
-alignment = 1
-
-[node name="GameOverArt" type="TextureRect" parent="Black/Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(840, 469)
-layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
 texture = ExtResource("2_art")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="Center" type="CenterContainer" parent="Black"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -355.0
+offset_top = -391.0
+offset_right = 355.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VBox" type="VBoxContainer" parent="Black/Center"]
+custom_minimum_size = Vector2(710, 60)
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
 [node name="Buttons" type="HBoxContainer" parent="Black/Center/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 32
 alignment = 1
 
@@ -47,13 +71,16 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 52)
 layout_mode = 2
-text = "Load Last Save"
+size_flags_horizontal = 2
+text = "LOAD LAST SAVE"
+icon = ExtResource("4_load")
 
 [node name="QuitButton" type="Button" parent="Black/Center/VBox/Buttons"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 52)
 layout_mode = 2
-text = "Quit to Main Menu"
+text = "QUIT TO MAIN MENU"
+icon = ExtResource("5_quit")
 
 [node name="StatusLabel" type="Label" parent="Black/Center/VBox"]
 unique_name_in_owner = true
@@ -63,3 +90,13 @@ horizontal_alignment = 1
 [node name="Sound" type="AudioStreamPlayer" parent="."]
 unique_name_in_owner = true
 process_mode = 3
+
+[node name="CRTShader" type="ColorRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_5dykx")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

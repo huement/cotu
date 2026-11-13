@@ -8,6 +8,8 @@ const SHINE_SHADER: Shader = preload("res://Shaders/portrait_shine.gdshader")
 
 ## The event payload sent on SignalBus.popup_requested when clicked.
 @export var action_type: String = ""
+## Input-map action that presses this button (interact, party_rest, item_menu).
+@export var input_action: StringName = &""
 
 @export var hover_scale: Vector2 = Vector2(1.1, 1.1)
 @export var click_scale: Vector2 = Vector2(0.95, 0.95)
@@ -31,6 +33,23 @@ func _ready() -> void:
 	button_down.connect(_on_click_start)
 	button_up.connect(_on_click_end)
 	pressed.connect(_on_button_pressed)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if input_action == &"" or event.is_echo() or not event.is_action_pressed(input_action):
+		return
+	if not is_visible_in_tree() or get_tree().paused or KeyboardModal.is_any_open():
+		return
+	var focus: Control = get_viewport().gui_get_focus_owner() as Control
+	if focus is LineEdit or focus is TextEdit:
+		return
+	var player: Node = get_tree().get_first_node_in_group(&"player")
+	if is_instance_valid(player) and player.has_method(&"is_locked") and bool(player.call(&"is_locked")):
+		return
+	if is_instance_valid(GameState) and GameState.current_mode != GameState.Mode.EXPLORING:
+		return
+	get_viewport().set_input_as_handled()
+	_on_button_pressed()
 
 
 ## Plays the click sound, then does the button's job. Override _activate(), not this.

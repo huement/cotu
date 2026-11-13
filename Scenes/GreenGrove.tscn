@@ -21,7 +21,6 @@
 
 [sub_resource type="Sky" id="Sky_wy3s8"]
 sky_material = ExtResource("90_pixelsky")
-process_mode = 2
 
 [sub_resource type="Environment" id="Environment_p8j3p"]
 background_mode = 2

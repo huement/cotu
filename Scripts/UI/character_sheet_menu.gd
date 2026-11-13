@@ -54,6 +54,11 @@ func _ready() -> void:
 
 	if close_button:
 		close_button.pressed.connect(_on_close_button_pressed)
+	# Keyboard: Tab / arrows / Enter, Esc closes, 1-6 switch character (DungeonHUD party hotkeys).
+	if overlay_panel:
+		KeyboardModal.attach(overlay_panel, _on_close_button_pressed)
+		overlay_panel.set_meta(KeyboardModal.META_ALLOW_PARTY_KEYS, true)
+		KeyboardModal.set_default(close_button) # Enter on open = close, never an accidental row swap
 	if spend_points_button:
 		spend_points_button.pressed.connect(_on_spend_points_pressed)
 

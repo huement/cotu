@@ -1,9 +1,34 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=7 format=3 uid="uid://dogikevynw47f"]
 
 [ext_resource type="PackedScene" path="res://Scenes/GameMenus/MenuScreenTemplate.tscn" id="1_tmpl"]
+[ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="2_kal78"]
+[ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="3_cp1nw"]
+[ext_resource type="FontFile" uid="uid://d0ksagavyqlt7" path="res://ui/fonts/Nexa-ExtraLight.otf" id="4_5qu8d"]
+[ext_resource type="FontFile" uid="uid://c1112jnjnfk4y" path="res://ui/fonts/RedditMono-Regular.ttf" id="5_uu5sb"]
+
+[sub_resource type="Theme" id="Theme_176av"]
+default_font = ExtResource("5_uu5sb")
+default_font_size = 18
 
 [node name="HelpScreen" instance=ExtResource("1_tmpl")]
 screen_title = "HELP"
 subtitle = "How to play"
 body_file = "res://Data/Help/help.md"
 show_starter_party_button = true
+
+[node name="BackButton" parent="Margin/Panel/Inner/VBox/Header" index="0"]
+theme_override_fonts/font = ExtResource("2_kal78")
+theme_override_font_sizes/font_size = 32
+
+[node name="TitleLabel" parent="Margin/Panel/Inner/VBox/Header/TitleBlock" index="0"]
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_fonts/font = ExtResource("3_cp1nw")
+theme_override_font_sizes/font_size = 26
+
+[node name="SubtitleLabel" parent="Margin/Panel/Inner/VBox/Header/TitleBlock" index="1"]
+theme_override_colors/font_color = Color(0, 0.95686275, 1, 1)
+theme_override_fonts/font = ExtResource("4_5qu8d")
+theme_override_font_sizes/font_size = 24
+
+[node name="BodyLabel" parent="Margin/Panel/Inner/VBox/Body" index="0"]
+theme = SubResource("Theme_176av")
