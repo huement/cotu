@@ -1,6 +1,5 @@
-[gd_scene load_steps=435 format=3 uid="uid://ci4b8iodvo08n"]
+[gd_scene load_steps=434 format=3 uid="uid://ci4b8iodvo08n"]
 
-[ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
 [ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
 [ext_resource type="Texture2D" uid="uid://b6ktcekweqdqm" path="res://ui/BATTLE/top-bar.png" id="2_tbwvx"]
 [ext_resource type="Texture2D" uid="uid://jjfq430a2taa" path="res://ui/BATTLE/btm-bar.png" id="3_83cdx"]
@@ -2890,22 +2889,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_rj0sa")
 
-[node name="HUDBackground" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -577.0
-offset_top = -325.0
-offset_right = 577.0
-offset_bottom = 325.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("1_hcak5")
-
 [node name="ActionBarBackground" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 7
@@ -3085,8 +3068,8 @@ grow_horizontal = 2
 grow_vertical = 0
 scale = Vector2(0.95, 0.95)
 pivot_offset = Vector2(223.5, 71)
-alignment = 1
 theme_override_constants/separation = 4
+alignment = 1
 script = ExtResource("9_lrf55")
 
 [node name="AttackButton" parent="ActionBar" instance=ExtResource("7_5m5hv")]

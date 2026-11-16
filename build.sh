@@ -4,6 +4,7 @@
 #   ./build.sh            # Mac + Android
 #   ./build.sh mac        # just the Mac build   -> build/macos/Shards.zip
 #   ./build.sh android    # just the Android APK -> build/android/Shards.apk
+#   ./build.sh web        # itch.io HTML5 build  -> build/Shards_web.zip (index.html at zip root)
 #
 # Uses the presets in export_presets.cfg. Needs Godot's export templates installed
 # (Editor > Manage Export Templates); Android also needs the Android SDK + Java set in
@@ -51,11 +52,23 @@ build_android() {
 	echo "    build/android/Shards.apk"
 }
 
+build_web() {
+	echo "==> Web build (itch.io)"
+	rm -rf build/web 2>/dev/null || true
+	mkdir -p build/web
+	"$GODOT" --headless --path . --export-release "Web" build/web/index.html
+	rm -f build/Shards_web.zip
+	# Zip the folder's CONTENTS so index.html sits at the root of the archive.
+	(cd build/web && zip -qr ../Shards_web.zip . -x "*.DS_Store")
+	echo "    build/Shards_web.zip  (upload to itch.io, tick 'This file will be played in the browser')"
+}
+
 case "${1:-all}" in
 	mac|macos) build_mac ;;
 	android) build_android ;;
+	web) build_web ;;
 	all) build_mac; build_android ;;
-	*) echo "Usage: ./build.sh [mac|android|all]" >&2; exit 1 ;;
+	*) echo "Usage: ./build.sh [mac|android|web|all]" >&2; exit 1 ;;
 esac
 
 echo "Done."

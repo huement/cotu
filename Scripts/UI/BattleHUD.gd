@@ -27,14 +27,13 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var edge_flash: Control = %EdgeFlash as Control if has_node("%EdgeFlash") else null
 @onready var slice_overlay: ColorRect = %SliceOverlay as ColorRect if has_node("%SliceOverlay") else null
 
-@onready var hud_background: TextureRect = get_node_or_null(^"HUDBackground") as TextureRect
 @onready var action_bar_background: TextureRect = get_node_or_null(^"ActionBarBackground") as TextureRect
 
-## Mobile art: the battle frame split into a left and a right edge piece + its own bottom bar.
+## Battle frame: a left and a right edge piece (every platform, so it fits any screen width),
+## plus the mobile bottom bar.
 const MOBILE_FRAME_LEFT: Texture2D = preload("res://ui/MOBILE/battlehud_left.svg")
 const MOBILE_FRAME_RIGHT: Texture2D = preload("res://ui/MOBILE/battlehud_right.svg")
 const MOBILE_ACTION_BAR_BG: Texture2D = preload("res://ui/MOBILE/battlehud_bottom.svg")
-const FRAME_DESIGN_SIZE: Vector2 = Vector2(1154, 650) ## ui/BATTLE/hud-bg.png
 const FRAME_PIECE_DESIGN_SIZE: Vector2 = Vector2(71.93, 648.81) ## battlehud_left/right.svg viewBox
 const ACTION_BAR_BG_DESIGN_SIZE: Vector2 = Vector2(1066, 54)
 ## Gap from the bottom of the screen to the bottom of the (scaled) action buttons.
@@ -117,14 +116,13 @@ func _ready() -> void:
 # RESPONSIVE LAYOUT (everything anchored - no "x px from the left")
 # ==============================================================================
 ## Frame, action-bar background and action buttons are anchored and re-laid out whenever the
-## screen size changes, the HUD is shown, or a button appears/disappears. On touch layouts
-## (MobileUI.is_wanted()) the one-piece frame is swapped for the left/right edge pieces so it
-## fits any phone width.
+## screen size changes, the HUD is shown, or a button appears/disappears. The frame is always
+## the left/right edge pieces (hugging the screen sides), so it fits any width or aspect ratio.
 func _setup_responsive_layout() -> void:
 	if is_instance_valid(action_bar_background):
 		_desktop_action_bar_bg = action_bar_background.texture
-	_frame_left = _make_frame_piece("MobileFrameLeft", MOBILE_FRAME_LEFT)
-	_frame_right = _make_frame_piece("MobileFrameRight", MOBILE_FRAME_RIGHT)
+	_frame_left = _make_frame_piece("FrameLeft", MOBILE_FRAME_LEFT)
+	_frame_right = _make_frame_piece("FrameRight", MOBILE_FRAME_RIGHT)
 	get_viewport().size_changed.connect(_apply_responsive_layout)
 	visibility_changed.connect(func() -> void:
 		if visible:
@@ -141,11 +139,9 @@ func _make_frame_piece(piece_name: String, tex: Texture2D) -> TextureRect:
 	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	t.stretch_mode = TextureRect.STRETCH_SCALE
 	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	t.hide()
 	add_child(t)
-	# Draw behind everything else, like HUDBackground.
-	var behind: int = hud_background.get_index() + 1 if is_instance_valid(hud_background) else 0
-	move_child(t, behind)
+	# Draw behind everything else.
+	move_child(t, 0)
 	return t
 
 
@@ -159,22 +155,8 @@ func _apply_responsive_layout() -> void:
 	_layout_action_bar()
 
 
-func _layout_frame(mobile: bool, insets: Dictionary) -> void:
-	if is_instance_valid(hud_background):
-		hud_background.visible = not mobile
-		# Desktop: one-piece frame centred on screen.
-		hud_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		hud_background.stretch_mode = TextureRect.STRETCH_SCALE
-		hud_background.set_anchors_preset(Control.PRESET_CENTER)
-		hud_background.offset_left = -FRAME_DESIGN_SIZE.x * 0.5
-		hud_background.offset_right = FRAME_DESIGN_SIZE.x * 0.5
-		hud_background.offset_top = -FRAME_DESIGN_SIZE.y * 0.5
-		hud_background.offset_bottom = FRAME_DESIGN_SIZE.y * 0.5
+func _layout_frame(_mobile: bool, insets: Dictionary) -> void:
 	if not is_instance_valid(_frame_left) or not is_instance_valid(_frame_right):
-		return
-	_frame_left.visible = mobile
-	_frame_right.visible = mobile
-	if not mobile:
 		return
 	# Full height, width kept in proportion. Left piece hugs the left edge, right piece the right.
 	var h: float = size.y if size.y > 0.0 else get_viewport_rect().size.y

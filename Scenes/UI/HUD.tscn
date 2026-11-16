@@ -66,11 +66,15 @@ grow_vertical = 2
 
 [node name="CockpitBackground" type="TextureRect" parent="MainHUDLayout"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 1114.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -38.0
 offset_top = 95.0
-offset_right = 1186.0
+offset_right = 34.0
 offset_bottom = 998.0
+grow_horizontal = 0
 scale = Vector2(0.6, 0.6)
 texture = ExtResource("2_ako3u")
 
@@ -105,11 +109,15 @@ color = Color(1, 1, 0.3254902, 1)
 
 [node name="RightSidebarAnchor" type="Control" parent="MainHUDLayout"]
 unique_name_in_owner = true
-anchors_preset = 0
-offset_left = 1064.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -88.0
 offset_top = 86.0
-offset_right = 1146.0
+offset_right = -6.0
 offset_bottom = 641.0
+grow_horizontal = 0
 
 [node name="PartyContainer" type="VBoxContainer" parent="MainHUDLayout/RightSidebarAnchor"]
 unique_name_in_owner = true

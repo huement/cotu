@@ -14,6 +14,7 @@ config/name="Shards Of Arcanum"
 config/version="0.1.1"
 run/main_scene="res://Scenes/Boot.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
+boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/image="uid://dj1476a6hb1e"
 config/icon="uid://dem6rrpb323ok"
 
@@ -128,6 +129,8 @@ scenes/main_menu="res://Scenes/GameMenus/MainMenu.tscn"
 camera/apply_fov=false
 
 [rendering]
+
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
