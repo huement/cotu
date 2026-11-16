@@ -1,0 +1,147 @@
+{
+  "pack": "PulseLite UI SFX Free Sample",
+  "version": "1.2",
+  "how_to_use": "Each entry is <category>/<file> without extension. WAV: sounds/<entry>.wav. OGG: ogg/<entry>.ogg (OGG is in the full pack only; the free sample ships WAV). Play 'recommended', or pick randomly from recommended + alternates. Levels are already balanced between events, so start every event at the same volume. pitch_jitter is the suggested random pitch range (+/-); 0 means keep melodic stingers at their pitch.",
+  "toggle_pairs": "toggle_on files are odd numbers, toggle_off even numbers; 01/02, 03/04 ... are matched on/off pairs.",
+  "events": [
+    {
+      "event": "button_click",
+      "category": "click",
+      "use_for": "Button press, tap, list item select",
+      "recommended": "click/click_03",
+      "alternates": [
+        "click/click_09"
+      ],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 16
+    },
+    {
+      "event": "button_hover",
+      "category": "hover",
+      "use_for": "Mouse-over, keyboard/gamepad focus change",
+      "recommended": "hover/hover_01",
+      "alternates": [
+        "hover/hover_05"
+      ],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 15
+    },
+    {
+      "event": "toggle_on",
+      "category": "toggle",
+      "use_for": "Switch/checkbox turned on (pitch goes up)",
+      "recommended": "toggle/toggle_01",
+      "alternates": [],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 8
+    },
+    {
+      "event": "toggle_off",
+      "category": "toggle",
+      "use_for": "Switch/checkbox turned off (pitch goes down)",
+      "recommended": "toggle/toggle_02",
+      "alternates": [],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 7
+    },
+    {
+      "event": "menu_confirm",
+      "category": "confirm",
+      "use_for": "Accept, OK, save, start game",
+      "recommended": "confirm/confirm_05",
+      "alternates": [
+        "confirm/confirm_06"
+      ],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 16
+    },
+    {
+      "event": "menu_back",
+      "category": "back_cancel",
+      "use_for": "Back, cancel, close menu, undo",
+      "recommended": "back_cancel/back_cancel_01",
+      "alternates": [],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 15
+    },
+    {
+      "event": "error",
+      "category": "error",
+      "use_for": "Invalid action, locked item, not enough currency",
+      "recommended": "error/error_01",
+      "alternates": [
+        "error/error_03"
+      ],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 15
+    },
+    {
+      "event": "notification",
+      "category": "notify",
+      "use_for": "Message, alert, quest update, toast",
+      "recommended": "notify/notify_02",
+      "alternates": [
+        "notify/notify_05"
+      ],
+      "pitch_jitter": 0.0,
+      "full_pack_variants": 16
+    },
+    {
+      "event": "panel_open",
+      "category": "panel_open",
+      "use_for": "Open menu, inventory, drawer, dialog",
+      "recommended": "panel_open/panel_open_04",
+      "alternates": [],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 15
+    },
+    {
+      "event": "panel_close",
+      "category": "panel_close",
+      "use_for": "Close menu, inventory, drawer, dialog",
+      "recommended": "panel_close/panel_close_05",
+      "alternates": [],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 15
+    },
+    {
+      "event": "transition",
+      "category": "whoosh",
+      "use_for": "Screen/scene transition, swipe, card fly-in",
+      "recommended": "whoosh/whoosh_06",
+      "alternates": [],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 16
+    },
+    {
+      "event": "coin_pickup",
+      "category": "coin",
+      "use_for": "Currency pickup, score tick, collectible",
+      "recommended": "coin/coin_01",
+      "alternates": [
+        "coin/coin_07"
+      ],
+      "pitch_jitter": 0.03,
+      "full_pack_variants": 16
+    },
+    {
+      "event": "reward",
+      "category": "reward",
+      "use_for": "Chest open, achievement, daily bonus, star rating",
+      "recommended": "reward/reward_05",
+      "alternates": [],
+      "pitch_jitter": 0.0,
+      "full_pack_variants": 15
+    },
+    {
+      "event": "level_up",
+      "category": "level_up",
+      "use_for": "Level up, rank up, stage clear, unlock",
+      "recommended": "level_up/level_up_01",
+      "alternates": [],
+      "pitch_jitter": 0.0,
+      "full_pack_variants": 15
+    }
+  ],
+  "full_pack": "https://bigshadex.itch.io/pulselite-ui-sfx (200 sounds, 15-16 per category, plus OGG and a Unity script)"
+}

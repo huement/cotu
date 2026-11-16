@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" uid="uid://u4shg1uh4n3g" path="res://resources/tile_sets/dungeon_boss/Textures/colormap.png" id="1_tex"]
+[ext_resource type="PackedScene" uid="uid://cfhdjrogg8bte" path="res://resources/tile_sets/dungeon_boss/floor.glb" id="2_floor"]
+[ext_resource type="PackedScene" uid="uid://cx6don07smgun" path="res://resources/tile_sets/dungeon_boss/floor-detail.glb" id="3_floor_detail"]
+[ext_resource type="PackedScene" uid="uid://bxr5vdr2v3nyp" path="res://resources/tile_sets/dungeon_boss/floor-detail-a.glb" id="4_floor_detail_a"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_boss"]
+resource_name = "colormap"
+cull_mode = 2
+albedo_texture = ExtResource("1_tex")
+texture_filter = 0
+
+[node name="BossFloorTiles" type="Node3D"]
+
+[node name="floor" parent="." instance=ExtResource("2_floor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="floor" parent="floor" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="floor-detail" parent="." instance=ExtResource("3_floor_detail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="floor-detail" parent="floor-detail" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")
+
+[node name="floor-detail-a" parent="." instance=ExtResource("4_floor_detail_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+
+[node name="floor-detail-a" parent="floor-detail-a" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_boss")

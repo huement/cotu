@@ -17,9 +17,14 @@ enum Facing {
 @export var movement_duration: float = 0.2
 @export var rotation_duration: float = 0.15
 @export var eye_height: float = 2
+## Extra camera height while standing on a Bridges-layer tile (FeroShaw / BrokenBoneMarsh).
+@export var bridge_eye_lift: float = 0.45
+@export var bridge_eye_lift_duration: float = 0.22
 @export var max_shake_offset: Vector3 = Vector3(0.15, 0.15, 0.05)
 @export var shake_decay: float = 3.0
 @export var back_hold_to_turn_duration: float = 0.4 # How long to hold back to trigger a 180 turn.
+@export var sprint_duration_multiplier: float = 0.6 ## Speed multiplier when holding Shift (0.6 = 40% faster)
+@export var forward_hold_to_run_delay: float = 0.3 # Time in seconds to wait before auto-repeating forward movement.
 
 # -- Back Button Hold-to-Turn State --
 var _is_back_held: bool = false
@@ -27,8 +32,18 @@ var _back_held_start_time: float = 0.0
 var _back_turn_triggered: bool = false
 # ------------------------------------
 
-var _trauma: float = 0.0
+# -- Forward Button Hold-to-Run State --
+var _is_forward_held: bool = false
+var _forward_held_start_time: float = 0.0
+# ------------------------------------
 
+
+var _trauma: float = 0.0
+var _base_eye_height: float = 2.0
+var _on_bridge: bool = false
+var _bridge_cam_tween: Tween = null
+
+#var grid_map: GridMap
 var grid_map: GridMap
 var map_manager: MapManager
 
@@ -36,8 +51,17 @@ var current_grid_pos: Vector2i = Vector2i.ZERO
 var current_facing: Facing = Facing.NORTH
 var is_moving: bool = false
 var _is_in_combat: bool = false
-
+var is_movement_locked: bool = false
+## True while the party's view is in the dungeon battle room (see BattleArena). The party stays on
+## its grid cell (current_grid_pos); only this node's transform is somewhere else.
+var battle_position_override: bool = false
 var _last_proximity_tier: int = 0
+
+## Heavy enemies whose footsteps shake the camera when they're in range (enemy_type keys).
+const HEAVY_ENEMY_TYPES: Array[String] = ["beast", "minotaur"]
+## Camera trauma per proximity check: nearby (yellow, 3-5 tiles) and close (red, 1-2 tiles).
+const HEAVY_SHAKE_NEARBY: float = 0.25
+const HEAVY_SHAKE_CLOSE: float = 0.4
 
 func _ready() -> void:
 	add_to_group(&"player") # Ensures WorldEnemy can locate player's current_grid_pos
@@ -45,6 +69,7 @@ func _ready() -> void:
 	_connect_to_signal_bus()
 
 	if is_instance_valid(grid_movement):
+		grid_movement.step_started.connect(_on_component_step_started)
 		grid_movement.step_completed.connect(_on_component_step_completed)
 		grid_movement.turn_completed.connect(_on_component_turn_completed)
 
@@ -62,26 +87,51 @@ func _connect_to_signal_bus() -> void:
 
 func _initialize_player() -> void:
 	var world_root: Node3D = get_parent() as Node3D
-	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	map_manager = world_root.get_node_or_null("MapManager") as MapManager
 
-	# TEMPORARY FALLBACK: Hardcoded BGM playback for testing.
-	# Necessary while launching directly into pre-loaded dungeon scenes 
-	# where MapManager.switch_map() / switch_map_from_resource() is not called.
-	if is_instance_valid(AudioManager):
-		AudioManager.play_bgm("Environment/dungeon-creepy-quite")
-		
+	# 1. Resolve GridMap across all scene structures
+	grid_map = world_root.get_node_or_null("GridMap") as GridMap
 	if not grid_map:
-		if map_manager and is_instance_valid(map_manager.dungeon_grid):
-			grid_map = map_manager.dungeon_grid
+		grid_map = world_root.get_node_or_null("FloorMap") as GridMap
+	# Movement grid = the map's FloorMap (2 m cells) when it has one; wall layers may be scaled
+	if not grid_map and map_manager and is_instance_valid(map_manager.floor_grid):
+		grid_map = map_manager.floor_grid
+	if not grid_map and map_manager and is_instance_valid(map_manager.dungeon_grid):
+		grid_map = map_manager.dungeon_grid
+	if not grid_map and map_manager and is_instance_valid(map_manager.active_map_instance):
+		var active_map: Node3D = map_manager.active_map_instance
+		if active_map is GridMap:
+			grid_map = active_map as GridMap
 		else:
-			push_error("Player: GridMap sibling node could not be resolved from World root!")
-			return
+			grid_map = active_map.get_node_or_null("%FloorMap") as GridMap
+			if not grid_map:
+				grid_map = active_map.get_node_or_null("%WallMap") as GridMap
+			if not grid_map:
+				grid_map = active_map.get_node_or_null("FloorMap") as GridMap
+			if not grid_map:
+				grid_map = active_map.get_node_or_null("GridMap") as GridMap
+
+	# Fallback search if GridMap is nested or named differently
+	if not grid_map:
+		var found_gridmaps: Array[Node] = world_root.find_children("*", "GridMap", true, false)
+		if not found_gridmaps.is_empty():
+			grid_map = found_gridmaps[0] as GridMap
+
+	# Guard: Stop early if no GridMap node is present in the scene tree
+	if not is_instance_valid(grid_map):
+		push_error("Player: GridMap could not be resolved from World or MapManager!")
+		return
+
+	# TEMPORARY FALLBACK: Hardcoded BGM playback for testing.
+	if is_instance_valid(AudioManager):
+		AudioManager.play_bgm("Environment/forest-creepy")
 
 	# Resolve spawn position AND facing angle from SpawnPoint node first
 	var spawn_point: Node3D = null
 	if map_manager and is_instance_valid(map_manager.active_map_instance):
 		spawn_point = map_manager.active_map_instance.get_node_or_null("SpawnPoint") as Node3D
+	else:
+		spawn_point = world_root.get_node_or_null("SpawnPoint") as Node3D
 
 	if spawn_point:
 		current_grid_pos = _world_to_cell(spawn_point.global_position)
@@ -94,10 +144,56 @@ func _initialize_player() -> void:
 		current_facing = initial_facing
 
 	_apply_canonical_transform()
+	_eye_height_setup(spawn_point, world_root)
 
-	camera.position = Vector3(0.0, eye_height, 0.0)
+
+# Determine eye height dynamically per map (checking metadata AND script properties)
+func _eye_height_setup(spawn_point: Node3D, world_root: Node3D) -> void:
+	var active_height: float = _resolve_eye_height(spawn_point, world_root)
+	GameLogger.info("Player: SpawnPoint eye_height: %s" % active_height)
+	_apply_eye_height(active_height)
+
+
+## Reads eye height from an arrival / spawn marker (used after MapTransition.teleport).
+func apply_eye_height_from(marker: Node3D) -> void:
+	if not is_instance_valid(marker):
+		return
+	var height: float = _resolve_eye_height(marker, null)
+	_apply_eye_height(height)
+
+
+func _resolve_eye_height(spawn_point: Node3D, world_root: Node3D) -> float:
+	if is_instance_valid(spawn_point):
+		if spawn_point.has_meta("eye_height"):
+			return float(spawn_point.get_meta("eye_height"))
+		if "eye_height" in spawn_point:
+			return float(spawn_point.get("eye_height"))
+	if map_manager and is_instance_valid(map_manager.active_map_instance):
+		var active_map: Node3D = map_manager.active_map_instance
+		if active_map.has_meta("eye_height"):
+			return float(active_map.get_meta("eye_height"))
+		if "eye_height" in active_map:
+			return float(active_map.get("eye_height"))
+		# Maps like FeroShaw only had SpawnPoint_* arrivals — pick any marker meta.
+		for child: Node in active_map.get_children():
+			if child is Marker3D and child.has_meta("eye_height"):
+				return float(child.get_meta("eye_height"))
+	if is_instance_valid(world_root) and world_root.has_meta("eye_height"):
+		return float(world_root.get_meta("eye_height"))
+	return eye_height
+
+
+func _apply_eye_height(active_height: float) -> void:
+	_base_eye_height = active_height
+	_on_bridge = false
+	if _bridge_cam_tween != null:
+		_bridge_cam_tween.kill()
+		_bridge_cam_tween = null
+	camera.position = Vector3(0.0, _base_eye_height, 0.0)
 	camera.rotation_degrees = Vector3.ZERO
 	camera.make_current()
+	# Apply bridge lift if we spawn / arrive already on a bridge tile.
+	_update_bridge_camera(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), false)
 
 
 func _physics_process(_delta: float) -> void:
@@ -106,22 +202,71 @@ func _physics_process(_delta: float) -> void:
 
 	rotation_degrees.x = 0.0
 	rotation_degrees.z = 0.0
-	if not is_moving:
+	if not is_moving and not battle_position_override:
 		_apply_canonical_transform()
 
 
+# ==============================================================================
+# MOVEMENT & INPUT HANDLING MAIN
+# ==============================================================================
+func _input(event: InputEvent) -> void:
+	# 🛑 LOCKOUT GUARD: Block movement while in combat, moving, or explicitly locked
+	if _is_in_combat or is_movement_locked or not is_instance_valid(grid_movement) or grid_movement.is_moving:
+		return
+	# A popup / character sheet is open: the arrow keys move its focus, not the party.
+	if KeyboardModal.is_any_open():
+		return
+		
+	# Ignore OS auto-repeat key echo events
+	if event.is_echo():
+		return
+
+	# --- Forward Step Initiator ---
+	if event.is_action_pressed("move_forward"):
+		_forward_held_start_time = Time.get_ticks_msec()
+		if "step_duration" in grid_movement:
+			grid_movement.step_duration = movement_duration
+		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
+		return
+
+	# --- Back Button Hold-to-Turn ---
+	if event.is_action_pressed("move_backward"):
+		_is_back_held = true
+		_back_held_start_time = Time.get_ticks_msec()
+		_back_turn_triggered = false
+		return
+
+	if event.is_action_released("move_backward"):
+		if _is_back_held and not _back_turn_triggered:
+			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+		_is_back_held = false
+		_back_turn_triggered = false
+		return
+	# ---------------------------------------------
+
+	# Rotations remain on discrete button presses
+	if event.is_action_pressed("turn_left"):
+		grid_movement.try_turn(self, 90.0)
+	elif event.is_action_pressed("turn_right"):
+		grid_movement.try_turn(self, -90.0)
+
+
 func _process(delta: float) -> void:
-	# -- NEW: Check for holding the back button to trigger a 180-degree turn --
+	_check_continuous_movement()
+
+	# -- Check for holding the back button to trigger a 180-degree turn --
 	if _is_back_held and not _back_turn_triggered:
-		var hold_time: float = (Time.get_ticks_msec() - _back_held_start_time) / 1000.0
-		if hold_time >= back_hold_to_turn_duration:
-			_back_turn_triggered = true
-			# Prevent the release from also firing a step-back command
+		if not Input.is_action_pressed("move_backward"):
 			_is_back_held = false
-			
-			if is_instance_valid(AudioManager) and AudioManager.has_method("play_turn_around_sound"):
-				AudioManager.play_turn_around_sound()
-			grid_movement.try_turn(self, 180.0)
+		else:
+			var hold_time: float = (Time.get_ticks_msec() - _back_held_start_time) / 1000.0
+			if hold_time >= back_hold_to_turn_duration:
+				_back_turn_triggered = true
+				_is_back_held = false
+				
+				if is_instance_valid(AudioManager) and AudioManager.has_method("play_turn_around_sound"):
+					AudioManager.play_turn_around_sound()
+				grid_movement.try_turn(self, 180.0)
 	# -------------------------------------------------------------------------
 
 	if _trauma > 0.0:
@@ -140,49 +285,23 @@ func _process(delta: float) -> void:
 		camera.v_offset = 0.0
 
 
-# ==============================================================================
-# MOVEMENT & INPUT HANDLING MAIN
-# ==============================================================================
-func _input(event: InputEvent) -> void:
-	# 🛑 LOCKOUT GUARD: Block forward, strafe, backward, and turning while in combat
-	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
+## Polls hardware input for continuous tile movement and hold-to-dash acceleration.
+func _check_continuous_movement() -> void:
+	if _is_in_combat or is_movement_locked or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
 
-	# / Key or "interact" action checks the tile directly in front of the player
-	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SLASH):
-		_try_interact_facing_tile()
-		return
-
-	# --- Simplified Hold-to-Turn Input Handling ---
-	if event.is_action_pressed("move_backward"):
-		# A turn may have already been triggered by _process if the button was held long enough.
-		# In that case, _back_turn_triggered would be true. We reset for a new press.
-		_is_back_held = true
-		_back_held_start_time = Time.get_ticks_msec()
-		_back_turn_triggered = false
-		return
-
-	if event.is_action_released("move_backward"):
-		# If the button is released and a turn hasn't happened, it was a tap. Step back.
-		if _is_back_held and not _back_turn_triggered:
-			grid_movement.try_step(self, Vector3.BACK, _get_cardinal_string())
+	if Input.is_action_pressed("move_forward"):
+		var hold_time: float = (Time.get_ticks_msec() - _forward_held_start_time) / 1000.0
+		var is_dashing: bool = hold_time >= forward_hold_to_run_delay or Input.is_key_pressed(KEY_SHIFT)
 		
-		# Reset state for the next press cycle
-		_is_back_held = false
-		_back_turn_triggered = false
-		return
-	# ---------------------------------------------
-
-	if event.is_action_pressed("move_forward"):
+		if "step_duration" in grid_movement:
+			grid_movement.step_duration = movement_duration * (sprint_duration_multiplier if is_dashing else 1.0)
+			
 		grid_movement.try_step(self, Vector3.FORWARD, _get_cardinal_string())
-	elif event.is_action_pressed("strafe_left"):
+	elif Input.is_action_pressed("strafe_left"):
 		grid_movement.try_step(self, Vector3.LEFT, _get_cardinal_string())
-	elif event.is_action_pressed("strafe_right"):
+	elif Input.is_action_pressed("strafe_right"):
 		grid_movement.try_step(self, Vector3.RIGHT, _get_cardinal_string())
-	elif event.is_action_pressed("turn_left"):
-		grid_movement.try_turn(self, 90.0)
-	elif event.is_action_pressed("turn_right"):
-		grid_movement.try_turn(self, -90.0)
 
 
 # ==============================================================================
@@ -246,7 +365,7 @@ func _execute_grid_step(input_direction: Vector3) -> void:
 				enemy_node.call("trigger_combat_encounter")
 				return
 
-		print("Movement blocked by structural layout block.")
+		GameLogger.nav("Movement blocked by structural layout block.")
 		return
 
 	is_moving = true
@@ -331,23 +450,56 @@ func _angle_to_facing(angle_deg: float) -> Facing:
 
 
 func _cell_to_world(cell: Vector2i) -> Vector3:
+	if not is_instance_valid(grid_map):
+		return Vector3(cell.x * 2.0, 0.0, cell.y * 2.0)
 	var local_pos: Vector3 = grid_map.map_to_local(Vector3i(cell.x, 0, cell.y))
 	local_pos.y = 0.0
 	return grid_map.to_global(local_pos)
 
 
 func _world_to_cell(world_pos: Vector3) -> Vector2i:
+	if not is_instance_valid(grid_map):
+		return Vector2i.ZERO
 	var local_pos: Vector3 = grid_map.to_local(world_pos)
 	var map_pos: Vector3i = grid_map.local_to_map(local_pos)
 	return Vector2i(map_pos.x, map_pos.z)
 
 
 func _is_cell_blocked(grid_pos: Vector3i) -> bool:
-	if map_manager:
-		return map_manager.is_tile_blocked(grid_pos)
+	# 1. Check if MapManager or GridMap reports a structural wall tile
+	if map_manager and map_manager.is_tile_blocked(grid_pos):
+		return true
 
-	var item_index: int = grid_map.get_cell_item(grid_pos)
-	return item_index != GridMap.INVALID_CELL_ITEM
+	# Only a combined floor+wall GridMap (dungeon style) blocks by "any tile here".
+	# On FloorMap-based maps every floor cell has a tile, so walls come from MapManager.
+	var grid_is_walls: bool = not map_manager or grid_map == map_manager.dungeon_grid
+	if is_instance_valid(grid_map) and grid_is_walls:
+		var item_index: int = grid_map.get_cell_item(grid_pos)
+		if item_index != GridMap.INVALID_CELL_ITEM:
+			return true
+
+	# 2. 3D Physics Volume Query: Detect instantiated StaticBody3D obstacles (BigTimber trees, props)
+	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	if not space_state:
+		return false
+
+	var target_world_pos: Vector3 = _cell_to_world(Vector2i(grid_pos.x, grid_pos.z))
+
+	var shape_query := PhysicsShapeQueryParameters3D.new()
+	var box_shape := BoxShape3D.new()
+	# Check a 1.6 x 2.0 x 1.6 volume centered in the target cell
+	box_shape.size = Vector3(1.6, 2.0, 1.6)
+	shape_query.shape = box_shape
+	shape_query.transform = Transform3D(Basis.IDENTITY, target_world_pos + Vector3(0.0, 1.0, 0.0))
+	shape_query.collision_mask = 1 # Layer 1 for StaticBody3D objects
+
+	var hits: Array[Dictionary] = space_state.intersect_shape(shape_query)
+	for hit: Dictionary in hits:
+		var collider: Object = hit.get("collider")
+		if collider and collider != self:
+			return true
+
+	return false
 
 
 func _get_cardinal_string() -> String:
@@ -390,11 +542,34 @@ func _is_enemy_adjacent() -> bool:
 	return false
 
 
+## Lift / lower the camera as soon as a step toward a bridge (or off it) begins.
+func _on_component_step_started(target_world_position: Vector3) -> void:
+	if not is_instance_valid(map_manager):
+		return
+	var target_cell: Vector3i = map_manager.world_to_grid(target_world_position)
+	_update_bridge_camera(target_cell, true)
+
+
 ## Called when the player finishes stepping to a new grid cell
-func _on_grid_step_completed() -> void:
-	# 1. Play player footstep sound
-	if Engine.has_singleton("AudioManager") or is_instance_valid(AudioManager):
-		AudioManager.play_walking_sound("dungeon")
+func _on_component_step_completed(world_position: Vector3) -> void:
+	var grid_3d: Vector3i = Vector3i.ZERO
+	if map_manager:
+		grid_3d = map_manager.world_to_grid(world_position)
+		current_grid_pos = Vector2i(grid_3d.x, grid_3d.z)
+
+	if is_instance_valid(SignalBus):
+		SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+	_on_grid_step_completed(grid_3d)
+
+
+## Called when the player finishes stepping to a new grid cell
+func _on_grid_step_completed(grid_3d: Vector3i = Vector3i.ZERO) -> void:
+	# 1. Detect surface and play dynamic footstep sound
+	if is_instance_valid(AudioManager):
+		var current_map_type: String = map_manager.get_current_map_type() if is_instance_valid(map_manager) else "dungeon"
+		var surface_type: String = _get_surface_type_at_position(grid_3d)
+		AudioManager.play_walking_sound(current_map_type, surface_type)
 
 	# 2. Check nearby enemy distance and evaluate proximity alerts
 	_check_enemy_proximity()
@@ -404,15 +579,11 @@ func _on_grid_step_completed() -> void:
 		SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.35)
 
 
-func _on_component_step_completed(world_position: Vector3) -> void:
-	if map_manager:
-		var grid_3d: Vector3i = map_manager.world_to_grid(world_position)
-		current_grid_pos = Vector2i(grid_3d.x, grid_3d.z)
-
-	if is_instance_valid(SignalBus):
-		SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
-
-	_on_grid_step_completed()
+func _on_step_completed(target_grid_pos: Vector3i) -> void:
+	var map_type: String = map_manager.get_current_map_type() if map_manager else "dungeon"
+	var surface_type: String = _get_surface_type_at_position(target_grid_pos)
+	GameLogger.info("_on_step_completed surface_type: " + surface_type	)
+	AudioManager.play_walking_sound(map_type, surface_type)
 
 
 func _on_component_turn_completed(_direction: Vector3) -> void:
@@ -428,57 +599,136 @@ func _on_component_turn_completed(_direction: Vector3) -> void:
 			current_facing = Facing.EAST
 
 
-## Queries MapManager for an interactable object in the facing tile or current tile
+## Queries MapManager and 3D physics for an interactable object in the facing tile or current tile
 func _try_interact_facing_tile() -> bool:
-	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
-	if not is_instance_valid(map_mgr):
-		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
-
-	if not is_instance_valid(map_mgr) or not map_mgr.has_method("get_interactable_at_grid_pos"):
-		return false
-
-	# 1. Check tile directly in front of the player (facing wall/chest)
 	var facing_offset: Vector2i = _get_movement_offset(Vector3.FORWARD)
 	var target_cell: Vector2i = current_grid_pos + facing_offset
 	var target_3d := Vector3i(target_cell.x, 0, target_cell.y)
 
-	var interactable: DungeonInteractable = map_mgr.get_interactable_at_grid_pos(target_3d) as DungeonInteractable
-	if is_instance_valid(interactable):
-		interactable.interact(self)
-		return true
+	# 1. Check MapManager registered tile interactables
+	var map_mgr: Node3D = get_tree().current_scene.find_child("MapManager", true, false) as Node3D
+	if not is_instance_valid(map_mgr):
+		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
-	# 2. Fallback check: Current standing cell (for wall objects placed on tile edge)
-	var current_3d := Vector3i(current_grid_pos.x, 0, current_grid_pos.y)
-	interactable = map_mgr.get_interactable_at_grid_pos(current_3d) as DungeonInteractable
-	if is_instance_valid(interactable):
-		interactable.interact(self)
-		return true
+	if is_instance_valid(map_mgr) and map_mgr.has_method("get_interactable_at_grid_pos"):
+		var interactable: Object = map_mgr.get_interactable_at_grid_pos(target_3d)
+		if is_instance_valid(interactable):
+			if interactable.has_method(&"interact"):
+				interactable.call("interact", self)
+				return true
+			elif interactable.has_method(&"inspect"):
+				interactable.call("inspect", self)
+				return true
+
+	# 2. Check 3D Physics Volume in facing cell (detects placed 3D objects like Windmill & Masoleum)
+	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	if space_state:
+		var target_world_pos: Vector3 = _cell_to_world(target_cell)
+		var shape_query := PhysicsShapeQueryParameters3D.new()
+		var box_shape := BoxShape3D.new()
+		box_shape.size = Vector3(1.6, 2.0, 1.6)
+		shape_query.shape = box_shape
+		shape_query.transform = Transform3D(Basis.IDENTITY, target_world_pos + Vector3(0.0, 1.0, 0.0))
+		shape_query.collision_mask = 1
+		shape_query.collide_with_bodies = true
+		shape_query.collide_with_areas = true
+
+		var hits: Array[Dictionary] = space_state.intersect_shape(shape_query)
+		for hit: Dictionary in hits:
+			var collider: Object = hit.get("collider") as Object
+			if is_instance_valid(collider) and collider != self:
+				var candidate: Node = collider as Node
+				while is_instance_valid(candidate) and candidate != get_tree().current_scene:
+					if candidate.has_method(&"interact"):
+						candidate.call("interact", self)
+						return true
+					elif candidate.has_method(&"inspect"):
+						candidate.call("inspect", self)
+						return true
+					candidate = candidate.get_parent()
+
+	# 3. Fallback check: Current standing cell
+	if is_instance_valid(map_mgr) and map_mgr.has_method("get_interactable_at_grid_pos"):
+		var current_3d := Vector3i(current_grid_pos.x, 0, current_grid_pos.y)
+		var interactable: Object = map_mgr.get_interactable_at_grid_pos(current_3d)
+		if is_instance_valid(interactable):
+			if interactable.has_method(&"interact"):
+				interactable.call("interact", self)
+				return true
+			elif interactable.has_method(&"inspect"):
+				interactable.call("inspect", self)
+				return true
 
 	return false
 
 
-# player.gd (or world.tscn debug controller)
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.is_echo():
-		match event.keycode:
-			KEY_M: # Press 'M' to switch between Main Dungeon and Testbed
-				if map_manager:
-					var testbed_scene: PackedScene = load("res://Scenes/dungeon_testbed.tscn")
-					map_manager.switch_map_from_resource(testbed_scene)
-					grid_map = map_manager.dungeon_grid
-					print("Map swapped to Testbed!")
-			KEY_T: # Press 'T' to test FIRE VFX & Shake
-				SignalBus.camera_shake_requested.emit(0.5)
-				SignalBus.edge_flash_requested.emit(Color(0.15, 1.0, 0.15), 0.35)
-			KEY_Y: # Press 'Y' to test WATER VFX & Shake
-				SignalBus.camera_shake_requested.emit(1)
-				SignalBus.edge_flash_requested.emit(Color(1.0, 0.15, 0.15), 0.95)
+func _get_surface_type_at_position(grid_pos: Vector3i) -> String:
+	if not is_instance_valid(map_manager):
+		return ""
+
+	# Bridges layer first (FeroShaw / BrokenBoneMarsh keep bridges on their own GridMap).
+	var bridge_name: String = map_manager.get_bridge_item_name(grid_pos).to_lower()
+	if not bridge_name.is_empty():
+		return _surface_type_from_item_name(bridge_name)
+
+	# Floor tiles sit on floor_grid; fallback to dungeon_grid if floor_grid isn't separate
+	var target_grid: GridMap = map_manager.floor_grid if is_instance_valid(map_manager.floor_grid) else map_manager.dungeon_grid
+	if not is_instance_valid(target_grid):
+		return ""
+
+	var cell_item: int = target_grid.get_cell_item(grid_pos)
+
+	# If no item on floor_grid at this position, check dungeon_grid
+	if cell_item == GridMap.INVALID_CELL_ITEM and is_instance_valid(map_manager.dungeon_grid) and target_grid != map_manager.dungeon_grid:
+		target_grid = map_manager.dungeon_grid
+		cell_item = target_grid.get_cell_item(grid_pos)
+
+	if cell_item == GridMap.INVALID_CELL_ITEM:
+		return ""
+
+	var mesh_library: MeshLibrary = target_grid.mesh_library
+	if not is_instance_valid(mesh_library):
+		return ""
+
+	return _surface_type_from_item_name(mesh_library.get_item_name(cell_item).to_lower())
+
+
+## Match tile GLB mesh names to audio surface keys.
+func _surface_type_from_item_name(item_name: String) -> String:
+	if "bridge" in item_name or "path_wood" in item_name or "path_stone" in item_name:
+		if "stone" in item_name:
+			return "bridge_stone"
+		return "bridge_wood"
+	if "grass" in item_name:
+		return "ground_grass"
+	if "path" in item_name:
+		return "ground_path"
+	return ""
+
+
+## Raise the camera slightly on bridge tiles; ease back down when leaving.
+func _update_bridge_camera(grid_pos: Vector3i, animate: bool) -> void:
+	if not is_instance_valid(camera):
+		return
+	var want_bridge: bool = is_instance_valid(map_manager) and map_manager.is_bridge_at(grid_pos)
+	if want_bridge == _on_bridge and animate:
+		return
+	_on_bridge = want_bridge
+	var target_y: float = _base_eye_height + (bridge_eye_lift if _on_bridge else 0.0)
+	if not animate:
+		camera.position.y = target_y
+		return
+	if _bridge_cam_tween != null:
+		_bridge_cam_tween.kill()
+	_bridge_cam_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_bridge_cam_tween.tween_property(camera, "position:y", target_y, bridge_eye_lift_duration)
 
 
 # Scans all active enemies in the dungeon, calculates grid distance, and triggers clickers / HUD alerts
 func _check_enemy_proximity() -> void:
 	var nearby_enemy_types: Array[String] = []
 	var min_grid_dist: int = 999
+	var min_heavy_dist: int = 999
 
 	var enemy_nodes: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
 	if enemy_nodes.is_empty():
@@ -517,6 +767,9 @@ func _check_enemy_proximity() -> void:
 			elif "enemy_data" in enemy_node and is_instance_valid(enemy_node.get("enemy_data")):
 				e_type = str(enemy_node.get("enemy_data").get("enemy_type")).to_lower()
 
+			if HEAVY_ENEMY_TYPES.has(e_type) and grid_dist < min_heavy_dist:
+				min_heavy_dist = grid_dist
+
 			if not e_type.is_empty() and not nearby_enemy_types.has(e_type):
 				nearby_enemy_types.append(e_type)
 
@@ -539,3 +792,90 @@ func _check_enemy_proximity() -> void:
 	if get_tree().root.has_node("SignalBus"):
 		GameLogger.combat("ALERT PROXIMITY %d TIER %d" % [min_grid_dist, current_tier])
 		SignalBus.enemy_proximity_changed.emit(min_grid_dist, current_tier)
+		# Heavy enemies (beasts, minotaurs) rattle the camera: a little when nearby, more when close.
+		if min_heavy_dist <= 2:
+			SignalBus.camera_shake_requested.emit(HEAVY_SHAKE_CLOSE)
+		elif min_heavy_dist <= 5:
+			SignalBus.camera_shake_requested.emit(HEAVY_SHAKE_NEARBY)
+
+
+## Re-initializes GridMap references, spawn point, facing, and camera eye height when a map changes.
+func refresh_for_new_map() -> void:
+	_initialize_player()
+	
+	# Sync grid movement component if present
+	var grid_comp: Node = get_node_or_null("%GridMovementComponent")
+	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
+		grid_comp.set("current_grid_pos", current_grid_pos)
+
+
+## Instantly moves the party to the floor cell under `world_pos` and turns to face
+## `look_at_world` (snapped to the nearest of N/E/S/W). Used by scripted events (boss statue).
+func teleport_to(world_pos: Vector3, look_at_world: Vector3 = Vector3.INF) -> void:
+	current_grid_pos = _world_to_cell(world_pos)
+	if look_at_world != Vector3.INF:
+		var dir: Vector3 = look_at_world - _cell_to_world(current_grid_pos)
+		if Vector2(dir.x, dir.z).length_squared() > 0.0001:
+			current_facing = _angle_to_facing(rad_to_deg(atan2(-dir.x, -dir.z)))
+	is_moving = false
+	_apply_canonical_transform()
+	var grid_comp: Node = get_node_or_null("%GridMovementComponent")
+	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
+		grid_comp.set("current_grid_pos", current_grid_pos)
+	SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+
+## Puts the party on `cell` facing "NORTH" / "EAST" / "SOUTH" / "WEST" (loading a save).
+## Puts the party on a marker's cell, facing the marker's direction (new-game start points).
+func move_to_marker(marker: Node3D) -> void:
+	current_grid_pos = _world_to_cell(marker.global_position)
+	current_facing = _angle_to_facing(marker.global_rotation_degrees.y)
+	is_moving = false
+	_apply_canonical_transform()
+
+
+func restore_location(cell: Vector2i, facing_name: String) -> void:
+	current_grid_pos = cell
+	match facing_name.to_upper():
+		"EAST":
+			current_facing = Facing.EAST
+		"SOUTH":
+			current_facing = Facing.SOUTH
+		"WEST":
+			current_facing = Facing.WEST
+		_:
+			current_facing = Facing.NORTH
+	is_moving = false
+	_apply_canonical_transform()
+	var grid_comp: Node = get_node_or_null("%GridMovementComponent")
+	if is_instance_valid(grid_comp) and "current_grid_pos" in grid_comp:
+		grid_comp.set("current_grid_pos", current_grid_pos)
+	SignalBus.party_moved.emit(Vector3i(current_grid_pos.x, 0, current_grid_pos.y), _get_cardinal_string())
+
+
+## "NORTH" / "EAST" / "SOUTH" / "WEST"
+func get_facing_name() -> String:
+	return _get_cardinal_string()
+
+
+## Moves the party's VIEW to a spot off the movement grid (the dungeon battle room) without
+## changing its grid cell or facing. Undo with leave_battle_view().
+func enter_battle_view(world_pos: Vector3, yaw_radians: float) -> void:
+	battle_position_override = true
+	is_moving = false
+	global_position = world_pos
+	rotation = Vector3(0.0, yaw_radians, 0.0)
+
+
+## Puts the view back on the party's grid cell and facing.
+func leave_battle_view() -> void:
+	battle_position_override = false
+	_apply_canonical_transform()
+
+
+func set_movement_locked(locked: bool) -> void:
+	is_movement_locked = locked
+
+
+func is_locked() -> bool:
+	return _is_in_combat or is_moving or is_movement_locked

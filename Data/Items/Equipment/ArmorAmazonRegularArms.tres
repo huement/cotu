@@ -1,14 +1,14 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dmriqhpexu5vj"]
 
-[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_nhfag"]
-[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_nwyfp"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_nhfag"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_nwyfp"]
 
 [resource]
 script = ExtResource("2_nwyfp")
 item_id = "armor_amazon_regular_arms"
 item_name = "Bronze Arms Armor"
 description = "Regular heavy armor for the Amazon class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_nhfag")
 item_type = 2
 equipment_slot = 2

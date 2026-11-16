@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Environment/BattleConfigTerminal.gd" id="1_terminal"]
+[ext_resource type="PackedScene" uid="uid://stqc4g0mlbaj" path="res://resources/tile_sets/nature/statue_head.glb" id="2_model"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_terminal"]
+height = 3.0
+radius = 1.2
+
+[node name="BattleConfigTerminal" type="Node3D"]
+script = ExtResource("1_terminal")
+object_id = "battle_test_terminal"
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_terminal")
+
+[node name="statue_head" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)

@@ -1,0 +1,143 @@
+# Cave Levels
+
+Three generated cave levels hang off **GloomReach**, built from the cave tile set
+(`cave_floor_mesh_library` / `cave_wall_mesh_library`, 2 m cells).
+
+```
+GloomReach  ──CryptHole──▶  CaveLevel1  ──crypt hole──▶  CaveLevel2  ──crypt hole──▶  CaveLevel3
+    ▲  (arrive: CaveExitArrival)                                                         │
+    └──────────────────────────────── exit stairs ────────────────────────────────────────┘
+Every level's entrance stairs lead back UP to the previous map (arrive on its ExitArrival).
+```
+
+| Scene | Size | Rooms | Enemies | Exit |
+|---|---|---|---|---|
+| `Scenes/Caves/CaveLevel1.tscn` | 24×24 | 6 | 2 × Zombie Savage | crypt hole → CaveLevel2 |
+| `Scenes/Caves/CaveLevel2.tscn` | 28×28 | 8 | Savage / Guard | crypt hole → CaveLevel3 |
+| `Scenes/Caves/CaveLevel3.tscn` | 32×32 | 10 | Guard / Knight | stairs → GloomReach (`CaveExitArrival`) |
+
+GloomReach changes: the existing `Environment/CryptHole` now targets `CaveLevel1.tscn`, and a new
+`CaveExitArrival` marker (2 cells south of the hole, facing away) is where you come back out.
+Backup of the old file: `_extra/GloomReach.tscn.backup-before-caves`.
+
+## How travel works
+
+`Scripts/Environment/MapTransition.gd` → `MapTransition.travel(tree, scene_path, arrival_point_name)`:
+swaps the sub-map with `MapManager.switch_map()` (Player/HUD stay loaded), then teleports the party to
+the named marker in the new map, facing the marker's **-Z**. Falls back to `SpawnPoint`.
+
+- **CryptHole**: new `arrival_point_name` export (default `SpawnPoint`, so other maps behave as before).
+- **Stairs**: new `use_map_manager` (default **false** = old behaviour, `change_scene_to_file`) and
+  `arrival_point_name`. Cave stairs set `use_map_manager = true`, because `change_scene_to_file` would
+  replace the whole World scene with a sub-map.
+
+## Level scene layout (what the generator builds)
+
+```
+CaveLevelN (CaveLevel.gd: map_type "dungeon", bgm, generator settings)
+├── WorldEnvironment        black background, warm ambient, depth fog
+├── EditorWorkLight         editor-only lights + fog-free preview (gone in game)
+├── WorldSceneInitializer   torch on the player camera + dust; no floor/ceiling
+├── SpawnPoint              in front of the entrance stairs (eye_height 1.5 like GloomReach)
+├── ExitArrival             next to the exit - where you land when coming back UP from below
+├── FloorMap / WallMap      GridMaps, cell size 2, cell_center_y off, no scaling
+├── EntryStairs             Stairs.tscn in an alcove, leads to the previous map
+├── Exit                    CryptHole.tscn (scale 0.17) or Stairs.tscn in an alcove
+├── Lights                  EntryLight, ExitLight, CrystalLight1..n (teal, on each crystal rock)
+└── Enemies                 enemy.tscn instances
+```
+
+## Making more levels
+
+**`Scripts/Utilities/GenerateCaveLevel.gd`** (EditorScript): edit the CONFIGURATION block, then
+File → Run. It generates the layout, builds the whole scene above and saves it to
+`Scenes/Caves/<LEVEL_NAME>.tscn` (overwrites; an open copy is reloaded).
+
+- `LEVEL_SEED`: change it for a different cave with the same settings.
+- `GRID_SIZE`, `ROOM_COUNT`, `ENEMY_COUNT`, `ENEMY_DATA`: size and population.
+- `PREVIOUS_SCENE` / `PREVIOUS_ARRIVAL`: where the entrance stairs lead.
+- `EXIT_IS_STAIRS`, `NEXT_SCENE` / `NEXT_ARRIVAL`: crypt hole down, or stairs out.
+
+To add a 4th level: generate `CaveLevel4` (defaults already point back to CaveLevel3), then on
+CaveLevel3 change the Exit to lead to CaveLevel4 (or regenerate CaveLevel3 with
+`EXIT_IS_STAIRS = false`, `NEXT_SCENE = CaveLevel4`) and move the "out to GloomReach" stairs to
+the new last level (`EXIT_IS_STAIRS = true`, `NEXT_SCENE = GloomReach`, `NEXT_ARRIVAL = CaveExitArrival`).
+
+**`Scripts/Utilities/RebuildCaveWalls.gd`** (EditorScript): for hand edits. Open a cave level, paint
+or erase cells on the **FloorMap**, then File → Run: the whole WallMap is re-picked from the floor
+(crystal rocks are kept). Press Ctrl/Cmd+S. If you move the stairs or exit by hand, keep a floor cell
+under them and move `SpawnPoint` / `ExitArrival` with them.
+
+**`Scripts/Utilities/CaveGenerator.gd`**: the shared layout logic (rooms → winding tunnels → loops →
+pillars → entrance alcove → farthest exit → crystals → enemies → wall pieces). Walls go in rock cells
+next to floor; the piece is chosen by how many sides are open:
+1 = `cave-wall`/`-b`/`-c`, 2 adjacent = `cave-wall-corner`, 2 opposite = `cave-wall-double`,
+3 = `cave-wall-end`, 4 = `cave-pillar`.
+
+## Ghosts
+
+Each cave has a haunt on a treasure chest (`GhostAmbushComponent`, 15-tile radius). Half the caves have one ghost, half have two, on different chests. The ghost parks off the grid, so the chest itself stays open. Broken Bone Marsh had no chests; it now has two, each with a ghost. A haunt that lands is an ambush: the ghost acts before the party.
+
+| Scene | Ghosts |
+|---|---|
+| `CaveLevel1`, `CaveLevel2`, `WindmillCave1` | 1 |
+| `CaveLevel3`, `WindmillCave2`, `BrokenBoneMarshCave` | 2 |
+| `StoneTrailCave1`, `StoneTrailCave2`, `StoneTrailCave3` | 2 |
+
+Windmill caves keep that split in `GenerateWindmillCaves.gd` (`ghost_count`). Re-running that generator puts a single ghost on the last chest, or two ghosts on the first and last chests.
+
+## Stone Trail caves
+
+Three floors behind the **RockCave** mouth on Stone Trail, built by
+**`Scripts/Utilities/GenerateStoneTrailCaves.gd`** (File → Run; same `CaveFloorBuilder` settings
+format as the Windmill caves). A step up from the Windmill Cellars.
+
+```
+StoneTrail RockCave ──▶ StoneTrailCave1 ──crypt hole──▶ StoneTrailCave2 ──crypt hole──▶ StoneTrailCave3
+      ▲  (arrive: SpawnPoint_StoneTrailCave, 2 cells west of the mouth, facing away)          │
+      └──────────────────────────────────── exit stairs ─────────────────────────────────────┘
+```
+
+| Scene | Size | Rooms | Enemy groups | Enemies (pack, multiplier) | Ghosts | Chests |
+|---|---|---|---|---|---|---|
+| `StoneTrailCave1` | 30×30 | 8 | 6 | Cyclops 2-3 ×1.0, Crab 3-4 ×1.0, Corrupted 1-2 ×0.9, Rage Wraith 1-2 ×0.85 | 2 (×0.85, lvl 2) | 5 |
+| `StoneTrailCave2` | 32×32 | 9 | 7 | Cyclops 2-3 ×1.05, Rage Wraith 1-2 ×1.0, Corrupted 2-3 ×1.0, Oculat 1-2 ×0.9 | 2 (×0.95, lvl 2) | 6 |
+| `StoneTrailCave3` | 34×34 | 10 | 8 | Oculat 2-3 ×1.0, Rage Wraith 2-3 ×1.0, Savage 1-2 ×1.0, Corrupted 2-4 ×1.05 | 2 (×1.0, lvl 3) | 6 |
+
+- **Bone gear:** 2 × `TokenPartyGearBone` per floor, in the first and last chest of each list.
+  Those are the two chests the ghosts sit on, so the ghosts guard the gear.
+- **Stone Trail changes:** `RockCave.target_dungeon_scene` → `StoneTrailCave1.tscn` (was the
+  placeholder `DungeonLevel1_Upper`), new marker `SpawnPoint_StoneTrailCave`.
+  Backup: `_extra/StoneTrail.tscn.backup-before-caves`.
+
+## Battle room (cave "battle mode")
+
+Cave tunnels are too tight to fit an enemy pack, so cave fights work exactly like dungeon fights:
+the screen fades to black, the party's view moves into `Scenes/Caves/CaveBattle.tscn`, the battle
+runs there, and when it ends the view cuts back to where the party was.
+
+- **Script.** `Scripts/Managers/BattleArena.gd` (shared with dungeons; full description in
+  `BATTLE_SYSTEM.md` §3a). Any map whose root is a `CaveLevel` uses the cave room, so every cave
+  level (GloomReach caves, Broken Bone Marsh cave, windmill cellars) and any new generated one gets it.
+- **Turn it off for one cave:** root metadata `use_battle_room = false` (the fight then happens in place).
+- **Different room for one map:** root metadata `battle_room_scene = "res://..."`.
+- **Editing the room.** The party stands on the scene's `SpawnPoint` marker and looks along its -Z;
+  enemies appear a few metres in front. Keep **Center Y off** on FloorMap / WallMap. The room only
+  has the lights you place in it (plus the party's torch), because it sits 2000 m away from the level.
+- **The party never leaves its cell.** Only the view moves; saves and the cave's other enemies are untouched.
+
+## Editing a dark level
+
+Every cave has an **EditorWorkLight** node (`Scripts/Environment/EditorWorkLight.gd`, a `@tool`
+script). In the editor it adds two soft lights and shows a brighter, fog-free copy of the cave
+environment, so you can see to place treasure. Nothing it adds is saved (the real environment is
+restored before every save) and it deletes itself when the game runs. Tweak `light_energy`,
+`ambient_energy` or `disable_fog` in the Inspector; untick `enabled` to see the real in-game look
+or to edit the real WorldEnvironment. Works in any dark map: just add the node.
+
+## Notes
+
+- Mesh library item ids are hard-coded in `CaveGenerator.gd` (floor 0/1, walls 0–7). If you re-export
+  the libraries with a different item order, update the constants.
+- The player torch added by `WorldSceneInitializer` stays on the camera after leaving the caves
+  (same as other dungeon maps).

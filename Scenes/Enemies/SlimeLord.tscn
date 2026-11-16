@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://qhp1bqggc7xp"]
+
+[ext_resource type="Script" uid="uid://cm4t8ntfsf5p4" path="res://Scripts/Enemies/BlobBossController.gd" id="1_ctrl"]
+[ext_resource type="Script" uid="uid://bxlxhe0eriek1" path="res://Scripts/3D/BlobBossJuice.gd" id="2_juice"]
+[ext_resource type="PackedScene" uid="uid://bx6drxci78ubu" path="res://resources/Enemies/slime.glb" id="1_gqo34"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnSlimeLord.tres" id="4_data"]
+
+[node name="SlimeLord" type="Node3D"]
+script = ExtResource("1_ctrl")
+base_data = ExtResource("4_data")
+boss_scale = 4.0
+loop_model_animation = true
+face_player = true
+scale_affects_stats = false
+trigger_mode = 1
+rise_depth = 8.0
+rise_duration = 3.2
+earth_shake_size = 2
+earth_shake_loops = 2
+wait_for_quake_before_combat = true
+entrance_sound_delay = 0.6
+combat_view_distance = 3.0
+
+[node name="VisualJuice" type="Node3D" parent="."]
+script = ExtResource("2_juice")
+
+[node name="slime" parent="VisualJuice" instance=ExtResource("1_gqo34")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)

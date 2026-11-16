@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://b4n0j4k1s2w7x"]
 
 [ext_resource type="Script" uid="uid://d14gxjgaqmnhs" path="res://Scripts/UI/character_loadout_panel.gd" id="1_abcde"]
-[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="2_qfyrq"]
+[ext_resource type="FontFile" path="res://ui/fonts/AnonymousPro-Regular.ttf" id="2_qfyrq"]
 [ext_resource type="Texture2D" uid="uid://7h0awl3rn8fw" path="res://ui/HUD/load-out.png" id="2_tt2k6"]
 [ext_resource type="Texture2D" uid="uid://bsjd6pdfqbolc" path="res://ui/HUD/hexagon.png" id="4_tt2k6"]
 
@@ -209,7 +209,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.75, 1)
 theme_override_fonts/font = ExtResource("2_qfyrq")
 theme_override_font_sizes/font_size = 12
-text = "MAG BOOTS"
+text = "BOOTS"
 
 [node name="StatusVal" type="Label" parent="GridContainer/SlotFeet/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2

@@ -1,0 +1,14 @@
+{
+  "name": "shards",
+  "engine": "godot",
+  "launch": {
+    "cmd": "/Applications/Godot.app/Contents/MacOS/Godot",
+    "args": ["--path", "."]
+  },
+  "log": {
+    "stdout": true
+  },
+  "ready": "Godot Engine v",
+  "window": "Shards",
+  "sourceRoots": [".", "Scripts", "Core", "Scenes", "resources"]
+}

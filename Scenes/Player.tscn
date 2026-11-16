@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://dhvb1rt0k3ohv"]
+[gd_scene load_steps=9 format=3 uid="uid://dhvb1rt0k3ohv"]
 
 [ext_resource type="Script" uid="uid://onlnsh8w2iiv" path="res://Scripts/player.gd" id="1_dewec"]
 [ext_resource type="PackedScene" uid="uid://d1rfhycwotsyq" path="res://Scenes/3D/weapon_animatior.tscn" id="2_5ixxa"]
+[ext_resource type="PackedScene" path="res://Scenes/3D/throw_animator.tscn" id="2_throw"]
 [ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="3_52ee3"]
 [ext_resource type="Script" uid="uid://b8qk035c6nrth" path="res://Scripts/3D/CameraShake.gd" id="3_nn08x"]
 [ext_resource type="Script" uid="uid://lp1gjanmumd3" path="res://Scripts/Components/GridMovementComponent.gd" id="4_52ee3"]
@@ -21,6 +22,8 @@ eye_height = 2.5
 [node name="CollisionRayCast" type="RayCast3D" parent="Camera3D"]
 
 [node name="WeaponAnimatior" parent="Camera3D" instance=ExtResource("2_5ixxa")]
+
+[node name="ThrowAnimator" parent="Camera3D" instance=ExtResource("2_throw")]
 
 [node name="LevelHUDLabel" type="Label3D" parent="Camera3D"]
 transform = Transform3D(1, 0, 0, 0, 0.99939084, 0.034899496, 0, -0.034899496, 0.99939084, 0, 0.15, -1.2)

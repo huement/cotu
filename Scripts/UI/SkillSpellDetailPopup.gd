@@ -36,6 +36,8 @@ var _selected_target_cat: CatCharacter = null
 
 func _ready() -> void:
 	_hide_popup()
+	if panel_container:
+		KeyboardModal.attach(panel_container, _hide_popup)
 
 	if close_button and not close_button.pressed.is_connected(_hide_popup):
 		close_button.pressed.connect(
@@ -74,7 +76,30 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		var res: Resource = data.get("resource", null) as Resource
 		var cat: CatCharacter = data.get("character", null) as CatCharacter
 		if is_instance_valid(res):
-			open_detail(res, cat)
+			if bool(data.get("cast_now", false)):
+				cast_now(res, cat, data.get("target", null) as CatCharacter)
+			else:
+				open_detail(res, cat)
+
+
+## False for skills that work on the party's supplies instead of a party member (no target page).
+static func needs_target(res: Resource) -> bool:
+	return not (res is SkillData and str((res as SkillData).skill_id) in ["sk_craft_ammo", "sk_flask_brew"])
+
+
+## Uses the ability right away without showing the popup. The touch character sheet picks the
+## target on the sheet itself (CharacterSheetMobile) and sends ABILITY_INFO with "cast_now".
+func cast_now(res: Resource, cat: CatCharacter, target: CatCharacter) -> void:
+	_active_resource = res
+	_active_cat = cat
+	_selected_target_cat = target
+	if res is SkillData and str((res as SkillData).skill_id) == "sk_craft_ammo":
+		_execute_craft_ammo(res as SkillData)
+	elif res is SkillData and str((res as SkillData).skill_id) == "sk_flask_brew":
+		_execute_flask_brew(res as SkillData)
+	else:
+		_execute_field_ability()
+	_hide_popup()
 
 
 ## Displays detailed specifications for a SpellData or SkillData resource
@@ -240,8 +265,12 @@ func _configure_bottom_bar(is_allowed: bool, meets_req: bool, is_field_usable: b
 func _go_to_target_page() -> void:
 	if _active_resource is SkillData:
 		var skill := _active_resource as SkillData
-		if skill.skill_id == &"sk_craft_ammo":
+		var sid: String = str(skill.skill_id)
+		if sid == "sk_craft_ammo":
 			_execute_craft_ammo(skill)
+			return
+		if sid == "sk_flask_brew":
+			_execute_flask_brew(skill)
 			return
 
 	if page_detail:
@@ -389,4 +418,52 @@ func _execute_craft_ammo(skill: SkillData) -> void:
 	if get_tree().root.has_node("SignalBus"):
 		GameLogger.info("%s fabricated %d x %s!" % [_active_cat.name.to_upper(), amount, ammo_item.item_name])
 
+	_hide_popup()
+
+
+## Crush one battle gem into gunpowder and refill Alchemy Flasks.
+func _execute_flask_brew(skill: SkillData) -> void:
+	var cost: int = skill.energy_cost if "energy_cost" in skill else 0
+	if is_instance_valid(_active_cat) and "current_energy" in _active_cat:
+		if _active_cat.current_energy < cost:
+			GameLogger.info("%s does not have enough Energy!" % _active_cat.name)
+			return
+
+	var inv: Inventory = GameState.inventory if is_instance_valid(GameState) else null
+	if not is_instance_valid(inv):
+		GameLogger.info("No inventory — cannot crush gems.")
+		return
+
+	var gem: ItemData = null
+	for stack: ItemData in inv.get_items():
+		if is_instance_valid(stack) and stack.item_id.begins_with("gem_"):
+			gem = stack
+			break
+	if not is_instance_valid(gem):
+		GameLogger.info("%s has no battle gems to crush!" % (_active_cat.name if is_instance_valid(_active_cat) else "Maester"))
+		return
+
+	if is_instance_valid(_active_cat) and "current_energy" in _active_cat and cost > 0:
+		_active_cat.current_energy -= cost
+
+	var gem_name: String = gem.item_name
+	inv.remove_item(gem, 1)
+
+	var flask_path: String = "res://Data/Items/Equipment/WeapMaesterRegularPrimary.tres"
+	var flask: ItemData = load(flask_path) as ItemData if ResourceLoader.exists(flask_path) else null
+	if not is_instance_valid(flask):
+		flask = ItemData.new()
+		flask.item_id = "weap_maester_regular_primary"
+		flask.item_name = "Alchemy Flasks"
+		flask.item_type = ItemData.ItemType.WEAPON
+		flask.equipment_slot = ItemData.EquipmentSlot.RIGHT_HAND
+		flask.weapon_type = ItemData.WeaponType.RANGED
+
+	var amount: int = skill.effect_amount if ("effect_amount" in skill and skill.effect_amount > 0) else 5
+	inv.add_item(flask, amount)
+
+	if is_instance_valid(AudioManager):
+		AudioManager.play_skill_sound(skill.skill_name)
+	GameLogger.info("%s crushed %s into gunpowder and brewed %d flasks!" % [
+		_active_cat.name.to_upper() if is_instance_valid(_active_cat) else "MAESTER", gem_name, amount])
 	_hide_popup()

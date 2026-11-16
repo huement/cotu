@@ -1,12 +1,8 @@
-![_extra/logo-text.png](_extra/logo-text.png)
+![_extra/arcanum_wallpaper.png](_extra/arcanum_wallpaper.png)
 
 ```text
 ■◤◢◤◢◤◢◤◢◤◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■◣◥◣◥◣◥◣◥◣◥■
 ▉▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▉
-▉ * .  ┓━┓┳ ┳┳━┓┳━┓┳━┓┓━┓  .  ┳━┓┳━┓┏━┓┳━┓┏┓┓┳ ┓┓━┓ *.       .   ▉
-▉  .   ┗━┓┃━┫┃━┫┃┳┛┃ ┃┗━┓ OF  ┃━┫┃┳┛┃  ┃━┫┃┃┃┃ ┃┗━┓      >*<     ▉
-▉.     ━━┛┇ ┻┛ ┇┇┗┛┇━┛━━┛ THE ┛ ┇┇┗┛┗━┛┛ ┇┇┗┛┇━┛━━┛  .       *   ▉
-▉       .         *          .           *               *       ▉
 ▉■■■■■■■■■■▶ INFO CENTER ◀■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▉
 ▉                                                                ▉
 ▉   :: GODOT BASED ::                                            ▉
@@ -38,6 +34,3 @@ It aims to provide a `Blobber` Style RPG with a Retro feel. Using traditional D&
 
 There is a markdown file [WORLD.md](_extra/WORLD.md) that contains a rough outline of the world and the characters that will be a part of the game.
 
-<p align="center">
-  <img src="_extra/arcanus.png" alt="Image Description" width="600">
-</p>

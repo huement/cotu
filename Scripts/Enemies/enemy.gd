@@ -31,6 +31,16 @@ extends Node3D
 
 @export var hasSpottedPlayer: bool = false
 
+## Difficulty dial for THIS enemy only (the shared .tres data is never changed).
+## 1.0 = as authored. 0.6 = a softer version for early areas, 1.8 = a tougher "boss" version.
+## Scales health, attack, magic power, mana and XP/gold rewards. Defense only moves a quarter
+## as much, because damage is (attack - defense) and a big defense makes an enemy unhittable.
+@export_range(0.1, 5.0, 0.05) var stat_multiplier: float = 1.0
+## Level of THIS placement (the whole pack). 0 = the enemy data's own level (Data/Enemies.csv).
+## Level is the main difficulty dial: every level adds +20% HP, +15% attack, +10% defense,
+## +4% speed and +30% XP / gold over the level-1 sheet stats (CombatMath.ENEMY_*_GROWTH).
+@export_range(0, 99, 1) var level: int = 0
+
 # ==============================================================================
 # 2. NODE REFERENCES & STATE
 # ==============================================================================
@@ -77,6 +87,7 @@ func _ready() -> void:
 	
 	_resolve_enemy_data()
 	_setup_enemy_group()
+	_apply_stat_multiplier()
 	_instantiate_world_model()
 	_connect_trigger_signals()
 	
@@ -99,11 +110,8 @@ func _cell_to_world(cell: Vector2i) -> Vector3:
 	if not is_instance_valid(map_mgr):
 		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
-	if is_instance_valid(map_mgr) and "dungeon_grid" in map_mgr and is_instance_valid(map_mgr.dungeon_grid):
-		var grid: GridMap = map_mgr.dungeon_grid as GridMap
-		var cell_3d := Vector3i(cell.x, 0, cell.y)
-		var local_pos: Vector3 = grid.map_to_local(cell_3d)
-		var global_pos: Vector3 = grid.to_global(local_pos)
+	if is_instance_valid(map_mgr) and map_mgr.has_method("nav_cell_to_world") and is_instance_valid(map_mgr.get_nav_grid()):
+		var global_pos: Vector3 = map_mgr.nav_cell_to_world(Vector3i(cell.x, 0, cell.y))
 		return Vector3(global_pos.x, global_pos.y + vertical_offset, global_pos.z)
 	
 	return Vector3(cell.x * 2.0 + 1.0, vertical_offset, cell.y * 2.0 + 1.0)
@@ -143,17 +151,48 @@ func _setup_enemy_group() -> void:
 		for i: int in range(pack_size):
 			if is_instance_valid(template):
 				var dup: Resource = template.duplicate(true)
-				
-				if "resource_path" in template and not template.resource_path.is_empty():
-					dup.resource_path = template.resource_path
+				# Don't copy resource_path onto the duplicate: the original already owns that path,
+				# so Godot rejects it ("possible cyclic resource inclusion"). Enemies are identified
+				# by enemy_id, not by path.
 				if "model_scene" in template and template.get("model_scene") != null:
 					dup.set("model_scene", template.get("model_scene"))
 				if "custom_material" in template and template.get("custom_material") != null:
 					dup.set("custom_material", template.get("custom_material"))
 				if "texture_path" in template and not str(template.get("texture_path")).is_empty():
 					dup.set("texture_path", template.get("texture_path"))
-				
+				# Combat scale comes from EnemyData / CSV only. World model_scale is overworld visual.
+
 				enemy_group.append(dup)
+
+
+## Gives every pack member its own scaled copy of its EnemyData (see stat_multiplier / level).
+func _apply_stat_multiplier() -> void:
+	if level > 0:
+		for i: int in range(enemy_group.size()):
+			var src_l: EnemyData = enemy_group[i] as EnemyData
+			if src_l == null:
+				continue
+			var d_l: EnemyData = src_l.duplicate(false) as EnemyData
+			d_l.base_level = level
+			enemy_group[i] = d_l
+	if is_equal_approx(stat_multiplier, 1.0):
+		return
+	var m: float = stat_multiplier
+	var defense_m: float = 1.0 + (m - 1.0) * 0.25
+	for i: int in range(enemy_group.size()):
+		var src: EnemyData = enemy_group[i] as EnemyData
+		if src == null:
+			continue
+		var d: EnemyData = src.duplicate(false) as EnemyData # shallow: keeps model/material refs
+		d.max_health = maxi(1, roundi(float(src.max_health) * m))
+		d.current_health = d.max_health
+		d.attack_damage = maxi(1, roundi(float(src.attack_damage) * m))
+		d.defense = maxi(0, roundi(float(src.defense) * defense_m))
+		d.magic_power = roundi(float(src.magic_power) * m)
+		d.max_mana = roundi(float(src.max_mana) * m)
+		d.xp_value = maxi(1, roundi(float(src.xp_value) * m))
+		d.gold_value = roundi(float(src.gold_value) * m)
+		enemy_group[i] = d
 
 
 func _align_to_grid() -> void:
@@ -162,8 +201,8 @@ func _align_to_grid() -> void:
 		map_mgr = get_tree().root.find_child("MapManager", true, false) as Node3D
 
 	var grid: GridMap = null
-	if is_instance_valid(map_mgr) and "dungeon_grid" in map_mgr and is_instance_valid(map_mgr.dungeon_grid):
-		grid = map_mgr.dungeon_grid as GridMap
+	if is_instance_valid(map_mgr) and map_mgr.has_method("get_nav_grid"):
+		grid = map_mgr.get_nav_grid()
 
 	if initial_cell != Vector2i.ZERO:
 		_grid_position = initial_cell
@@ -250,6 +289,9 @@ func _apply_material_override_recursive(node: Node, mat: Material) -> void:
 # ==============================================================================
 func _process(delta: float) -> void:
 	if not _is_initialized or _is_in_active_combat or enemy_data == null or _is_moving:
+		return
+	# Hold still while any battle (or its victory screen) is on.
+	if is_instance_valid(GameState) and GameState.has_method("is_battle_in_progress") and GameState.is_battle_in_progress():
 		return
 
 	var step_interval: float = maxf(0.5, enemy_data.movement_speed)
@@ -468,12 +510,8 @@ func _get_ambush_component() -> GhostAmbushComponent:
 func trigger_combat_encounter() -> void:
 	if _is_in_active_combat:
 		return
-
-	# Prevent triggering a new battle if the Combat Manager is busy
-	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
-	if is_instance_valid(cm):
-		if cm.get("is_combat_active") or ("is_transitioning_out" in cm and cm.get("is_transitioning_out")):
-			return
+	if is_instance_valid(GameState) and GameState.has_method("can_begin_encounter") and not GameState.can_begin_encounter():
+		return
 
 	# 👻 GHOST AMBUSH GUARD: If this enemy is an ambush ghost, block direct combat unless the ambush failed
 	var ambush_comp: GhostAmbushComponent = _get_ambush_component()
@@ -482,10 +520,30 @@ func trigger_combat_encounter() -> void:
 		return
 
 	_is_in_active_combat = true
+
+	# Sampled before the battle room turns the party around to look at the fight.
+	var caught_from_behind: bool = BattleFacing.party_is_facing_away(get_tree(), global_position)
+
+	# Dungeons: fade into the battle room. Elsewhere: turn the party to face this enemy first
+	# (battle models appear in front of the camera).
+	await BattleArena.prepare_party(get_tree(), global_position)
+	if not is_inside_tree():
+		return
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	if is_instance_valid(cm) and bool(cm.get("is_combat_active")):
+		_is_in_active_combat = false # another fight started while we turned
+		return
 	hide()
 
 	if is_instance_valid(GameLogger):
 		GameLogger.combat("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), _grid_position])
+
+	# A landed haunt is always an ambush. Any other meeting ambushes only from behind,
+	# and only enemies with can_surprise_player actually take the first turn.
+	var ambush: bool = is_instance_valid(ambush_comp) or caught_from_behind
+	if ambush and is_instance_valid(GameLogger):
+		GameLogger.combat("Ambush! The party had its back to the enemy.")
+	CombatMath.apply_meeting_ambush(enemy_group, ambush)
 
 	var party_slots: Array = []
 	if "current_party" in GameState and GameState.current_party != null:

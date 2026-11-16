@@ -1,0 +1,17 @@
+---
+description: ATB combat contracts — CombatManager, BattleHUD, targeting
+globs: "{Scripts/Combat/**,tests/combat/**,Scripts/Managers/CombatManager.gd,Scripts/Managers/TargetSelectionManager.gd,Scripts/Managers/BattleFacing.gd,Scripts/UI/Battle*.gd,Scripts/UI/battle_*.gd,Scripts/3D/EnemyVisualManager.gd,Scripts/Resources/{Enemy*,Skill*,Spell*,Status*}.gd,_documentation/{COMBAT*,BATTLES*,SKILLS*}.md}"
+alwaysApply: false
+---
+
+# Combat
+
+Canonical: `_documentation/COMBAT_README.md` (not older “planning phase” notes in STATUS.md).
+
+- Start: `SignalBus.combat_started(enemy_group, party_slots, facing)`
+- End: **only** `CombatManager` emits `combat_ended`
+- Actions: UI → `player_action_selected` / `TargetSelectionManager` pending ability → CombatManager
+- Targets: `SINGLE_ENEMY|SINGLE_ALLY|ALL_ENEMY|ALL_ALLY|SELF`
+- Snapshot stats into combatants at battle start; don’t mutate live exploration resources mid-resolve without going through CombatManager
+- Row rules: front melee-exposed; back protected / melee restricted — see `BATTLES.md`
+- Formulas live in `Scripts/Combat/` (`CombatMath`, `CombatTargeting`, `AbilityInfo`, `Combatant`, `ActiveEffect`): static, typed, no SignalBus/logging. Read those instead of CombatManager; change a formula there and update `tests/combat/`. CombatManager only injects state (guards, tuning exports) and logs.

@@ -1,6 +1,7 @@
 # res://Scripts/Utilities/SkillCompiler.gd
 @tool
 extends EditorScript
+class_name SkillCompiler
 
 const CSV_PATHS: Array[String] = ["res://Data/Skills.csv", "res://Data/Skills/Skills.csv"]
 const OUTPUT_DIR: String = "res://Data/Skills/"
@@ -10,11 +11,11 @@ func _run() -> void:
 	compile_skills()
 
 
-func compile_skills() -> void:
+static func compile_skills() -> int:
 	var csv_path: String = _find_valid_csv_path()
 	if csv_path.is_empty():
 		printerr("Skill Compiler Error: Cannot find 'Skills.csv' in project root or Data folder!")
-		return
+		return 0
 
 	if not DirAccess.dir_exists_absolute(OUTPUT_DIR):
 		DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
@@ -22,7 +23,7 @@ func compile_skills() -> void:
 	var file := FileAccess.open(csv_path, FileAccess.READ)
 	if file == null:
 		printerr("Skill Compiler Error: Failed to open CSV file at ", csv_path)
-		return
+		return 0
 
 	var _header: PackedStringArray = file.get_csv_line()
 	var count: int = 0
@@ -73,9 +74,16 @@ func compile_skills() -> void:
 		else:
 			skill.status_effect = "NONE"
 
-		# Column 15: attack_vfx_path
+		# Column 15: animation (ThrowAnimator / WeaponAnimator / spell VFX name)
 		if line.size() >= 16:
-			_apply_vfx_frames(skill, line[15].strip_edges())
+			var anim: String = line[15].strip_edges()
+			skill.animation = anim if not anim.is_empty() else "NONE"
+		else:
+			skill.animation = "NONE"
+
+		# Column 16: attack_vfx_path
+		if line.size() >= 17:
+			_apply_vfx_frames(skill, line[16].strip_edges())
 
 		var save_path: String = OUTPUT_DIR + save_path_filename(skill.skill_id)
 
@@ -86,20 +94,21 @@ func compile_skills() -> void:
 			printerr("Failed to save Skill resource for: ", skill.skill_name, " Error: ", err)
 
 	print("Skill Compiler Success: Generated ", count, " Skill .tres files into ", OUTPUT_DIR)
+	return count
 
 
-func save_path_filename(id_str: String) -> String:
+static func save_path_filename(id_str: String) -> String:
 	return id_str.to_pascal_case() + ".tres"
 
 
-func _find_valid_csv_path() -> String:
+static func _find_valid_csv_path() -> String:
 	for path in CSV_PATHS:
 		if FileAccess.file_exists(path):
 			return path
 	return ""
 
 
-func _parse_skill_type(s: String) -> SkillData.SkillType:
+static func _parse_skill_type(s: String) -> SkillData.SkillType:
 	match s.to_upper():
 		"ENVIRONMENT":
 			return SkillData.SkillType.ENVIRONMENT
@@ -109,7 +118,7 @@ func _parse_skill_type(s: String) -> SkillData.SkillType:
 			return SkillData.SkillType.COMBAT
 
 
-func _parse_target_type(s: String) -> SkillData.TargetType:
+static func _parse_target_type(s: String) -> SkillData.TargetType:
 	match s.to_upper():
 		"ALL_ENEMY", "ALL_ENEMIES":
 			return SkillData.TargetType.ALL_ENEMY
@@ -125,7 +134,7 @@ func _parse_target_type(s: String) -> SkillData.TargetType:
 			return SkillData.TargetType.SINGLE_ENEMY
 
 
-func _parse_effect_type(s: String) -> SkillData.EffectType:
+static func _parse_effect_type(s: String) -> SkillData.EffectType:
 	match s.to_upper():
 		"HEAL":
 			return SkillData.EffectType.HEAL
@@ -147,7 +156,7 @@ func _parse_effect_type(s: String) -> SkillData.EffectType:
 			return SkillData.EffectType.DAMAGE
 
 
-func _parse_element(s: String) -> ItemData.EffectElement:
+static func _parse_element(s: String) -> ItemData.EffectElement:
 	match s.to_upper():
 		"BLADE":
 			return ItemData.EffectElement.BLADE
@@ -163,7 +172,7 @@ func _parse_element(s: String) -> ItemData.EffectElement:
 			return ItemData.EffectElement.NONE
 
 
-func _parse_status_effect(s: String, duration: int = 1) -> String:
+static func _parse_status_effect(s: String, duration: int = 1) -> String:
 	var clean_s: String = s.strip_edges()
 	if clean_s.is_empty() or clean_s.to_upper() == "NONE":
 		return "NONE"
@@ -213,7 +222,7 @@ func _parse_status_effect(s: String, duration: int = 1) -> String:
 			return clean_s
 
 ## Safely loads and assigns a SpriteFrames resource from a CSV string path
-func _apply_vfx_frames(target_resource: Resource, vfx_path_string: String) -> void:
+static func _apply_vfx_frames(target_resource: Resource, vfx_path_string: String) -> void:
 	var clean_path: String = vfx_path_string.strip_edges()
 	if clean_path.is_empty():
 		return

@@ -34,13 +34,20 @@ var _active_slot_index: int = -1
 var _current_page: Page = Page.ABILITY_SELECT
 var _current_tab: AbilityTab = AbilityTab.SKILLS
 var _selected_ability: Resource = null
+## Single-selection group for the ability rows (rebuilt with the list).
+var _ability_group: ButtonGroup = ButtonGroup.new()
 var _selected_target_id: String = ""
 var _selected_target_index: int = -1
 var _combatants_list: Array = []
 
+const LABEL_NEXT_TARGET: String = "NEXT: TARGET >"
+const LABEL_CONFIRM: String = "CONFIRM"
+
 
 func _ready() -> void:
 	_close_popup()
+	if is_instance_valid(panel_container):
+		KeyboardModal.attach(panel_container, _on_keyboard_cancel)
 
 	if is_instance_valid(skills_tab_btn):
 		skills_tab_btn.pressed.connect(_on_tab_changed.bind(AbilityTab.SKILLS))
@@ -59,7 +66,7 @@ func _ready() -> void:
 			func():
 				if is_instance_valid(AudioManager):
 					AudioManager.play_button_press()
-				_go_to_target_page()
+				_on_page1_next_pressed()
 		)
 	if is_instance_valid(page2_back_btn):
 		page2_back_btn.pressed.connect(
@@ -265,37 +272,24 @@ func _render_ability_list() -> void:
 		ability_scroll_list.add_child(empty_lbl)
 		return
 
+	_ability_group = ButtonGroup.new()
 	for ability_res: Resource in valid_items:
 		var btn: Button = _create_ability_row_button(ability_res)
 		ability_scroll_list.add_child(btn)
 
 
+## One ability as the shared AbilityRow (same row as the character sheet), see-through for the HUD.
+## Rows share a ButtonGroup so the picked ability stays highlighted.
 func _create_ability_row_button(ability_res: Resource) -> Button:
-	var btn: Button = Button.new()
-	btn.custom_minimum_size = Vector2(0, 36)
-	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn.focus_mode = Control.FOCUS_NONE
+	var row: AbilityRow = AbilityRow.create(ability_res, {
+		"context": AbilityRow.Context.HUD,
+		"toggle": true,
+		"button_group": _ability_group,
+	})
+	row.focus_mode = Control.FOCUS_NONE
+	row.set_selected(ability_res == _selected_ability)
 
-	var name_str: String = ""
-	if "spell_name" in ability_res and not str(ability_res.get("spell_name")).is_empty():
-		name_str = str(ability_res.get("spell_name"))
-	elif "skill_name" in ability_res and not str(ability_res.get("skill_name")).is_empty():
-		name_str = str(ability_res.get("skill_name"))
-	elif "name" in ability_res:
-		name_str = str(ability_res.get("name"))
-	else:
-		name_str = "Ability"
-
-	var cost_val: int = 0
-	if "energy_cost" in ability_res:
-		cost_val = int(ability_res.get("energy_cost"))
-	elif "mana_cost" in ability_res:
-		cost_val = int(ability_res.get("mana_cost"))
-	elif "mp_cost" in ability_res:
-		cost_val = int(ability_res.get("mp_cost"))
-
-	btn.text = "  %s (Cost: %d EN)" % [name_str.to_upper(), cost_val]
-
+	var cost_val: int = AbilityRow.cost_of(ability_res)
 	var current_en: int = 0
 	if "current_energy" in _active_cat:
 		current_en = int(_active_cat.get("current_energy"))
@@ -303,36 +297,17 @@ func _create_ability_row_button(ability_res: Resource) -> Button:
 		current_en = int(_active_cat.get("current_mp"))
 	elif "current_mana" in _active_cat:
 		current_en = int(_active_cat.get("current_mana"))
-
 	if current_en < cost_val:
-		btn.disabled = true
-		btn.text += " [LOW ENERGY]" if _current_tab == AbilityTab.SKILLS else " [LOW MANA]"
+		row.set_unavailable("Not enough mana (%d / %d)" % [current_en, cost_val], true)
 
-	var style_normal: StyleBoxFlat = StyleBoxFlat.new()
-	style_normal.bg_color = Color(0.08, 0.12, 0.15, 0.9)
-	style_normal.border_width_left = 1
-	style_normal.border_width_top = 1
-	style_normal.border_width_right = 1
-	style_normal.border_width_bottom = 1
-	style_normal.border_color = Color(0.0, 0.8, 0.7, 0.4)
-
-	var style_hover: StyleBoxFlat = style_normal.duplicate() as StyleBoxFlat
-	style_hover.bg_color = Color(0.12, 0.22, 0.28, 0.9)
-	style_hover.border_color = Color(0.0, 1.0, 0.8, 0.9)
-
-	btn.add_theme_stylebox_override("normal", style_normal)
-	btn.add_theme_stylebox_override("hover", style_hover)
-	btn.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8))
-
-	btn.pressed.connect(
+	row.pressed.connect(
 		func() -> void:
 			if is_instance_valid(AudioManager):
 				AudioManager.play_ui_sound("button-press")
 			_selected_ability = ability_res
 			_update_ability_preview(),
 	)
-
-	return btn
+	return row
 
 
 func _update_ability_preview() -> void:
@@ -355,11 +330,12 @@ func _update_ability_preview() -> void:
 			cost_val = int(_selected_ability.get("mp_cost"))
 
 		if is_instance_valid(selected_ability_label):
-			selected_ability_label.text = "%s [COST: %d EN]" % [name_str.to_upper(), cost_val]
+			selected_ability_label.text = "%s [COST: %d MANA]" % [name_str.to_upper(), cost_val]
 		if is_instance_valid(ability_desc_label):
 			ability_desc_label.text = desc_str
 		if is_instance_valid(page1_next_btn):
 			page1_next_btn.disabled = false
+			page1_next_btn.text = LABEL_CONFIRM if _get_valid_targets(_selected_ability).size() == 1 else LABEL_NEXT_TARGET
 	else:
 		if is_instance_valid(selected_ability_label):
 			selected_ability_label.text = "SELECT AN ABILITY ABOVE"
@@ -367,6 +343,7 @@ func _update_ability_preview() -> void:
 			ability_desc_label.text = "Choose a skill or spell from the list to view specifications and select a target."
 		if is_instance_valid(page1_next_btn):
 			page1_next_btn.disabled = true
+			page1_next_btn.text = LABEL_NEXT_TARGET
 
 
 func _selected_ability_title() -> String:
@@ -430,9 +407,20 @@ func _render_target_grid() -> void:
 	if not is_instance_valid(_selected_ability):
 		return
 
-	var is_ally_target: bool = _is_ally_targeting(_selected_ability)
+	for c: Variant in _get_valid_targets(_selected_ability):
+		var card: Button = _create_target_card_button(c)
+		target_grid_container.add_child(card)
 
+
+## Combatants this ability can target: living enemies (or allies for support abilities).
+## Falls back to all of that side if none are alive, matching the old grid behaviour.
+func _get_valid_targets(ability_res: Resource) -> Array:
 	var valid_targets: Array = []
+	if not is_instance_valid(ability_res):
+		return valid_targets
+
+	var is_ally_target: bool = _is_ally_targeting(ability_res)
+
 	for c: Variant in _combatants_list:
 		if not is_instance_valid(c):
 			continue
@@ -455,9 +443,22 @@ func _render_target_grid() -> void:
 			elif not is_ally_target and not is_player:
 				valid_targets.append(c)
 
-	for c: Variant in valid_targets:
-		var card: Button = _create_target_card_button(c)
-		target_grid_container.add_child(card)
+	return valid_targets
+
+
+## Page 1 primary button: with exactly one valid target, skip the target page and act.
+func _on_page1_next_pressed() -> void:
+	if not is_instance_valid(_selected_ability):
+		return
+	var targets: Array = _get_valid_targets(_selected_ability)
+	if targets.size() == 1:
+		var only: Object = targets[0]
+		_selected_target_id = str(only.get("id")) if "id" in only else ""
+		_selected_target_index = int(only.get("slot_index")) if "slot_index" in only else 0
+		GameLogger.combat("Battle Ability For | %s (single target, auto-confirm)" % _selected_ability_title())
+		_confirm_and_emit_action()
+	else:
+		_go_to_target_page()
 
 
 func _create_target_card_button(combatant: Object) -> Button:
@@ -561,8 +562,10 @@ func _is_ally_targeting(ability_res: Resource) -> bool:
 	if not is_instance_valid(ability_res):
 		return false
 
-	if "skill_id" in ability_res and ability_res.get("skill_id") == &"sk_craft_ammo":
-		return true
+	if "skill_id" in ability_res:
+		var sid: String = str(ability_res.get("skill_id"))
+		if sid == "sk_craft_ammo" or sid == "sk_flask_brew":
+			return true
 
 	var raw_type: Variant = ability_res.get("target_type") if "target_type" in ability_res else ability_res.get("target")
 	if raw_type is String or raw_type is StringName:
@@ -629,28 +632,8 @@ func _confirm_and_emit_action() -> void:
 
 	var action_type: StringName = &"SKILL" if _current_tab == AbilityTab.SKILLS else &"SPELL"
 
-	var cost_val: int = 0
-	if "energy_cost" in _selected_ability:
-		cost_val = int(_selected_ability.get("energy_cost"))
-	elif "mana_cost" in _selected_ability:
-		cost_val = int(_selected_ability.get("mana_cost"))
-	elif "mp_cost" in _selected_ability:
-		cost_val = int(_selected_ability.get("mp_cost"))
-
-	if is_instance_valid(_active_cat):
-		var new_val: int = 0
-		if "current_energy" in _active_cat:
-			new_val = max(0, int(_active_cat.get("current_energy")) - cost_val)
-			_active_cat.set("current_energy", new_val)
-		elif "current_mp" in _active_cat:
-			new_val = max(0, int(_active_cat.get("current_mp")) - cost_val)
-			_active_cat.set("current_mp", new_val)
-		elif "current_mana" in _active_cat:
-			new_val = max(0, int(_active_cat.get("current_mana")) - cost_val)
-			_active_cat.set("current_mana", new_val)
-
-		if get_tree().root.has_node("SignalBus"):
-			SignalBus.character_mana_changed.emit(_active_slot_index, new_val)
+	# Mana is spent by CombatManager when the ability actually resolves
+	# (so it is never charged twice, or charged for a cast that fails).
 
 	var target_mgr: Node = get_tree().root.get_node_or_null("TargetSelectionManager")
 	if is_instance_valid(target_mgr) and target_mgr.has_method("set_pending_ability"):
@@ -662,6 +645,16 @@ func _confirm_and_emit_action() -> void:
 		GameLogger.combat("BattleAbilityPopup: Executed %s on target index %d" % [action_type, _selected_target_index])
 
 	_close_popup()
+
+
+## Esc: from the target page go back to the ability list, otherwise close.
+func _on_keyboard_cancel() -> void:
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-close")
+	if _current_page == Page.TARGET_SELECT:
+		_go_to_ability_page()
+	else:
+		_close_popup()
 
 
 func _close_popup() -> void:

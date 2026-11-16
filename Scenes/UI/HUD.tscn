@@ -1,26 +1,38 @@
-[gd_scene load_steps=24 format=3 uid="uid://dqkr2j65k83yc"]
+[gd_scene load_steps=37 format=3 uid="uid://dqkr2j65k83yc"]
 
 [ext_resource type="Script" uid="uid://bxkfs62e26vou" path="res://Scripts/hud.gd" id="1_cn5rm"]
 [ext_resource type="Texture2D" uid="uid://dn0f5ac8pbppq" path="res://ui/HUD/sidebar.png" id="2_ako3u"]
 [ext_resource type="Texture2D" uid="uid://ccjl04lnxg00i" path="res://ui/HUD/topbar.png" id="3_khvou"]
 [ext_resource type="PackedScene" uid="uid://yo001sb3lbfp" path="res://Scenes/UI/PartySlotPortrait.tscn" id="4_55bpt"]
-[ext_resource type="Texture2D" uid="uid://dte7juxkf8grr" path="res://ui/HUD/search-btn.png" id="5_yd1yt"]
-[ext_resource type="Texture2D" uid="uid://dfx0p2jk0ynh3" path="res://ui/HUD/search-hover.png" id="6_0n5r3"]
 [ext_resource type="Script" uid="uid://bismjgexijch3" path="res://Scripts/search_button.gd" id="7_5h4o4"]
-[ext_resource type="Texture2D" uid="uid://bb878wlm1bg45" path="res://ui/HUD/item-btn.png" id="8_p4bpa"]
-[ext_resource type="Texture2D" uid="uid://cvbiq0j3bvkjh" path="res://ui/HUD/item-hover.png" id="9_gcvgm"]
 [ext_resource type="Script" uid="uid://b8ywsg7wbn4ln" path="res://Scripts/item_button.gd" id="10_k3th7"]
-[ext_resource type="Texture2D" uid="uid://cl03o04pwuvpk" path="res://ui/HUD/rest-btn.png" id="11_dlptc"]
-[ext_resource type="Texture2D" uid="uid://bswsoraw21ye4" path="res://ui/HUD/rest-hover.png" id="12_cg6gh"]
 [ext_resource type="Script" uid="uid://bfhgpygqe21fy" path="res://Scripts/rest_button.gd" id="13_iub3o"]
 [ext_resource type="PackedScene" uid="uid://ci4b8iodvo08n" path="res://Scenes/UI/BattleHUD.tscn" id="14_eedsi"]
-[ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="15_u1rxn"]
+[ext_resource type="Shader" uid="uid://cjl40i4twnp5j" path="res://Shaders/minimap_crt.gdshader" id="15_u1rxn"]
+[ext_resource type="Texture2D" uid="uid://dockh2fhdi881" path="res://ui/HUD/menu_button.png" id="15_yd1yt"]
+[ext_resource type="Texture2D" uid="uid://1xbwaw2vwxnn" path="res://ui/HUD/menu_button_pressed.png" id="16_5h4o4"]
 [ext_resource type="Script" uid="uid://ckoiskavvtx6f" path="res://Scripts/minimap_camera.gd" id="16_wjwn1"]
 [ext_resource type="Texture2D" uid="uid://btil8atds3nsj" path="res://ui/minimap-indicator.png" id="17_lyj15"]
-[ext_resource type="Texture2D" uid="uid://6q4bmnpuwq3m" path="res://ui/HUD/minimap_bg_sm.png" id="18_l2igo"]
+[ext_resource type="Texture2D" uid="uid://0r32xf12mm4" path="res://ui/HUD/menu_button_hover.png" id="17_p4bpa"]
+[ext_resource type="Texture2D" uid="uid://btj1qk47hrys6" path="res://ui/HUD/mini-map-cover.png" id="18_ako3u"]
+[ext_resource type="Texture2D" uid="uid://cwdkwsykhlspg" path="res://ui/HUD/shard_menu_button.png" id="18_k3th7"]
 [ext_resource type="PackedScene" uid="uid://c7djkhvfbkv60" path="res://Scenes/UI/NineHUD.tscn" id="19_ako3u"]
+[ext_resource type="Texture2D" uid="uid://sbgtkm8juot8" path="res://ui/HUD/shard_menu_button_pressed.png" id="19_dlptc"]
 [ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="19_ralih"]
+[ext_resource type="Texture2D" uid="uid://4rntwjnu04is" path="res://ui/HUD/shard_menu_button_hover.png" id="20_cg6gh"]
 [ext_resource type="Texture2D" uid="uid://be14sjxl48syt" path="res://ui/HUD/edge_vignette.png" id="20_p5q14"]
+[ext_resource type="FontFile" uid="uid://cx1vfygfe1ymt" path="res://ui/fonts/RedditMono-Bold.ttf" id="21_khvou"]
+[ext_resource type="Shader" uid="uid://ddae7co6523v3" path="res://Shaders/screen_slice.gdshader" id="23_55bpt"]
+[ext_resource type="Texture2D" uid="uid://cl0yy0wv0yfx4" path="res://ui/HUD/toolbar/toolbar_bg.png" id="tb_bg"]
+[ext_resource type="Texture2D" uid="uid://3715bat1pi2m" path="res://ui/HUD/toolbar/items.png" id="tb_items"]
+[ext_resource type="Texture2D" uid="uid://djotaahg74qj6" path="res://ui/HUD/toolbar/items_hover.png" id="tb_items_h"]
+[ext_resource type="Texture2D" uid="uid://c1dcj3lncbcnx" path="res://ui/HUD/toolbar/items_pressed.png" id="tb_items_p"]
+[ext_resource type="Texture2D" uid="uid://d2flkiuk5r45k" path="res://ui/HUD/toolbar/rest.png" id="tb_rest"]
+[ext_resource type="Texture2D" uid="uid://qhrliw3nmgpq" path="res://ui/HUD/toolbar/rest_hover.png" id="tb_rest_h"]
+[ext_resource type="Texture2D" uid="uid://dqqd8w17p5cll" path="res://ui/HUD/toolbar/rest_pressed.png" id="tb_rest_p"]
+[ext_resource type="Texture2D" uid="uid://co68sr5gqqdab" path="res://ui/HUD/toolbar/search.png" id="tb_search"]
+[ext_resource type="Texture2D" uid="uid://cl7gtlenhi7yg" path="res://ui/HUD/toolbar/search_hover.png" id="tb_search_h"]
+[ext_resource type="Texture2D" uid="uid://dtfee88d41ifd" path="res://ui/HUD/toolbar/search_pressed.png" id="tb_search_p"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r0ikl"]
 shader = ExtResource("15_u1rxn")
@@ -32,6 +44,13 @@ shader_parameter/vignette_intensity = 0.150000007125
 [sub_resource type="Environment" id="Environment_r0ikl"]
 background_mode = 1
 background_color = Color(0.050980393, 0.06666667, 0.09019608, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yd1yt"]
+shader = ExtResource("23_55bpt")
+shader_parameter/progress = 0.0
+shader_parameter/line_width = 0.10000000405148
+shader_parameter/line_color = Color(0.9041508, 0, 0.075268306, 1)
+shader_parameter/glow_color = Color(0.9983018, 0.48437268, 0.44557494, 0.8)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_cn5rm")
@@ -47,11 +66,15 @@ grow_vertical = 2
 
 [node name="CockpitBackground" type="TextureRect" parent="MainHUDLayout"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 1114.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -38.0
 offset_top = 95.0
-offset_right = 1186.0
+offset_right = 34.0
 offset_bottom = 998.0
+grow_horizontal = 0
 scale = Vector2(0.6, 0.6)
 texture = ExtResource("2_ako3u")
 
@@ -70,11 +93,15 @@ texture = ExtResource("3_khvou")
 
 [node name="EnemyInRange" type="ColorRect" parent="MainHUDLayout"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 866.0
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -286.0
 offset_top = 22.0
-offset_right = 876.0
+offset_right = -276.0
 offset_bottom = 31.0
+grow_horizontal = 0
 pivot_offset = Vector2(49, 5)
 mouse_filter = 2
 mouse_behavior_recursive = 1
@@ -82,11 +109,15 @@ color = Color(1, 1, 0.3254902, 1)
 
 [node name="RightSidebarAnchor" type="Control" parent="MainHUDLayout"]
 unique_name_in_owner = true
-anchors_preset = 0
-offset_left = 1064.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -88.0
 offset_top = 86.0
-offset_right = 1146.0
+offset_right = -6.0
 offset_bottom = 641.0
+grow_horizontal = 0
 
 [node name="PartyContainer" type="VBoxContainer" parent="MainHUDLayout/RightSidebarAnchor"]
 unique_name_in_owner = true
@@ -160,45 +191,119 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
-offset_top = -66.0
-offset_right = 193.0
+offset_top = -105.0
+offset_right = 213.0
 offset_bottom = -12.0
 grow_vertical = 0
 
-[node name="ActionButtons" type="HBoxContainer" parent="MainHUDLayout/ActionBarAnchor"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-theme_override_constants/separation = 12
+[node name="ActionToolbar" type="Control" parent="MainHUDLayout/ActionBarAnchor"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(201, 93)
+anchors_preset = 0
+offset_right = 201.0
+offset_bottom = 93.0
+mouse_filter = 2
 
-[node name="SearchButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionButtons"]
+[node name="ToolbarBackground" type="TextureRect" parent="MainHUDLayout/ActionBarAnchor/ActionToolbar"]
+layout_mode = 0
+offset_right = 201.0
+offset_bottom = 93.0
+mouse_filter = 2
+texture = ExtResource("tb_bg")
+
+[node name="ActionButtons" type="HBoxContainer" parent="MainHUDLayout/ActionBarAnchor/ActionToolbar"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 27.0
+offset_right = 185.0
+offset_bottom = 68.0
+theme_override_constants/separation = 23
+
+[node name="SearchButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionToolbar/ActionButtons"]
 unique_name_in_owner = true
 layout_mode = 2
-texture_normal = ExtResource("5_yd1yt")
-texture_pressed = ExtResource("6_0n5r3")
-texture_hover = ExtResource("6_0n5r3")
+texture_normal = ExtResource("tb_search")
+texture_pressed = ExtResource("tb_search_p")
+texture_hover = ExtResource("tb_search_h")
 script = ExtResource("7_5h4o4")
 
-[node name="ItemButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionButtons"]
+[node name="RestButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionToolbar/ActionButtons"]
 unique_name_in_owner = true
 layout_mode = 2
-texture_normal = ExtResource("8_p4bpa")
-texture_pressed = ExtResource("9_gcvgm")
-texture_hover = ExtResource("9_gcvgm")
-script = ExtResource("10_k3th7")
-
-[node name="RestButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionButtons"]
-unique_name_in_owner = true
-layout_mode = 2
-texture_normal = ExtResource("11_dlptc")
-texture_pressed = ExtResource("12_cg6gh")
-texture_hover = ExtResource("12_cg6gh")
+texture_normal = ExtResource("tb_rest")
+texture_pressed = ExtResource("tb_rest_p")
+texture_hover = ExtResource("tb_rest_h")
 script = ExtResource("13_iub3o")
+
+[node name="ItemButton" type="TextureButton" parent="MainHUDLayout/ActionBarAnchor/ActionToolbar/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+texture_normal = ExtResource("tb_items")
+texture_pressed = ExtResource("tb_items_p")
+texture_hover = ExtResource("tb_items_h")
+script = ExtResource("10_k3th7")
 
 [node name="BattleHUD" parent="MainHUDLayout" instance=ExtResource("14_eedsi")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
+
+[node name="GameMenuAnchor" type="Control" parent="MainHUDLayout"]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 176.0
+offset_top = 17.0
+offset_right = 234.0
+offset_bottom = 77.0
+mouse_filter = 2
+
+[node name="GameMenuButton" type="TextureButton" parent="MainHUDLayout/GameMenuAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 3.0
+offset_top = 8.0
+offset_right = 49.0
+offset_bottom = 59.0
+texture_normal = ExtResource("15_yd1yt")
+texture_pressed = ExtResource("16_5h4o4")
+texture_hover = ExtResource("17_p4bpa")
+
+[node name="GameMenuButtonLabel" type="Label" parent="MainHUDLayout/GameMenuAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 46.0
+offset_top = 18.0
+offset_right = 142.0
+offset_bottom = 41.0
+text = "MAIN MENU"
+
+[node name="ShardMenuAnchor" type="Control" parent="MainHUDLayout"]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 176.0
+offset_top = 93.0
+offset_right = 234.0
+offset_bottom = 144.0
+mouse_filter = 2
+
+[node name="ShardMenuButton" type="TextureButton" parent="MainHUDLayout/ShardMenuAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 7.0
+offset_right = 53.0
+offset_bottom = 51.0
+texture_normal = ExtResource("18_k3th7")
+texture_pressed = ExtResource("19_dlptc")
+texture_hover = ExtResource("20_cg6gh")
+
+[node name="ShardMenuButtonLabel" type="Label" parent="MainHUDLayout/ShardMenuAnchor"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 50.0
+offset_top = 11.0
+offset_right = 146.0
+offset_bottom = 34.0
+text = "SHARDS"
 
 [node name="MinimapAnchor" type="Control" parent="."]
 unique_name_in_owner = true
@@ -211,10 +316,10 @@ offset_bottom = 40.0
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_r0ikl")
 layout_mode = 0
-offset_left = 27.0
-offset_top = 25.0
-offset_right = 177.0
-offset_bottom = 175.0
+offset_left = 23.0
+offset_top = 19.0
+offset_right = 173.0
+offset_bottom = 169.0
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="MinimapAnchor/SubViewportContainer"]
@@ -238,12 +343,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 68.0
-offset_top = 58.0
-offset_right = 101.0
-offset_bottom = 91.0
+offset_left = 62.0
+offset_top = 55.0
+offset_right = 95.0
+offset_bottom = 88.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.8, 0.8)
 pivot_offset = Vector2(16.5, 16.5)
 texture = ExtResource("17_lyj15")
 
@@ -254,23 +360,98 @@ offset_top = 12.0
 offset_right = 205.0
 offset_bottom = 206.0
 scale = Vector2(0.9, 0.9)
-texture = ExtResource("18_l2igo")
+texture = ExtResource("18_ako3u")
 
 [node name="NineHud" parent="." instance=ExtResource("19_ako3u")]
 unique_name_in_owner = true
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 19.0
+offset_top = 191.0
+offset_right = 215.0
+offset_bottom = 345.0
+grow_horizontal = 1
+grow_vertical = 1
+scale = Vector2(0.8, 0.8)
+size_flags_horizontal = 2
 
 [node name="CompassLabel" type="Label" parent="."]
 unique_name_in_owner = true
-offset_left = 968.0
-offset_top = 18.0
-offset_right = 1088.0
-offset_bottom = 41.0
+offset_left = 14.0
+offset_top = 156.0
+offset_right = 134.0
+offset_bottom = 180.0
 theme_override_fonts/font = ExtResource("19_ralih")
-theme_override_font_sizes/font_size = 14
-text = "NORTH"
+theme_override_font_sizes/font_size = 20
+text = "N"
 horizontal_alignment = 1
 clip_text = true
 text_overrun_behavior = 1
+
+[node name="DaytimeLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -140.0
+offset_top = 16.0
+offset_right = -100.0
+offset_bottom = 39.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("21_khvou")
+theme_override_font_sizes/font_size = 16
+text = "MORN"
+
+[node name="GoldControl" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -39.0
+offset_top = 41.0
+offset_right = 1.0
+offset_bottom = 81.0
+grow_horizontal = 0
+size_flags_horizontal = 10
+
+[node name="GoldLabel" type="Label" parent="GoldControl"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -98.0
+offset_top = 9.0
+offset_right = -17.0
+offset_bottom = 32.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_fonts/font = ExtResource("21_khvou")
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 2
+
+[node name="GoldIcon" type="Label" parent="GoldControl"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -18.0
+offset_top = 8.0
+offset_right = -3.0
+offset_bottom = 33.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_fonts/font = ExtResource("21_khvou")
+theme_override_font_sizes/font_size = 18
+text = "₡"
+horizontal_alignment = 2
 
 [node name="EdgeFlash" type="TextureRect" parent="."]
 unique_name_in_owner = true
@@ -281,3 +462,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("20_p5q14")
+
+[node name="SliceOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 128
+material = SubResource("ShaderMaterial_yd1yt")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

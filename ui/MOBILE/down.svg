@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88.3 76">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-6 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #00f0ff;
+      }
+
+      .cls-3 {
+        fill: #000;
+        opacity: .25;
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+
+      .cls-6 {
+        stroke: #00f0ff;
+        stroke-width: 2.15px;
+      }
+
+      .cls-5 {
+        fill: #64dfdf;
+      }
+    </style>
+  </defs>
+  <g id="Layer_7" data-name="Layer 7">
+    <g>
+      <polygon id="btn-back" class="cls-3" points="1.08 1.08 87.23 1.08 87.23 59.54 71.84 74.92 16.46 74.92 1.08 59.54 1.08 1.08"/>
+      <polygon id="btn-back-2" data-name="btn-back" class="cls-6" points="1.08 1.08 87.23 1.08 87.23 59.54 71.84 74.92 16.46 74.92 1.08 59.54 1.08 1.08"/>
+      <rect class="cls-5" x="30.16" y="21.92" width="27.99" height="3.43"/>
+      <g>
+        <polygon class="cls-1" points="56.84 35.1 31.61 34.85 31.66 34.92 56.79 35.17 56.84 35.1"/>
+        <polygon class="cls-2" points="24.75 31.31 27.33 34.88 31.66 34.92 31.61 34.85 56.84 35.1 56.79 35.17 61.03 35.21 63.55 31.69 24.75 31.31"/>
+        <polygon class="cls-4" points="31.66 34.92 27.33 34.88 44.39 58.46 61.03 35.21 56.79 35.17 54.32 38.62 44.38 52.51 34.19 38.42 31.66 34.92"/>
+      </g>
+    </g>
+  </g>
+</svg>

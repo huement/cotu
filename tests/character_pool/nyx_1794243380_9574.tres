@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="CatCharacter" load_steps=6 format=3]
+
+[ext_resource type="Resource" path="res://Data/Races/Bengal.tres" id="1_r2018"]
+[ext_resource type="Resource" path="res://Data/Skills/SkWildPounce.tres" id="2_lx22e"]
+[ext_resource type="Resource" path="res://Data/Skills/SkShieldBash.tres" id="3_17yml"]
+[ext_resource type="Resource" path="res://Data/Classes/Spartan.tres" id="4_kq8s1"]
+[ext_resource type="Script" path="res://resources/CatCharacter.gd" id="5_3q11e"]
+
+[resource]
+script = ExtResource("5_3q11e")
+name = "Nyx"
+breed = ExtResource("1_r2018")
+profession = ExtResource("4_kq8s1")
+portrait_path = "res://Data/Portraits/Spartan.png"
+roster_id = "nyx_1794243380_9574"
+creation_dice = Array[int]([4, 4, 6])
+creation_allocation = {
+"dexterity": 2,
+"piety": 1,
+"speed": 3,
+"strength": 4,
+"vitality": 4
+}
+max_xp = 800
+strength = 16
+intelligence = 5
+piety = 6
+vitality = 18
+dexterity = 10
+speed = 13
+personality = 3
+current_hp = 54
+max_hp = 54
+current_energy = 11
+max_energy = 11
+known_skills = Array[Resource]([ExtResource("2_lx22e"), ExtResource("3_17yml")])
+abilities_initialized = true

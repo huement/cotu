@@ -1,0 +1,123 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/ShopMenu.gd" id="1_shop"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.03137255, 0.0627451, 0.078431375, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.78431374, 0.654902, 1)
+
+[node name="ShopMenu" type="CanvasLayer"]
+layer = 85
+script = ExtResource("1_shop")
+
+[node name="OverlayPanel" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="OverlayPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.04, 0.82)
+mouse_filter = 2
+
+[node name="Frame" type="PanelContainer" parent="OverlayPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -220.0
+offset_right = 280.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="OverlayPanel/Frame"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="OverlayPanel/Frame/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="OverlayPanel/Frame/Margin/VBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="OverlayPanel/Frame/Margin/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 1, 0.78431374, 1)
+theme_override_font_sizes/font_size = 20
+text = "QUARTERMASTER"
+
+[node name="GoldLabel" type="Label" parent="OverlayPanel/Frame/Margin/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 18
+text = "₡ 0"
+
+[node name="Tabs" type="HBoxContainer" parent="OverlayPanel/Frame/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BuyTab" type="Button" parent="OverlayPanel/Frame/Margin/VBox/Tabs"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "[ BUY ]"
+
+[node name="SellTab" type="Button" parent="OverlayPanel/Frame/Margin/VBox/Tabs"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "[ SELL ]"
+
+[node name="BuyScroll" type="ScrollContainer" parent="OverlayPanel/Frame/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 280)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BuyList" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/VBox/BuyScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="SellScroll" type="ScrollContainer" parent="OverlayPanel/Frame/Margin/VBox"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 280)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SellList" type="VBoxContainer" parent="OverlayPanel/Frame/Margin/VBox/SellScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="CloseButton" type="Button" parent="OverlayPanel/Frame/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "[ CLOSE ]"

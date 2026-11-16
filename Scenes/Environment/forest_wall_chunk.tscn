@@ -1,0 +1,41 @@
+[gd_scene load_steps=17 format=3 uid="uid://r2hd51nblgow"]
+
+[ext_resource type="ArrayMesh" uid="uid://xfkca0ve80md" path="res://resources/meshes/tree_oak.res" id="1_6qbev"]
+[ext_resource type="Script" uid="uid://dqr8vgqbyjq0u" path="res://Scripts/Environment/forest_wall_generator.gd" id="2_buf3s"]
+[ext_resource type="ArrayMesh" uid="uid://0pv5y0eden07" path="res://resources/meshes/tree_detailed.res" id="3_0isp1"]
+[ext_resource type="ArrayMesh" uid="uid://bm2scs373p0bx" path="res://resources/meshes/tree_detailed-f.res" id="4_s4di1"]
+[ext_resource type="ArrayMesh" uid="uid://cbuh8yisdv7vk" path="res://resources/meshes/tree_fat.res" id="5_ke0ct"]
+[ext_resource type="ArrayMesh" uid="uid://b58bjfuvkos1j" path="res://resources/meshes/tree_pine-g.res" id="7_6cqow"]
+[ext_resource type="ArrayMesh" uid="uid://df1nbakycoa2v" path="res://resources/meshes/tree_pine-r.res" id="8_6s5qt"]
+[ext_resource type="ArrayMesh" uid="uid://b1jlxajmkm2ag" path="res://resources/meshes/tree_pine-re.res" id="9_v2lvb"]
+[ext_resource type="ArrayMesh" uid="uid://628re28jvw47" path="res://resources/meshes/tree_pine-td.res" id="10_avaah"]
+[ext_resource type="ArrayMesh" uid="uid://csxudwjvihdgn" path="res://resources/meshes/tree_plateau.res" id="11_1bhyc"]
+[ext_resource type="ArrayMesh" uid="uid://dluj3nhvx5xpm" path="res://resources/meshes/tree_simple-f.res" id="12_t6c5b"]
+[ext_resource type="ArrayMesh" uid="uid://dy73uj0bd72jn" path="res://resources/meshes/tree_small.res" id="13_ya0qj"]
+[ext_resource type="ArrayMesh" uid="uid://bg5qd4tmky32p" path="res://resources/meshes/tree_tall-f.res" id="14_svf4c"]
+[ext_resource type="ArrayMesh" uid="uid://dpw86ev5f8dr" path="res://resources/meshes/tree_tall.res" id="15_n66iq"]
+
+[sub_resource type="MultiMesh" id="MultiMesh_nbfhd"]
+transform_format = 1
+instance_count = 3
+mesh = ExtResource("11_1bhyc")
+buffer = PackedFloat32Array(0.6211317, 0, -3.5004725, 0.34202844, 0, 3.555153, 0, 0, 3.5004725, 0, 0.6211317, -0.41609037, 0.9085022, 0, 4.121552, -0.7012882, 0, 4.220494, 0, 0, -4.121552, 0, 0.9085022, -0.10963043, 2.7635784, 0, 3.0768833, 0.16553113, 0, 4.135768, 0, 0, -3.0768833, 0, 2.7635784, 0.1776993)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6qbev"]
+size = Vector3(2, 2, 3)
+
+[node name="ForestWallChunk" type="Node3D"]
+
+[node name="MultiMeshInstance3D" type="MultiMeshInstance3D" parent="."]
+multimesh = SubResource("MultiMesh_nbfhd")
+script = ExtResource("2_buf3s")
+tree_mesh_pool = Array[Mesh]([ExtResource("1_6qbev"), ExtResource("3_0isp1"), ExtResource("4_s4di1"), ExtResource("5_ke0ct"), ExtResource("7_6cqow"), ExtResource("8_6s5qt"), ExtResource("9_v2lvb"), ExtResource("10_avaah"), ExtResource("11_1bhyc"), ExtResource("12_t6c5b"), ExtResource("13_ya0qj"), ExtResource("14_svf4c"), ExtResource("15_n66iq")])
+tree_count = 3
+tree_scale_min = 3.3
+generate = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.5)
+shape = SubResource("BoxShape3D_6qbev")

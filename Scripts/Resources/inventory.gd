@@ -10,41 +10,57 @@ signal item_used(item: ItemData)
 @export var _items: Array[ItemData] = []
 
 
+## Adds `amount` of an item (default: the item's own quantity, at least 1).
+## Stackable items (potions, consumables, gems, ammo...) merge into the existing stack.
+## The inventory always stores its OWN copy, never the shared resource loaded from disk,
+## so stack counts can't leak between slots and are saved with the game.
 func add_item(item: ItemData, amount: int = 1) -> bool:
 	if not is_instance_valid(item):
 		return false
 
-	var qty_to_add: int = max(1, item.quantity) if amount == 1 else amount
-	var is_stackable: bool = (item.item_type == ItemData.ItemType.CONSUMABLE) or (item.equipment_slot == ItemData.EquipmentSlot.NONE) or ("arrow" in item.item_id.to_lower()) or ("bolt" in item.item_id.to_lower())
+	var qty_to_add: int = maxi(1, item.quantity) if amount == 1 else maxi(1, amount)
 
-	if is_stackable:
-		for existing in _items:
-			if is_instance_valid(existing) and (
-				(not item.item_id.is_empty() and existing.item_id == item.item_id) or
-				(existing.item_name == item.item_name)
-			):
-				existing.quantity += qty_to_add
-				item_added.emit(existing)
-				return true
+	if is_stackable(item):
+		var existing: ItemData = find_stack(item)
+		if existing != null:
+			existing.quantity += qty_to_add
+			item_added.emit(existing)
+			return true
+		if _items.size() >= max_slots:
+			push_warning("Inventory full! Could not add: " + item.item_name)
+			return false
+		var stack: ItemData = _make_own_copy(item)
+		stack.quantity = qty_to_add
+		_items.append(stack)
+		item_added.emit(stack)
+		return true
 
-	item.quantity = qty_to_add
-	if _items.size() >= max_slots:
-		push_warning("Inventory full! Could not add: " + item.item_name)
-		return false
-
-	_items.append(item)
-	item_added.emit(item)
+	# Non-stackable (weapons / armor): one slot per piece
+	for i in range(qty_to_add):
+		if _items.size() >= max_slots:
+			push_warning("Inventory full! Could not add: " + item.item_name)
+			return i > 0
+		var piece: ItemData = _make_own_copy(item)
+		piece.quantity = 1
+		_items.append(piece)
+		item_added.emit(piece)
 	return true
 
 
-func remove_item(item: ItemData) -> bool:
+## Removes an item stack. amount = -1 removes the whole stack, otherwise that many from it.
+func remove_item(item: ItemData, amount: int = -1) -> bool:
 	var index: int = _items.find(item)
 	if index == -1:
 		return false
 
-	var removed: ItemData = _items[index]
+	var stack: ItemData = _items[index]
+	if amount > 0 and stack.quantity > amount:
+		stack.quantity -= amount
+		item_removed.emit(stack)
+		return true
+
 	_items.remove_at(index)
-	item_removed.emit(removed)
+	item_removed.emit(stack)
 	return true
 
 
@@ -56,6 +72,96 @@ func size() -> int:
 	return _items.size()
 
 
+## Total count of an item across the inventory (by item_id, falls back to name).
+func get_item_count(item_id_or_item: Variant) -> int:
+	var total: int = 0
+	for it: ItemData in _items:
+		if not is_instance_valid(it):
+			continue
+		if item_id_or_item is ItemData:
+			if _stack_key(it) == _stack_key(item_id_or_item as ItemData):
+				total += maxi(1, it.quantity)
+		elif it.item_id == str(item_id_or_item):
+			total += maxi(1, it.quantity)
+	return total
+
+
+func is_stackable(item: ItemData) -> bool:
+	if not is_instance_valid(item):
+		return false
+	# Throwables (shuriken) and named ammo always stack.
+	if item.is_throwable or CombatMath.is_ammo_item(item):
+		return true
+	# Weapons / armor never stack unless marked consumable ammo (arrows, flasks).
+	if item.item_type in [ItemData.ItemType.WEAPON, ItemData.ItemType.ARMOR, ItemData.ItemType.EQUIPMENT]:
+		return item.is_consumable
+	return item.item_type in [
+		ItemData.ItemType.CONSUMABLE,
+		ItemData.ItemType.POTION,
+		ItemData.ItemType.MISC,
+		ItemData.ItemType.QUEST,
+	] or item.is_consumable or item.equipment_slot == ItemData.EquipmentSlot.NONE
+
+
+## The existing stack this item would merge into, or null.
+func find_stack(item: ItemData) -> ItemData:
+	var key: String = _stack_key(item)
+	for existing: ItemData in _items:
+		if is_instance_valid(existing) and _stack_key(existing) == key:
+			return existing
+	return null
+
+
+## Merges duplicate entries into single stacks and replaces shared (on-disk) resources with
+## inventory-owned copies. Called by GameState after every load; safe to call any time.
+func normalize_stacks() -> void:
+	var counts: Dictionary = {} # key -> total quantity (stackables)
+	var order: Array[ItemData] = [] # first entry of each stack / every non-stackable, in order
+	var first_of_key: Dictionary = {}
+
+	for it: ItemData in _items:
+		if not is_instance_valid(it):
+			continue
+		if is_stackable(it):
+			var key: String = _stack_key(it)
+			counts[key] = int(counts.get(key, 0)) + maxi(1, it.quantity)
+			if not first_of_key.has(key):
+				first_of_key[key] = it
+				order.append(it)
+		else:
+			order.append(it)
+
+	var rebuilt: Array[ItemData] = []
+	var seen_instances: Dictionary = {}
+	for it: ItemData in order:
+		var copy: ItemData = it
+		# Shared disk resources (or the same instance listed twice) become owned copies
+		if not it.resource_path.is_empty() or seen_instances.has(it.get_instance_id()):
+			copy = _make_own_copy(it)
+		seen_instances[it.get_instance_id()] = true
+		if is_stackable(it):
+			copy.quantity = int(counts[_stack_key(it)])
+			rebuilt.append(copy)
+		else:
+			# Gear must be one piece per slot — split any mis-stacked quantity.
+			var pieces: int = maxi(1, it.quantity)
+			copy.quantity = 1
+			rebuilt.append(copy)
+			for _i: int in range(pieces - 1):
+				var extra: ItemData = _make_own_copy(it)
+				extra.quantity = 1
+				rebuilt.append(extra)
+	_items = rebuilt
+
+
+func _stack_key(item: ItemData) -> String:
+	return item.item_id if not item.item_id.is_empty() else "name:" + item.item_name
+
+
+func _make_own_copy(item: ItemData) -> ItemData:
+	return item.duplicate() as ItemData
+
+
 func use_item(index: int, target_character: Resource) -> bool:
 	if not is_instance_valid(target_character) or index < 0 or index >= _items.size():
 		GameLogger.warning("Inventory: Invalid target or index %d out of bounds." % index)
@@ -64,6 +170,15 @@ func use_item(index: int, target_character: Resource) -> bool:
 	var item: ItemData = _items[index]
 	if not is_instance_valid(item):
 		GameLogger.warning("Inventory: Item at slot %d is null." % index)
+		return false
+
+	# Spell Books / Skill Crystals open the learn picker instead; the item is only used up when the
+	# character actually learns something (handled asynchronously, so this returns false right away).
+	var learn_kind: StringName = AbilityLearnScreen.kind_for_item(item)
+	if learn_kind != &"":
+		var learner: CatCharacter = target_character as CatCharacter
+		if is_instance_valid(learner):
+			_learn_from_item(item, learner, learn_kind)
 		return false
 
 	# Usability check: CONSUMABLE, POTION, or marked is_consumable
@@ -78,20 +193,80 @@ func use_item(index: int, target_character: Resource) -> bool:
 		if is_instance_valid(AudioManager):
 				AudioManager.play_potion_sound()	
 
-		# Decrement stack quantity or remove item if last one
-		if item.quantity > 1:
-			item.quantity -= 1
-			GameLogger.info("Inventory: Used %s (Remaining quantity: %d)" % [item.item_name, item.quantity])
-		else:
-			var removed: ItemData = _items[index]
-			_items.remove_at(index)
-			item_removed.emit(removed)
-			GameLogger.info("Inventory: Consumed last %s and removed slot %d" % [item.item_name, index])
-
+		consume_one(index)
 		return true
 
 	GameLogger.warning("Inventory: Item %s is not usable as a consumable." % item.item_name)
 	return false
+
+
+## Uses ONE item on every character in `targets` (group heal potions etc.).
+## Downed characters (0 HP) are skipped unless the item is a revive item.
+## Consumes a single item. Returns false (and consumes nothing) if no one was affected.
+func use_item_on_targets(index: int, targets: Array) -> bool:
+	if index < 0 or index >= _items.size():
+		GameLogger.warning("Inventory: Index %d out of bounds." % index)
+		return false
+
+	var item: ItemData = _items[index]
+	if not is_instance_valid(item):
+		return false
+
+	var is_usable: bool = item.is_consumable or item.item_type == ItemData.ItemType.CONSUMABLE or item.item_type == ItemData.ItemType.POTION
+	if not is_usable:
+		GameLogger.warning("Inventory: Item %s is not usable as a consumable." % item.item_name)
+		return false
+
+	var revives: bool = "revive" in item.item_id.to_lower() or "revive" in item.effects.to_lower()
+	var affected: int = 0
+	for target in targets:
+		var cat: CatCharacter = target as CatCharacter
+		if not is_instance_valid(cat):
+			continue
+		if cat.current_hp <= 0 and not revives:
+			continue
+		_apply_item_effects(item, cat)
+		affected += 1
+
+	if affected == 0:
+		GameLogger.info("Inventory: %s had no valid targets." % item.item_name)
+		return false
+
+	item_used.emit(item)
+	if is_instance_valid(AudioManager):
+		AudioManager.play_potion_sound()
+	GameLogger.info("Inventory: %s affected %d character(s)" % [item.item_name, affected])
+	consume_one(index)
+	return true
+
+
+func _learn_from_item(item: ItemData, learner: CatCharacter, learn_kind: StringName) -> void:
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var learned: Resource = await AbilityLearnScreen.open(tree, learner, learn_kind)
+	if learned == null:
+		return
+	var idx: int = _items.find(item)
+	if idx >= 0:
+		item_used.emit(item)
+		consume_one(idx)
+	if is_instance_valid(GameState):
+		GameState.save_game()
+
+
+## Removes one from the stack at `index` (or the whole slot if it was the last one).
+func consume_one(index: int) -> void:
+	if index < 0 or index >= _items.size():
+		return
+	var item: ItemData = _items[index]
+	if is_instance_valid(item) and item.quantity > 1:
+		item.quantity -= 1
+		GameLogger.info("Inventory: Used %s (Remaining quantity: %d)" % [item.item_name, item.quantity])
+	else:
+		_items.remove_at(index)
+		item_removed.emit(item)
+		GameLogger.info("Inventory: Consumed last %s and removed slot %d" % [item.item_name if is_instance_valid(item) else "item", index])
 
 
 func _apply_item_effects(item: ItemData, cat: CatCharacter) -> void:

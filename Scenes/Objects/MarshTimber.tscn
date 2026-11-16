@@ -1,0 +1,51 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Environment/marsh_timber.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://bwqnmmbu8yj8y" path="res://resources/tile_sets/marsh/Flat_Tree_Elm_green.glb" id="2_TreeElm"]
+[ext_resource type="PackedScene" uid="uid://4gups557o1px" path="res://resources/tile_sets/marsh/Flat_Tree_Maple_red.glb" id="3_TreeMaple"]
+[ext_resource type="PackedScene" uid="uid://hmh6vfj1mr2" path="res://resources/tile_sets/marsh/Flat_Tree_Oak_large_green.glb" id="4_TreeOakLarge"]
+[ext_resource type="PackedScene" uid="uid://coueytpkpvsjv" path="res://resources/tile_sets/marsh/Flat_Tree_Oak_medium_green.glb" id="5_TreeOakMedium"]
+[ext_resource type="PackedScene" uid="uid://r0allo1xuib3" path="res://resources/tile_sets/marsh/Flat_Tree_Park_large_green.glb" id="6_TreePark"]
+[ext_resource type="PackedScene" uid="uid://bs7ii6tn332vn" path="res://resources/tile_sets/marsh/Flat_Tree_Simple_large.glb" id="7_TreeSimple"]
+[ext_resource type="PackedScene" uid="uid://l84x25yrw0b7" path="res://resources/tile_sets/marsh/Flat_Tree_Windswept_dark_green.glb" id="8_TreeWindswept"]
+
+[sub_resource type="CylinderShape3D" id="Cyl_1"]
+height = 2.0
+radius = 0.8
+
+[node name="MarshTimber" type="Node3D"]
+script = ExtResource("1_script")
+tree_type = 0
+
+[node name="TreeElm" parent="." instance=ExtResource("2_TreeElm")]
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
+
+[node name="TreeMaple" parent="." instance=ExtResource("3_TreeMaple")]
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
+visible = false
+
+[node name="TreeOakLarge" parent="." instance=ExtResource("4_TreeOakLarge")]
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
+visible = false
+
+[node name="TreeOakMedium" parent="." instance=ExtResource("5_TreeOakMedium")]
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
+visible = false
+
+[node name="TreePark" parent="." instance=ExtResource("6_TreePark")]
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
+visible = false
+
+[node name="TreeSimple" parent="." instance=ExtResource("7_TreeSimple")]
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
+visible = false
+
+[node name="TreeWindswept" parent="." instance=ExtResource("8_TreeWindswept")]
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
+visible = false
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.918, 0)
+shape = SubResource("Cyl_1")

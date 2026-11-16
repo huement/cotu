@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://b6myurbcvg70j"]
 
-[ext_resource type="Texture2D" uid="uid://dxn2utn68va15" path="res://Data/Items/shield.png" id="1_kys51"]
+[ext_resource type="Texture2D" uid="uid://dxn2utn68va15" path="res://ui/icons/items/shield.png" id="1_kys51"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_x08ma"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_x08ma")
 item_id = "armor_soulwright_advanced_shield"
 item_name = "Energy Shield"
 description = "A sturdy shield for the Soulwright."
-icon_path = "res://Data/Items/shield.png"
+icon_path = "res://ui/icons/items/shield.png"
 icon = ExtResource("1_kys51")
 item_type = 2
 equipment_slot = 5

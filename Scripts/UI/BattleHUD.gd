@@ -14,6 +14,7 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var enemy_hp_label: Label = %EnemyHPLabel as Label
 @onready var turn_character_label: Label = %TurnCharacter as Label
 @onready var turn_info_label: Label = %TurnInfo as Label
+@onready var active_portrait: TextureRect = %ActivePortrait as TextureRect
 
 @onready var left_chevrons: TextureRect = %LeftChevrons as TextureRect
 @onready var right_chevrons: TextureRect = %RightChevrons as TextureRect
@@ -26,6 +27,31 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var edge_flash: Control = %EdgeFlash as Control if has_node("%EdgeFlash") else null
 @onready var slice_overlay: ColorRect = %SliceOverlay as ColorRect if has_node("%SliceOverlay") else null
 
+@onready var action_bar_background: TextureRect = get_node_or_null(^"ActionBarBackground") as TextureRect
+
+## Battle frame: a left and a right edge piece (every platform, so it fits any screen width),
+## plus the mobile bottom bar.
+const MOBILE_FRAME_LEFT: Texture2D = preload("res://ui/MOBILE/battlehud_left.svg")
+const MOBILE_FRAME_RIGHT: Texture2D = preload("res://ui/MOBILE/battlehud_right.svg")
+const MOBILE_ACTION_BAR_BG: Texture2D = preload("res://ui/MOBILE/battlehud_bottom.svg")
+const FRAME_PIECE_DESIGN_SIZE: Vector2 = Vector2(71.93, 648.81) ## battlehud_left/right.svg viewBox
+const ACTION_BAR_BG_DESIGN_SIZE: Vector2 = Vector2(1066, 54)
+## Gap from the bottom of the screen to the bottom of the (scaled) action buttons.
+const ACTION_BAR_BOTTOM_GAP: float = 15.0
+
+var _frame_left: TextureRect = null
+var _frame_right: TextureRect = null
+var _desktop_action_bar_bg: Texture2D = null
+
+const WATER_ENEMY_IDS: Array[String] = ["en_lake_tentacle", "en_lake_monster"]
+const WATER_SLICE_SHADER: Shader = preload("res://Shaders/water_slice.gdshader")
+const TURN_INFO_SCROLL_SPEED: float = 28.0 ## pixels per second when TurnInfo overflows
+
+var _default_slice_material: ShaderMaterial = null
+var _water_slice_material: ShaderMaterial = null
+var _is_water_encounter: bool = false
+var _slice_tween: Tween = null
+
 var portrait_slots: Array[Node] = []
 var _state: CombatState = CombatState.IDLE
 var _active_slot_index: int = -1
@@ -34,6 +60,10 @@ var _pending_target_action: StringName = &""
 var _is_auto_battle_on: bool = false
 var _buttons_bound: bool = false
 var current_turn_slot_index: int = -1
+
+var _turn_info_scroll_label: Label = null
+var _turn_info_tween: Tween = null
+var _active_portrait_default: Texture2D = null
 
 var _enemy_max_hps: Dictionary = {}
 var _enemy_current_hps: Dictionary = {}
@@ -54,8 +84,19 @@ func _ready() -> void:
 	_initialize_portrait_slots()
 	_setup_target_button_container()
 	_setup_enemy_info_menu()
+	_setup_turn_info_scroller()
 	_connect_to_signal_bus()
 	_bind_action_buttons()
+	# Keyboard: arrows / Tab pick an action, Enter does it; target buttons the same, Esc = back.
+	if is_instance_valid(action_bar):
+		KeyboardModal.attach(action_bar)
+		action_bar.set_meta(KeyboardModal.META_ALLOW_PARTY_KEYS, true)
+	if is_instance_valid(_target_button_container):
+		KeyboardModal.attach(_target_button_container, _cancel_target_selection)
+		_target_button_container.set_meta(KeyboardModal.META_ALLOW_PARTY_KEYS, true)
+
+	if is_instance_valid(active_portrait):
+		_active_portrait_default = active_portrait.texture
 
 	if is_instance_valid(auto_button):
 		auto_button.toggled.connect(_on_auto_button_toggled)
@@ -63,9 +104,125 @@ func _ready() -> void:
 		elemental_vfx.hide()
 		if not elemental_vfx.animation_finished.is_connected(_on_vfx_animation_finished):
 			elemental_vfx.animation_finished.connect(_on_vfx_animation_finished)
-	if is_instance_valid(SignalBus) and SignalBus.has_signal(&"screen_slice_requested"):
-		if not SignalBus.screen_slice_requested.is_connected(play_screen_slice):
+	_setup_slice_overlay()
+	_setup_responsive_layout()
+
+	if is_instance_valid(SignalBus):
+		if SignalBus.has_signal(&"screen_slice_requested") and not SignalBus.screen_slice_requested.is_connected(play_screen_slice):
 			SignalBus.screen_slice_requested.connect(play_screen_slice)
+
+
+# ==============================================================================
+# RESPONSIVE LAYOUT (everything anchored - no "x px from the left")
+# ==============================================================================
+## Frame, action-bar background and action buttons are anchored and re-laid out whenever the
+## screen size changes, the HUD is shown, or a button appears/disappears. The frame is always
+## the left/right edge pieces (hugging the screen sides), so it fits any width or aspect ratio.
+func _setup_responsive_layout() -> void:
+	if is_instance_valid(action_bar_background):
+		_desktop_action_bar_bg = action_bar_background.texture
+	_frame_left = _make_frame_piece("FrameLeft", MOBILE_FRAME_LEFT)
+	_frame_right = _make_frame_piece("FrameRight", MOBILE_FRAME_RIGHT)
+	get_viewport().size_changed.connect(_apply_responsive_layout)
+	visibility_changed.connect(func() -> void:
+		if visible:
+			_apply_responsive_layout())
+	if is_instance_valid(action_bar):
+		action_bar.minimum_size_changed.connect(_layout_action_bar)
+	_apply_responsive_layout.call_deferred()
+
+
+func _make_frame_piece(piece_name: String, tex: Texture2D) -> TextureRect:
+	var t := TextureRect.new()
+	t.name = piece_name
+	t.texture = tex
+	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	t.stretch_mode = TextureRect.STRETCH_SCALE
+	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(t)
+	# Draw behind everything else.
+	move_child(t, 0)
+	return t
+
+
+func _apply_responsive_layout() -> void:
+	if not is_inside_tree():
+		return
+	var mobile: bool = MobileUI.is_wanted()
+	var insets: Dictionary = MobileUI.safe_insets(self)
+	_layout_frame(mobile, insets)
+	_layout_action_bar_background(mobile)
+	_layout_action_bar()
+
+
+func _layout_frame(_mobile: bool, insets: Dictionary) -> void:
+	if not is_instance_valid(_frame_left) or not is_instance_valid(_frame_right):
+		return
+	# Full height, width kept in proportion. Left piece hugs the left edge, right piece the right.
+	var h: float = size.y if size.y > 0.0 else get_viewport_rect().size.y
+	var w: float = h * FRAME_PIECE_DESIGN_SIZE.x / FRAME_PIECE_DESIGN_SIZE.y
+	var left_in: float = float(insets["left"])
+	var right_in: float = float(insets["right"])
+	_frame_left.anchor_left = 0.0
+	_frame_left.anchor_right = 0.0
+	_frame_left.anchor_top = 0.0
+	_frame_left.anchor_bottom = 1.0
+	_frame_left.offset_left = left_in
+	_frame_left.offset_right = left_in + w
+	_frame_left.offset_top = 0.0
+	_frame_left.offset_bottom = 0.0
+	_frame_right.anchor_left = 1.0
+	_frame_right.anchor_right = 1.0
+	_frame_right.anchor_top = 0.0
+	_frame_right.anchor_bottom = 1.0
+	_frame_right.offset_left = -right_in - w
+	_frame_right.offset_right = -right_in
+	_frame_right.offset_top = 0.0
+	_frame_right.offset_bottom = 0.0
+
+
+func _layout_action_bar_background(mobile: bool) -> void:
+	if not is_instance_valid(action_bar_background):
+		return
+	var tex: Texture2D = MOBILE_ACTION_BAR_BG if mobile else _desktop_action_bar_bg
+	if tex != null:
+		action_bar_background.texture = tex
+	action_bar_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	action_bar_background.stretch_mode = TextureRect.STRETCH_SCALE
+	# Bottom-centre, fixed design size.
+	action_bar_background.anchor_left = 0.5
+	action_bar_background.anchor_right = 0.5
+	action_bar_background.anchor_top = 1.0
+	action_bar_background.anchor_bottom = 1.0
+	action_bar_background.offset_left = -ACTION_BAR_BG_DESIGN_SIZE.x * 0.5
+	action_bar_background.offset_right = ACTION_BAR_BG_DESIGN_SIZE.x * 0.5
+	action_bar_background.offset_top = -ACTION_BAR_BG_DESIGN_SIZE.y
+	action_bar_background.offset_bottom = 0.0
+	action_bar_background.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	action_bar_background.grow_vertical = Control.GROW_DIRECTION_BEGIN
+
+
+## Centres the ATTACK / DEFEND / SPELLS / ... row on the bottom edge. The row is scaled, so it is
+## scaled around its bottom-centre and stays centred however many buttons are visible.
+func _layout_action_bar() -> void:
+	if not is_instance_valid(action_bar):
+		return
+	var bar_size: Vector2 = action_bar.get_combined_minimum_size()
+	if bar_size.x <= 0.0:
+		return
+	action_bar.anchor_left = 0.5
+	action_bar.anchor_right = 0.5
+	action_bar.anchor_top = 1.0
+	action_bar.anchor_bottom = 1.0
+	action_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	action_bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	if action_bar is BoxContainer:
+		(action_bar as BoxContainer).alignment = BoxContainer.ALIGNMENT_CENTER
+	action_bar.offset_left = -bar_size.x * 0.5
+	action_bar.offset_right = bar_size.x * 0.5
+	action_bar.offset_top = -bar_size.y - ACTION_BAR_BOTTOM_GAP
+	action_bar.offset_bottom = -ACTION_BAR_BOTTOM_GAP
+	action_bar.pivot_offset = Vector2(bar_size.x * 0.5, bar_size.y)
 
 
 # ==============================================================================
@@ -308,13 +465,18 @@ func _setup_target_button_container() -> void:
 	_target_button_container.name = "TargetButtonContainer"
 	_target_button_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	_target_button_container.add_theme_constant_override("separation", 12)
+	_target_button_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_target_button_container)
 
-	_target_button_container.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_target_button_container.offset_left = -250.0
-	_target_button_container.offset_top = -120.0
-	_target_button_container.offset_right = 250.0
-	_target_button_container.offset_bottom = -70.0
+	# Full width, just above the action bar. 112px fits the 96px large bar buttons.
+	_target_button_container.anchor_left = 0.0
+	_target_button_container.anchor_right = 1.0
+	_target_button_container.anchor_top = 1.0
+	_target_button_container.anchor_bottom = 1.0
+	_target_button_container.offset_left = 16.0
+	_target_button_container.offset_right = -16.0
+	_target_button_container.offset_top = -242.0
+	_target_button_container.offset_bottom = -130.0
 	_target_button_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_target_button_container.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_target_button_container.hide()
@@ -405,27 +567,26 @@ func _on_combatant_turn_ready(combatant_id: String, slot_index: int) -> void:
 		if is_instance_valid(portrait_slots[i]) and portrait_slots[i].has_method("set_active"):
 			portrait_slots[i].set_active(i == slot_index)
 
+	var cat_res: Resource = _get_party_slot_resource(slot_index)
 	var cat_name: String = "???"
-	var gs: Node = get_tree().root.get_node_or_null("GameState")
-
-	if is_instance_valid(gs) and "current_party" in gs and gs.current_party:
-		var slots: Array = gs.current_party.get("slots") as Array
-		if slot_index >= 0 and slot_index < slots.size() and is_instance_valid(slots[slot_index]):
-			var cat_res: Resource = slots[slot_index] as Resource
-			if "name" in cat_res and cat_res.get("name") != null:
-				cat_name = str(cat_res.get("name")).to_upper()
-			elif "character_name" in cat_res and cat_res.get("character_name") != null:
-				cat_name = str(cat_res.get("character_name")).to_upper()
+	if is_instance_valid(cat_res):
+		if "name" in cat_res and cat_res.get("name") != null:
+			cat_name = str(cat_res.get("name")).to_upper()
+		elif "character_name" in cat_res and cat_res.get("character_name") != null:
+			cat_name = str(cat_res.get("character_name")).to_upper()
 
 	if is_instance_valid(turn_character_label):
 		turn_character_label.text = cat_name
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "ACTIVE"
+	_set_active_portrait(cat_res)
+	_set_turn_info_text(_build_turn_info_line(cat_res, slot_index))
 	if is_instance_valid(action_bar):
 		action_bar.show()
 
 
 func _on_action_button_pressed(action_type: StringName, _button_name: String) -> void:
+	# Changed your mind while picking an attack target: drop the targeting and take the new action.
+	if _state == CombatState.SELECTING_TARGET:
+		_cancel_target_selection()
 	if _state != CombatState.AWAITING_ACTION:
 		return
 		
@@ -480,20 +641,74 @@ func _start_target_selection(action_type: StringName, alive_indices: Array[int])
 	_state = CombatState.SELECTING_TARGET
 	_pending_target_action = action_type
 
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "SELECT TARGET"
+	_set_turn_info_text("SELECT TARGET")
 
 	_clear_target_buttons()
 
 	if is_instance_valid(_target_button_container):
 		for enemy_idx in alive_indices:
-			var btn := Button.new()
-			btn.text = "TARGET ENEMY %c" % (65 + enemy_idx)
-			btn.custom_minimum_size = Vector2(140, 36)
+			var btn := BarButton.new()
+			btn.palette = BarButton.Palette.ARC
+			btn.size_tier = BarButton.SizeTier.SMALL
+			btn.shape = BarButton.Shape.STRETCH
+			btn.icon_kind = BarButton.IconKind.NONE
+			btn.label_text = _target_button_label(enemy_idx)
 			btn.pressed.connect(_on_target_selected.bind(enemy_idx))
 			_target_button_container.add_child(btn)
 
+		var back_btn := BarButton.new()
+		back_btn.palette = BarButton.Palette.ARC
+		back_btn.size_tier = BarButton.SizeTier.SMALL
+		back_btn.shape = BarButton.Shape.SQUARE
+		back_btn.label_text = ""
+		back_btn.icon_kind = BarButton.IconKind.BACK
+		back_btn.pressed.connect(_cancel_target_selection)
+		_target_button_container.add_child(back_btn)
+
 		_target_button_container.show()
+
+
+## Leaves target picking and returns to the action bar for the same party member.
+## (BACK button, Esc / right-click, or pressing another action button.)
+func _cancel_target_selection() -> void:
+	if _state != CombatState.SELECTING_TARGET:
+		return
+	_clear_target_buttons()
+	_pending_target_action = &""
+	_state = CombatState.AWAITING_ACTION
+	_set_turn_info_text(_build_turn_info_line(_get_party_slot_resource(_active_slot_index), _active_slot_index))
+	if is_instance_valid(action_bar):
+		action_bar.show()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _state != CombatState.SELECTING_TARGET:
+		return
+	var is_right_click: bool = event is InputEventMouseButton and (event as InputEventMouseButton).pressed \
+		and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT
+	if event.is_action_pressed("ui_cancel") or is_right_click:
+		_cancel_target_selection()
+		get_viewport().set_input_as_handled()
+
+
+## Same slot letter as the info dropdown: the first enemy is always A, even
+## after someone else dies. "Scavenger Cyclops" in slot C stays "Scavenge... C".
+func _target_button_label(enemy_idx: int) -> String:
+	var label: String = _enemy_name_at(enemy_idx).left(8) + "..."
+	if _current_enemy_resources.size() <= 1:
+		return label
+	return "%s %c" % [label, 65 + enemy_idx]
+
+
+func _enemy_name_at(enemy_idx: int) -> String:
+	if enemy_idx < 0 or enemy_idx >= _current_enemy_resources.size():
+		return "Enemy"
+	var res: Resource = _current_enemy_resources[enemy_idx]
+	if is_instance_valid(res) and "enemy_name" in res and res.get("enemy_name") != null:
+		var enemy_name: String = str(res.get("enemy_name")).strip_edges()
+		if not enemy_name.is_empty():
+			return enemy_name
+	return "Enemy"
 
 
 func _on_target_selected(enemy_idx: int) -> void:
@@ -506,6 +721,8 @@ func _on_target_selected(enemy_idx: int) -> void:
 func _clear_target_buttons() -> void:
 	if is_instance_valid(_target_button_container):
 		for child in _target_button_container.get_children():
+			if child is KeyboardModal:
+				continue
 			child.queue_free()
 		_target_button_container.hide()
 
@@ -524,8 +741,136 @@ func _reset_state() -> void:
 
 	if is_instance_valid(action_bar):
 		action_bar.hide()
-	if is_instance_valid(turn_info_label):
-		turn_info_label.text = "WAITING"
+	_set_turn_info_text("WAITING")
+
+
+func _get_party_slot_resource(slot_index: int) -> Resource:
+	var gs: Node = get_tree().root.get_node_or_null("GameState")
+	if not is_instance_valid(gs) or not ("current_party" in gs) or gs.current_party == null:
+		return null
+	var slots: Array = gs.current_party.get("slots") as Array
+	if slot_index < 0 or slot_index >= slots.size():
+		return null
+	return slots[slot_index] as Resource
+
+
+func _get_combatant_for_slot(slot_index: int) -> Combatant:
+	var cm: Node = get_tree().root.get_node_or_null("CombatManager")
+	if not is_instance_valid(cm) or not ("combatants" in cm):
+		return null
+	var list: Array = cm.get("combatants") as Array
+	for entry: Variant in list:
+		if entry is Combatant:
+			var c: Combatant = entry as Combatant
+			if c.is_player and c.slot_index == slot_index:
+				return c
+	return null
+
+
+func _build_turn_info_line(cat_res: Resource, slot_index: int) -> String:
+	var attack_type: String = CombatMath.effective_attack_type_for_character(cat_res)
+	var parts: PackedStringArray = PackedStringArray(["ATK: %s" % attack_type])
+
+	var combatant: Combatant = _get_combatant_for_slot(slot_index)
+	if is_instance_valid(combatant):
+		var negatives: Array[String] = combatant.get_negative_status_names()
+		if not negatives.is_empty():
+			parts.append("STAT: %s" % ", ".join(negatives))
+
+	return "  |  ".join(parts)
+
+
+func _set_active_portrait(character: Resource) -> void:
+	if not is_instance_valid(active_portrait):
+		return
+	var tex: Texture2D = _resolve_character_portrait(character)
+	active_portrait.texture = tex if is_instance_valid(tex) else _active_portrait_default
+	active_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	active_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	active_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+func _resolve_character_portrait(character: Resource) -> Texture2D:
+	if not is_instance_valid(character):
+		return null
+	if "portrait" in character and character.get("portrait") is Texture2D:
+		return character.get("portrait") as Texture2D
+	if "portrait_path" in character:
+		var path: String = str(character.get("portrait_path"))
+		if not path.is_empty() and ResourceLoader.exists(path):
+			return load(path) as Texture2D
+	if "breed" in character and is_instance_valid(character.get("breed")):
+		var breed: Resource = character.get("breed") as Resource
+		if is_instance_valid(breed) and "portrait_path" in breed:
+			var breed_path: String = str(breed.get("portrait_path"))
+			if not breed_path.is_empty() and ResourceLoader.exists(breed_path):
+				return load(breed_path) as Texture2D
+	return null
+
+
+func _setup_turn_info_scroller() -> void:
+	if not is_instance_valid(turn_info_label):
+		return
+	turn_info_label.clip_contents = true
+	turn_info_label.text = ""
+	turn_info_label.clip_text = false
+
+	_turn_info_scroll_label = Label.new()
+	_turn_info_scroll_label.name = "TurnInfoScroll"
+	_turn_info_scroll_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_turn_info_scroll_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_turn_info_scroll_label.add_theme_color_override("font_color", turn_info_label.get_theme_color("font_color"))
+	var info_font: Font = turn_info_label.get_theme_font("font")
+	if is_instance_valid(info_font):
+		_turn_info_scroll_label.add_theme_font_override("font", info_font)
+	_turn_info_scroll_label.add_theme_font_size_override("font_size", turn_info_label.get_theme_font_size("font_size"))
+	turn_info_label.add_child(_turn_info_scroll_label)
+
+
+func _set_turn_info_text(message: String) -> void:
+	if not is_instance_valid(turn_info_label):
+		return
+	if not is_instance_valid(_turn_info_scroll_label):
+		_setup_turn_info_scroller()
+	if not is_instance_valid(_turn_info_scroll_label):
+		turn_info_label.text = message
+		return
+
+	if is_instance_valid(_turn_info_tween):
+		_turn_info_tween.kill()
+		_turn_info_tween = null
+
+	turn_info_label.text = ""
+	_turn_info_scroll_label.text = message
+	_turn_info_scroll_label.position = Vector2.ZERO
+	_turn_info_scroll_label.size = Vector2.ZERO
+	_turn_info_scroll_label.reset_size()
+
+	# Defer scroll setup so label minimum size is measured after layout.
+	call_deferred("_start_turn_info_marquee_if_needed")
+
+
+func _start_turn_info_marquee_if_needed() -> void:
+	if not is_instance_valid(turn_info_label) or not is_instance_valid(_turn_info_scroll_label):
+		return
+
+	var avail: float = turn_info_label.size.x
+	var needed: float = _turn_info_scroll_label.get_minimum_size().x
+	_turn_info_scroll_label.size = Vector2(needed, turn_info_label.size.y)
+	_turn_info_scroll_label.position = Vector2.ZERO
+
+	if needed <= avail + 1.0:
+		return
+
+	var distance: float = needed - avail + 12.0
+	var duration: float = maxf(1.5, distance / TURN_INFO_SCROLL_SPEED)
+	_turn_info_tween = create_tween()
+	_turn_info_tween.set_loops()
+	_turn_info_tween.tween_interval(0.7)
+	_turn_info_tween.tween_property(_turn_info_scroll_label, "position:x", -distance, duration) \
+		.set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
+	_turn_info_tween.tween_interval(0.9)
+	_turn_info_tween.tween_property(_turn_info_scroll_label, "position:x", 0.0, 0.35)
 
 
 func _on_auto_button_toggled(is_on: bool) -> void:
@@ -593,34 +938,73 @@ func _resolve_enemy_resources(payload: Variant) -> Array[Resource]:
 
 		if result.is_empty() and payload is Resource:
 			var target_res: Resource = payload as Resource
-			var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
-			if overworld_enemies.is_empty():
-				overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+			var best_node: Node3D = _find_nearest_world_enemy(target_res)
 
-			for node in overworld_enemies:
-				if is_instance_valid(node) and ("enemy_group" in node):
-					var grp: Variant = node.get("enemy_group")
-					var n_data: Variant = node.get("data") if "data" in node else null
-					var n_edata: Variant = node.get("enemy_data") if "enemy_data" in node else null
-
-					if (grp is Array and (grp as Array).has(target_res)) or n_data == target_res or n_edata == target_res:
-						if grp is Array and not (grp as Array).is_empty():
-							for item in (grp as Array):
-								if item is Resource:
-									result.append(item as Resource)
-							break
+			if is_instance_valid(best_node) and ("enemy_group" in best_node):
+				var grp: Variant = best_node.get("enemy_group")
+				if grp is Array and not (grp as Array).is_empty():
+					for item in (grp as Array):
+						if item is Resource:
+							result.append(item as Resource)
 
 			if result.is_empty():
 				var count: int = 1
-				if "pack_size" in payload:
+				if is_instance_valid(best_node) and "pack_size" in best_node:
+					count = max(1, int(best_node.get("pack_size")))
+				elif "pack_size" in payload:
 					count = max(1, int(payload.get("pack_size")))
 				for i in range(count):
-					result.append(target_res.duplicate() if count > 1 else target_res)
+					result.append(target_res.duplicate(true) if count > 1 else target_res)
 
 	return result
 
 
+func _find_nearest_world_enemy(target_res: Resource) -> Node3D:
+	var overworld_enemies: Array[Node] = get_tree().get_nodes_in_group(&"world_enemies")
+	if overworld_enemies.is_empty():
+		overworld_enemies = get_tree().root.find_children("*", "WorldEnemy", true, false)
+
+	var player: Node3D = get_tree().get_first_node_in_group(&"player") as Node3D
+	var player_pos: Vector3 = player.global_position if is_instance_valid(player) else Vector3.ZERO
+	var player_cell: Vector2i = player.current_grid_pos if is_instance_valid(player) and ("current_grid_pos" in player) else Vector2i(-9999, -9999)
+
+	var best_node: Node3D = null
+	var min_dist: float = INF
+
+	for node in overworld_enemies:
+		if not is_instance_valid(node) or not (node is Node3D):
+			continue
+		var enemy_node: Node3D = node as Node3D
+		if not enemy_node.visible and not ("_is_in_active_combat" in enemy_node and bool(enemy_node.get("_is_in_active_combat"))):
+			continue
+
+		var grp: Variant = enemy_node.get("enemy_group") if "enemy_group" in enemy_node else null
+		var n_data: Variant = enemy_node.get("data") if "data" in enemy_node else null
+		var n_edata: Variant = enemy_node.get("enemy_data") if "enemy_data" in enemy_node else null
+
+		var matches: bool = n_data == target_res or n_edata == target_res
+		if not matches and grp is Array:
+			matches = (grp as Array).has(target_res)
+		if not matches:
+			continue
+
+		var dist: float = enemy_node.global_position.distance_to(player_pos)
+		if enemy_node.has_method("get_grid_pos") and player_cell != Vector2i(-9999, -9999):
+			var n_cell: Vector2i = enemy_node.get_grid_pos()
+			dist = float(absi(n_cell.x - player_cell.x) + absi(n_cell.y - player_cell.y))
+
+		if dist < min_dist:
+			min_dist = dist
+			best_node = enemy_node
+
+	return best_node
+
+
 func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facing: String) -> void:
+	# Built once per battle (the HUD may already be shown by GameState's BATTLE mode).
+	if not _current_enemy_resources.is_empty():
+		show()
+		return
 	show()
 	_reset_state()
 	_bind_action_buttons()
@@ -633,6 +1017,7 @@ func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facin
 		_info_menu_panel.hide()
 
 	_current_enemy_resources = _resolve_enemy_resources(enemy_payload)
+	_is_water_encounter = _detect_water_encounter(_current_enemy_resources)
 	_enemy_max_hps.clear()
 	_enemy_current_hps.clear()
 
@@ -645,7 +1030,7 @@ func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facin
 
 		if is_instance_valid(res):
 			if "max_health" in res and res.get("max_health") != null:
-				hp = int(res.get("max_health"))
+				hp = CombatMath.enemy_max_health_at_level(res) # sheet HP grown to the enemy's level
 
 		_enemy_max_hps[e_id] = hp
 		_enemy_current_hps[e_id] = hp
@@ -657,6 +1042,40 @@ func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facin
 
 	if is_instance_valid(enemy_hp_label):
 		enemy_hp_label.text = "%d / %d" % [total_max_hp, total_max_hp]
+
+
+## Called by the HUD when CombatManager's watchdog finds this HUD hidden during a battle.
+## Rebuilds it if it was never built for this fight, otherwise just shows it again.
+func recover(enemy_payload: Variant, player_party: Array) -> void:
+	if _current_enemy_resources.is_empty():
+		hide()
+		on_combat_started(enemy_payload, player_party, "")
+	else:
+		show()
+	GameLogger.combat("BATTLE HUD recovered by the combat watchdog.")
+
+
+## Top bar: names and HP of the enemies still standing ("CORRUPTODON (X2) 104/104" ->
+## "CORRUPTODON 52/52" once one dies). Called on every enemy HP change.
+func _refresh_top_header() -> void:
+	var alive: Array[Resource] = []
+	var hp_now: int = 0
+	var hp_max: int = 0
+	for i: int in range(_current_enemy_resources.size()):
+		var e_id: String = "enemy_%d" % i
+		var cur: int = int(_enemy_current_hps.get(e_id, 0))
+		if cur <= 0:
+			continue
+		alive.append(_current_enemy_resources[i])
+		hp_now += cur
+		hp_max += int(_enemy_max_hps.get(e_id, cur))
+	if alive.is_empty():
+		if is_instance_valid(enemy_hp_label):
+			enemy_hp_label.text = "0 / 0"
+		return
+	update_enemy_header_display(alive)
+	if is_instance_valid(enemy_hp_label):
+		enemy_hp_label.text = "%d / %d" % [hp_now, hp_max]
 
 
 func update_enemy_header_display(enemy_pack: Array[Resource]) -> void:
@@ -704,8 +1123,7 @@ func _on_enemy_health_changed(enemy_id: String, current_hp: int, max_hp: int) ->
 		total_current += _enemy_current_hps.get(id, 0)
 		total_max += _enemy_max_hps.get(id, 0)
 
-	if is_instance_valid(enemy_hp_label):
-		enemy_hp_label.text = "%d / %d" % [total_current, total_max]
+	_refresh_top_header()
 
 	# Synchronize live HP in open info card row
 	if _info_enemy_rows.has(enemy_id):
@@ -764,9 +1182,19 @@ func _on_vfx_animation_finished() -> void:
 func _on_combat_ended(_victory: bool) -> void:
 	hide()
 	_reset_state()
+	_current_enemy_resources.clear()
+	_is_water_encounter = false
 	_is_info_menu_open = false
 	if is_instance_valid(_info_menu_panel):
 		_info_menu_panel.hide()
+	if is_instance_valid(_slice_tween):
+		_slice_tween.kill()
+		_slice_tween = null
+	if is_instance_valid(slice_overlay) and is_instance_valid(_default_slice_material):
+		slice_overlay.material = _default_slice_material
+		_default_slice_material.set_shader_parameter("progress", 0.0)
+	if is_instance_valid(_water_slice_material):
+		_water_slice_material.set_shader_parameter("progress", 0.0)
 
 
 func setup_party_display(party_members: Array) -> void:
@@ -786,20 +1214,77 @@ func setup_party_display(party_members: Array) -> void:
 				slot_node.call("setup_slot", null)
 
 
+func _setup_slice_overlay() -> void:
+	if not is_instance_valid(slice_overlay):
+		slice_overlay = ColorRect.new()
+		slice_overlay.name = "SliceOverlay"
+		add_child(slice_overlay)
+
+	slice_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	slice_overlay.offset_left = 0.0
+	slice_overlay.offset_top = 0.0
+	slice_overlay.offset_right = 0.0
+	slice_overlay.offset_bottom = 0.0
+	slice_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slice_overlay.z_index = 128
+	slice_overlay.color = Color.WHITE
+
+	_default_slice_material = slice_overlay.material as ShaderMaterial
+	_water_slice_material = ShaderMaterial.new()
+	_water_slice_material.shader = WATER_SLICE_SHADER
+	_water_slice_material.set_shader_parameter("progress", 0.0)
+	_water_slice_material.set_shader_parameter("line_width", 0.12)
+
+
+func _detect_water_encounter(enemy_pack: Array[Resource]) -> bool:
+	for res: Resource in enemy_pack:
+		if not is_instance_valid(res):
+			continue
+		var e_id: String = str(res.get("enemy_id")) if "enemy_id" in res else ""
+		var e_name: String = str(res.get("enemy_name")).to_lower() if "enemy_name" in res else ""
+		var e_path: String = str(res.get("model_path")).to_lower() if "model_path" in res else ""
+		if WATER_ENEMY_IDS.has(e_id) or "tentacle" in e_name or "sea monster" in e_name or "tentacle" in e_path or "sea_monster" in e_path:
+			return true
+	return false
+
+
 func play_screen_slice() -> void:
-	if not is_instance_valid(slice_overlay) or slice_overlay.material == null:
+	if not is_instance_valid(slice_overlay):
+		_setup_slice_overlay()
+	if not is_instance_valid(slice_overlay):
 		return
 
-	var mat := slice_overlay.material as ShaderMaterial
+	var mat: ShaderMaterial = _default_slice_material
+	if _is_water_encounter and is_instance_valid(_water_slice_material):
+		mat = _water_slice_material
+
 	if mat == null:
 		return
 
+	# Restart cleanly: an older slice tween would otherwise keep writing "progress"
+	# and its finished callback would zero out the new slice mid-swipe.
+	if is_instance_valid(_slice_tween):
+		_slice_tween.kill()
+
+	slice_overlay.visible = true
+	slice_overlay.move_to_front()
+	slice_overlay.material = mat
+	mat.set_shader_parameter("progress", 0.0)
+
 	var tween: Tween = create_tween()
-	tween.tween_property(mat, "shader_parameter/progress", 1.0, 0.22) \
-		.from(0.0) \
-		.set_trans(Tween.TRANS_QUAD) \
-		.set_ease(Tween.EASE_OUT)
+	_slice_tween = tween
+	tween.tween_method(
+		func(value: float) -> void:
+			if is_instance_valid(mat):
+				mat.set_shader_parameter("progress", value),
+		0.0,
+		1.0,
+		0.45
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	tween.finished.connect(func() -> void:
-		mat.set_shader_parameter("progress", 0.0)
+		if _slice_tween == tween:
+			_slice_tween = null
+		if is_instance_valid(mat):
+			mat.set_shader_parameter("progress", 0.0)
 	, CONNECT_ONE_SHOT)

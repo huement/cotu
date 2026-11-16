@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bjtnwm36gg27n"]
 
-[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="1_y0ngi"]
+[ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="1_y0ngi"]
 
 [resource]
 script = ExtResource("1_y0ngi")
 item_id = "weap_ghostblade_advanced_backup"
 item_name = "Laser Dagger"
 description = "Backup melee weapon for the Ghostblade."
-icon_path = "res://Data/Items/dagger.png"
+icon_path = "res://ui/icons/items/dagger.png"
 item_type = 1
 equipment_slot = 6
 weapon_type = 1

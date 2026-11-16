@@ -5,13 +5,20 @@ class_name StatusEffectCompiler
 const CSV_PATH: String = "res://Data/status_effects.csv"
 const OUTPUT_DIR: String = "res://Data/StatusEffects/"
 
+
 func _run() -> void:
 	compile_csv()
 
+
 func compile_csv() -> void:
+	compile_status_effects()
+
+
+## Callable from the editor (_run) or a headless SceneTree runner.
+static func compile_status_effects() -> int:
 	if not FileAccess.file_exists(CSV_PATH):
 		push_error("StatusEffectCompiler: CSV file not found at %s" % CSV_PATH)
-		return
+		return 0
 
 	var dir := DirAccess.open("res://Data/")
 	if dir and not dir.dir_exists("StatusEffects"):
@@ -20,9 +27,8 @@ func compile_csv() -> void:
 	var file := FileAccess.open(CSV_PATH, FileAccess.READ)
 	if not file:
 		push_error("StatusEffectCompiler: Failed to open CSV file.")
-		return
+		return 0
 
-	# Skip CSV Header
 	var _header := file.get_line()
 	var count: int = 0
 
@@ -56,38 +62,66 @@ func compile_csv() -> void:
 			push_error("Failed to save status effect: %s (Error %d)" % [save_path, err])
 
 	print("StatusEffectCompiler: Successfully compiled %d status effect resources into %s" % [count, OUTPUT_DIR])
+	return count
 
-func _parse_effect_type(val: String) -> StatusEffectData.EffectType:
-	match val.to_upper():
-		"NEGATIVE": return StatusEffectData.EffectType.NEGATIVE
-		_: return StatusEffectData.EffectType.POSITIVE
 
-func _parse_element(val: String) -> StatusEffectData.EffectElement:
+static func _parse_effect_type(val: String) -> StatusEffectData.EffectType:
 	match val.to_upper():
-		"NATURE": return StatusEffectData.EffectElement.NATURE
-		"ARCANE": return StatusEffectData.EffectElement.ARCANE
-		"BIO": return StatusEffectData.EffectElement.BIO
-		"FIRE": return StatusEffectData.EffectElement.FIRE
-		"WATER": return StatusEffectData.EffectElement.WATER
-		_: return StatusEffectData.EffectElement.NONE
+		"NEGATIVE":
+			return StatusEffectData.EffectType.NEGATIVE
+		_:
+			return StatusEffectData.EffectType.POSITIVE
 
-func _parse_stat(val: String) -> StatusEffectData.ModifierStat:
-	match val.to_upper():
-		"DEF": return StatusEffectData.ModifierStat.DEF
-		"ATK": return StatusEffectData.ModifierStat.ATK
-		"ACC": return StatusEffectData.ModifierStat.ACC
-		"DEX": return StatusEffectData.ModifierStat.DEX
-		"MAG": return StatusEffectData.ModifierStat.MAG
-		"SPD": return StatusEffectData.ModifierStat.SPD
-		"HP": return StatusEffectData.ModifierStat.HP
-		_: return StatusEffectData.ModifierStat.NONE
 
-func _parse_mod_type(val: String) -> StatusEffectData.ModifierType:
+static func _parse_element(val: String) -> StatusEffectData.EffectElement:
 	match val.to_upper():
-		"PERCENT_MAX_HP_HEAL": return StatusEffectData.ModifierType.PERCENT_MAX_HP_HEAL
-		"PERCENT_SHIELD": return StatusEffectData.ModifierType.PERCENT_SHIELD
-		"PERCENT_MAGIC_SHIELD": return StatusEffectData.ModifierType.PERCENT_MAGIC_SHIELD
-		"PERCENT_MAX_HP_TICK": return StatusEffectData.ModifierType.PERCENT_MAX_HP_TICK
-		"CC_SKIP_TURN": return StatusEffectData.ModifierType.CC_SKIP_TURN
-		"CC_LOCK_MAGIC": return StatusEffectData.ModifierType.CC_LOCK_MAGIC
-		_: return StatusEffectData.ModifierType.MULTIPLIER
+		"NATURE":
+			return StatusEffectData.EffectElement.NATURE
+		"ARCANE":
+			return StatusEffectData.EffectElement.ARCANE
+		"BIO":
+			return StatusEffectData.EffectElement.BIO
+		"FIRE":
+			return StatusEffectData.EffectElement.FIRE
+		"WATER":
+			return StatusEffectData.EffectElement.WATER
+		_:
+			return StatusEffectData.EffectElement.NONE
+
+
+static func _parse_stat(val: String) -> StatusEffectData.ModifierStat:
+	match val.to_upper():
+		"DEF":
+			return StatusEffectData.ModifierStat.DEF
+		"ATK":
+			return StatusEffectData.ModifierStat.ATK
+		"ACC":
+			return StatusEffectData.ModifierStat.ACC
+		"DEX":
+			return StatusEffectData.ModifierStat.DEX
+		"MAG":
+			return StatusEffectData.ModifierStat.MAG
+		"SPD":
+			return StatusEffectData.ModifierStat.SPD
+		"HP":
+			return StatusEffectData.ModifierStat.HP
+		_:
+			return StatusEffectData.ModifierStat.NONE
+
+
+static func _parse_mod_type(val: String) -> StatusEffectData.ModifierType:
+	match val.to_upper():
+		"PERCENT_MAX_HP_HEAL":
+			return StatusEffectData.ModifierType.PERCENT_MAX_HP_HEAL
+		"PERCENT_SHIELD":
+			return StatusEffectData.ModifierType.PERCENT_SHIELD
+		"PERCENT_MAGIC_SHIELD":
+			return StatusEffectData.ModifierType.PERCENT_MAGIC_SHIELD
+		"PERCENT_MAX_HP_TICK":
+			return StatusEffectData.ModifierType.PERCENT_MAX_HP_TICK
+		"CC_SKIP_TURN":
+			return StatusEffectData.ModifierType.CC_SKIP_TURN
+		"CC_LOCK_MAGIC":
+			return StatusEffectData.ModifierType.CC_LOCK_MAGIC
+		_:
+			return StatusEffectData.ModifierType.MULTIPLIER

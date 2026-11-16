@@ -17,3 +17,4 @@ spellbook_type = "Soulwright"
 level_spells_unlock = 1
 skill_points_per_level = 1
 spell_points_per_level = 4
+allowed_weapon_types = Array[int]([2])

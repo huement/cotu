@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 71.93 648.81">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #0fb2aa;
+        stroke-miterlimit: 10;
+        stroke-width: .81px;
+      }
+
+      .cls-2 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .cls-2, .cls-3 {
+        mix-blend-mode: screen;
+        stroke-width: 0px;
+      }
+
+      .cls-3 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-4 {
+        isolation: isolate;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-1836.66" y1="-64.72" x2="-1992.65" y2="222.88" gradientTransform="translate(-1885.26) rotate(-180) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00f5d4"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="-805.75" y1="-3245.5" x2="-961.74" y2="-2957.9" gradientTransform="translate(-854.36 -2531.96) rotate(-180)" xlink:href="#linear-gradient"/>
+  </defs>
+  <g class="cls-4">
+    <g id="Layer_2" data-name="Layer 2">
+      <g id="HUD">
+        <g>
+          <g>
+            <polygon class="cls-3" points=".41 .41 71.53 .41 71.53 20.33 26.62 65.24 26.62 162.87 7.49 181.99 .41 181.99 .41 .41"/>
+            <polygon class="cls-1" points=".41 .41 71.53 .41 71.53 20.33 26.62 65.24 26.62 162.87 7.49 181.99 .41 181.99 .41 .41"/>
+          </g>
+          <g>
+            <polygon class="cls-2" points=".41 648.41 71.53 648.41 71.53 628.48 26.62 583.57 26.62 485.94 7.49 466.82 .41 466.82 .41 648.41"/>
+            <polygon class="cls-1" points=".41 648.41 71.53 648.41 71.53 628.48 26.62 583.57 26.62 485.94 7.49 466.82 .41 466.82 .41 648.41"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

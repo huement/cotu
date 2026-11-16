@@ -27,7 +27,7 @@ func _ready() -> void:
 
 ## Attempts a cardinal step relative to parent orientation.
 func try_step(parent_node: Node3D, local_input_dir: Vector3, _current_facing: String) -> bool:
-	GameLogger.nav('try_step FIRED')
+	# GameLogger.nav('try_step FIRED')
 	if is_moving or not parent_node:
 		return false
 
@@ -45,21 +45,32 @@ func try_step(parent_node: Node3D, local_input_dir: Vector3, _current_facing: St
 
 	if map_manager:
 		var target_grid_pos: Vector3i = map_manager.world_to_grid(target_world_pos)
-		if map_manager.is_tile_blocked(target_grid_pos):
-			GameLogger.nav('try_step BLOCKED INSTANCE')
+		var block_reason: String = map_manager.get_tile_block_reason(target_grid_pos)
+		if not block_reason.is_empty():
+			var from_cell: Vector3i = map_manager.world_to_grid(parent_node.global_position)
+			GameLogger.nav("Step blocked %s -> %s: %s" % [Vector2i(from_cell.x, from_cell.z), Vector2i(target_grid_pos.x, target_grid_pos.z), block_reason])
 			var enemy_node: Node3D = map_manager.get_enemy_at_grid_pos(target_grid_pos)
 			if is_instance_valid(enemy_node):
-				var enemy_data: Variant = enemy_node.get("data") if "data" in enemy_node else null
-				var enemy_facing: String = enemy_node.call("_get_cardinal_string") if enemy_node.has_method("_get_cardinal_string") else "SOUTH"
+				if enemy_node.has_method("trigger_combat_encounter"):
+					enemy_node.call("trigger_combat_encounter")
+				else:
+					var enemy_payload: Variant = null
+					if "enemy_group" in enemy_node:
+						var grp: Variant = enemy_node.get("enemy_group")
+						if grp is Array and not (grp as Array).is_empty():
+							enemy_payload = grp
+					if enemy_payload == null:
+						enemy_payload = enemy_node.get("data") if "data" in enemy_node else null
+					var enemy_facing: String = enemy_node.call("_get_cardinal_string") if enemy_node.has_method("_get_cardinal_string") else "SOUTH"
 
-				var party_members: Array = []
-				var gs: Node = get_tree().root.get_node_or_null("GameState")
-				if is_instance_valid(gs) and "current_party" in gs and gs.current_party:
-					if "slots" in gs.current_party:
-						party_members = gs.current_party.get("slots") as Array
+					var party_members: Array = []
+					var gs: Node = get_tree().root.get_node_or_null("GameState")
+					if is_instance_valid(gs) and "current_party" in gs and gs.current_party:
+						if "slots" in gs.current_party:
+							party_members = gs.current_party.get("slots") as Array
 
-				if is_instance_valid(SignalBus):
-					SignalBus.combat_started.emit(enemy_data, party_members, enemy_facing)
+					if is_instance_valid(SignalBus) and enemy_payload != null:
+						SignalBus.combat_started.emit(enemy_payload, party_members, enemy_facing)
 			else:
 				if is_instance_valid(SignalBus):
 					SignalBus.audio_effect_requested.emit(&"wall_bump")

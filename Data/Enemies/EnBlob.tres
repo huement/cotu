@@ -1,21 +1,22 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://rmuneiaru3gq"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
-[ext_resource type="PackedScene" uid="uid://ct3xw5fgx488s" path="res://resources/Enemies/blob.glb" id="1_uf1iu"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_x3utc"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/blobby.glb" id="1_uf1iu"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_x3utc"]
 
 [resource]
 script = ExtResource("2_x3utc")
 enemy_id = "en_blob"
 enemy_type = "fear"
 enemy_name = "Pulsing Sac"
-model_path = "res://resources/Enemies/blob.glb"
+model_path = "res://resources/Enemies/blobby.glb"
 model_scene = ExtResource("1_uf1iu")
-base_level = 3
+model_scale = Vector3(3, 3, 3)
+base_level = 1
 max_health = 60
 current_health = 60
-attack_damage = 10
+attack_damage = 12
 defense = 10
-speed = 8.0
+speed = 11.0
 initiative_speed = 10
 attack_element = 1
 equipped_item_id = "gem_corrupt_emerald"

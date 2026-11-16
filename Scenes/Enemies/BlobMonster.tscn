@@ -1,0 +1,28 @@
+[gd_scene load_steps=6 format=3 uid="uid://cjl0q48rpnael"]
+
+[ext_resource type="Script" uid="uid://cm4t8ntfsf5p4" path="res://Scripts/Enemies/BlobBossController.gd" id="1_ctrl"]
+[ext_resource type="Script" uid="uid://bxlxhe0eriek1" path="res://Scripts/3D/BlobBossJuice.gd" id="2_juice"]
+[ext_resource type="PackedScene" uid="uid://bbe68ob6fu7bl" path="res://resources/Enemies/blob_corrupt.glb" id="4_5h5ix"]
+[ext_resource type="Resource" uid="uid://rmuneiaru3gq" path="res://Data/Enemies/EnBlob.tres" id="4_data"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wide"]
+size = Vector3(11.994141, 4, 11.741211)
+
+[node name="BlobMonster" type="Node3D"]
+script = ExtResource("1_ctrl")
+base_data = ExtResource("4_data")
+boss_scale = 1.5
+
+[node name="VisualJuice" type="Node3D" parent="."]
+script = ExtResource("2_juice")
+hit_shake_intensity = 0.3
+hit_shake_duration = 0.33
+
+[node name="blob_corrupt" parent="VisualJuice" instance=ExtResource("4_5h5ix")]
+transform = Transform3D(1.75, 0, 0, 0, 1.75, 0, 0, 0, 1.75, 0, 0, 0)
+
+[node name="ActivationArea" type="Area3D" parent="."]
+collision_layer = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ActivationArea"]
+shape = SubResource("BoxShape3D_wide")

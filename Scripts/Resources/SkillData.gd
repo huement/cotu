@@ -35,6 +35,8 @@ enum EffectType {
 @export var icon_path: String = ""
 @export var icon: Texture2D
 @export var attack_vfx: SpriteFrames
+## Optional battle animation name (ThrowAnimator clip, WeaponAnimator clip, or spell VFX).
+@export var animation: String = "NONE"
 
 @export_group("Cost & Targeting")
 @export var energy_cost: int = 0

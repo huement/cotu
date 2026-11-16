@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/slime.glb" id="1_7txws"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_n3p4b"]
+
+[resource]
+script = ExtResource("2_n3p4b")
+enemy_id = "en_slime_lord"
+enemy_type = "slime"
+enemy_name = "Slime Lord"
+model_path = "res://resources/Enemies/slime.glb"
+model_scene = ExtResource("1_7txws")
+model_scale = Vector3(4, 4, 4)
+base_level = 8
+scale_with_player = false
+max_health = 158
+current_health = 158
+attack_damage = 18
+defense = 7
+speed = 10.9
+initiative_speed = 8
+weakness_element = 4
+can_cast_spells = true
+spell_ids = Array[String](["sp_corrosive_spray", "sp_neurotoxin_gas"])
+max_mana = 118
+occurs_in_groups = false
+max_group_size = 1
+aggro_range_tiles = 4
+can_be_surprised = false
+xp_value = 581
+gold_value = 258

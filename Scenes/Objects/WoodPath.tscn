@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://bpabgpkgh1av1"]
+
+[ext_resource type="Script" uid="uid://mfvrfrlay80t" path="res://Scripts/Environment/wood_path.gd" id="1_08lf6"]
+[ext_resource type="PackedScene" uid="uid://b3pphk3nvm7gd" path="res://resources/tile_sets/nature/path_wood.glb" id="2_4nats"]
+[ext_resource type="PackedScene" uid="uid://dubwb8h6a3ajg" path="res://resources/tile_sets/nature/path_woodCorner.glb" id="3_weym5"]
+[ext_resource type="PackedScene" uid="uid://d3wvrhp2b00o5" path="res://resources/tile_sets/nature/path_woodEnd.glb" id="4_nbxtf"]
+
+[node name="WoodPath" type="Node3D"]
+script = ExtResource("1_08lf6")
+
+[node name="path_wood" parent="." instance=ExtResource("2_4nats")]
+unique_name_in_owner = true
+
+[node name="path_wood_corner" parent="." instance=ExtResource("3_weym5")]
+unique_name_in_owner = true
+
+[node name="path_wood_end" parent="." instance=ExtResource("4_nbxtf")]
+unique_name_in_owner = true

@@ -180,7 +180,7 @@ func _get_fallback_slot_title(slot_name: String) -> String:
 		"LEGS":
 			return "LEG ARMOR"
 		"FEET":
-			return "MAG BOOTS"
+			return "BOOTS"
 		"LEFT_HAND":
 			return "LEFT HAND"
 		"RIGHT_HAND":

@@ -23,6 +23,8 @@ var _items_use_btn: Button = null
 var _items_drop_btn: Button = null
 
 const GALAXIA_FONT: Font = preload("res://ui/fonts/GALAXIA.otf")
+## Side of the square boss avatar on a BOSS_DIALOG popup (half of it hangs outside the panel).
+const BOSS_AVATAR_SIZE: float = 112.0
 
 const BATTLE_VICTORY_SCENE: PackedScene = preload("res://Scenes/UI/BattleVictoryPopup.tscn")
 @export var skills_spells_popup_scene: PackedScene = preload("res://Scenes/UI/SkillsSpellsPopup.tscn")
@@ -53,17 +55,21 @@ func _ready() -> void:
 	if confirm_button:
 		confirm_button.pressed.connect(_on_confirm_pressed)
 
+	# Keyboard: Tab / arrows / Enter inside every popup, Esc = cancel (see KeyboardModal).
+	if panel_container:
+		KeyboardModal.attach(panel_container, _on_cancel_pressed)
+
 
 ## Catches incoming event requests and builds custom menus on the fly
 func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> void:
-	print("[DEBUG] UniversalPopup: Received request for action: ", action_type)
+	GameLogger.ui(str("[DEBUG] UniversalPopup: Received request for action: ", action_type))
 
 	# 🎯 Guard: Ignore ABILITY_INFO so UniversalPopup does not destroy its content
 	if action_type == &"ABILITY_INFO":
 		return
 
 	# Intercept item selection when the Standalone ITEMS Modal is already open
-	if action_type == &"ITEM_ACTIONS" and active_action_type == &"ITEMS":
+	if action_type == &"ITEM_ACTIONS" and (active_action_type == &"ITEMS" or active_action_type == &"BATTLE_ITEMS"):
 		_update_items_preview(data)
 		return
 
@@ -81,7 +87,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		&"REST":
 			title_label.text = "Set Purrogate Camp Duration"
 			_build_rest_ui()
-		&"ITEMS":
+		&"ITEMS", &"BATTLE_ITEMS":
 			title_label.text = "Useable Items"
 			_build_items_inventory_ui()
 		&"ITEM_ACTIONS":
@@ -97,8 +103,15 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 			var title_str: String = str(data.get("title", "Archive Log")).to_upper()
 			title_label.text = title_str
 			_build_lore_popup_ui(data)
+		&"BOSS_DIALOG":
+			title_label.text = ""
+			_build_boss_dialog_ui(data)
 		&"LEAVE_DUNGEON":
 			_build_leave_dungeon_ui(data)
+		&"CONFIRMATION":
+			var title_str: String = str(data.get("title", ""))
+			title_label.text = title_str.to_upper() if not title_str.is_empty() else "CONFIRM"
+			_build_confirmation_ui(data)
 		_:
 			push_warning("UniversalPopup: Unknown action type requested: " + String(action_type))
 			return
@@ -107,7 +120,7 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		background_dimmer.visible = true
 	if panel_container:
 		panel_container.visible = true
-		print("[DEBUG] UniversalPopup: Panel container visible.")
+		GameLogger.ui("[DEBUG] UniversalPopup: Panel container visible.")
 		_center_popup()
 
 
@@ -188,6 +201,14 @@ func _close_modal() -> void:
 func _on_cancel_pressed() -> void:
 	if is_instance_valid(AudioManager):
 		AudioManager.play_ui_sound("button-close")
+	# Lore popups report closing however they were dismissed (see BossStatue)
+	if active_action_type == &"LORE_POPUP":
+		_emit_confirmation(&"LORE_POPUP", active_data.duplicate())
+		return
+	# A boss's dialog can't be skipped past its cutscene: Esc closes it the same way as its button
+	if active_action_type == &"BOSS_DIALOG":
+		_emit_confirmation(&"BOSS_DIALOG", active_data.duplicate())
+		return
 	_close_modal()
 
 
@@ -240,7 +261,7 @@ func _build_search_ui() -> void:
 	if nearby_details.is_empty():
 		info_text.text = "Searching corridors for hidden compartments...\nNo immediate micro-vibrations or anomalies detected."
 	else:
-		info_text.text = "SCAN RESULTS:\n" + "\n".join(nearby_details) + "\n\nFace object and press 'E' or 'SEARCH' to interact."
+		info_text.text = "SCAN RESULTS:\n" + "\n".join(nearby_details) + "\n\nFace object and press '/' on keyboard or the 'SEARCH' HUD icon to interact."
 
 	content_area.add_child(info_text)
 
@@ -284,6 +305,9 @@ func _build_rest_ui() -> void:
 	btn_hbox.add_theme_constant_override("separation", 16)
 
 	var rest_btn := _create_modal_button("REST", Color(0.0, 0.9, 0.8, 1.0))
+	# Keyboard: focus starts on the slider (left/right = hours), Enter rests.
+	KeyboardModal.set_default(rest_btn)
+	KeyboardModal.set_default(slider)
 	rest_btn.pressed.connect(
 		func() -> void:
 			_emit_confirmation(&"REST", { "hours": int(slider.value) }),
@@ -307,7 +331,7 @@ func _build_items_inventory_ui() -> void:
 	popup_instance.close_requested.connect(_on_cancel_pressed)
 	popup_instance.target_selection_requested.connect(
 		func(item_to_use: ItemData, inv_slot_idx: int, acting_slot_idx: int) -> void:
-			match item_to_use.target_type:
+			match item_to_use.get_battle_target_type() if acting_slot_idx >= 0 else item_to_use.target_type:
 				ItemData.TargetType.NONE, ItemData.TargetType.ALL_PARTY, ItemData.TargetType.ALL_ENEMIES:
 					_execute_item_use_direct(item_to_use, inv_slot_idx, acting_slot_idx, -1)
 					_close_modal()
@@ -347,7 +371,8 @@ func _build_item_target_selection_ui(item: ItemData, inv_slot_idx: int, acting_s
 
 	if is_in_battle:
 		var combatants: Array = active_data.get("combatants", [])
-		var is_ally_target: bool = (item.target_type == ItemData.TargetType.SINGLE_PARTY_MEMBER or item.target_type == ItemData.TargetType.ALL_PARTY)
+		var battle_target: ItemData.TargetType = item.get_battle_target_type()
+		var is_ally_target: bool = (battle_target == ItemData.TargetType.SINGLE_PARTY_MEMBER or battle_target == ItemData.TargetType.ALL_PARTY)
 
 		var valid_targets: Array = []
 		for c in combatants:
@@ -486,8 +511,29 @@ func _execute_item_use_direct(item: ItemData, inv_slot_idx: int, acting_slot_idx
 
 		if get_tree().root.has_node("SignalBus"):
 			SignalBus.player_action_selected.emit(acting_slot_idx, &"ITEM", max(0, target_slot_idx))
+		# The target was picked on this popup's cards - don't leave the manager waiting for a portrait click.
+		if is_instance_valid(target_mgr) and target_mgr.has_method("finish_selection"):
+			target_mgr.call("finish_selection")
 	else:
 		var gs: Node = get_tree().root.get_node_or_null("GameState")
+		# Group items (e.g. Group Heal Potion): ONE item applied to the whole party.
+		if item.target_type == ItemData.TargetType.ALL_PARTY and is_instance_valid(gs) \
+				and "inventory" in gs and gs.inventory != null and "current_party" in gs and gs.current_party:
+			var party_slots: Array = gs.current_party.get("slots") as Array
+			if is_instance_valid(AudioManager):
+				AudioManager.play_ui_sound("button-confirm")
+			var group_ok: bool = gs.inventory.use_item_on_targets(inv_slot_idx, party_slots)
+			GameLogger.info("UniversalPopup: Field group item use result = %s" % str(group_ok))
+			if group_ok and get_tree().root.has_node("SignalBus"):
+				for idx: int in range(party_slots.size()):
+					var cat: Resource = party_slots[idx] as Resource
+					if not is_instance_valid(cat):
+						continue
+					if cat.get("current_hp") != null:
+						SignalBus.character_health_changed.emit(idx, cat.get("current_hp"))
+					if cat.get("current_energy") != null:
+						SignalBus.character_mana_changed.emit(idx, cat.get("current_energy"), cat.get("max_energy") if cat.get("max_energy") != null else 0)
+			return
 		if is_instance_valid(gs) and "inventory" in gs and gs.inventory != null:
 			var target_cat: Resource = null
 			var resolved_target_idx: int = target_slot_idx
@@ -542,7 +588,7 @@ func _reset_items_preview() -> void:
 ## Renders the styled popup scene inside the universal popup modal
 func _build_skills_spells_popup_ui(action_type: StringName, data: Dictionary) -> void:
 	var cat: CatCharacter = data.get("character", null) as CatCharacter
-	print("UniversalPopup: Building Skills/Spells Popup for character: ", cat.name if is_instance_valid(cat) else "null", " with action_type: ", action_type)
+	GameLogger.ui(str("UniversalPopup: Building Skills/Spells Popup for character: ", cat.name if is_instance_valid(cat) else "null", " with action_type: ", action_type))
 
 	# 1. Determine initial tab mode
 	var initial_mode: SkillsSpellsPopup.Mode = SkillsSpellsPopup.Mode.SPELLS
@@ -601,7 +647,7 @@ func _center_popup() -> void:
 	panel_container.offset_right = 0
 	panel_container.offset_bottom = 0
 
-	print("[DEBUG] UniversalPopup Centered -> Position: ", panel_container.position, " | Size: ", panel_container.size)
+	GameLogger.ui(str("[DEBUG] UniversalPopup Centered -> Position: ", panel_container.position, " | Size: ", panel_container.size))
 
 		
 ## Helper method to adjust container margins for standard vs flush modals
@@ -670,33 +716,55 @@ func _build_item_actions_ui(data: Dictionary) -> void:
 			if is_equippable:
 				var equip_action := func() -> void:
 					if is_instance_valid(cat):
+						if cat.has_method("can_equip_item") and not bool(cat.call("can_equip_item", item)):
+							var type_name: String = ItemData.WeaponType.keys()[item.weapon_type]
+							var prof_name: String = "this class"
+							if "profession" in cat and is_instance_valid(cat.profession) and "profession_name" in cat.profession:
+								prof_name = str(cat.profession.profession_name)
+							if is_instance_valid(SignalBus) and SignalBus.has_signal(&"show_toast"):
+								SignalBus.show_toast.emit(
+									"%s cannot equip %s weapons." % [prof_name, type_name], true
+								)
+							_close_modal()
+							return
+
 						var target_slot: String = item.get_slot_string()
 						if target_slot.is_empty():
 							target_slot = "LEFT_HAND"
 
-						# Aggregate total quantity of matching stack items in inventory
-						var total_qty: int = 0
-						var items_to_remove: Array[ItemData] = []
+						# Ammo / throwables: merge matching stacks into the equipped hand.
+						# Weapons / armor: equip only this one piece (never merge duplicates).
+						var stackable: bool = inv != null and inv.has_method("is_stackable") and bool(inv.call("is_stackable", item))
 						if is_instance_valid(inv):
-							for inv_item in inv.get_items():
-								if is_instance_valid(inv_item) and (
-									(not item.item_id.is_empty() and inv_item.item_id == item.item_id) or
-									(inv_item.item_name == item.item_name)
-								):
-									total_qty += inv_item.quantity
-									items_to_remove.append(inv_item)
-
-						item.quantity = max(1, total_qty)
-
-						# Remove all matching stack instances from inventory
-						if is_instance_valid(inv):
-							for r_item in items_to_remove:
-								inv.remove_item(r_item)
+							if stackable:
+								var total_qty: int = 0
+								var items_to_remove: Array[ItemData] = []
+								for inv_item in inv.get_items():
+									if is_instance_valid(inv_item) and (
+										(not item.item_id.is_empty() and inv_item.item_id == item.item_id) or
+										(inv_item.item_name == item.item_name)
+									):
+										total_qty += inv_item.quantity
+										items_to_remove.append(inv_item)
+								item.quantity = maxi(1, total_qty)
+								for r_item in items_to_remove:
+									inv.remove_item(r_item)
+							else:
+								item.quantity = 1
+								inv.remove_item(item)
 
 						# Swap equipment in loadout
 						var unequipped: ItemData = cat.unequip_item(target_slot) as ItemData if cat.has_method("unequip_item") else null
+						var equipped_ok: bool = true
 						if cat.has_method("equip_item"):
-							cat.equip_item(target_slot, item)
+							equipped_ok = bool(cat.equip_item(target_slot, item))
+						if not equipped_ok:
+							if is_instance_valid(inv):
+								inv.add_item(item)
+								if is_instance_valid(unequipped) and cat.has_method("equip_item"):
+									cat.equip_item(target_slot, unequipped)
+							_close_modal()
+							return
 						if is_instance_valid(inv) and is_instance_valid(unequipped):
 							inv.add_item(unequipped)
 
@@ -807,8 +875,9 @@ func _build_lore_popup_ui(data: Dictionary) -> void:
 
 	content_area.add_child(scroll)
 
-	var close_btn := _create_modal_button("CLOSE", Color(0.0, 0.7, 0.8, 1.0))
-	close_btn.pressed.connect(_close_modal)
+	var close_btn := _create_modal_button(str(data.get("button_text", "CLOSE")), Color(0.0, 0.7, 0.8, 1.0))
+	# Confirm (not just close) so scripted objects like BossStatue know the player read it
+	close_btn.pressed.connect(func() -> void: _emit_confirmation(&"LORE_POPUP", data))
 
 	var btn_hbox := HBoxContainer.new()
 	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -816,6 +885,88 @@ func _build_lore_popup_ui(data: Dictionary) -> void:
 	content_area.add_child(btn_hbox)
 	
 	
+## A boss talks to the party (BossVillainCutscene). Same glass panel as every popup, with the
+## boss's avatar hanging off the top-left corner and the text beside it.
+## data: "body" (text), "speaker" (name line, optional), "avatar" (Texture2D, optional),
+##       "button_text" (optional), "dialog_id" (echoed back in popup_confirmed).
+func _build_boss_dialog_ui(data: Dictionary) -> void:
+	if title_label:
+		title_label.visible = false # no title bar: the speaker's name sits above the text
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var avatar: Texture2D = data.get("avatar", null) as Texture2D
+	if is_instance_valid(avatar):
+		# The slot only reserves the half of the picture that sits inside the panel; the frame
+		# itself is shifted left past the panel's 15 px margin so it straddles the panel edge.
+		var slot := Control.new()
+		slot.custom_minimum_size = Vector2(BOSS_AVATAR_SIZE * 0.5 - 15.0, BOSS_AVATAR_SIZE)
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(slot)
+
+		var frame := Panel.new()
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame.position = Vector2(-BOSS_AVATAR_SIZE * 0.5 - 15.0, 0.0)
+		frame.size = Vector2(BOSS_AVATAR_SIZE, BOSS_AVATAR_SIZE)
+		var frame_style := StyleBoxFlat.new()
+		frame_style.bg_color = Color.BLACK
+		frame_style.set_border_width_all(3)
+		frame_style.border_color = Color.BLACK
+		frame.add_theme_stylebox_override("panel", frame_style)
+		slot.add_child(frame)
+
+		var picture := TextureRect.new()
+		picture.texture = avatar
+		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		picture.position = Vector2(3.0, 3.0)
+		picture.size = Vector2(BOSS_AVATAR_SIZE - 6.0, BOSS_AVATAR_SIZE - 6.0)
+		frame.add_child(picture)
+
+	var text_column := VBoxContainer.new()
+	text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_column.add_theme_constant_override("separation", 8)
+	row.add_child(text_column)
+
+	var speaker: String = str(data.get("speaker", "")).strip_edges()
+	if not speaker.is_empty():
+		var name_lbl := Label.new()
+		name_lbl.text = speaker.to_upper()
+		name_lbl.add_theme_font_override("font", GALAXIA_FONT)
+		name_lbl.add_theme_font_size_override("font_size", 16)
+		name_lbl.add_theme_color_override("font_color", Color(1.0, 0.16, 0.16))
+		text_column.add_child(name_lbl)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(380, 170)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	text_column.add_child(scroll)
+
+	var body_lbl := Label.new()
+	body_lbl.text = str(data.get("body", ""))
+	body_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body_lbl.add_theme_color_override("font_color", Color.WHITE)
+	body_lbl.add_theme_font_size_override("font_size", 15)
+	scroll.add_child(body_lbl)
+
+	content_area.add_child(row)
+
+	var close_btn := _create_modal_button(str(data.get("button_text", "...")), Color(0.78, 0.08, 0.08, 1.0))
+	close_btn.pressed.connect(func() -> void: _emit_confirmation(&"BOSS_DIALOG", data.duplicate()))
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_END
+	btn_hbox.add_child(close_btn)
+	content_area.add_child(btn_hbox)
+
+	call_deferred("_center_popup")
+
+
 func _process(delta: float) -> void:
 	if _is_aura_active:
 		_shake_timer += delta
@@ -835,6 +986,11 @@ func _configure_aura_preset(preset_type: String) -> void:
 			_aura_material.set_shader_parameter("albedo_color_a", Color(0.0, 0.5, 0.9, 0.85))
 			_aura_material.set_shader_parameter("albedo_color_b", Color(0.0, 0.85, 0.45, 0.85))
 			_aura_material.set_shader_parameter("emission_color", Color(0.1, 1.0, 0.8, 0.6))
+		"shard":
+			# Arcanum Shard: purple with a green highlight.
+			_aura_material.set_shader_parameter("albedo_color_a", ArcanumShard.AURA_COLOR_A)
+			_aura_material.set_shader_parameter("albedo_color_b", ArcanumShard.AURA_COLOR_B)
+			_aura_material.set_shader_parameter("emission_color", ArcanumShard.AURA_EMISSION)
 		"bad", _:
 			_aura_material.set_shader_parameter("albedo_color_a", Color(0.8, 0.05, 0.1, 0.85))
 			_aura_material.set_shader_parameter("albedo_color_b", Color(0.35, 0.0, 0.5, 0.85))
@@ -930,3 +1086,49 @@ func _build_leave_dungeon_ui(data: Dictionary) -> void:
 	btn_hbox.add_child(leave_btn)
 	btn_hbox.add_child(cancel_btn)
 	content_area.add_child(btn_hbox)
+
+
+func _build_confirmation_ui(data: Dictionary) -> void:
+	var prompt_text: String = str(data.get("message", "Are you sure?"))
+	var confirm_str: String = str(data.get("confirm_text", "YES")).to_upper()
+	var cancel_str: String = str(data.get("cancel_text", "NO")).to_upper()
+	var on_confirm_cb: Callable = data.get("on_confirm", Callable())
+	var on_cancel_cb: Callable = data.get("on_cancel", Callable())
+
+	# 1. Prompt Text Label
+	var lbl := Label.new()
+	lbl.text = prompt_text
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	lbl.add_theme_font_size_override("font_size", 14)
+	content_area.add_child(lbl)
+
+	# 2. Action Buttons (Yes / No)
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hbox.add_theme_constant_override("separation", 16)
+
+	# Confirm / Yes Button
+	var confirm_btn := _create_modal_button(confirm_str, Color(0.0, 0.8, 0.4, 1.0))
+	confirm_btn.pressed.connect(func() -> void:
+		if on_confirm_cb.is_valid():
+			on_confirm_cb.call()
+		_emit_confirmation(&"CONFIRMATION", data)
+	)
+
+	# Cancel / No Button
+	var cancel_btn := _create_modal_button(cancel_str, Color(0.5, 0.5, 0.5, 1.0))
+	cancel_btn.pressed.connect(func() -> void:
+		if on_cancel_cb.is_valid():
+			on_cancel_cb.call()
+		_on_cancel_pressed()
+	)
+
+	btn_hbox.add_child(confirm_btn)
+	btn_hbox.add_child(cancel_btn)
+	cancel_btn.visible = not bool(data.get("hide_cancel", false)) # message-only popups: just OK
+	content_area.add_child(btn_hbox)
+
+	call_deferred("_center_popup")

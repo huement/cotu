@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://ck88b678i0di6"]
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3]
 
-[ext_resource type="Script" uid="uid://dhg6x8lvxtnkp" path="res://Scripts/Resources/StatusEffectData.gd" id="1_ua8rd"]
+[ext_resource type="Script" path="res://Scripts/Resources/StatusEffectData.gd" id="1_ua8rd"]
 
 [resource]
 script = ExtResource("1_ua8rd")
@@ -16,4 +16,4 @@ modifier_value = 10.0
 max_stacks = 5
 cured_by = "DISPEL"
 is_dispellable = true
-icon_path = "res://Data/Effects/Icons/heal_2.png"
+icon_path = "res://ui/icons/status/heal_2.png"

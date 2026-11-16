@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://dx4c3itu5r2ej"]
+
+[ext_resource type="PackedScene" uid="uid://b338gm7m8jujv" path="res://resources/OutdoorParts/stone_gateway.glb" id="1_ndai8"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fov1k"]
+size = Vector3(1.9338379, 2.9638672, 3.7423706)
+
+[node name="StoneGate" type="Node3D"]
+
+[node name="StoneGateModel" parent="." instance=ExtResource("1_ndai8")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15759277, 0.67529297, 0.022247314)
+shape = SubResource("BoxShape3D_fov1k")

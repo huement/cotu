@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75.68 57.68">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-7 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #80ffdb;
+      }
+
+      .cls-3 {
+        fill: #00f0ff;
+      }
+
+      .cls-4 {
+        fill: #000;
+        opacity: .25;
+      }
+
+      .cls-7 {
+        stroke: #00f0ff;
+        stroke-width: 2.19px;
+      }
+
+      .cls-5 {
+        fill: #fff;
+      }
+
+      .cls-6 {
+        fill: #64dfdf;
+      }
+    </style>
+  </defs>
+  <g id="Layer_7" data-name="Layer 7">
+    <g>
+      <g>
+        <polygon id="btn-strafe-left" class="cls-4" points="17.39 1.2 74.59 1.2 74.59 56.58 1.5 56.58 1.5 16.58 17.39 1.2"/>
+        <polygon id="btn-strafe-left-2" data-name="btn-strafe-left" class="cls-7" points="17.39 1.2 74.59 1.2 74.59 56.58 1.5 56.58 1.5 16.58 17.39 1.2"/>
+        <rect class="cls-6" x="20.66" y="18.58" width="2.15" height="20.62"/>
+        <g>
+          <polygon class="cls-1" points="53.72 35.04 52.66 33.98 47.58 28.8 53.62 22.74 53.72 35.04"/>
+          <polygon class="cls-5" points="50.31 36.34 42.81 28.7 57.15 14.32 57.19 19.14 47.66 28.68 47.7 28.72 47.67 28.76 52.78 33.9 57.35 38.56 57.39 43.46 50.31 36.34"/>
+          <path class="cls-3" d="M53.83,34.95l.06.06-.1-12.31-.03.03s0-.05,0-.07l3.47-3.47.16,19.42-3.57-3.63s0-.01,0-.02Z"/>
+        </g>
+        <g>
+          <polygon class="cls-1" points="37.83 35.04 36.76 33.98 31.68 28.8 37.73 22.74 37.83 35.04"/>
+          <polygon class="cls-5" points="34.41 36.34 26.92 28.7 41.26 14.32 41.3 19.14 31.76 28.68 31.81 28.72 31.77 28.76 36.89 33.9 41.46 38.56 41.5 43.46 34.41 36.34"/>
+          <path class="cls-3" d="M37.93,34.95l.06.06-.1-12.31-.03.03s0-.05,0-.07l3.47-3.47.16,19.42-3.57-3.63s0-.01,0-.02Z"/>
+        </g>
+      </g>
+      <polygon class="cls-2" points="0 9.14 9.57 0 0 0 0 9.14"/>
+    </g>
+  </g>
+</svg>

@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://cye0pgvk600g6"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
 
-[ext_resource type="Material" uid="uid://c5lt06n5etv2j" path="res://resources/Enemies/Kenny/Materials/en_heavy_servitor_mat.tres" id="1_3j1js"]
-[ext_resource type="PackedScene" uid="uid://c1dr8vg5g0pyx" path="res://resources/Enemies/Kenny/character-n.glb" id="2_spsti"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_ikinr"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_heavy_servitor_mat.tres" id="1_3j1js"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-n.glb" id="2_spsti"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_ikinr"]
 
 [resource]
 script = ExtResource("3_ikinr")
@@ -13,17 +13,20 @@ model_path = "res://resources/Enemies/Kenny/character-n.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-n.png"
 model_scene = ExtResource("2_spsti")
 custom_material = ExtResource("1_3j1js")
+model_scale = Vector3(1, 1, 1)
+hit_reaction = "holding-both-shoot"
 base_level = 7
-max_health = 110
-current_health = 110
-attack_damage = 25
-defense = 10
-speed = 6.0
-initiative_speed = 8
+max_health = 50
+current_health = 50
+attack_damage = 20
+defense = 6
+speed = 10.5
+initiative_speed = 6
 occurs_in_groups = false
 max_group_size = 1
 movement_speed = 0.7
 aggro_range_tiles = 5
 can_be_surprised = false
-xp_value = 220
-gold_value = 125
+xp_value = 79
+gold_value = 45
+max_mana = 0

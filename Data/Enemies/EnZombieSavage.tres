@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://w6tvsfi0pypv"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://ych5aq6i31pi"]
 
 [ext_resource type="Material" uid="uid://7mqwvh7drkfx" path="res://resources/Enemies/Kenny/Materials/en_zombie_savage_mat.tres" id="1_6efj3"]
 [ext_resource type="PackedScene" uid="uid://d2rgrhaldmh6r" path="res://resources/Enemies/Kenny/character-f.glb" id="2_ko70x"]
@@ -7,22 +7,23 @@
 [resource]
 script = ExtResource("3_dqqm2")
 enemy_id = "en_zombie_savage"
-enemy_type = "zombie"
 enemy_name = "Savage Corrupted"
 model_path = "res://resources/Enemies/Kenny/character-f.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-f.png"
 model_scene = ExtResource("2_ko70x")
 custom_material = ExtResource("1_6efj3")
+model_scale = Vector3(1, 1, 1)
+hit_reaction = "holding-both-shoot"
 base_level = 3
-max_health = 80
-current_health = 80
-attack_damage = 18
-defense = 10
-speed = 9.0
-initiative_speed = 11
+max_health = 57
+current_health = 57
+attack_damage = 17
+defense = 8
+speed = 10.2
+initiative_speed = 10
 attack_element = 2
 max_group_size = 5
 movement_speed = 1.5
 aggro_range_tiles = 6
-xp_value = 150
+xp_value = 94
 gold_value = 0

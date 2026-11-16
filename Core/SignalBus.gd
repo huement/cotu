@@ -17,10 +17,15 @@ enum CombatPhase {
 # Exploration & Navigation
 signal party_moved(new_grid_pos: Vector3i, facing: Direction)
 signal party_roster_updated(roster_slots: Array)
+signal day_night_changed(is_night: bool)
 
 # Combat Triggers
 signal combat_started(enemy_data_or_group: Variant, player_party: Array, enemy_facing: String)
 signal combat_ended(victory: bool)
+## Every party member is down (emitted right after combat_ended(false)). Not sent for fleeing.
+signal party_defeated
+## CombatManager's watchdog found a running battle with the battle HUD hidden; HUD shows it again.
+signal battle_hud_recovery_requested(enemy_data_or_group: Variant, player_party: Array)
 signal combat_phase_changed(new_phase: CombatPhase)
 
 # Combat Actions & Escapes
@@ -45,22 +50,50 @@ signal chevron_flash_requested(is_player_hit: bool)
 signal character_xp_changed(slot_index: int, current_xp: int, max_xp: int)
 signal character_leveled_up(slot_index: int, new_level: int)
 signal party_gold_changed(new_total: int, amount_changed: int)
+## Opens the Level Up allocation screen for a party member (CatCharacter).
+signal level_up_screen_requested(character: Resource)
+## Opens the quartermaster / shop UI (optional stock override in data).
+signal shop_requested(data: Dictionary)
 
 # Popups & UI
 signal popup_requested(action_type: StringName, data: Dictionary)
 signal popup_confirmed(action_type: StringName, extra_data: Dictionary)
 signal portrait_clicked(slot_index: int)
 signal battle_victory_popup_requested(data: Dictionary)
+signal time_period_changed(new_period: String)
+## Nine voice assistant: basename under Audio/Voice/ (e.g. "intro" → intro.mp3).
+signal nine_speak_requested(clip_basename: String)
 
 # JUICE IT
 signal camera_shake_requested(trauma: float)
 signal elemental_vfx_requested(element: ItemData.ElementalBase)
 signal spell_vfx_requested(anim_name: String, element: ItemData.ElementalBase)
 signal edge_flash_requested(color: Color, duration: float)
+## Slow "breathing" edge glow that loops until stopped. period <= 0 stops it (fades out).
+signal edge_pulse_requested(color: Color, period: float)
 signal audio_effect_requested(effect_name: StringName)
 signal target_vfx_requested(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: float)
 signal screen_slice_requested()
+## One big slash on the exploration HUD (environmental hazards)
+signal hazard_slash_requested()
+# Weapon Animation & Impact Synchronization
+signal weapon_impact_occurred
+signal weapon_animation_finished
 signal weapon_swing_requested(anim_name: String)
+## ThrowAnimator clips: "big_potion_throw", "knife_throw", "star_throw".
+signal throw_requested(anim_name: String)
+signal throw_animation_finished
+
+## Lore object scare: aura overlay + image flash (see LoreScareFX)
+signal lore_scare_requested(data: Dictionary)
+
+# --- Boss Cutscenes (Scripts/Cutscenes/BossVillainCutscene.gd) ---
+## A boss asks for its villain cutscene. `ending` is a BossCutsceneEnding: the boss's dialog and
+## what happens to the party afterwards (drain / forced fight / travel). null = cutscene only.
+signal boss_cutscene_requested(cutscene_id: String, anchor_position: Vector3, ending: Resource)
+## The cutscene tells the boss placed in the level to show itself (true) or vanish again (false).
+signal boss_cutscene_villain_visible(cutscene_id: String, shown: bool)
+signal boss_cutscene_finished(cutscene_id: String)
 
 # Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)
@@ -73,3 +106,17 @@ signal enemy_proximity_changed(min_grid_distance: int, current_tier: int)
 
 ## Emitted when an enemy alarm or proximity clicker is triggered
 signal proximity_alert_triggered(alert_level: int) # 0 = Safe, 1 = Nearby (Clicker 1), 2 = Close (Clicker 2), 3 = Critical (Alarm)
+
+## An Arcanum Shard was collected (Scripts/Objects/ArcanumShard.gd -> ShardLedger.collect).
+signal shard_collected(shard_id: String, level_name: String)
+
+
+# --- Weather & Atmosphere ---
+## Emitted by map events, bosses, or scripts to roll a storm in or shift intensity (0.0 to 1.0).
+signal storm_requested(target_amount: float, duration_sec: float)
+## Emitted to gradually clear active weather back to baseline (storm_amount -> 0.0).
+signal weather_clear_requested(duration_sec: float)
+## Emitted by cutscenes or scripted strikes to force an immediate lightning bolt (0.0 to 1.0).
+signal lightning_flash_requested(intensity: float)
+## Emitted by WeatherController whenever storm_amount updates so overlays and UI stay in sync.
+signal weather_changed(storm_amount: float)

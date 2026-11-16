@@ -1,0 +1,389 @@
+[gd_scene load_steps=38 format=3 uid="uid://cwppjunkxqs84"]
+
+[ext_resource type="Script" uid="uid://bcvr81rbuqpc2" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_ab27a"]
+[ext_resource type="Script" uid="uid://co7xlukyxktxc" path="res://Scripts/Environment/EditorWorkLight.gd" id="2_fj1u1"]
+[ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="3_vaalu"]
+[ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="4_5kj1p"]
+[ext_resource type="MeshLibrary" uid="uid://wkj1vx74cd3c" path="res://resources/mesh_library/nav_blocker_mesh_library.tres" id="6_g4nsp"]
+[ext_resource type="PackedScene" uid="uid://bpcdn1khhuu8r" path="res://Scenes/Dungeons/Parts/WideRoom.tscn" id="7_7l3v3"]
+[ext_resource type="PackedScene" uid="uid://78xhgif81bl8" path="res://Scenes/Dungeons/Parts/CornerRoom.tscn" id="9_54tk3"]
+[ext_resource type="PackedScene" uid="uid://d057a05vypqup" path="res://Scenes/Dungeons/Parts/LargeRoom.tscn" id="10_wnk16"]
+[ext_resource type="PackedScene" uid="uid://dnbdrcp6aris0" path="res://Scenes/Dungeons/Parts/SmallRoom.tscn" id="11_niju3"]
+[ext_resource type="PackedScene" uid="uid://6r0ruk82bxhi" path="res://Scenes/Dungeons/Parts/BossChamber.tscn" id="12_e3e0w"]
+[ext_resource type="AudioStream" uid="uid://bnf78ibe2s7wp" path="res://Audio/Enemies/gravel_run.mp3" id="14_5h1wc"]
+[ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/Enemies/enemy.tscn" id="14_cc6jg"]
+[ext_resource type="Script" uid="uid://biejn7cqkavs6" path="res://Scripts/Enemies/BossEnemy.gd" id="15_kkycd"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnHazardCleaner.tres" id="16_lhpku"]
+[ext_resource type="PackedScene" uid="uid://bw676kt4vufsx" path="res://resources/tile_sets/dungeon/corridor.glb" id="18_tmqeb"]
+[ext_resource type="PackedScene" uid="uid://d4lle5jgv2d57" path="res://resources/tile_sets/dungeon/corridor-corner-square.glb" id="19_1jhnm"]
+[ext_resource type="PackedScene" uid="uid://dlrcqecsdj6uy" path="res://resources/tile_sets/dungeon/corridor-end.glb" id="20_lsqk2"]
+[ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="21_apabf"]
+[ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="23_keqlp"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="25_e2l60"]
+[ext_resource type="Resource" uid="uid://dem4o7hy0xiqt" path="res://Data/Items/Consumables/PotHp100.tres" id="26_q34ia"]
+[ext_resource type="Resource" uid="uid://c65flv8cb4nx5" path="res://Data/Items/Consumables/PotMana50.tres" id="27_ftim0"]
+[ext_resource type="Resource" uid="uid://bkak3qcw02h0e" path="res://Data/Items/Equipment/KnightLegsArmor.tres" id="28_m076s"]
+[ext_resource type="Resource" uid="uid://17ikk27f56us" path="res://Data/Items/Consumables/PotHp50.tres" id="29_14fj3"]
+[ext_resource type="Resource" uid="uid://hkuygmxotjkf" path="res://Data/Items/Consumables/PotRevive.tres" id="30_u43f3"]
+[ext_resource type="Resource" uid="uid://cuketg4iwfcf0" path="res://Data/Items/Consumables/PotGroupHp50.tres" id="31_rb8ol"]
+[ext_resource type="Resource" uid="uid://dtllye1aoin33" path="res://Data/Enemies/EnGhost.tres" id="33_4gxsk"]
+[ext_resource type="Script" uid="uid://cdkuyybx3dwf0" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="34_jebjk"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnCorruptedRonin.tres" id="35_wnqty"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnVoidWeaver.tres" id="36_xxg7m"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnHeavyServitor.tres" id="37_4of3f"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnShadowAssassin.tres" id="38_h88qj"]
+[ext_resource type="PackedScene" uid="uid://c0chklqh4xdeq" path="res://Scenes/Objects/ArcanumShard.tscn" id="39_a76ae"]
+[ext_resource type="Shader" uid="uid://cfdeopc8skgfy" path="res://Shaders/arcanum_shard.gdshader" id="41_ev6p0"]
+[ext_resource type="Texture2D" uid="uid://bk2a038orhc24" path="res://resources/Lore/arcanum_shard_arcanum_texture.png" id="42_n7ms6"]
+
+[sub_resource type="Environment" id="Environment_lhpku"]
+background_mode = 1
+background_color = Color(0.01, 0.01, 0.015, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.26, 0.27, 0.34, 1)
+ambient_light_energy = 0.9
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.012, 0.012, 0.018, 1)
+fog_density = 1.0
+fog_depth_end = 36.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ab27a"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("41_ev6p0")
+shader_parameter/albedo_texture = ExtResource("42_n7ms6")
+shader_parameter/albedo_tint = Color(0.75, 0.8, 0.75, 1)
+shader_parameter/roughness = 0.35
+shader_parameter/metallic = 0.25
+shader_parameter/energy_color = Color(0.25, 1, 0.3, 1)
+shader_parameter/hot_color = Color(0.9, 1, 0.75, 1)
+shader_parameter/painted_glow = 2.5
+shader_parameter/vein_glow = 2.0
+shader_parameter/vein_scale = 1.4
+shader_parameter/vein_sharpness = 7.0
+shader_parameter/flow_speed = 0.6
+shader_parameter/pulse_speed = 2.2
+shader_parameter/rim_color = Color(0.45, 1, 0.35, 1)
+shader_parameter/rim_power = 2.5
+shader_parameter/rim_strength = 1.2
+shader_parameter/wobble = 0.03
+shader_parameter/surge = 0.0
+shader_parameter/surge_boost = 3.0
+
+[node name="GloomReachDungeon" type="Node3D"]
+script = ExtResource("1_ab27a")
+level_seed = 139000
+room_count = 8
+enemy_count = 7
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_lhpku")
+
+[node name="EditorWorkLight" type="Node3D" parent="."]
+script = ExtResource("2_fj1u1")
+
+[node name="WorldSceneInitializer" type="Node3D" parent="."]
+script = ExtResource("3_vaalu")
+create_floor = false
+create_ceiling = false
+setup_dark_retro_environment = false
+particle_color = Color(0.85, 0.85, 1, 0.3)
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 5, 0, 3)
+metadata/eye_height = 1.5
+metadata/battle_vertical_offset = -0.5
+
+[node name="LevelTitle" parent="." instance=ExtResource("4_5kj1p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 3)
+level_title = "Gloom Reach
+Dungeon III"
+
+[node name="FloorMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+cell_center_y = false
+
+[node name="WallMap" type="GridMap" parent="."]
+unique_name_in_owner = true
+visible = false
+mesh_library = ExtResource("6_g4nsp")
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 1, 2, 0, 2, 0, 0, 2, 2, 0, 3, 0, 0, 3, 2, 0, 4, 0, 0, 4, 2, 0, 5, 0, 0, 5, 2, 0, 6, 0, 0, 6, 2, 0, 7, 0, 0, 7, 2, 0, 8, 0, 0, 8, 2, 0, 18, 0, 0, 18, 2, 0, 19, 2, 0, 20, 0, 0, 20, 1, 0, 20, 2, 0, 18, 65534, 0, 18, 65535, 0, 20, 65534, 0, 20, 65535, 0, 18, 65532, 0, 18, 65533, 0, 20, 65532, 0, 20, 65533, 0, 14, 65528, 0, 14, 65530, 0, 15, 65528, 0, 15, 65530, 0, 16, 65528, 0, 16, 65530, 0, 12, 4, 0, 12, 5, 0, 12, 6, 0, 14, 4, 0, 14, 5, 0, 14, 6, 0, 12, 7, 0, 12, 8, 0, 14, 7, 0, 14, 8, 0, 12, 9, 0, 12, 10, 0, 14, 9, 0, 14, 10, 0, 8, 65522, 0, 8, 65524, 0, 9, 65522, 0, 10, 65522, 0, 10, 65523, 0, 10, 65524, 0, 6, 65522, 0, 6, 65524, 0, 7, 65522, 0, 7, 65524, 0, 4, 65522, 0, 4, 65524, 0, 5, 65522, 0, 5, 65524, 0, 2, 65528, 0, 2, 65530, 0, 3, 65528, 0, 3, 65530, 0, 4, 65528, 0, 4, 65530, 0, 0, 65528, 0, 0, 65530, 0, 1, 65528, 0, 1, 65530, 0, 12, 20, 0, 12, 22, 0, 13, 22, 0, 14, 20, 0, 14, 21, 0, 14, 22, 0, 10, 20, 0, 10, 22, 0, 11, 20, 0, 11, 22, 0, 8, 20, 0, 8, 22, 0, 9, 20, 0, 9, 22, 0, 65528, 65528, 0, 65528, 65530, 0, 65529, 65528, 0, 65529, 65530, 0, 65530, 65528, 0, 65530, 65530, 0, 65526, 65528, 0, 65526, 65530, 0, 65527, 65528, 0, 65527, 65530, 0, 65524, 65528, 0, 65524, 65530, 0, 65525, 65528, 0, 65525, 65530, 0, 65520, 65524, 0, 65520, 65526, 0, 65521, 65524, 0, 65522, 65524, 0, 65522, 65525, 0, 65522, 65526, 0, 65518, 65524, 0, 65518, 65526, 0, 65519, 65524, 0, 65519, 65526, 0)
+}
+
+[node name="Rooms" type="Node3D" parent="."]
+
+[node name="Room1_WideRoom" parent="Rooms" instance=ExtResource("7_7l3v3")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 27, 0, 3)
+open_doors = 11
+removed_nodes = PackedStringArray("Environment/Banner1", "Environment/Banner2")
+id_prefix = "gloomreachdungeon_room1_wideroom"
+
+[node name="Room2_CornerRoom" parent="Rooms" instance=ExtResource("9_54tk3")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 39, 0, -13)
+open_doors = 9
+removed_nodes = PackedStringArray()
+id_prefix = "gloomreachdungeon_room2_cornerroom"
+
+[node name="Room3_LargeRoom" parent="Rooms" instance=ExtResource("10_wnk16")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 19, 0, -13)
+open_doors = 14
+removed_nodes = PackedStringArray("Environment/Barrel4")
+id_prefix = "gloomreachdungeon_room3_largeroom"
+
+[node name="Room4_LargeRoom" parent="Rooms" instance=ExtResource("10_wnk16")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 31)
+open_doors = 5
+removed_nodes = PackedStringArray("Environment/Banner1", "Environment/Banner2", "Environment/Barrel1", "Environment/Barrel4")
+id_prefix = "gloomreachdungeon_room4_largeroom"
+
+[node name="Room5_SmallRoom" parent="Rooms" instance=ExtResource("11_niju3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -25)
+open_doors = 2
+removed_nodes = PackedStringArray("Banner1", "Rug1", "Stones1")
+id_prefix = "gloomreachdungeon_room5_smallroom"
+
+[node name="Room6_SmallRoom" parent="Rooms" instance=ExtResource("11_niju3")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5, 0, -13)
+open_doors = 5
+removed_nodes = PackedStringArray("Banner1")
+id_prefix = "gloomreachdungeon_room6_smallroom"
+
+[node name="Room7_LargeRoom" parent="Rooms" instance=ExtResource("10_wnk16")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7, 0, 43)
+open_doors = 8
+removed_nodes = PackedStringArray("Environment/Banner2", "Environment/Barrel1", "Environment/Barrel3")
+id_prefix = "gloomreachdungeon_room7_largeroom"
+
+[node name="Room8_CornerRoom" parent="Rooms" instance=ExtResource("9_54tk3")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, -29, 0, -13)
+open_doors = 9
+removed_nodes = PackedStringArray("Banner1")
+id_prefix = "gloomreachdungeon_room8_cornerroom"
+
+[node name="BossChamber" parent="Rooms" instance=ExtResource("12_e3e0w")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -45, 0, -21)
+boss_id = 13
+removed_nodes = PackedStringArray()
+id_prefix = "gloomreachdungeon_bosschamber"
+
+[node name="Boss" parent="Rooms/BossChamber" instance=ExtResource("14_cc6jg")]
+script = ExtResource("15_kkycd")
+default_facing = 1
+model_scale_multiplier = 1.5
+minion_data = ExtResource("16_lhpku")
+minion_count = 2
+boss_stat_multiplier = 2.2
+reward_spell_books = 1
+reward_skill_crystals = 1
+rush_on_room_enter = false
+rush_trigger_tiles = 5
+rush_yell_path = "res://Audio/Enemies/azure_yell.mp3"
+rush_run_sound = ExtResource("14_5h1wc")
+rush_taunt_time = 1.0
+rush_speed = 9.0
+rush_stop_distance = 2.5
+rush_impact_shake = 0.6
+data = ExtResource("36_xxg7m")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+level = 8
+
+[node name="Corridors" type="Node3D" parent="."]
+
+[node name="Corridor1" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 0, -21)
+
+[node name="Corridor2" parent="Corridors" instance=ExtResource("19_1jhnm")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -29, 0, -21)
+
+[node name="Corridor3" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 0, -13)
+
+[node name="Corridor4" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0, -13)
+
+[node name="Corridor5" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -13)
+
+[node name="Corridor6" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -13)
+
+[node name="Corridor7" parent="Corridors" instance=ExtResource("20_lsqk2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3)
+
+[node name="Corridor8" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -13)
+
+[node name="Corridor9" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 3)
+
+[node name="Corridor10" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -25)
+
+[node name="Corridor11" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, 3)
+
+[node name="Corridor12" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -25)
+
+[node name="Corridor13" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 3)
+
+[node name="Corridor14" parent="Corridors" instance=ExtResource("19_1jhnm")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19, 0, -25)
+
+[node name="Corridor15" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 43)
+
+[node name="Corridor16" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0, 43)
+
+[node name="Corridor17" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 11)
+
+[node name="Corridor18" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 15)
+
+[node name="Corridor19" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, 19)
+
+[node name="Corridor20" parent="Corridors" instance=ExtResource("19_1jhnm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27, 0, 43)
+
+[node name="Corridor21" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, -13)
+
+[node name="Corridor22" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 39, 0, -5)
+
+[node name="Corridor23" parent="Corridors" instance=ExtResource("18_tmqeb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 39, 0, -1)
+
+[node name="Corridor24" parent="Corridors" instance=ExtResource("19_1jhnm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0, 3)
+
+[node name="EntryStairs" parent="." instance=ExtResource("21_apabf")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 0, 3)
+prompt_message = "Climb back up to the second crypt?"
+target_scene = "res://Scenes/Dungeons/GloomReachDungeon_Middle.tscn"
+use_map_manager = true
+arrival_point_name = "ExitArrival"
+object_id = "gloomreachdungeon_entry_stairs"
+snap_to_floor_center = false
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="EntryLight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3.2, 3)
+light_color = Color(1, 0.8, 0.55, 1)
+light_energy = 1.4
+omni_range = 8.0
+
+[node name="BossSpawn" type="Marker3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -45, 0, -21)
+
+[node name="Chests" type="Node3D" parent="."]
+
+[node name="Chest1" parent="Chests" instance=ExtResource("23_keqlp")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 35, 0, 25)
+guaranteed_items = Array[ExtResource("25_e2l60")]([ExtResource("26_q34ia"), ExtResource("27_ftim0")])
+gold_amount = 260
+object_id = "gloomreachdungeon_chest_1"
+
+[node name="Chest2" parent="Chests" instance=ExtResource("23_keqlp")]
+transform = Transform3D(-2.1855694e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.1855694e-08, 25, 0, -13)
+guaranteed_items = Array[ExtResource("25_e2l60")]([ExtResource("28_m076s"), ExtResource("29_14fj3")])
+gold_amount = 320
+object_id = "gloomreachdungeon_chest_2"
+
+[node name="Chest3" parent="Chests" instance=ExtResource("23_keqlp")]
+transform = Transform3D(-0.5, 0, -4.371139e-08, 0, 0.5, 0, 4.371139e-08, 0, -0.5, 21, 0, 25)
+guaranteed_items = Array[ExtResource("25_e2l60")]([ExtResource("30_u43f3"), ExtResource("31_rb8ol")])
+gold_amount = 400
+object_id = "gloomreachdungeon_chest_3"
+
+[node name="Ghosts" type="Node3D" parent="."]
+
+[node name="Ghost1" parent="Ghosts" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, -17)
+data = ExtResource("33_4gxsk")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.85
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost1"]
+script = ExtResource("34_jebjk")
+ghost_level = 2
+
+[node name="Ghost2" parent="Ghosts" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.39046, 0, 43.817654)
+data = ExtResource("33_4gxsk")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.85
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost2"]
+script = ExtResource("34_jebjk")
+ghost_level = 2
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy1" parent="Enemies" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 45)
+data = ExtResource("35_wnqty")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+stat_multiplier = 1.1
+
+[node name="Enemy2" parent="Enemies" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -27)
+data = ExtResource("36_xxg7m")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, 1)
+data = ExtResource("37_4of3f")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy4" parent="Enemies" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, 37)
+data = ExtResource("38_h88qj")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="Enemy5" parent="Enemies" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 1)
+data = ExtResource("16_lhpku")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+level = 7
+
+[node name="Enemy6" parent="Enemies" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 0, -9)
+data = ExtResource("35_wnqty")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+stat_multiplier = 1.1
+
+[node name="Enemy7" parent="Enemies" instance=ExtResource("14_cc6jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43, 0, -13)
+data = ExtResource("36_xxg7m")
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+
+[node name="ArcanumShard" parent="." instance=ExtResource("39_a76ae")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -21)
+shard_id = "gloomreach_dungeon"
+level_name = "Gloom Reach Dungeon"
+boss = NodePath("../Rooms/BossChamber/Boss")
+shard_material = SubResource("ShaderMaterial_ab27a")

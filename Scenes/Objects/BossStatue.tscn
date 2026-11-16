@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Environment/BossStatue.gd" id="1_statue"]
+[ext_resource type="PackedScene" uid="uid://stqc4g0mlbaj" path="res://resources/tile_sets/nature/statue_head.glb" id="2_model"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_statue"]
+height = 3.0
+radius = 1.2
+
+[node name="BossStatue" type="Node3D"]
+script = ExtResource("1_statue")
+lore_title = "THE DROWNED IDOL"
+lore_text = "A colossal stone face half-swallowed by the earth. Its eyes weep a thick green ooze that pools and quivers at your feet... and then begins to crawl back toward the stone. Something beneath the ground is breathing."
+xp_reward = 50
+object_id = "gloom_boss_statue"
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_statue")
+
+[node name="statue_head" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0, 0)

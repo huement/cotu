@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="CatBreed" load_steps=2 format=3 uid="uid://bbfc124kmib1x"]
 
-[ext_resource type="Script" uid="uid://bypfb35b2rktq" path="res://resources/CatBreed.gd" id="1_kcyru"]
+[ext_resource type="Script" uid="uid://b0ku5fa2jk50e" path="res://resources/CatBreed.gd" id="1_kcyru"]
 
 [resource]
 script = ExtResource("1_kcyru")

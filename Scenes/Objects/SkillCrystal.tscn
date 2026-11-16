@@ -1,0 +1,26 @@
+[gd_scene load_steps=6 format=3 uid="uid://c8fr3ng3mfh08"]
+
+[ext_resource type="PackedScene" uid="uid://b88lrofckloqg" path="res://resources/Objects/doggy_crystals.glb" id="1_4sxbc"]
+[ext_resource type="PackedScene" uid="uid://bva05ko56v07g" path="res://resources/Objects/crystal_low_poly.glb" id="2_45uac"]
+[ext_resource type="Shape3D" uid="uid://b6p1sxyyu3gc8" path="res://Scenes/Objects/Barrel_Shape.tres" id="3_4eknp"]
+
+[ext_resource type="Script" path="res://Scripts/Environment/ItemPickup.gd" id="90_pickup"]
+[ext_resource type="Resource" path="res://Data/Items/Loot/LrnSkillCrystal.tres" id="91_item"]
+
+[node name="SkillCrystal" type="Node3D"]
+script = ExtResource("90_pickup")
+item = ExtResource("91_item")
+glow_color = Color(0.72, 0.5, 1, 1)
+float_height = 0.15
+
+[node name="dog_crystal" parent="." instance=ExtResource("1_4sxbc")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0.6168039, 0)
+
+[node name="dog_crystal_base" parent="." instance=ExtResource("2_45uac")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.314682, 0)
+shape = ExtResource("3_4eknp")

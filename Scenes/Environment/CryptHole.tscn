@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://cltube2ajn7vj"]
+
+[ext_resource type="Script" uid="uid://c8v8cryptscript" path="res://Scripts/Environment/CryptHole.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://dcdyeqpdpdqrm" path="res://resources/OutdoorParts/crypthole.glb" id="2_crypthole"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(3.5, 2.5, 3.5)
+
+[node name="CryptHole" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="crypthole" parent="." instance=ExtResource("2_crypthole")]
+
+[node name="InteractionArea" type="Area3D" parent="."]
+collision_layer = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_interaction")

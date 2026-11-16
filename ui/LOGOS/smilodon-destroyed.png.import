@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://baqe7a82cb112"
 path.s3tc="res://.godot/imported/smilodon-destroyed.png-16a5dcc7e413326504377a6adaef6cc8.s3tc.ctex"
+path.etc2="res://.godot/imported/smilodon-destroyed.png-16a5dcc7e413326504377a6adaef6cc8.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://ui/LOGOS/smilodon-destroyed.png"
-dest_files=["res://.godot/imported/smilodon-destroyed.png-16a5dcc7e413326504377a6adaef6cc8.s3tc.ctex"]
+dest_files=["res://.godot/imported/smilodon-destroyed.png-16a5dcc7e413326504377a6adaef6cc8.s3tc.ctex", "res://.godot/imported/smilodon-destroyed.png-16a5dcc7e413326504377a6adaef6cc8.etc2.ctex"]
 
 [params]
 

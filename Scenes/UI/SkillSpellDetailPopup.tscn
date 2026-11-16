@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bnr17p03ce6f0" path="res://Scripts/UI/SkillSpellDetailPopup.gd" id="1_controller"]
 [ext_resource type="Texture2D" uid="uid://dbsldgsyrjjuh" path="res://ui/HUD/ss_single_top.png" id="1_qtas1"]
 [ext_resource type="Texture2D" uid="uid://clc6sy4f11pt3" path="res://ui/HUD/ss_single_btm.png" id="2_68ux8"]
-[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="3_font"]
+[ext_resource type="FontFile" path="res://ui/fonts/AnonymousPro-Regular.ttf" id="3_font"]
 
 [node name="SkillSpellDetailPopup" type="CanvasLayer"]
 layer = 110

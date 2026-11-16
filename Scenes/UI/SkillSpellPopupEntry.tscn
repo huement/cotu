@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://djbrtoqil1qdh"]
 
-[ext_resource type="FontFile" uid="uid://c6c7gnx36opr0" path="res://addons/gut/fonts/AnonymousPro-Regular.ttf" id="1_qfyrq"]
+[ext_resource type="FontFile" path="res://ui/fonts/AnonymousPro-Regular.ttf" id="1_qfyrq"]
 
 [node name="SkillSpellEntry" type="Button"]
 custom_minimum_size = Vector2(0, 40)

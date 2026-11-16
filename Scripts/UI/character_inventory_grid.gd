@@ -2,9 +2,52 @@
 extends VBoxContainer
 class_name CharacterInventoryGrid
 
+## What the grid lists (the touch character sheet has buttons for these; desktop shows ALL).
+enum Filter { ALL, GEAR, CONSUMABLES }
+
+## Touch layout (phones): fewer, bigger slots so they are easy to hit with a finger.
+const TOUCH_COLUMNS: int = 5
+const TOUCH_SLOT_HEIGHT: float = 100.0
+const SLOT_HEIGHT: float = 48.0
+
 @onready var grid_container: GridContainer = %GridContainer as GridContainer
+@onready var _desktop_columns: int = grid_container.columns
+
+var filter: Filter = Filter.ALL
+var touch_layout: bool = false
 
 var _connected_inventory: Inventory = null
+
+
+## Switched on by CharacterSheetMobile while the phone layout is active.
+func set_touch_layout(on: bool) -> void:
+	if touch_layout == on:
+		return
+	touch_layout = on
+	if not on:
+		filter = Filter.ALL
+	grid_container.columns = TOUCH_COLUMNS if on else _desktop_columns
+	grid_container.add_theme_constant_override("h_separation", 10 if on else 4)
+	grid_container.add_theme_constant_override("v_separation", 10 if on else 4)
+	_render_grid()
+
+
+func set_filter(value: Filter) -> void:
+	if filter == value:
+		return
+	filter = value
+	_render_grid()
+
+
+func _matches_filter(item: ItemData) -> bool:
+	match filter:
+		Filter.GEAR:
+			return item.equipment_slot != ItemData.EquipmentSlot.NONE \
+				or item.item_type in [ItemData.ItemType.WEAPON, ItemData.ItemType.ARMOR, ItemData.ItemType.EQUIPMENT]
+		Filter.CONSUMABLES:
+			return item.is_consumable or item.is_throwable \
+				or item.item_type in [ItemData.ItemType.POTION, ItemData.ItemType.CONSUMABLE]
+	return true
 
 
 func display_inventory(inventory: Inventory) -> void:
@@ -50,7 +93,7 @@ func _render_grid() -> void:
 	var item_counts: Dictionary = {}
 
 	for item in item_list:
-		if not is_instance_valid(item):
+		if not is_instance_valid(item) or not _matches_filter(item):
 			continue
 
 		var existing: ItemData = null
@@ -62,11 +105,13 @@ func _render_grid() -> void:
 				existing = u
 				break
 
+		# Count real stack quantities, not entries
+		var qty: int = maxi(1, item.quantity)
 		if existing != null:
-			item_counts[existing] += 1
+			item_counts[existing] += qty
 		else:
 			unique_items.append(item)
-			item_counts[item] = 1
+			item_counts[item] = qty
 
 	# 1. Render occupied slots with icons and quantity badges
 	for i in range(unique_items.size()):
@@ -75,8 +120,11 @@ func _render_grid() -> void:
 		var original_idx: int = item_list.find(item)
 		_create_slot_button(item, original_idx, count)
 
-	# 2. Draw empty placeholder slots
+	# 2. Draw empty placeholder slots (a filtered list only pads out its last row)
 	var empty_slots: int = max(0, max_capacity - unique_items.size())
+	if filter != Filter.ALL:
+		var columns: int = maxi(1, grid_container.columns)
+		empty_slots = (columns - unique_items.size() % columns) % columns
 	for _i in range(empty_slots):
 		var empty_btn := _create_styled_button()
 		empty_btn.disabled = true
@@ -126,7 +174,8 @@ func _add_quantity_counter(btn: Button, count: int) -> void:
 		return
 
 	var count_label := Label.new()
-	count_label.text = "%d" % count
+	count_label.text = ("x%d" if touch_layout else "%d") % count
+	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 
@@ -136,7 +185,7 @@ func _add_quantity_counter(btn: Button, count: int) -> void:
 	count_label.offset_right = -4
 	count_label.offset_bottom = -2
 
-	count_label.add_theme_font_size_override("font_size", 11)
+	count_label.add_theme_font_size_override("font_size", 18 if touch_layout else 11)
 	count_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3, 1.0))
 	count_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 1.0))
 	count_label.add_theme_constant_override("outline_size", 4)
@@ -146,7 +195,7 @@ func _add_quantity_counter(btn: Button, count: int) -> void:
 
 func _create_styled_button() -> Button:
 	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(0, 48)
+	btn.custom_minimum_size = Vector2(0, TOUCH_SLOT_HEIGHT if touch_layout else SLOT_HEIGHT)
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.focus_mode = Control.FOCUS_NONE
 
@@ -172,6 +221,6 @@ func _create_styled_button() -> Button:
 	btn.add_theme_stylebox_override("hover", style_hover)
 	btn.add_theme_stylebox_override("disabled", style_disabled)
 	btn.add_theme_color_override("font_color", Color(0.0, 1.0, 0.8, 1.0))
-	btn.add_theme_font_size_override("font_size", 10)
+	btn.add_theme_font_size_override("font_size", 15 if touch_layout else 10)
 
 	return btn

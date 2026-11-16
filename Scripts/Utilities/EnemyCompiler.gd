@@ -12,20 +12,25 @@ func _run() -> void:
 	compile_enemies()
 
 
-func compile_enemies() -> void:
+## Callable from the editor (_run) or a headless SceneTree runner.
+static func compile_enemies() -> int:
 	var csv_path: String = _find_valid_csv_path()
 	if csv_path.is_empty():
 		printerr("EnemyCompiler Error: Cannot find 'Enemies.csv' in project root or Data folder!")
-		return
+		return 0
 
 	_ensure_directories_exist()
 
 	var file := FileAccess.open(csv_path, FileAccess.READ)
 	if file == null:
 		printerr("EnemyCompiler Error: Failed to open CSV file at ", csv_path)
-		return
+		return 0
 
-	var _header: PackedStringArray = file.get_csv_line()
+	var header: PackedStringArray = file.get_csv_line()
+	for i: int in range(header.size()):
+		header[i] = header[i].strip_edges()
+	var col_magic_power: int = header.find("magic_power")
+	var col_pushback: int = header.find("combat_camera_pushback")
 	var count: int = 0
 
 	while not file.eof_reached():
@@ -68,6 +73,33 @@ func compile_enemies() -> void:
 		if line.size() > 28:
 			enemy.enemy_type = line[28].strip_edges()
 
+		# Optional columns (index 29, 30): uniform model_scale, combat_forward_distance.
+		# Empty = keep EnemyData defaults.
+		if line.size() > 29 and not line[29].strip_edges().is_empty():
+			var s: float = float(line[29])
+			enemy.model_scale = Vector3(s, s, s)
+		if line.size() > 30 and not line[30].strip_edges().is_empty():
+			enemy.combat_forward_distance = float(line[30])
+		# Optional column (index 31): hit_reaction = AUTO | CLIP | SHAKE, or an animation name.
+		# Empty = AUTO. Mode words are stored uppercase; clip names keep their spelling.
+		if line.size() > 31 and not line[31].strip_edges().is_empty():
+			var reaction: String = line[31].strip_edges()
+			var reaction_mode: String = reaction.to_upper()
+			if reaction_mode == "AUTO" or reaction_mode == "CLIP" or reaction_mode == "SHAKE":
+				enemy.hit_reaction = reaction_mode
+			else:
+				enemy.hit_reaction = reaction
+		# Optional columns (index 32, 33). 0 is a real value (sea monster yaw faces +Z).
+		if line.size() > 32 and not line[32].strip_edges().is_empty():
+			enemy.vertical_offset = float(line[32])
+		if line.size() > 33 and not line[33].strip_edges().is_empty():
+			enemy.combat_yaw_offset_degrees = float(line[33])
+		# Optional columns found by header name (empty = EnemyData default).
+		if col_magic_power >= 0 and line.size() > col_magic_power and not line[col_magic_power].strip_edges().is_empty():
+			enemy.magic_power = int(line[col_magic_power])
+		if col_pushback >= 0 and line.size() > col_pushback and not line[col_pushback].strip_edges().is_empty():
+			enemy.combat_camera_pushback = line[col_pushback].strip_edges().to_lower() == "true"
+
 		# Load 3D GLB mesh
 		if not enemy.model_path.is_empty() and ResourceLoader.exists(enemy.model_path):
 			enemy.model_scene = load(enemy.model_path) as PackedScene
@@ -77,16 +109,20 @@ func compile_enemies() -> void:
 			enemy.custom_material = _create_or_load_material(enemy.texture_path, enemy.enemy_id)
 
 		var save_path: String = OUTPUT_DIR + enemy.enemy_id.to_pascal_case() + ".tres"
+		var old_uid: int = ResourceLoader.get_resource_uid(save_path) if ResourceLoader.exists(save_path) else ResourceUID.INVALID_ID
 		var err := ResourceSaver.save(enemy, save_path)
 		if err == OK:
+			if old_uid != ResourceUID.INVALID_ID:
+				ResourceSaver.set_uid(save_path, old_uid)
 			count += 1
 		else:
 			printerr("Failed to save Enemy resource for: ", enemy.enemy_name, " Error: ", err)
 
 	print("EnemyCompiler Success: Compiled ", count, " Enemy .tres files into ", OUTPUT_DIR)
+	return count
 
 
-func _create_or_load_material(tex_path: String, id_str: String) -> StandardMaterial3D:
+static func _create_or_load_material(tex_path: String, id_str: String) -> StandardMaterial3D:
 	var mat_file_name: String = id_str + "_mat.tres"
 	var full_mat_path: String = MATERIAL_DIR + mat_file_name
 
@@ -100,24 +136,24 @@ func _create_or_load_material(tex_path: String, id_str: String) -> StandardMater
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 
 	ResourceSaver.save(mat, full_mat_path)
-	return mat
+	return load(full_mat_path) as StandardMaterial3D
 
 
-func _ensure_directories_exist() -> void:
+static func _ensure_directories_exist() -> void:
 	if not DirAccess.dir_exists_absolute(OUTPUT_DIR):
 		DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
 	if not DirAccess.dir_exists_absolute(MATERIAL_DIR):
 		DirAccess.make_dir_recursive_absolute(MATERIAL_DIR)
 
 
-func _find_valid_csv_path() -> String:
+static func _find_valid_csv_path() -> String:
 	for path in CSV_PATHS:
 		if FileAccess.file_exists(path):
 			return path
 	return ""
 
 
-func _parse_element(s: String) -> ItemData.EffectElement:
+static func _parse_element(s: String) -> ItemData.EffectElement:
 	match s.to_upper():
 		"BLADE":
 			return ItemData.EffectElement.BLADE
@@ -133,7 +169,7 @@ func _parse_element(s: String) -> ItemData.EffectElement:
 			return ItemData.EffectElement.NONE
 
 
-func _parse_string_list(s: String) -> Array[String]:
+static func _parse_string_list(s: String) -> Array[String]:
 	var result: Array[String] = []
 	if s.is_empty() or s.to_upper() == "NONE":
 		return result

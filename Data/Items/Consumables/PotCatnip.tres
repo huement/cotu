@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dxm74d7ewhg0f"]
 
-[ext_resource type="Texture2D" uid="uid://bjis2vjryj0tq" path="res://Data/Items/health.png" id="1_lxy6c"]
+[ext_resource type="Texture2D" uid="uid://bjis2vjryj0tq" path="res://ui/icons/items/health.png" id="1_lxy6c"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_ngcvh"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_ngcvh")
 item_id = "pot_catnip"
 item_name = "Catnip Potion"
 description = "Concentrated liquid catnip. Restores 15 HP and 5 Energy."
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("1_lxy6c")
 item_type = 3
 credit_value = 40

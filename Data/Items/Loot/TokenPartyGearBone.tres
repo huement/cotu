@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bi1fqworr70tf"]
+
+[ext_resource type="Texture2D" uid="uid://cv7c4r2x1kwut" path="res://ui/icons/loot/obsidian.png" id="1_rpo7d"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_iyk27"]
+
+[resource]
+script = ExtResource("2_iyk27")
+item_id = "token_party_gear_bone"
+item_name = "Bone Party Gear"
+description = "Placeholder chest loot. Expands into one Bone-tier armor piece usable by the current party (Spartan/Shade/Warden/Amazon/Crusader/Ghostblade)."
+icon_path = "res://ui/icons/loot/obsidian.png"
+icon = ExtResource("1_rpo7d")
+target_type = 4
+can_use_in_battle = false
+can_use_in_field = false
+max_durability = 1
+current_durability = 1
+effects = "PartyGear:bone"
+effect_stat = "armor"

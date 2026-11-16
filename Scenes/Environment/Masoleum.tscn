@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://7wkaliam7jl2"]
+
+[ext_resource type="PackedScene" uid="uid://cxen11ai60pul" path="res://resources/OutdoorParts/crypt.glb" id="1_awqsw"]
+[ext_resource type="Script" uid="uid://cmn4q7vnadb5" path="res://Scripts/Environment/Masoleum.gd" id="2_abcde"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_awqsw"]
+size = Vector3(10.482976, 2.7911377, 11.258179)
+
+[node name="Masoleum" type="Node3D"]
+script = ExtResource("2_abcde")
+object_id = "interactable_13"
+
+[node name="MasoleumModel" parent="." instance=ExtResource("1_awqsw")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14809465, 0.9365845, -0.11082649)
+shape = SubResource("BoxShape3D_awqsw")

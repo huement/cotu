@@ -11,6 +11,7 @@ var _sfx_index: int = 0
 var _sfx_3d_index: int = 0
 
 var _ambient_player: AudioStreamPlayer
+var _rain_player: AudioStreamPlayer
 var _bgm_player: AudioStreamPlayer
 var _ui_player: AudioStreamPlayer
 var _voice_player: AudioStreamPlayer
@@ -19,12 +20,22 @@ var _voice_player: AudioStreamPlayer
 var _active_enemy_loops: Dictionary = {}
 var _is_in_combat: bool = false
 var _current_bgm_request: Variant = null
+## resource_path of the track currently assigned to _bgm_player (for same-track checks after duplicate).
+var _current_bgm_path: String = ""
+## When false, the track plays once (the intro). Looping tracks restart when they finish.
+var _bgm_loop: bool = true
+
+var _is_left_foot: bool = true
+
+## True while something (e.g. the Game Over screen) owns the audio: level music won't auto-resume.
+var hold_music: bool = false
 
 
 func _ready() -> void:
 	_ui_player = AudioStreamPlayer.new()
 	_ui_player.name = "UIPlayer"
 	_ui_player.bus = &"UI" if AudioServer.get_bus_index("UI") != -1 else &"Master"
+	_ui_player.process_mode = Node.PROCESS_MODE_ALWAYS # menus that pause the game still click
 	add_child(_ui_player)
 		
 	_voice_player = AudioStreamPlayer.new()
@@ -67,20 +78,27 @@ func _initialize_audio_channels() -> void:
 	_ambient_player.bus = &"Ambient" if AudioServer.get_bus_index("Ambient") != -1 else &"Master"
 	add_child(_ambient_player)
 
+	# Dedicated rain bed so storms layer over BGM + level ambient without stopping either.
+	_rain_player = AudioStreamPlayer.new()
+	_rain_player.name = "RainPlayer"
+	_rain_player.bus = &"Ambient" if AudioServer.get_bus_index("Ambient") != -1 else &"Master"
+	add_child(_rain_player)
+
 	_bgm_player = AudioStreamPlayer.new()
 	_bgm_player.name = "BGMPlayer"
 	_bgm_player.bus = &"Music" if AudioServer.get_bus_index("Music") != -1 else &"Master"
 	add_child(_bgm_player)
 
-	# Auto-loop any track played on the BGM player
-	_bgm_player.finished.connect(_bgm_player.play)
+	# Looping tracks restart here. One-shot tracks (see play_bgm's loop flag) do not.
+	_bgm_player.finished.connect(_on_bgm_finished)
 
 
 # ==============================================================================
 # 0. BGM & AMBIENT MUSIC MANAGEMENT
 # ==============================================================================
 ## Plays a dedicated background music track from a file path or AudioStream.
-func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true) -> void:
+## [param loop] restarts the track when it ends. One-shot cues (the intro) pass false.
+func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true, loop: bool = true) -> void:
 	if update_saved_request:
 		_current_bgm_request = stream_or_file_name
 
@@ -117,16 +135,32 @@ func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true) -
 			return
 
 	if is_instance_valid(stream):
-		if _bgm_player.stream != stream or not _bgm_player.is_playing():
-			_bgm_player.stream = stream
-			_bgm_player.play()
-			GameLogger.combat("BGM playing successfully: %s" % stream.resource_path)
+		var track_path: String = stream.resource_path
+		if track_path == _current_bgm_path and _bgm_player.is_playing():
+			return
+		# Own a copy so looping doesn't mutate the cached import used elsewhere.
+		var play_stream: AudioStream = stream.duplicate() as AudioStream
+		if play_stream != null and "loop" in play_stream:
+			play_stream.set("loop", loop)
+		else:
+			play_stream = stream
+		_bgm_loop = loop
+		_current_bgm_path = track_path
+		_bgm_player.stream = play_stream
+		_bgm_player.play()
+		GameLogger.combat("BGM playing successfully: %s" % track_path)
+
+
+func _on_bgm_finished() -> void:
+	if _bgm_loop and is_instance_valid(_bgm_player):
+		_bgm_player.play()
 
 
 ## Stops the currently playing background music.
 func stop_bgm() -> void:
 	if is_instance_valid(_bgm_player) and _bgm_player.is_playing():
 		_bgm_player.stop()
+	_current_bgm_path = ""
 
 
 ## Plays looping ambient environmental audio (e.g., "ghost", "dungeon_wind") without touching BGM.
@@ -145,6 +179,78 @@ func play_level_sound(sound_name: String) -> void:
 func stop_level_sound() -> void:
 	if is_instance_valid(_ambient_player) and _ambient_player.is_playing():
 		_ambient_player.stop()
+
+
+## Starts looping rain (Audio/Environment/rain-loop.mp3) on the Ambient bus without touching BGM or level ambient.
+func start_rain_loop(volume_linear: float = 1.0) -> void:
+	if not is_instance_valid(_rain_player):
+		return
+	var file_path: String = base_audio_dir.path_join("Environment").path_join("rain-loop.mp3")
+	if not ResourceLoader.exists(file_path):
+		push_warning("AudioManager: Rain loop not found at %s" % file_path)
+		return
+	if not _rain_player.is_playing() or _rain_player.stream == null:
+		var stream: AudioStream = load(file_path) as AudioStream
+		if not is_instance_valid(stream):
+			return
+		var play_stream: AudioStream = stream.duplicate() as AudioStream
+		if play_stream != null and "loop" in play_stream:
+			play_stream.set("loop", true)
+		else:
+			play_stream = stream
+		_rain_player.stream = play_stream
+		_rain_player.play()
+	set_rain_loop_volume(volume_linear)
+
+
+## Updates rain loop loudness (0..1 linear). Does not start playback.
+func set_rain_loop_volume(volume_linear: float) -> void:
+	if not is_instance_valid(_rain_player):
+		return
+	var clamped: float = clampf(volume_linear, 0.0, 1.0)
+	_rain_player.volume_db = linear_to_db(maxf(clamped, 0.0001))
+
+
+## Stops the looping rain bed.
+func stop_rain_loop() -> void:
+	if is_instance_valid(_rain_player) and _rain_player.is_playing():
+		_rain_player.stop()
+	if is_instance_valid(_rain_player):
+		_rain_player.stream = null
+
+
+## Plays one random thunder clip (thunder-1..thunder-4) on the SFX pool so it stacks over rain/BGM.
+func play_thunder(volume_db: float = 0.0, pitch_scale: float = 1.0, preferred_streams: Array[AudioStream] = []) -> void:
+	var stream: AudioStream = null
+	if not preferred_streams.is_empty():
+		var candidates: Array[AudioStream] = []
+		for s: AudioStream in preferred_streams:
+			if is_instance_valid(s):
+				candidates.append(s)
+		if not candidates.is_empty():
+			stream = candidates[randi() % candidates.size()]
+	if stream == null:
+		var paths: Array[String] = [
+			base_audio_dir.path_join("Environment").path_join("thunder-1.mp3"),
+			base_audio_dir.path_join("Environment").path_join("thunder-2.mp3"),
+			base_audio_dir.path_join("Environment").path_join("thunder-3.mp3"),
+			base_audio_dir.path_join("Environment").path_join("thunder-4.mp3"),
+		]
+		var existing: Array[String] = []
+		for p: String in paths:
+			if ResourceLoader.exists(p):
+				existing.append(p)
+		if existing.is_empty():
+			push_warning("AudioManager: No thunder-*.mp3 clips found under Audio/Environment/")
+			return
+		stream = load(existing[randi() % existing.size()]) as AudioStream
+	if not is_instance_valid(stream):
+		return
+	var player: AudioStreamPlayer = _get_next_sfx_player()
+	player.stream = stream
+	player.volume_db = volume_db
+	player.pitch_scale = pitch_scale
+	player.play()
 
 
 # ==============================================================================
@@ -196,6 +302,19 @@ func play_enemy_death_sound(enemy_type: String = "") -> void:
 	_play_from_folder("Enemies/", file_name)
 
 
+## Plays "Audio/Enemies/<enemy_type>_<action>.mp3" if it exists (e.g. beast_attack, minotaur_attack).
+## Returns false when that enemy type has no sound for the action.
+func play_enemy_action_sound(enemy_type: String, action: String) -> bool:
+	var key: String = enemy_type.to_lower().strip_edges()
+	if key.is_empty():
+		return false
+	var file_path: String = base_audio_dir.path_join("Enemies").path_join("%s_%s.mp3" % [key, action])
+	if not ResourceLoader.exists(file_path):
+		return false
+	_play_stream_from_path(file_path)
+	return true
+
+
 func play_3d_enemy_sound(sound_name: String, world_pos: Vector3) -> void:
 	var file_path: String = base_audio_dir.path_join("Enemies").path_join(sound_name.to_lower() + ".mp3")
 	if ResourceLoader.exists(file_path):
@@ -222,9 +341,13 @@ func play_enemy_sound(enemy_sound_file_name: String) -> void:
 # ==============================================================================
 # BATTLE MUSIC OVERRIDES
 # ==============================================================================
-func play_battle_music() -> void:
+const BATTLE_MUSIC_PATH: String = "Environment/dungeon-battle"
+const BOSS_MUSIC_PATH: String = "Enemies_Boss/boss_music"
+
+
+func play_battle_music(is_boss_fight: bool = false) -> void:
 	# Pass false so _current_bgm_request is not overwritten
-	play_bgm("Environment/dungeon-battle", false)
+	play_bgm(BOSS_MUSIC_PATH if is_boss_fight else BATTLE_MUSIC_PATH, false)
 
 
 func stop_battle_music() -> void:
@@ -237,7 +360,50 @@ func stop_battle_music() -> void:
 func _on_combat_started(_enemy_data_or_group: Variant, _player_party: Array, _enemy_facing: String) -> void:
 	_is_in_combat = true
 	stop_all_enemy_loops()
-	play_battle_music()
+	play_battle_music(_is_boss_combat(_enemy_data_or_group))
+	if _combat_has_enemy_type(_enemy_data_or_group, "zombie") and randi() % 5 == 0:
+		play_enemy_sound("zombie_surprise")
+
+
+func _is_boss_combat(data: Variant) -> bool:
+	# BossEnemy / BlobBoss / TentacleBoss register rewards just before combat_started.
+	if is_instance_valid(GameState) and not GameState.pending_boss_rewards.is_empty():
+		return true
+	return _combat_has_boss_mark(data)
+
+
+func _combat_has_boss_mark(data: Variant) -> bool:
+	if data is Array:
+		for entry: Variant in data:
+			if _combat_has_boss_mark(entry):
+				return true
+		return false
+	# Matches CombatFormation.BOSS_META ("combat_is_boss") without coupling this autoload to it.
+	if data is Resource and (data as Resource).has_meta(&"combat_is_boss") and bool((data as Resource).get_meta(&"combat_is_boss")):
+		return true
+	if data is Object and is_instance_valid(data):
+		for field: String in ["enemies", "enemy_list", "members", "enemy_group"]:
+			var sub: Variant = data.get(field)
+			if sub is Array and _combat_has_boss_mark(sub):
+				return true
+	return false
+
+
+func _combat_has_enemy_type(data: Variant, type_key: String) -> bool:
+	if data is Array:
+		for d in data:
+			if _combat_has_enemy_type(d, type_key):
+				return true
+		return false
+	if data is Object and is_instance_valid(data):
+		var t: Variant = data.get("enemy_type")
+		if t != null and str(t).to_lower() == type_key:
+			return true
+		for field in ["enemies", "enemy_list", "members"]:
+			var sub: Variant = data.get(field)
+			if sub is Array and _combat_has_enemy_type(sub, type_key):
+				return true
+	return false
 
 
 func _on_combat_ended(victory: bool) -> void:
@@ -248,7 +414,9 @@ func _on_combat_ended(victory: bool) -> void:
 		
 	# Delay restarting standard level BGM slightly to allow victory fanfare to play out
 	await get_tree().create_timer(3.0).timeout
-	
+	if _is_in_combat or hold_music:
+		return # a new battle started during the fanfare / game over owns the audio
+
 	# Resume standard level background music
 	if _current_bgm_request != null:
 		play_bgm(_current_bgm_request)
@@ -257,9 +425,38 @@ func _on_combat_ended(victory: bool) -> void:
 # ==============================================================================
 # 3. MOVEMENT & PROXIMITY ALERTS
 # ==============================================================================
-func play_walking_sound(floor_type: String = "dungeon") -> void:
-	var key: String = "footsteps_" + floor_type.to_lower()
-	_play_from_folder("Player/", key)
+func play_walking_sound(map_type: String = "forest", surface_type: String = "") -> void:
+	# Toggle step foot for alternating audio files
+	_is_left_foot = !_is_left_foot
+	var step_suffix: String = "-2" if not _is_left_foot else ""
+	
+	map_type = map_type.to_lower()
+	surface_type = surface_type.to_lower()
+	
+	# Build the primary key (e.g., "footsteps_forest-ground_grass")
+	var base_key: String = "footsteps_" + map_type
+	if surface_type != "":
+		base_key += "-" + surface_type
+		
+	var target_key: String = base_key + step_suffix
+	
+	# Fallback sequence if exact file doesn't exist
+	if not _has_sound("Player/", target_key):
+		if _has_sound("Player/", base_key):
+			target_key = base_key
+		elif step_suffix != "" and _has_sound("Player/", "footsteps_" + map_type + step_suffix):
+			target_key = "footsteps_" + map_type + step_suffix
+		elif _has_sound("Player/", "footsteps_" + map_type):
+			target_key = "footsteps_" + map_type
+		else:
+			target_key = "footsteps_dungeon"
+
+	_play_from_folder("Player/", target_key)
+
+
+func _has_sound(folder: String, sound_key: String) -> bool:
+	var base_path: String = "res://Audio/" + folder + sound_key
+	return ResourceLoader.exists(base_path + ".mp3")
 
 
 func play_proximity_clicker(tier: int) -> void:
@@ -270,9 +467,17 @@ func play_proximity_clicker(tier: int) -> void:
 # ==============================================================================
 # 4. ENVIRONMENT & ITEMS SFX
 # ==============================================================================
-func play_mask_sound(mask_type: String = "bad") -> void:
-	var file_name: String = "mask-" + mask_type.to_lower()
-	_play_from_folder("Items/", file_name)
+## Plays Items/mask-<type>.mp3. Missing types (e.g. "good") fall back to mask-default, then mask-bad.
+func play_mask_sound(mask_type: String = "default") -> void:
+	var key: String = mask_type.strip_edges().to_lower()
+	if key.is_empty() or key == "none":
+		key = "default"
+	var candidates: Array[String] = ["mask-" + key, "mask-default", "mask-bad"]
+	for file_name: String in candidates:
+		if _has_file("Items/", file_name):
+			_play_from_folder("Items/", file_name)
+			return
+	push_warning("AudioManager: No mask sound found (tried %s)." % str(candidates))
 
 
 func play_magic_sound(element_name: String) -> void:
@@ -318,6 +523,21 @@ func play_environment(sound_name: String) -> void:
 		return
 
 	_play_stream_from_path(full_path)
+
+
+## Plays any AudioStream from an absolute res:// path (oneshot SFX, no BGM loop).
+func play_audio_path(full_path: String) -> void:
+	var clean_path: String = full_path.strip_edges()
+	if clean_path.is_empty():
+		return
+	if not clean_path.begins_with("res://"):
+		clean_path = base_audio_dir.path_join(clean_path)
+	if not clean_path.ends_with(".mp3") and not clean_path.ends_with(".ogg") and not clean_path.ends_with(".wav"):
+		clean_path = clean_path.get_basename() + ".mp3"
+	if not ResourceLoader.exists(clean_path):
+		push_warning("AudioManager: Audio path not found: " + clean_path)
+		return
+	_play_stream_from_path(clean_path)
 
 
 # ==============================================================================
@@ -390,32 +610,50 @@ func sync_nearby_enemy_loops(nearby_types: Array[String]) -> void:
 
 func _start_enemy_loop(enemy_type: String) -> void:
 	var key: String = enemy_type.to_lower()
-	var possible_paths: Array[String] = [
-		base_audio_dir + "Enemies/" + key + "_walking.mp3",
-		base_audio_dir + "Enemies/" + key + "_shuffle.mp3"
-	]
-
-	var file_path: String = ""
-	for path in possible_paths:
-		if ResourceLoader.exists(path):
-			file_path = path
-			break
-
-	if file_path.is_empty():
-		return
-
-	var stream: AudioStream = load(file_path) as AudioStream
-	if not is_instance_valid(stream):
+	var candidates: Array[AudioStream] = _get_enemy_walk_streams(key)
+	if candidates.is_empty():
 		return
 
 	var asp := AudioStreamPlayer.new()
 	asp.name = "EnemyLoop_" + key
 	asp.bus = &"SFX" if AudioServer.get_bus_index("SFX") != -1 else &"Master"
-	asp.stream = stream
 	add_child(asp)
+	if candidates.size() == 1:
+		asp.stream = candidates[0]
+	else:
+		# Rotate through variants: play one clip, then pick another when it ends.
+		asp.stream = candidates.pick_random()
+		asp.finished.connect(func() -> void:
+			if is_instance_valid(asp) and asp.is_inside_tree():
+				asp.stream = candidates.pick_random()
+				asp.play())
 	asp.play()
 
 	_active_enemy_loops[key] = asp
+
+
+## Collects <type>_walking.mp3, <type>_walking_2.mp3, ... (falls back to <type>_shuffle.mp3).
+## When several variants exist they are made non-looping so the rotation can advance.
+func _get_enemy_walk_streams(key: String) -> Array[AudioStream]:
+	var out: Array[AudioStream] = []
+	var paths: Array[String] = [base_audio_dir + "Enemies/" + key + "_walking.mp3"]
+	for i in range(2, 10):
+		paths.append(base_audio_dir + "Enemies/%s_walking_%d.mp3" % [key, i])
+	for p in paths:
+		if ResourceLoader.exists(p):
+			var s: AudioStream = load(p) as AudioStream
+			if is_instance_valid(s):
+				out.append(s)
+	if out.is_empty():
+		var shuffle: String = base_audio_dir + "Enemies/" + key + "_shuffle.mp3"
+		if ResourceLoader.exists(shuffle):
+			out.append(load(shuffle) as AudioStream)
+	if out.size() > 1:
+		for i in out.size():
+			if "loop" in out[i]:
+				out[i] = out[i].duplicate()
+				out[i].set("loop", false)
+	return out
 
 
 func _stop_enemy_loop(enemy_type: String) -> void:

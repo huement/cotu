@@ -1,0 +1,24 @@
+# Godot cache / imports (huge, low signal for agents)
+.godot/
+**/*.import
+**/*.translation
+
+# OS / editor junk
+.DS_Store
+**/.DS_Store
+
+# Backups and local scratch
+_backup*/
+**/*.backup
+**/*.backup-*
+
+# Addon internals (skip unless fixing the addon itself)
+addons/gut/
+addons/asset_placer/
+addons/go_placer/
+addons/ScatterShot/
+
+# Uncomment if indexing is still slow:
+# Audio/**/*.mp3
+# Audio/**/*.ogg
+# Audio/**/*.wav

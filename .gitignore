@@ -2,6 +2,19 @@
 .godot/
 /android/
 
+# Exported builds (export_presets.cfg writes here)
+/build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+*.keystore
+*.aab
+play-store-credentials.json
+**/huement-service-account.json
+
 .DS_Store
 */.DS_Store/*
 **/.DS_Store
@@ -11,4 +24,17 @@ addons/asset_placer
 addons/go_placer
 addons/ScatterShot
 
-CLAUDE.md
+_backup**/*
+
+# CLAUDE.md is a thin pointer to AGENTS.md — keep both tracked.
+# Personal Claude overrides can live outside the repo.
+_export_tmp.tar.gz
+
+.cursor/plans/**.md
+.cursor/plans/*.plan.md
+
+Claude outputs/*
+
+.env*
+
+fastlane

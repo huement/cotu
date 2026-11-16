@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/bar_button.gd" id="1_bar"]
+
+[node name="BarButton" type="Button"]
+custom_minimum_size = Vector2(192, 96)
+offset_right = 192.0
+offset_bottom = 96.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = ""
+flat = true
+script = ExtResource("1_bar")
+label_text = "BUTTON"

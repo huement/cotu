@@ -16,3 +16,4 @@ spellbook_type = "Archanist"
 level_spells_unlock = 3
 stat_points_per_level = 6
 skill_points_per_level = 3
+allowed_weapon_types = Array[int]([2])

@@ -62,6 +62,11 @@ func compile_professions() -> void:
 		prof_res.stat_points_per_level = int(_get_col_val_default(line, col_map, "stat_points", "5"))
 		prof_res.skill_points_per_level = int(_get_col_val_default(line, col_map, "skill_points", "2"))
 		prof_res.spell_points_per_level = int(_get_col_val_default(line, col_map, "spell_points", "1"))
+
+		# Weapon Bonus column → allowed_weapon_types (BLADE=1, BASH=2, RANGED=3)
+		prof_res.allowed_weapon_types.clear()
+		for wt_int: int in _parse_weapon_bonus_ints(_get_col_val(line, col_map, "weapon_bonus", "19")):
+			prof_res.allowed_weapon_types.append(wt_int as ItemData.WeaponType)
 		
 		# Sanitize string naming conventions for system storage paths
 		var safe_name: String = prof_name.to_pascal_case()
@@ -95,7 +100,29 @@ func _map_header_columns(header: PackedStringArray) -> Dictionary:
 		elif "stat point" in col_name or "stat_point" in col_name or "stat pts" in col_name: map["stat_points"] = i
 		elif "skill point" in col_name or "skill_point" in col_name or "skill pts" in col_name: map["skill_points"] = i
 		elif "spell point" in col_name or "spell_point" in col_name or "spell pts" in col_name: map["spell_points"] = i
+		elif "weapon bonus" in col_name or "weapon_bonus" in col_name: map["weapon_bonus"] = i
 	return map
+
+
+func _parse_weapon_bonus_ints(raw: String) -> Array[int]:
+	## WeaponType ints: NONE=0, BLADE=1, BASH=2, RANGED=3 (mirrors ItemData.WeaponType).
+	var result: Array[int] = []
+	var cleaned: String = raw.strip_edges().trim_prefix("\"").trim_suffix("\"")
+	if cleaned.is_empty():
+		return result
+	for token: String in cleaned.split(","):
+		var key: String = token.strip_edges().to_upper()
+		var wt: int = -1
+		match key:
+			"BLADE":
+				wt = 1
+			"BASH":
+				wt = 2
+			"RANGED":
+				wt = 3
+		if wt >= 0 and not result.has(wt):
+			result.append(wt)
+	return result
 
 
 func _get_col_val(line: PackedStringArray, col_map: Dictionary, key: String, fallback_idx_str: String) -> String:

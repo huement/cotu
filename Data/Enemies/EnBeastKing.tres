@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://88e45r3hqxfl"]
+
+[ext_resource type="PackedScene" uid="uid://cvp5tl7sdodgi" path="res://resources/Enemies/beast.glb" id="1_model"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_beast_king"
+enemy_type = "beast"
+enemy_name = "Beast King"
+model_path = "res://resources/Enemies/beast.glb"
+model_scene = ExtResource("1_model")
+model_scale = Vector3(2.5, 2.5, 2.5)
+combat_forward_distance = 5.0
+base_level = 7
+scale_with_player = false
+max_health = 220
+current_health = 220
+attack_damage = 24
+defense = 7
+speed = 14.3
+initiative_speed = 10
+weakness_element = 2
+attack_element = 2
+occurs_in_groups = false
+max_group_size = 1
+movement_speed = 1.8
+aggro_range_tiles = 5
+can_surprise_player = true
+xp_value = 452
+gold_value = 142

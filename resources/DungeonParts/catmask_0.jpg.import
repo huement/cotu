@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cii8re3la7qk4"
 path.s3tc="res://.godot/imported/catmask_0.jpg-e8d4d2b2dca0ea4e0ac37b6c1b386eac.s3tc.ctex"
+path.etc2="res://.godot/imported/catmask_0.jpg-e8d4d2b2dca0ea4e0ac37b6c1b386eac.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://resources/DungeonParts/catmask_0.jpg"
-dest_files=["res://.godot/imported/catmask_0.jpg-e8d4d2b2dca0ea4e0ac37b6c1b386eac.s3tc.ctex"]
+dest_files=["res://.godot/imported/catmask_0.jpg-e8d4d2b2dca0ea4e0ac37b6c1b386eac.s3tc.ctex", "res://.godot/imported/catmask_0.jpg-e8d4d2b2dca0ea4e0ac37b6c1b386eac.etc2.ctex"]
 
 [params]
 

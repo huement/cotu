@@ -1,0 +1,197 @@
+[gd_scene format=3 uid="uid://bpcdn1khhuu8r"]
+
+[ext_resource type="PackedScene" uid="uid://c082dy5dhf2o6" path="res://resources/tile_sets/dungeon/room-wide.glb" id="1_y5jab"]
+[ext_resource type="PackedScene" uid="uid://obtfq1vnf1h8" path="res://Scenes/Objects/Torch.tscn" id="2_dsobn"]
+[ext_resource type="PackedScene" uid="uid://ceks7tayr3m7r" path="res://Scenes/Objects/Banner.tscn" id="3_8gerw"]
+[ext_resource type="Texture2D" uid="uid://baqe7a82cb112" path="res://ui/LOGOS/smilodon-destroyed.png" id="5_exrrb"]
+[ext_resource type="PackedScene" uid="uid://d31yfbhogp3bl" path="res://Scenes/Objects/Stones.tscn" id="5_iw0dv"]
+[ext_resource type="Script" path="res://Scripts/Dungeon/DungeonRoom.gd" id="dr_script"]
+[ext_resource type="PackedScene" uid="uid://bqng36cyjprj5" path="res://resources/tile_sets/dungeon/gate-metal-bars.glb" id="dr_gate"]
+
+[sub_resource type="BoxShape3D" id="CellWall_2"]
+size = Vector3(2, 4.4, 2)
+
+[sub_resource type="BoxShape3D" id="CellWall_4"]
+size = Vector3(4, 4.4, 2)
+
+[sub_resource type="BoxShape3D" id="CellWall_10"]
+size = Vector3(10, 4.4, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cap"]
+size = Vector3(2.4, 4.4, 1.1)
+
+[node name="WideRoom" type="Node3D"]
+script = ExtResource("dr_script")
+footprint = Vector2i(20, 12)
+
+[node name="RoomModel" parent="." instance=ExtResource("1_y5jab")]
+
+[node name="Walls" type="StaticBody3D" parent="."]
+
+[node name="Cells1" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.2, -6)
+shape = SubResource("CellWall_10")
+
+[node name="Cells2" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2.2, -6)
+shape = SubResource("CellWall_10")
+
+[node name="Cells3" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 2.2, -4)
+shape = SubResource("CellWall_4")
+
+[node name="Cells4" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 2.2, -4)
+shape = SubResource("CellWall_4")
+
+[node name="Cells5" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.2, -2)
+shape = SubResource("CellWall_2")
+
+[node name="Cells6" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2.2, -2)
+shape = SubResource("CellWall_2")
+
+[node name="Cells7" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.2, 2)
+shape = SubResource("CellWall_2")
+
+[node name="Cells8" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2.2, 2)
+shape = SubResource("CellWall_2")
+
+[node name="Cells9" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 2.2, 4)
+shape = SubResource("CellWall_4")
+
+[node name="Cells10" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 2.2, 4)
+shape = SubResource("CellWall_4")
+
+[node name="Cells11" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.2, 6)
+shape = SubResource("CellWall_10")
+
+[node name="Cells12" type="CollisionShape3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2.2, 6)
+shape = SubResource("CellWall_10")
+
+[node name="Environment" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Stones1" parent="Environment" instance=ExtResource("5_iw0dv")]
+unique_name_in_owner = true
+transform = Transform3D(-2.5669065, 0, 1.5527368, 0, 3, 0, -1.5527368, 0, -2.5669065, 7.508193, 0.013237357, -5.1580167)
+
+[node name="Stones2" parent="Environment" instance=ExtResource("5_iw0dv")]
+unique_name_in_owner = true
+transform = Transform3D(1.4948646, 0, 3.7101724, 0, 4, 0, -3.7101724, 0, 1.4948646, 9.147005, 0.013237357, -3.5864186)
+
+[node name="Stones3" parent="Environment" instance=ExtResource("5_iw0dv")]
+unique_name_in_owner = true
+transform = Transform3D(2.172313, 0, 1.2373583, 0, 2.5000002, 0, -1.2373583, 0, 2.172313, -8.948269, 0.013237357, 3.9178166)
+
+[node name="Stones4" parent="Environment" instance=ExtResource("5_iw0dv")]
+unique_name_in_owner = true
+transform = Transform3D(1.0211098, 0, -2.6071699, 0, 2.8, 0, 2.6071699, 0, 1.0211098, -7.6667, 0.013237357, 5.1591268)
+
+[node name="Banner1" parent="Environment" instance=ExtResource("3_8gerw")]
+unique_name_in_owner = true
+transform = Transform3D(-1.4976813, -0.010881532, -0.08265717, -0.011913976, 1.4998391, 0.018422952, 0.08251468, 0.019050984, -1.4976074, 2.5552406, 2.4214394, 4.5701604)
+
+[node name="Banner2" parent="Environment" instance=ExtResource("3_8gerw")]
+unique_name_in_owner = true
+transform = Transform3D(-1.4976813, -0.010881532, -0.08265717, -0.014240518, 1.4987022, 0.060727686, 0.08214513, 0.06141852, -1.4964889, -2.4390945, 2.4214394, 4.536001)
+
+[node name="Torch1" parent="Environment" instance=ExtResource("2_dsobn")]
+unique_name_in_owner = true
+transform = Transform3D(0.9995404, 0.00874875, 0.029021328, -0.0074524903, 0.9989826, -0.044477053, -0.029380923, 0.044240385, 0.99858886, -2.7397757, 2.9093137, -5.525245)
+
+[node name="Torch2" parent="Environment" instance=ExtResource("2_dsobn")]
+unique_name_in_owner = true
+transform = Transform3D(0.9995404, 0.00874875, 0.029021328, -0.0074524903, 0.9989826, -0.044477053, -0.029380923, 0.044240385, 0.99858886, 2.7685404, 2.9093137, -5.525245)
+
+[node name="WallArt1" type="Sprite3D" parent="Environment"]
+unique_name_in_owner = true
+transform = Transform3D(0.49211416, 0.08411861, 0.027344387, -0.08424469, 0.49285173, 0, -0.026953459, -0.004607238, 0.49925172, -6.106242, 2.2632601, -5.4329486)
+sorting_offset = 0.1
+modulate = Color(1, 1, 1, 0.63529414)
+shaded = true
+texture = ExtResource("5_exrrb")
+
+[node name="WallArt2" type="Sprite3D" parent="Environment"]
+unique_name_in_owner = true
+transform = Transform3D(0.3398246, -0.0832013, -0.0098379105, 0.083423, 0.33982676, 0.007639839, 0.007735831, -0.009762609, 0.3497783, 5.9590836, 2.2632601, -5.4769244)
+sorting_offset = 0.1
+modulate = Color(1, 1, 1, 0.63529414)
+shaded = true
+texture = ExtResource("5_exrrb")
+
+[node name="WallArt3" type="Sprite3D" parent="Environment"]
+unique_name_in_owner = true
+transform = Transform3D(0.34972587, 0.0040212274, -0.0132500725, -0.0040602833, 0.34997505, -0.0009556266, 0.013238156, 0.0011085952, 0.3497478, 4.9848285, 2.2811654, 5.460673)
+sorting_offset = 0.1
+modulate = Color(1, 1, 1, 0.63529414)
+shaded = true
+texture = ExtResource("5_exrrb")
+
+[node name="Doors" type="Node3D" parent="."]
+
+[node name="Door_N" type="Marker3D" parent="Doors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 0, 0, -6)
+
+[node name="Door_E" type="Marker3D" parent="Doors"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 10, 0, 0)
+
+[node name="Door_S" type="Marker3D" parent="Doors"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, -0, 0, -1, 0, 0, 6)
+
+[node name="Door_W" type="Marker3D" parent="Doors"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -10, 0, 0)
+
+[node name="Caps" type="Node3D" parent="."]
+
+[node name="Cap_N" type="Node3D" parent="Caps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 0, 0, -5.7)
+
+[node name="Gate" parent="Caps/Cap_N" instance=ExtResource("dr_gate")]
+
+[node name="Blocker" type="StaticBody3D" parent="Caps/Cap_N"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Caps/Cap_N/Blocker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+shape = SubResource("BoxShape3D_cap")
+
+[node name="Cap_E" type="Node3D" parent="Caps"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 9.6, 0, 0)
+
+[node name="Gate" parent="Caps/Cap_E" instance=ExtResource("dr_gate")]
+
+[node name="Blocker" type="StaticBody3D" parent="Caps/Cap_E"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Caps/Cap_E/Blocker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+shape = SubResource("BoxShape3D_cap")
+
+[node name="Cap_S" type="Node3D" parent="Caps"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, -0, 0, -1, 0, 0, 5.7)
+
+[node name="Gate" parent="Caps/Cap_S" instance=ExtResource("dr_gate")]
+
+[node name="Blocker" type="StaticBody3D" parent="Caps/Cap_S"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Caps/Cap_S/Blocker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+shape = SubResource("BoxShape3D_cap")
+
+[node name="Cap_W" type="Node3D" parent="Caps"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -9.6, 0, 0)
+
+[node name="Gate" parent="Caps/Cap_W" instance=ExtResource("dr_gate")]
+
+[node name="Blocker" type="StaticBody3D" parent="Caps/Cap_W"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Caps/Cap_W/Blocker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+shape = SubResource("BoxShape3D_cap")
+

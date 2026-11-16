@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/GameMenus/MenuScreenTemplate.tscn" id="1_tmpl"]
+
+[node name="PartyBuilderScreen" instance=ExtResource("1_tmpl")]
+screen_title = "PARTY BUILDER"
+space_background = true
+subtitle = "Create and arrange up to 6 adventurers  ·  coming soon"
+body_text = "[b]PLANNED[/b]
+• Create characters: race, class, portrait and name
+• Roll or assign starting stats
+• Arrange the 6-slot formation: front row (1-3) and back row (4-6)
+• Save rosters to the character pool and start a new game with them
+
+[color=#8c919e]This screen is a placeholder. Build the real UI inside the Body container.[/color]"

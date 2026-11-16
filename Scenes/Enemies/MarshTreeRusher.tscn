@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/RushEnemyController.gd" id="1_rush"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnMarshStalker.tres" id="2_data"]
+
+[node name="MarshTreeRusher" type="Node3D"]
+script = ExtResource("1_rush")
+enemy_data = ExtResource("2_data")
+pack_size = 1
+emerge_distance = 2.0
+emerge_time = 0.45
+taunt_time = 0.6
+run_speed = 7.0
+stop_distance = 2.5
+catch_distance = 2.5
+repelled_by_torch = false
+sink_time = 0.85
+rearm_after_retreat = false
+lock_player_movement = false
+emerge_from_ground = true
+retarget_while_rushing = true
+max_chase_time = 5.0
+sink_on_chase_timeout = true
+
+[node name="ModelPivot" type="Node3D" parent="."]

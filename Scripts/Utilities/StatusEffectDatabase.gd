@@ -7,18 +7,11 @@ static var _registry: Dictionary = {}
 
 static func initialize() -> void:
 	_registry.clear()
-	var dir := DirAccess.open(EFFECTS_DIR)
-	if dir:
-		dir.list_dir_begin()
-		var file_name: String = dir.get_next()
-		while not file_name.is_empty():
-			if not dir.current_is_dir() and file_name.ends_with(".tres"):
-				var res_path: String = EFFECTS_DIR + file_name
-				var effect_res := load(res_path) as StatusEffectData
-				if is_instance_valid(effect_res) and not effect_res.effect_id.is_empty():
-					_registry[effect_res.effect_id] = effect_res
-			file_name = dir.get_next()
-		dir.list_dir_end()
+	# Export-safe folder listing (exported builds only have *.remap files on disk).
+	for res: Resource in AbilityLibrary.load_all(EFFECTS_DIR):
+		var effect_res := res as StatusEffectData
+		if is_instance_valid(effect_res) and not effect_res.effect_id.is_empty():
+			_registry[effect_res.effect_id] = effect_res
 
 static func get_effect(effect_id: String) -> StatusEffectData:
 	if _registry.is_empty():

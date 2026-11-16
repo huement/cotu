@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88.3 101.84">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-6 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #80ffdb;
+      }
+
+      .cls-3 {
+        fill: #00f0ff;
+      }
+
+      .cls-4 {
+        fill: #000;
+        opacity: .25;
+      }
+
+      .cls-5 {
+        fill: #fff;
+      }
+
+      .cls-6 {
+        stroke: #00f0ff;
+        stroke-width: 2.15px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_7" data-name="Layer 7">
+    <g>
+      <polygon id="btn-forward" class="cls-4" points="16.46 1.08 71.84 1.08 87.23 16.46 87.23 100.77 1.08 100.77 1.08 16.46 16.46 1.08"/>
+      <polygon id="btn-forward-2" data-name="btn-forward" class="cls-6" points="16.46 1.08 71.84 1.08 87.23 16.46 87.23 100.77 1.08 100.77 1.08 16.46 16.46 1.08"/>
+      <polygon class="cls-2" points="61.97 47.69 44.15 26.32 26.34 47.69 24.43 46.1 44.15 22.44 63.87 46.1 61.97 47.69"/>
+      <g>
+        <polygon class="cls-1" points="27.92 64.45 60.21 64.76 60.14 64.67 27.98 64.37 27.92 64.45"/>
+        <polygon class="cls-3" points="68.98 69.04 65.68 64.73 60.14 64.67 60.21 64.76 27.92 64.45 27.98 64.37 22.55 64.32 19.33 68.57 68.98 69.04"/>
+        <polygon class="cls-5" points="60.14 64.67 65.68 64.73 43.85 36.26 22.55 64.32 27.98 64.37 31.15 60.2 43.87 43.45 56.9 60.45 60.14 64.67"/>
+      </g>
+    </g>
+  </g>
+</svg>

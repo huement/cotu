@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/GameMenus/MenuScreenTemplate.tscn" id="1_tmpl"]
+
+[node name="AboutScreen" instance=ExtResource("1_tmpl")]
+screen_title = "ABOUT"
+subtitle = "Shards of the Arcanum  ·  early build"
+body_text = "A blobber-style retro RPG set in a far-off world.
+
+The outer rim has been overrun with the corrupted. Build a party of up to six, explore, gather resources and battle to stop the spread before the kingdom falls.
+
+[b]CREDITS[/b]
+Design & development: (your name here)
+Menus: Game Menu Kit Lite · Settings Menu Lite
+Engine: Godot 4
+
+[color=#8c919e]Thanks for playing an early build. Feedback welcome![/color]"

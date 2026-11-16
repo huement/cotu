@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dv3bsnqdx4blf"]
 
-[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_enq3q"]
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://ui/icons/items/armor.png" id="1_enq3q"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_k0n3n"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_k0n3n")
 item_id = "armor_echo_advanced_head"
 item_name = "Synth-Silk Head Armor"
 description = "Advanced leather armor for the Echo class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_enq3q")
 item_type = 2
 equipment_slot = 7
