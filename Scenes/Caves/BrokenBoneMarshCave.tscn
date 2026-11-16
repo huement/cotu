@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Environment/CaveLevel.gd" id="1_o0tqi"]
 [ext_resource type="Script" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_hxkwh"]
@@ -11,6 +11,12 @@
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/enemy.tscn" id="9_o156w"]
 [ext_resource type="Script" path="res://Scripts/Enemies/enemy.gd" id="10_u1ft1"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnMarshCrab.tres" id="11_llm23"]
+[ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="12_chest"]
+[ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="13_item"]
+[ext_resource type="Resource" uid="uid://bitt1s0menqci" path="res://Data/Items/Consumables/PotHp25.tres" id="14_hp"]
+[ext_resource type="Resource" path="res://Data/Items/Consumables/PotMana25.tres" id="15_mana"]
+[ext_resource type="Resource" uid="uid://dtllye1aoin33" path="res://Data/Enemies/EnGhost.tres" id="16_ghost"]
+[ext_resource type="Script" uid="uid://cdkuyybx3dwf0" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="17_ambush"]
 
 [sub_resource type="Environment" id="Environment_3ee6l"]
 background_mode = 1
@@ -269,3 +275,49 @@ data = ExtResource("11_llm23")
 model_scale = Vector3(0.65, 0.65, 0.65)
 vertical_offset = -1.0
 enemy_type = "crab"
+
+[node name="Chests" type="Node3D" parent="."]
+
+[node name="Chest1" parent="Chests" instance=ExtResource("12_chest")]
+transform = Transform3D(-0.5, 0, -4.37114e-08, 0, 0.5, 0, 4.37114e-08, 0, -0.5, 53, 0, 33)
+guaranteed_items = Array[ExtResource("13_item")]([ExtResource("14_hp"), ExtResource("14_hp")])
+gold_amount = 80
+object_id = "broken_bone_marsh_cave_chest_1"
+
+[node name="Chest2" parent="Chests" instance=ExtResource("12_chest")]
+transform = Transform3D(5.96244e-09, 0, -0.5, 0, 0.5, 0, 0.5, 0, 5.96244e-09, 201, 0, 13)
+guaranteed_items = Array[ExtResource("13_item")]([ExtResource("14_hp"), ExtResource("15_mana")])
+gold_amount = 120
+object_id = "broken_bone_marsh_cave_chest_2"
+
+[node name="Ghosts" type="Node3D" parent="."]
+
+[node name="Ghost1" parent="Ghosts" instance=ExtResource("9_o156w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53, 0, 33)
+script = ExtResource("10_u1ft1")
+data = ExtResource("16_ghost")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.9
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost1"]
+script = ExtResource("17_ambush")
+ghost_level = 2
+haunt_radius_tiles = 15
+
+[node name="Ghost2" parent="Ghosts" instance=ExtResource("9_o156w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 201, 0, 13)
+script = ExtResource("10_u1ft1")
+data = ExtResource("16_ghost")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.9
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost2"]
+script = ExtResource("17_ambush")
+ghost_level = 2
+haunt_radius_tiles = 15

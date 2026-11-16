@@ -28,7 +28,7 @@ SignalBus.combat_started(enemy_group, party_slots, facing)
 `CombatManager._on_combat_started`:
 1. Bumps `_battle_serial` (any leftover coroutine from a previous battle sees the change and quits).
 2. Builds one **Combatant** per party member and per enemy. All stats are **snapshotted here** (see §5).
-3. Sets every turn meter to `speed × 5` (capped at 100), so fast characters start partly charged.
+3. Sets every turn meter to `speed × 5` (capped at 100), so fast characters start partly charged. An ambush fills that enemy's meter and queues it first, so it acts before the party. A ghost haunt is always an ambush. Any other enemy with `can_surprise_player` ambushes only when the party meets it with its back turned (a flank, or looking straight at it, is a normal fight). The check happens before the party is turned to face the battle. Anyone who starts already full is queued too — the meter tick skips a full gauge, so they would otherwise never take a turn.
 
 At the same time the HUD shows itself and builds the enemy header, and EnemyVisualManager spawns the models.
 
@@ -141,7 +141,7 @@ Duration = the larger of the status's `duration` and the ability's duration.
 
 **Enemy** (`EnemyData`)
 - **Attack** = `attack_damage` · **Defense** = `defense` · **Speed** = `speed`
-- At battle start, ATK and `magic_power` are multiplied by a **level band** from `base_level` (`CombatMath.enemy_level_damage_mult`): L1–3 ×1.2 · L4–6 ×1.4 · L7+ ×1.5. Sheet values stay as authored; this is applied in `CombatManager._build_enemy_combatant`.
+- **Level is the difficulty dial.** Sheet stats (`Data/Enemies.csv` → `.tres`) are **level-1** stats. At battle start `CombatMath.apply_enemy_level` grows them to `base_level` (in `CombatManager._build_enemy_combatant`): per level above 1, HP +20%, attack and `magic_power` +15%, defense +10%, speed / initiative +4%, mana +10%, XP / gold +30% (`CombatMath.ENEMY_*_GROWTH`). Blob bosses grow their own copies with the same rates and set `level_scaling_applied`, so nothing is scaled twice. A placed enemy can override its level (`level` on the WorldEnemy node, 0 = the sheet's).
 - `weakness_element`: hits of that type do ×1.5 (MAGIC = every spell)
 - `magic_resist`: fraction of spell damage ignored (magic defense)
 - `attack_element`: its physical attack type (BLADE/BASH/RANGED)

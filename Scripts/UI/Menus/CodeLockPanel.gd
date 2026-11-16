@@ -14,8 +14,8 @@ signal solved
 signal closed
 
 const DIGIT_FONT: FontFile = preload("res://ui/fonts/GALAXIA.otf")
-const ARROW_UP: Texture2D = preload("res://ui/icons/arrow_up.svg")
-const ARROW_DOWN: Texture2D = preload("res://ui/icons/arrow_down.svg")
+const ARROW_UP: Texture2D = preload("res://ui/icons/menu/arrow_up.svg")
+const ARROW_DOWN: Texture2D = preload("res://ui/icons/menu/arrow_down.svg")
 const COLOR_WRONG: Color = Color(1.0, 0.25, 0.3)
 const COLOR_RIGHT: Color = Color(0.35, 1.0, 0.55)
 const DIGIT_FONT_SIZE: int = 120

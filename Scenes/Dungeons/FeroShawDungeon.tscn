@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3]
+[gd_scene load_steps=39 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_dw3wi"]
 [ext_resource type="Script" path="res://Scripts/Environment/EditorWorkLight.gd" id="2_u8o3a"]
@@ -14,7 +14,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/enemy.tscn" id="12_h2q7h"]
 [ext_resource type="Script" path="res://Scripts/Enemies/BossEnemy.gd" id="13_sics0"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnScavengerCyclops.tres" id="14_nijsx"]
-[ext_resource type="Resource" path="res://Data/Enemies/EnAzurianDrone.tres" id="15_b01b3"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnZombieKnight.tres" id="15_b01b3"]
 [ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-end.glb" id="16_uw3qg"]
 [ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor.glb" id="17_8y8m5"]
 [ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-corner-square.glb" id="18_dbulj"]
@@ -37,6 +37,7 @@
 [ext_resource type="Resource" path="res://Data/Enemies/EnSlimeDrone.tres" id="35_bq6t7"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="36_leveltitle"]
 [ext_resource type="PackedScene" path="res://Scenes/Objects/ArcanumShard.tscn" id="99_arcshard"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnZombiePunk.tres" id="37_punk"]
 
 [sub_resource type="Environment" id="Environment_k5fg6"]
 background_mode = 1
@@ -154,11 +155,12 @@ decor_chance = 1.0
 script = ExtResource("13_sics0")
 default_facing = 3
 rush_on_room_enter = true
-minion_data = ExtResource("14_nijsx")
+minion_data = ExtResource("37_punk")
 data = ExtResource("15_b01b3")
 model_scale = Vector3(1, 1, 1)
 vertical_offset = -1.0
-stat_multiplier = 1.8
+stat_multiplier = 1.5
+boss_stat_multiplier = 1.6
 
 [node name="Corridors" type="Node3D" parent="."]
 

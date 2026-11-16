@@ -55,8 +55,10 @@ var collected_shards: Dictionary = {}
 ## Shared day/night clock (0..1, 0.25 = morning). Every map's DayNightCycle reads and advances it,
 ## so time no longer resets when you change maps. Saved with the game.
 var world_time: float = 0.25
-## Seconds played (only counts while the game isn't paused).
+## Seconds played this session (only while a game is running and the tree isn't paused).
 var play_time_seconds: float = 0.0
+## Enemies defeated in combat across this save. Counted when they fall, then written with the save.
+var enemies_killed: int = 0
 ## Where the last loaded save left the party: { map_scene_path, player_cell, player_facing, location_name }.
 ## MapManager consumes it once when the world starts (consume_pending_location()).
 var pending_location: Dictionary = {}
@@ -92,7 +94,8 @@ var _victory_screen_wait: float = 0.0
 
 
 func _process(delta: float) -> void:
-	play_time_seconds += delta
+	if session_active:
+		play_time_seconds += delta
 	if post_combat_immunity_timer > 0.0:
 		post_combat_immunity_timer -= delta
 	if encounter_lock_timer > 0.0:
@@ -269,6 +272,7 @@ func _load_default_save(equip_starters: bool = true, persist: bool = true) -> vo
 			world_time = 0.25
 			current_time_period = "MORNING"
 			play_time_seconds = 0.0
+			enemies_killed = 0
 			pending_location = {}
 			_last_location = {}
 			_sync_party_references()
@@ -376,6 +380,7 @@ func save_game(include_location: bool = true) -> bool:
 	save.world_time = world_time
 	save.time_period = current_time_period
 	save.play_time_seconds = play_time_seconds
+	save.enemies_killed = enemies_killed
 	var loc: Dictionary = capture_location() if include_location else _last_location
 	save.map_scene_path = str(loc.get("map_scene_path", ""))
 	save.location_name = str(loc.get("location_name", ""))
@@ -418,6 +423,7 @@ func load_game() -> bool:
 	collected_shards = save.collected_shards.duplicate(true)
 	world_time = save.world_time
 	play_time_seconds = save.play_time_seconds
+	enemies_killed = maxi(0, save.enemies_killed)
 	if not save.time_period.is_empty():
 		current_time_period = save.time_period
 	pending_location = {}

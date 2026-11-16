@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://d1rfhycwotsyq"]
+[gd_scene load_steps=24 format=3 uid="uid://d1rfhycwotsyq"]
 
 [ext_resource type="Script" uid="uid://dr1mlle0su820" path="res://Scripts/3D/weapon_animatior.gd" id="1_scqai"]
 [ext_resource type="PackedScene" uid="uid://cq53qqwsvdoyy" path="res://resources/Weapons/low_poly_sword.glb" id="2_t7gix"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://nva4dmbooh47" path="res://resources/Weapons/claws.glb" id="7_qw4aw"]
 [ext_resource type="PackedScene" uid="uid://b2bjvcot1dqqv" path="res://resources/Weapons/neospear.glb" id="8_a7kvb"]
 [ext_resource type="PackedScene" uid="uid://bkgtmbxg6f566" path="res://resources/Weapons/lute.glb" id="9_afu4u"]
+[ext_resource type="PackedScene" uid="uid://db2jgwsx7qunk" path="res://resources/Weapons/CatHand.glb" id="10_kc0kj"]
 [ext_resource type="Texture2D" uid="uid://dl7bgx6iwc61v" path="res://resources/Weapons/explosion/audio_spritesheet.png" id="11_kc0kj"]
 
 [sub_resource type="Animation" id="Animation_8cfq0"]
@@ -137,6 +138,204 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 1,
 "values": [true, true, true, false]
+}
+
+[sub_resource type="Animation" id="Animation_a7kvb"]
+resource_name = "claw_swing"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.14983082, 0.25127876, 0.34999543),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0.4, 0.050000012, -0.9), Vector3(0.4, 0.05, -1.29), Vector3(0.2, -0.2, -1.4), Vector3(0.2, -0.2, -0.8)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.14983082, 0.25127876, 0.3503856),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0.006981313, -1.9198622, -0.013962626), Vector3(-0.073303826, -1.5166911, 0.46949357), Vector3(0.97912973, -1.1955506, 0.710349), Vector3(-0.006981317, -1.9198622, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.4007194),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="Animation" id="Animation_qw4aw"]
+resource_name = "katana_swing"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15100138, 0.3000518),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0.2, -0.2, -0.9), Vector3(0.1, 0, -0.95), Vector3(0.2, 0.05, -0.9)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.13333334, 0.15139155, 0.1677793, 0.3000518),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-0.9651671, -3.6110861, -0.013962634), Vector3(0.08901179, -3.0490901, -0.013962634), Vector3(0.0017453292, -3.4225907, -0.013962634), Vector3(-0.07853982, -3.2288592, -0.013962634), Vector3(-0.72082096, -3.450516, -0.017453292)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.15061119, 0.36666667, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [true, true, true, true]
+}
+
+[sub_resource type="Animation" id="Animation_6rmrp"]
+resource_name = "lance_swing"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.14982341, 0.3, 0.37535742),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0.4, 0.35, -0.9), Vector3(0, 0.2, -1), Vector3(0, 0, -1.8), Vector3(0, 0, -0.9)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.14982341, 0.3, 0.37535742),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(0.0052359877, -2.1816616, 1.4643313), Vector3(0.008726646, -2.0315633, 1.3124876), Vector3(0.008726646, -2.0315633, 0.90931654)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.14982341, 0.3007286, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [true, true, true, false]
+}
+
+[sub_resource type="Animation" id="Animation_aq0gv"]
+resource_name = "lute_swing"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06666667, 0.13333334, 0.2, 0.23333333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0.4, 0.35000002, -0.9), Vector3(0.6, 0.15, -0.9), Vector3(0.4, 0.35000002, -0.9), Vector3(0.2, 0.05, -0.9), Vector3(0.4, 0.35000002, -0.9)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.06666667, 0.13333334, 0.2, 0.23333333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.23411065),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("AudioSprite:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.23450084),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [false, true]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("AudioSprite:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.23450084, 0.26666668, 0.3, 0.33333334, 0.36666667, 0.40000004, 0.43333337, 0.4666667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+tracks/5/type = "method"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath(".")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.23333333),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"trigger_impact"
+}]
 }
 
 [sub_resource type="Animation" id="Animation_fen5s"]
@@ -297,48 +496,8 @@ tracks/2/keys = {
 "values": [true, true, true, false]
 }
 
-[sub_resource type="Animation" id="Animation_qw4aw"]
-resource_name = "katana_swing"
-length = 0.4
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Pivot:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.15100138, 0.3000518),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0.2, -0.2, -0.9), Vector3(0.1, 0, -0.95), Vector3(0.2, 0.05, -0.9)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Pivot:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.13333334, 0.15139155, 0.1677793, 0.3000518),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(-0.9651671, -3.6110861, -0.013962634), Vector3(0.08901179, -3.0490901, -0.013962634), Vector3(0.0017453292, -3.4225907, -0.013962634), Vector3(-0.07853982, -3.2288592, -0.013962634), Vector3(-0.72082096, -3.450516, -0.017453292)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Pivot:visible")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.15061119, 0.36666667, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [true, true, true, true]
-}
-
-[sub_resource type="Animation" id="Animation_a7kvb"]
-resource_name = "claw_swing"
+[sub_resource type="Animation" id="Animation_n47lq"]
+resource_name = "unarmed_swing"
 length = 0.5
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -347,10 +506,10 @@ tracks/0/path = NodePath("Pivot:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.14983082, 0.25127876, 0.34999543),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.06666666, 0.1, 0.3, 0.33755076, 0.40130016),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector3(0.4, 0.050000012, -0.9), Vector3(0.4, 0.05, -1.29), Vector3(0.2, -0.2, -1.4), Vector3(0.2, -0.2, -0.8)]
+"values": [Vector3(0.4, 0.050000012, -0.9), Vector3(0.4, 0.05, -0.8), Vector3(0.4, 0.15, -0.75), Vector3(0.4, 0.05, -1.15), Vector3(0.4, 0.05, -1.19), Vector3(0.4, 0.05, -0.8)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -359,10 +518,10 @@ tracks/1/path = NodePath("Pivot:rotation")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.14983082, 0.25127876, 0.3503856),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.1, 0.3, 0.33755076, 0.40130016),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector3(0.006981313, -1.9198622, -0.013962626), Vector3(-0.073303826, -1.5166911, 0.46949357), Vector3(0.97912973, -1.1955506, 0.710349), Vector3(-0.006981317, -1.9198622, 0)]
+"values": [Vector3(0.006981313, -1.9198622, -0.013962626), Vector3(0.006981317, -1.9198622, -0.4171337), Vector3(0.006981317, -1.11352, 0.46949357), Vector3(0.006981313, -1.322492, 0.38021135), Vector3(0.006981317, -1.6772614, 0.22863813)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -371,128 +530,10 @@ tracks/2/path = NodePath("Pivot:visible")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.4007194),
+"times": PackedFloat32Array(0, 0.45083204),
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
 "values": [true, false]
-}
-
-[sub_resource type="Animation" id="Animation_6rmrp"]
-resource_name = "lance_swing"
-length = 0.4
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Pivot:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.14982341, 0.3, 0.37535742),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(0.4, 0.35, -0.9), Vector3(0, 0.2, -1), Vector3(0, 0, -1.8), Vector3(0, 0, -0.9)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Pivot:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.14982341, 0.3, 0.37535742),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(0.0052359877, -2.1816616, 1.4643313), Vector3(0.008726646, -2.0315633, 1.3124876), Vector3(0.008726646, -2.0315633, 0.90931654)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Pivot:visible")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.14982341, 0.3007286, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 1,
-"values": [true, true, true, false]
-}
-
-[sub_resource type="Animation" id="Animation_aq0gv"]
-resource_name = "lute_swing"
-length = 0.5
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Pivot:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.06666667, 0.13333334, 0.2, 0.23333333),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(0.4, 0.35000002, -0.9), Vector3(0.6, 0.15, -0.9), Vector3(0.4, 0.35000002, -0.9), Vector3(0.2, 0.05, -0.9), Vector3(0.4, 0.35000002, -0.9)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Pivot:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.06666667, 0.13333334, 0.2, 0.23333333),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 0,
-"values": [Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844), Vector3(-0.5602507, -1.1955506, 0.38920844)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Pivot:visible")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.23411065),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [true, false]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("AudioSprite:visible")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.23450084),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [false, true]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("AudioSprite:frame")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0.23450084, 0.26666668, 0.3, 0.33333334, 0.36666667, 0.40000004, 0.43333337, 0.4666667),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [0, 1, 2, 3, 4, 5, 6, 7]
-}
-tracks/5/type = "method"
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/path = NodePath(".")
-tracks/5/interp = 1
-tracks/5/loop_wrap = true
-tracks/5/keys = {
-"times": PackedFloat32Array(0.23333333),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"trigger_impact"
-}]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_3ud87"]
@@ -505,14 +546,15 @@ _data = {
 &"lute_swing": SubResource("Animation_aq0gv"),
 &"potion_throw": SubResource("Animation_fen5s"),
 &"staff_bash": SubResource("Animation_3ud87"),
-&"sword_swing": SubResource("Animation_b102c")
+&"sword_swing": SubResource("Animation_b102c"),
+&"unarmed_swing": SubResource("Animation_n47lq")
 }
 
 [node name="WeaponAnimatior" type="Node3D"]
 script = ExtResource("1_scqai")
 
 [node name="Pivot" type="Node3D" parent="."]
-transform = Transform3D(0.7281384, 0.32399178, 0.6040227, -0.6040226, 0.71984625, 0.3420201, -0.32399175, -0.61388147, 0.71984625, 0.4, -0.6, -0.4)
+transform = Transform3D(0.72813827, 0.32399178, 0.6040227, -0.60402256, 0.71984625, 0.3420201, -0.32399172, -0.61388147, 0.71984625, 0.4, -0.6, -0.4)
 
 [node name="SwordModel" type="Node3D" parent="Pivot"]
 visible = false
@@ -521,6 +563,7 @@ visible = false
 transform = Transform3D(0.39999995, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
 
 [node name="KatanaModel" type="Node3D" parent="Pivot"]
+visible = false
 
 [node name="bamboo_katana" parent="Pivot/KatanaModel" instance=ExtResource("3_fen5s")]
 transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 0, 0)
@@ -560,6 +603,11 @@ visible = false
 [node name="lute" parent="Pivot/LuteModel" instance=ExtResource("9_afu4u")]
 transform = Transform3D(-0.46862757, 0.29933923, -0.8311343, -0.86499643, 0.035533518, 0.5005183, 0.17935781, 0.9534848, 0.24227509, 0, 0, 0)
 visible = false
+
+[node name="UnarmedModel" type="Node3D" parent="Pivot"]
+
+[node name="CatHand" parent="Pivot/UnarmedModel" instance=ExtResource("10_kc0kj")]
+transform = Transform3D(-0.2334011, -0.2655021, 0.18716992, -0.19005604, 0.29851982, 0.18645284, -0.26344392, 0.019863784, -0.3003378, 0, 0, 0)
 
 [node name="ExplosionSprite" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)

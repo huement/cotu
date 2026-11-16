@@ -35,6 +35,10 @@ extends Control
 @onready var atb_bar: ProgressBar = %ATBBar as ProgressBar
 @onready var highlight_rect: TextureRect = %Highlight as TextureRect
 
+## The character this slot shows (set in setup_slot) and whether the downed portrait is showing.
+var _character: CatCharacter = null
+var _shown_down: bool = false
+
 var _shine_material: ShaderMaterial = null
 var _shine_tween: Tween = null
 
@@ -167,11 +171,13 @@ func _connect_signal_listeners() -> void:
 
 
 func setup_slot(character: CatCharacter) -> void:
+	_character = character
 	if character == null:
 		hide()
 		return
 
 	show()
+	_shown_down = int(character.get("current_hp")) <= 0 if "current_hp" in character else false
 	_update_portrait_image(character)
 	_refresh_stats(character)
 
@@ -182,12 +188,14 @@ func setup_slot(character: CatCharacter) -> void:
 		a_bar.value = 0.0
 
 
-func _update_portrait_image(character: CatCharacter) -> void:
+## hp_override >= 0: use that HP instead of the character's (battle HP lives on the Combatant
+## until the fight ends, so the battle HUD passes the value from character_health_changed).
+func _update_portrait_image(character: CatCharacter, hp_override: int = -1) -> void:
 	var p_rect: TextureRect = portrait_texture if portrait_texture else get_node_or_null("%PortraitTexture") as TextureRect
-	if p_rect == null:
+	if p_rect == null or character == null:
 		return
 
-	var hp_val: int = character.get("current_hp") if "current_hp" in character else 1
+	var hp_val: int = hp_override if hp_override >= 0 else (character.get("current_hp") if "current_hp" in character else 1)
 	if hp_val <= 0 and ResourceLoader.exists("res://ui/portrait-down.png"):
 		p_rect.texture = load("res://ui/portrait-down.png") as Texture2D
 		return
@@ -238,6 +246,12 @@ func _on_character_health_changed(target_slot: int, current_hp: int, max_hp: int
 			h_bar.max_value = max_hp
 		var tween: Tween = create_tween()
 		tween.tween_property(h_bar, "value", current_hp, 0.2)
+	# Swap to the downed portrait when this member falls (and back if they are revived).
+	if target_slot == slot_index and _character != null:
+		var is_down: bool = current_hp <= 0
+		if is_down != _shown_down:
+			_shown_down = is_down
+			_update_portrait_image(_character, current_hp)
 
 
 func _on_character_mana_changed(target_slot: int, current_mp: int, max_mp: int = -1) -> void:

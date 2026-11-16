@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://deevgjxtmsr2t"]
 
-[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_n3i6e"]
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://ui/icons/items/armor.png" id="1_n3i6e"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_6y6f5"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_6y6f5")
 item_id = "armor_maester_advanced_arms"
 item_name = "Chem-Guard Arms Armor"
 description = "Advanced leather armor for the Maester class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_n3i6e")
 item_type = 2
 equipment_slot = 2

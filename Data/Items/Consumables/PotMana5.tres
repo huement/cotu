@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://cgplc2ualwkck"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/health.png" id="1_0euek"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/health.png" id="1_0euek"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_t2tcm"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_t2tcm")
 item_id = "pot_mana_5"
 item_name = "Mana Potion (+5)"
 description = "+5 MANA RESTORE"
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("1_0euek")
 item_type = 3
 credit_value = 10

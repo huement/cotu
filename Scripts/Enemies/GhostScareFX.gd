@@ -7,6 +7,10 @@ extends CanvasLayer
 ##     GhostScareFX.play(get_tree())                 # default double pulse (inverted, ghostly)
 ##     GhostScareFX.play(get_tree(), 3, 1.0, 0.07)   # three hard pulses
 ##     GhostScareFX.play_blood(get_tree())           # red / black strobe (boss entrances)
+##
+## Sustained mode (stays until you end it - boss cutscenes):
+##     var fx: GhostScareFX = GhostScareFX.start_red_vignette(get_tree())
+##     fx.fade_out_and_free()
 
 const SHADER: Shader = preload("res://Shaders/ghost_scare_screen.gdshader")
 
@@ -31,6 +35,35 @@ static func play(tree: SceneTree, pulses: int = 2, peak: float = 1.0, pulse_seco
 ## Red-and-black strobe: the screen drops to black shadows and blood-red highlights.
 static func play_blood(tree: SceneTree, pulses: int = 2, peak: float = 1.0, pulse_seconds: float = 0.08) -> GhostScareFX:
 	return play(tree, pulses, peak, pulse_seconds, Color(0.95, 0.06, 0.04), true)
+
+
+## Dark red vignette that fades in and STAYS until fade_out_and_free(). The middle of the screen
+## stays readable. Sits on layer 102: above the message box (100), below LoreScareFX (105) so the
+## cube flash still punches through.
+static func start_red_vignette(tree: SceneTree, fade_in_seconds: float = 0.8, max_intensity: float = 0.92,
+		tint: Color = Color(0.75, 0.03, 0.03)) -> GhostScareFX:
+	if tree == null or tree.root == null:
+		return null
+	var fx := GhostScareFX.new()
+	fx.layer = 102
+	fx._material.set_shader_parameter(&"tint", tint)
+	fx._material.set_shader_parameter(&"duotone", 0.0)
+	fx._material.set_shader_parameter(&"vignette_only", 1.0)
+	fx._material.set_shader_parameter(&"split_amount", 0.006)
+	tree.root.add_child(fx)
+	fx._set_intensity(0.0)
+	var tween: Tween = fx.create_tween()
+	tween.tween_method(fx._set_intensity, 0.0, clampf(max_intensity, 0.0, 1.0), maxf(0.05, fade_in_seconds)) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	return fx
+
+
+## Ends a sustained effect (start_red_vignette): fades to nothing, then frees itself.
+func fade_out_and_free(fade_out_seconds: float = 0.5) -> void:
+	var current: float = float(_material.get_shader_parameter(&"intensity"))
+	var tween: Tween = create_tween()
+	tween.tween_method(_set_intensity, current, 0.0, maxf(0.05, fade_out_seconds))
+	tween.finished.connect(queue_free)
 
 
 func _init() -> void:

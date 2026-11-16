@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://dwuewtnrvx4qm"]
+
+[ext_resource type="PackedScene" uid="uid://bjb4e8x6kecgi" path="res://resources/Enemies/wallofflesh.glb" id="1_1b2td"]
+[ext_resource type="Script" path="res://Scripts/Enemies/MalviathanController.gd" id="2_malvi"]
+[ext_resource type="Script" uid="uid://bxlxhe0eriek1" path="res://Scripts/3D/BlobBossJuice.gd" id="3_juice"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c1hok"]
+size = Vector3(20.513123, 7.180664, 20.901093)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1b2td"]
+size = Vector3(4.501404, 6.198944, 6.3148193)
+
+[node name="Malviathan" type="Node3D"]
+script = ExtResource("2_malvi")
+
+[node name="VisualJuice" type="Node3D" parent="."]
+script = ExtResource("3_juice")
+rim_color = Color(0.95, 0.08, 0.1, 1)
+wobble_amount = 0.02
+base_squash_duration = 2.2
+
+[node name="MalviathanModel" parent="VisualJuice" instance=ExtResource("1_1b2td")]
+
+[node name="ActivationArea" type="Area3D" parent="."]
+collision_layer = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ActivationArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.259491, 1.590332, 0.74031067)
+shape = SubResource("BoxShape3D_c1hok")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.197113, 0.11457443, 0.1749878)
+shape = SubResource("BoxShape3D_1b2td")

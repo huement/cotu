@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://Scripts/Resources/inventory.gd" id="5_inventory"]
 [ext_resource type="Script" path="res://resources/Party.gd" id="6_party"]
 [ext_resource type="Script" path="res://Scripts/Resources/SaveGame.gd" id="32_save_game"]
-[ext_resource type="Texture2D" path="res://Data/Items/health.png" id="50_tex0"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/health.png" id="50_tex0"]
 [ext_resource type="Resource" path="res://Data/StarterParty/nyx_1794243380_9574.tres" id="60_nyx"]
 [ext_resource type="Resource" path="res://Data/StarterParty/socks_1794243447_6899.tres" id="61_socks"]
 [ext_resource type="Resource" path="res://Data/StarterParty/tigris_1794244210_0865.tres" id="62_tigris"]
@@ -17,7 +17,7 @@ script = ExtResource("1_item_data")
 item_id = "pot_catnip"
 item_name = "Catnip Potion"
 description = "Concentrated liquid catnip. Restores 15 HP and 5 Energy."
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("50_tex0")
 item_type = 3
 quantity = 5
@@ -35,7 +35,7 @@ script = ExtResource("1_item_data")
 item_id = "pot_hp_50"
 item_name = "Health Potion (+50)"
 description = "+50 HP RESTORE"
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("50_tex0")
 item_type = 3
 quantity = 5
@@ -51,7 +51,7 @@ script = ExtResource("1_item_data")
 item_id = "pot_mana_25"
 item_name = "Mana Potion (+25)"
 description = "+25 MANA RESTORE"
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("50_tex0")
 item_type = 3
 quantity = 5
@@ -67,7 +67,7 @@ script = ExtResource("1_item_data")
 item_id = "pot_revive"
 item_name = "Revive Potion"
 description = "Revive Downed Ally"
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("50_tex0")
 item_type = 3
 quantity = 2
@@ -83,7 +83,7 @@ script = ExtResource("1_item_data")
 item_id = "pot_group_hp_25"
 item_name = "Group Heal Potion (+25)"
 description = "Mist canister. Restores 25 HP to every conscious party member."
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("50_tex0")
 item_type = 3
 target_type = 1
@@ -100,7 +100,7 @@ script = ExtResource("1_item_data")
 item_id = "pot_group_hp_50"
 item_name = "Group Heal Potion (+50)"
 description = "Mist canister. Restores 50 HP to every conscious party member."
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("50_tex0")
 item_type = 3
 target_type = 1

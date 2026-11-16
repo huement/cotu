@@ -84,7 +84,7 @@ static func get_save_timestamp() -> String:
 static func start_new_game(tree: SceneTree) -> void:
 	_clear_running_session(tree)
 	GameState.reset_to_starter_party()
-	MenuKit.change_scene(GAME_SCENE)
+	LoadingScreen.change_scene(tree, GAME_SCENE)
 
 
 ## Wipes the session's save slot (GameState.save_slot - the main menu picks it before opening the
@@ -122,7 +122,7 @@ static func load_saved_game(tree: SceneTree) -> bool:
 		return false
 	GameState.session_active = true
 	_clear_running_session(tree)
-	MenuKit.change_scene(GAME_SCENE)
+	LoadingScreen.change_scene(tree, GAME_SCENE)
 	return true
 
 

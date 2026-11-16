@@ -287,7 +287,7 @@ func _process(delta: float) -> void:
 
 ## Polls hardware input for continuous tile movement and hold-to-dash acceleration.
 func _check_continuous_movement() -> void:
-	if _is_in_combat or not is_instance_valid(grid_movement) or grid_movement.is_moving:
+	if _is_in_combat or is_movement_locked or not is_instance_valid(grid_movement) or grid_movement.is_moving:
 		return
 
 	if Input.is_action_pressed("move_forward"):

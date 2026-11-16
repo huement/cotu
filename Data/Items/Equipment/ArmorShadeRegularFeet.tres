@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://1w4kfmqpp48u"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_nffy6"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_nffy6"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_qhta2"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_qhta2")
 item_id = "armor_shade_regular_feet"
 item_name = "Shadow Feet Armor"
 description = "Regular leather armor for the Shade class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_nffy6")
 item_type = 2
 equipment_slot = 4

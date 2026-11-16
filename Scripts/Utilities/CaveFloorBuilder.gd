@@ -17,6 +17,8 @@ const STAIRS_SCENE: String = "res://Scenes/Objects/Stairs.tscn"
 const CRYPT_SCENE: String = "res://Scenes/Environment/CryptHole.tscn"
 const ENEMY_SCENE: String = "res://Scenes/Enemies/enemy.tscn"
 const CHEST_SCENE: String = "res://Scenes/Objects/chest.tscn"
+const GHOST_DATA: String = "res://Data/Enemies/EnGhost.tres"
+const GHOST_AMBUSH_SCRIPT: String = "res://Scripts/Enemies/GhostAmbushComponent.gd"
 const LEVEL_TITLE_SCENE: String = "res://Scenes/UI/LevelTitleTrigger.tscn"
 const CELL_SIZE: float = 2.0
 const CRYPT_SCALE: float = 0.17
@@ -223,7 +225,47 @@ static func _build(cfg: Dictionary, layout: CaveGenerator.CaveLayout) -> Node3D:
 		push_warning("CaveFloorBuilder: %s only had room for %d of %d chests - try a bigger grid or another seed." % [
 			level_name, chest_cells.size(), chest_cfgs.size()])
 	root.set_meta("chest_count", chest_cells.size())
+	_add_ghosts(root, cfg, chest_cells)
 	return root
+
+
+## One ghost per chosen chest cell, on that cell. The haunt component hides the body;
+## the chest stays where it is. ghost_count 1 uses the last chest, 2 uses the first and last.
+static func _add_ghosts(root: Node3D, cfg: Dictionary, chest_cells: Array[Vector2i]) -> void:
+	var ghost_count: int = mini(int(cfg.get("ghost_count", 0)), chest_cells.size())
+	if ghost_count <= 0:
+		return
+	var indexes: Array[int] = []
+	if ghost_count == 1:
+		indexes.append(chest_cells.size() - 1)
+	else:
+		indexes.append(0)
+		indexes.append(chest_cells.size() - 1)
+	var ghost_cfg: Dictionary = cfg.get("ghost", {})
+	var ghost_data: EnemyData = load(str(ghost_cfg.get("data", GHOST_DATA))) as EnemyData
+	var enemy_scene: PackedScene = load(ENEMY_SCENE) as PackedScene
+	var ambush_script: Script = load(GHOST_AMBUSH_SCRIPT) as Script
+	var ghosts := Node3D.new()
+	ghosts.name = "Ghosts"
+	root.add_child(ghosts)
+	for n: int in range(indexes.size()):
+		var ghost: Node3D = enemy_scene.instantiate() as Node3D
+		ghost.name = "Ghost%d" % (n + 1)
+		ghost.position = _cell_center(chest_cells[indexes[n]], 0.0)
+		ghost.set("data", ghost_data)
+		ghost.set("pack_size", 1)
+		ghost.set("stat_multiplier", float(ghost_cfg.get("multiplier", 1.0)))
+		ghost.set("model_scale", Vector3.ONE)
+		ghost.set("vertical_offset", -1.0)
+		ghost.set("enemy_type", "ghost")
+		var ambush := Node.new()
+		ambush.name = "GhostAmbushComponent"
+		ambush.set_script(ambush_script)
+		ambush.set("ghost_level", int(ghost_cfg.get("level", 1)))
+		ambush.set("haunt_radius_tiles", int(ghost_cfg.get("haunt_radius", GhostAmbushComponent.DEFAULT_HAUNT_RADIUS)))
+		ghost.add_child(ambush)
+		ghosts.add_child(ghost)
+		ambush.owner = root
 
 
 ## Chest cells: room-like open cells (at least 5 of 8 neighbours open, so chests sit in rooms or

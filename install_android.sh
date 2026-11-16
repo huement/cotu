@@ -15,7 +15,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-PACKAGE="com.shardsgame.shards"          # package/unique_name in export_presets.cfg
+PACKAGE="com.huement.shardsofarcanum"          # package/unique_name in export_presets.cfg
 ACTIVITY="com.godot.game.GodotApp"       # Godot 4's Android launcher activity
 
 APK="build/android/Shards.apk"

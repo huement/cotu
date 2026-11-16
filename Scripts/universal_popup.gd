@@ -23,6 +23,8 @@ var _items_use_btn: Button = null
 var _items_drop_btn: Button = null
 
 const GALAXIA_FONT: Font = preload("res://ui/fonts/GALAXIA.otf")
+## Side of the square boss avatar on a BOSS_DIALOG popup (half of it hangs outside the panel).
+const BOSS_AVATAR_SIZE: float = 112.0
 
 const BATTLE_VICTORY_SCENE: PackedScene = preload("res://Scenes/UI/BattleVictoryPopup.tscn")
 @export var skills_spells_popup_scene: PackedScene = preload("res://Scenes/UI/SkillsSpellsPopup.tscn")
@@ -101,6 +103,9 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 			var title_str: String = str(data.get("title", "Archive Log")).to_upper()
 			title_label.text = title_str
 			_build_lore_popup_ui(data)
+		&"BOSS_DIALOG":
+			title_label.text = ""
+			_build_boss_dialog_ui(data)
 		&"LEAVE_DUNGEON":
 			_build_leave_dungeon_ui(data)
 		&"CONFIRMATION":
@@ -199,6 +204,10 @@ func _on_cancel_pressed() -> void:
 	# Lore popups report closing however they were dismissed (see BossStatue)
 	if active_action_type == &"LORE_POPUP":
 		_emit_confirmation(&"LORE_POPUP", active_data.duplicate())
+		return
+	# A boss's dialog can't be skipped past its cutscene: Esc closes it the same way as its button
+	if active_action_type == &"BOSS_DIALOG":
+		_emit_confirmation(&"BOSS_DIALOG", active_data.duplicate())
 		return
 	_close_modal()
 
@@ -507,6 +516,24 @@ func _execute_item_use_direct(item: ItemData, inv_slot_idx: int, acting_slot_idx
 			target_mgr.call("finish_selection")
 	else:
 		var gs: Node = get_tree().root.get_node_or_null("GameState")
+		# Group items (e.g. Group Heal Potion): ONE item applied to the whole party.
+		if item.target_type == ItemData.TargetType.ALL_PARTY and is_instance_valid(gs) \
+				and "inventory" in gs and gs.inventory != null and "current_party" in gs and gs.current_party:
+			var party_slots: Array = gs.current_party.get("slots") as Array
+			if is_instance_valid(AudioManager):
+				AudioManager.play_ui_sound("button-confirm")
+			var group_ok: bool = gs.inventory.use_item_on_targets(inv_slot_idx, party_slots)
+			GameLogger.info("UniversalPopup: Field group item use result = %s" % str(group_ok))
+			if group_ok and get_tree().root.has_node("SignalBus"):
+				for idx: int in range(party_slots.size()):
+					var cat: Resource = party_slots[idx] as Resource
+					if not is_instance_valid(cat):
+						continue
+					if cat.get("current_hp") != null:
+						SignalBus.character_health_changed.emit(idx, cat.get("current_hp"))
+					if cat.get("current_energy") != null:
+						SignalBus.character_mana_changed.emit(idx, cat.get("current_energy"), cat.get("max_energy") if cat.get("max_energy") != null else 0)
+			return
 		if is_instance_valid(gs) and "inventory" in gs and gs.inventory != null:
 			var target_cat: Resource = null
 			var resolved_target_idx: int = target_slot_idx
@@ -858,6 +885,88 @@ func _build_lore_popup_ui(data: Dictionary) -> void:
 	content_area.add_child(btn_hbox)
 	
 	
+## A boss talks to the party (BossVillainCutscene). Same glass panel as every popup, with the
+## boss's avatar hanging off the top-left corner and the text beside it.
+## data: "body" (text), "speaker" (name line, optional), "avatar" (Texture2D, optional),
+##       "button_text" (optional), "dialog_id" (echoed back in popup_confirmed).
+func _build_boss_dialog_ui(data: Dictionary) -> void:
+	if title_label:
+		title_label.visible = false # no title bar: the speaker's name sits above the text
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var avatar: Texture2D = data.get("avatar", null) as Texture2D
+	if is_instance_valid(avatar):
+		# The slot only reserves the half of the picture that sits inside the panel; the frame
+		# itself is shifted left past the panel's 15 px margin so it straddles the panel edge.
+		var slot := Control.new()
+		slot.custom_minimum_size = Vector2(BOSS_AVATAR_SIZE * 0.5 - 15.0, BOSS_AVATAR_SIZE)
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(slot)
+
+		var frame := Panel.new()
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame.position = Vector2(-BOSS_AVATAR_SIZE * 0.5 - 15.0, 0.0)
+		frame.size = Vector2(BOSS_AVATAR_SIZE, BOSS_AVATAR_SIZE)
+		var frame_style := StyleBoxFlat.new()
+		frame_style.bg_color = Color.BLACK
+		frame_style.set_border_width_all(3)
+		frame_style.border_color = Color.BLACK
+		frame.add_theme_stylebox_override("panel", frame_style)
+		slot.add_child(frame)
+
+		var picture := TextureRect.new()
+		picture.texture = avatar
+		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		picture.position = Vector2(3.0, 3.0)
+		picture.size = Vector2(BOSS_AVATAR_SIZE - 6.0, BOSS_AVATAR_SIZE - 6.0)
+		frame.add_child(picture)
+
+	var text_column := VBoxContainer.new()
+	text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_column.add_theme_constant_override("separation", 8)
+	row.add_child(text_column)
+
+	var speaker: String = str(data.get("speaker", "")).strip_edges()
+	if not speaker.is_empty():
+		var name_lbl := Label.new()
+		name_lbl.text = speaker.to_upper()
+		name_lbl.add_theme_font_override("font", GALAXIA_FONT)
+		name_lbl.add_theme_font_size_override("font_size", 16)
+		name_lbl.add_theme_color_override("font_color", Color(1.0, 0.16, 0.16))
+		text_column.add_child(name_lbl)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(380, 170)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	text_column.add_child(scroll)
+
+	var body_lbl := Label.new()
+	body_lbl.text = str(data.get("body", ""))
+	body_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body_lbl.add_theme_color_override("font_color", Color.WHITE)
+	body_lbl.add_theme_font_size_override("font_size", 15)
+	scroll.add_child(body_lbl)
+
+	content_area.add_child(row)
+
+	var close_btn := _create_modal_button(str(data.get("button_text", "...")), Color(0.78, 0.08, 0.08, 1.0))
+	close_btn.pressed.connect(func() -> void: _emit_confirmation(&"BOSS_DIALOG", data.duplicate()))
+	var btn_hbox := HBoxContainer.new()
+	btn_hbox.alignment = BoxContainer.ALIGNMENT_END
+	btn_hbox.add_child(close_btn)
+	content_area.add_child(btn_hbox)
+
+	call_deferred("_center_popup")
+
+
 func _process(delta: float) -> void:
 	if _is_aura_active:
 		_shake_timer += delta

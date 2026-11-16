@@ -76,7 +76,30 @@ func _on_popup_requested(action_type: StringName, data: Dictionary = { }) -> voi
 		var res: Resource = data.get("resource", null) as Resource
 		var cat: CatCharacter = data.get("character", null) as CatCharacter
 		if is_instance_valid(res):
-			open_detail(res, cat)
+			if bool(data.get("cast_now", false)):
+				cast_now(res, cat, data.get("target", null) as CatCharacter)
+			else:
+				open_detail(res, cat)
+
+
+## False for skills that work on the party's supplies instead of a party member (no target page).
+static func needs_target(res: Resource) -> bool:
+	return not (res is SkillData and str((res as SkillData).skill_id) in ["sk_craft_ammo", "sk_flask_brew"])
+
+
+## Uses the ability right away without showing the popup. The touch character sheet picks the
+## target on the sheet itself (CharacterSheetMobile) and sends ABILITY_INFO with "cast_now".
+func cast_now(res: Resource, cat: CatCharacter, target: CatCharacter) -> void:
+	_active_resource = res
+	_active_cat = cat
+	_selected_target_cat = target
+	if res is SkillData and str((res as SkillData).skill_id) == "sk_craft_ammo":
+		_execute_craft_ammo(res as SkillData)
+	elif res is SkillData and str((res as SkillData).skill_id) == "sk_flask_brew":
+		_execute_flask_brew(res as SkillData)
+	else:
+		_execute_field_ability()
+	_hide_popup()
 
 
 ## Displays detailed specifications for a SpellData or SkillData resource

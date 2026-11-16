@@ -11,4 +11,6 @@ model_path = "res://resources/Enemies/Kenny/character-l.glb"
 texture_path = "res://resources/Enemies/Kenny/texture-d.png"
 model_scene = ExtResource("1_wiw8o")
 custom_material = ExtResource("1_ht43a")
+model_scale = Vector3(1, 1, 1)
+attack_damage = 10
 metadata/_custom_type_script = "uid://cidbs10ca08v4"

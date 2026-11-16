@@ -36,6 +36,10 @@ extends Node3D
 ## Scales health, attack, magic power, mana and XP/gold rewards. Defense only moves a quarter
 ## as much, because damage is (attack - defense) and a big defense makes an enemy unhittable.
 @export_range(0.1, 5.0, 0.05) var stat_multiplier: float = 1.0
+## Level of THIS placement (the whole pack). 0 = the enemy data's own level (Data/Enemies.csv).
+## Level is the main difficulty dial: every level adds +20% HP, +15% attack, +10% defense,
+## +4% speed and +30% XP / gold over the level-1 sheet stats (CombatMath.ENEMY_*_GROWTH).
+@export_range(0, 99, 1) var level: int = 0
 
 # ==============================================================================
 # 2. NODE REFERENCES & STATE
@@ -147,9 +151,9 @@ func _setup_enemy_group() -> void:
 		for i: int in range(pack_size):
 			if is_instance_valid(template):
 				var dup: Resource = template.duplicate(true)
-				
-				if "resource_path" in template and not template.resource_path.is_empty():
-					dup.resource_path = template.resource_path
+				# Don't copy resource_path onto the duplicate: the original already owns that path,
+				# so Godot rejects it ("possible cyclic resource inclusion"). Enemies are identified
+				# by enemy_id, not by path.
 				if "model_scene" in template and template.get("model_scene") != null:
 					dup.set("model_scene", template.get("model_scene"))
 				if "custom_material" in template and template.get("custom_material") != null:
@@ -161,8 +165,16 @@ func _setup_enemy_group() -> void:
 				enemy_group.append(dup)
 
 
-## Gives every pack member its own scaled copy of its EnemyData (see stat_multiplier).
+## Gives every pack member its own scaled copy of its EnemyData (see stat_multiplier / level).
 func _apply_stat_multiplier() -> void:
+	if level > 0:
+		for i: int in range(enemy_group.size()):
+			var src_l: EnemyData = enemy_group[i] as EnemyData
+			if src_l == null:
+				continue
+			var d_l: EnemyData = src_l.duplicate(false) as EnemyData
+			d_l.base_level = level
+			enemy_group[i] = d_l
 	if is_equal_approx(stat_multiplier, 1.0):
 		return
 	var m: float = stat_multiplier
@@ -509,6 +521,9 @@ func trigger_combat_encounter() -> void:
 
 	_is_in_active_combat = true
 
+	# Sampled before the battle room turns the party around to look at the fight.
+	var caught_from_behind: bool = BattleFacing.party_is_facing_away(get_tree(), global_position)
+
 	# Dungeons: fade into the battle room. Elsewhere: turn the party to face this enemy first
 	# (battle models appear in front of the camera).
 	await BattleArena.prepare_party(get_tree(), global_position)
@@ -522,6 +537,13 @@ func trigger_combat_encounter() -> void:
 
 	if is_instance_valid(GameLogger):
 		GameLogger.combat("Player engaged enemy pack (%d hostiles) at cell Vector2i%s! Triggering combat..." % [enemy_group.size(), _grid_position])
+
+	# A landed haunt is always an ambush. Any other meeting ambushes only from behind,
+	# and only enemies with can_surprise_player actually take the first turn.
+	var ambush: bool = is_instance_valid(ambush_comp) or caught_from_behind
+	if ambush and is_instance_valid(GameLogger):
+		GameLogger.combat("Ambush! The party had its back to the enemy.")
+	CombatMath.apply_meeting_ambush(enemy_group, ambush)
 
 	var party_slots: Array = []
 	if "current_party" in GameState and GameState.current_party != null:

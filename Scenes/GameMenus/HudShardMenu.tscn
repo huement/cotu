@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://c8cu3vq2kqely" path="res://ui/HUD/shard_menu_hud.svg" id="3_hud"]
 [ext_resource type="FontFile" uid="uid://cfaddimieokwo" path="res://ui/fonts/Nexa-Heavy.otf" id="4_c8key"]
 [ext_resource type="FontFile" uid="uid://d0ksagavyqlt7" path="res://ui/fonts/Nexa-ExtraLight.otf" id="5_124oy"]
-[ext_resource type="Texture2D" uid="uid://crco0u6gbbfc" path="res://ui/icons/arrow_left.svg" id="5_back"]
+[ext_resource type="Texture2D" uid="uid://crco0u6gbbfc" path="res://ui/icons/menu/arrow_left.svg" id="5_back"]
 [ext_resource type="Texture2D" uid="uid://chcpf1lvsaye4" path="res://ui/HUD/shard_icon.png" id="9_jrkrh"]
 [ext_resource type="FontFile" uid="uid://bdjyj64pv1h01" path="res://ui/fonts/GALAXIA.otf" id="10_0d08e"]
 [ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="10_5ptat"]
@@ -100,7 +100,7 @@ size_flags_horizontal = 10
 theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
 theme_override_fonts/font = ExtResource("4_c8key")
 theme_override_font_sizes/font_size = 22
-text = "88:00"
+text = "0:00"
 
 [node name="KillsRow" type="HBoxContainer" parent="Root/Content/HBox/LeftColumn/StatsBlock"]
 layout_mode = 2
@@ -120,7 +120,7 @@ size_flags_horizontal = 10
 theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
 theme_override_fonts/font = ExtResource("4_c8key")
 theme_override_font_sizes/font_size = 22
-text = "999"
+text = "0"
 
 [node name="TopSpacer" type="Control" parent="Root/Content/HBox/LeftColumn"]
 layout_mode = 2

@@ -74,6 +74,42 @@ next to floor; the piece is chosen by how many sides are open:
 1 = `cave-wall`/`-b`/`-c`, 2 adjacent = `cave-wall-corner`, 2 opposite = `cave-wall-double`,
 3 = `cave-wall-end`, 4 = `cave-pillar`.
 
+## Ghosts
+
+Each cave has a haunt on a treasure chest (`GhostAmbushComponent`, 15-tile radius). Half the caves have one ghost, half have two, on different chests. The ghost parks off the grid, so the chest itself stays open. Broken Bone Marsh had no chests; it now has two, each with a ghost. A haunt that lands is an ambush: the ghost acts before the party.
+
+| Scene | Ghosts |
+|---|---|
+| `CaveLevel1`, `CaveLevel2`, `WindmillCave1` | 1 |
+| `CaveLevel3`, `WindmillCave2`, `BrokenBoneMarshCave` | 2 |
+| `StoneTrailCave1`, `StoneTrailCave2`, `StoneTrailCave3` | 2 |
+
+Windmill caves keep that split in `GenerateWindmillCaves.gd` (`ghost_count`). Re-running that generator puts a single ghost on the last chest, or two ghosts on the first and last chests.
+
+## Stone Trail caves
+
+Three floors behind the **RockCave** mouth on Stone Trail, built by
+**`Scripts/Utilities/GenerateStoneTrailCaves.gd`** (File → Run; same `CaveFloorBuilder` settings
+format as the Windmill caves). A step up from the Windmill Cellars.
+
+```
+StoneTrail RockCave ──▶ StoneTrailCave1 ──crypt hole──▶ StoneTrailCave2 ──crypt hole──▶ StoneTrailCave3
+      ▲  (arrive: SpawnPoint_StoneTrailCave, 2 cells west of the mouth, facing away)          │
+      └──────────────────────────────────── exit stairs ─────────────────────────────────────┘
+```
+
+| Scene | Size | Rooms | Enemy groups | Enemies (pack, multiplier) | Ghosts | Chests |
+|---|---|---|---|---|---|---|
+| `StoneTrailCave1` | 30×30 | 8 | 6 | Cyclops 2-3 ×1.0, Crab 3-4 ×1.0, Corrupted 1-2 ×0.9, Rage Wraith 1-2 ×0.85 | 2 (×0.85, lvl 2) | 5 |
+| `StoneTrailCave2` | 32×32 | 9 | 7 | Cyclops 2-3 ×1.05, Rage Wraith 1-2 ×1.0, Corrupted 2-3 ×1.0, Oculat 1-2 ×0.9 | 2 (×0.95, lvl 2) | 6 |
+| `StoneTrailCave3` | 34×34 | 10 | 8 | Oculat 2-3 ×1.0, Rage Wraith 2-3 ×1.0, Savage 1-2 ×1.0, Corrupted 2-4 ×1.05 | 2 (×1.0, lvl 3) | 6 |
+
+- **Bone gear:** 2 × `TokenPartyGearBone` per floor, in the first and last chest of each list.
+  Those are the two chests the ghosts sit on, so the ghosts guard the gear.
+- **Stone Trail changes:** `RockCave.target_dungeon_scene` → `StoneTrailCave1.tscn` (was the
+  placeholder `DungeonLevel1_Upper`), new marker `SpawnPoint_StoneTrailCave`.
+  Backup: `_extra/StoneTrail.tscn.backup-before-caves`.
+
 ## Battle room (cave "battle mode")
 
 Cave tunnels are too tight to fit an enemy pack, so cave fights work exactly like dungeon fights:

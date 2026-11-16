@@ -126,17 +126,77 @@ static func as_fraction(amount: float) -> float:
 
 
 # ------------------------------------------------------------------------------
-# Enemy level damage bands
+# Enemy level: the one difficulty dial
 # ------------------------------------------------------------------------------
-## Multiplier applied to enemy ATK (and magic_power) from EnemyData.base_level.
-## L1–3 → 1.2 · L4–6 → 1.4 · L7+ → 1.5. Keeps sheet numbers but turns up hits by band.
-static func enemy_level_damage_mult(base_level: int) -> float:
-	var lvl: int = maxi(1, base_level)
-	if lvl <= 3:
-		return 1.2
-	if lvl <= 6:
-		return 1.4
-	return 1.5
+## The numbers in Data/Enemies.csv (and the compiled .tres) are an enemy's LEVEL-1 stats.
+## Every level above 1 adds this fraction of the level-1 value (0.20 = +20% per level).
+## Used for every enemy: regular ones in CombatManager, blob bosses in BlobBossController.
+const ENEMY_HP_GROWTH: float = 0.20
+const ENEMY_ATTACK_GROWTH: float = 0.15 ## attack_damage and magic_power
+const ENEMY_DEFENSE_GROWTH: float = 0.10
+const ENEMY_SPEED_GROWTH: float = 0.04 ## speed and initiative_speed
+const ENEMY_MANA_GROWTH: float = 0.10
+const ENEMY_REWARD_GROWTH: float = 0.30 ## xp_value and gold_value
+
+
+## 1 + growth x (level - 1). Level 1 (or less) = 1.0.
+static func enemy_level_factor(level: int, growth: float) -> float:
+	return 1.0 + growth * float(maxi(1, level) - 1)
+
+
+## Scales an enemy data copy from its level-1 sheet stats to its base_level, in place.
+## Skips data already scaled (level_scaling_applied - blob bosses scale their own copies).
+## Damaged enemies (current_health below max) keep the same fraction of their health.
+static func apply_enemy_level(d: Resource) -> void:
+	if d == null or not ("base_level" in d):
+		return
+	if "level_scaling_applied" in d and bool(d.get("level_scaling_applied")):
+		return
+	var lvl: int = maxi(1, int(d.get("base_level")))
+	if "level_scaling_applied" in d:
+		d.set("level_scaling_applied", true)
+	if lvl <= 1:
+		return
+	var hp_f: float = enemy_level_factor(lvl, ENEMY_HP_GROWTH)
+	var atk_f: float = enemy_level_factor(lvl, ENEMY_ATTACK_GROWTH)
+	var def_f: float = enemy_level_factor(lvl, ENEMY_DEFENSE_GROWTH)
+	var spd_f: float = enemy_level_factor(lvl, ENEMY_SPEED_GROWTH)
+	var mana_f: float = enemy_level_factor(lvl, ENEMY_MANA_GROWTH)
+	var rew_f: float = enemy_level_factor(lvl, ENEMY_REWARD_GROWTH)
+	if "max_health" in d:
+		var old_max: int = maxi(1, int(d.get("max_health")))
+		var new_max: int = maxi(1, roundi(float(old_max) * hp_f))
+		d.set("max_health", new_max)
+		if "current_health" in d:
+			var cur: int = int(d.get("current_health"))
+			if cur > 0 and cur < old_max:
+				d.set("current_health", maxi(1, roundi(float(new_max) * float(cur) / float(old_max))))
+			else:
+				d.set("current_health", new_max)
+	_scale_int(d, "attack_damage", atk_f, 1)
+	_scale_int(d, "magic_power", atk_f, 0)
+	_scale_int(d, "defense", def_f, 0)
+	_scale_int(d, "initiative_speed", spd_f, 0)
+	_scale_int(d, "max_mana", mana_f, 0)
+	_scale_int(d, "xp_value", rew_f, 0)
+	_scale_int(d, "gold_value", rew_f, 0)
+	if "speed" in d:
+		d.set("speed", float(d.get("speed")) * spd_f)
+
+
+## Max HP an enemy will fight with (its sheet HP grown to its level), without changing the data.
+static func enemy_max_health_at_level(d: Resource) -> int:
+	if d == null or not ("max_health" in d):
+		return 0
+	var hp: int = int(d.get("max_health"))
+	if ("level_scaling_applied" in d and bool(d.get("level_scaling_applied"))) or not ("base_level" in d):
+		return hp
+	return maxi(1, roundi(float(hp) * enemy_level_factor(int(d.get("base_level")), ENEMY_HP_GROWTH)))
+
+
+static func _scale_int(d: Resource, prop: String, factor: float, min_value: int) -> void:
+	if prop in d:
+		d.set(prop, maxi(min_value, roundi(float(d.get(prop)) * factor)))
 
 
 # ------------------------------------------------------------------------------
@@ -241,6 +301,58 @@ static func ability_duration(ability: Resource, kind: StringName) -> int:
 # ------------------------------------------------------------------------------
 # Turn meters / fleeing
 # ------------------------------------------------------------------------------
+## Opening charge is speed x this, capped at the meter max. An ambush skips it and starts full.
+const OPENING_METER_PER_SPEED: float = 5.0
+## Set on the enemy resources of a fight that opened with a successful ambush (ghost haunt).
+const AMBUSH_META: StringName = &"combat_ambush"
+
+
+## Meter a combatant starts the fight with. Ambushers start full so they are already due a turn.
+static func opening_meter(speed: float, seized_initiative: bool, max_meter: float) -> float:
+	if seized_initiative:
+		return max_meter
+	return minf(max_meter, maxf(0.0, speed) * OPENING_METER_PER_SPEED)
+
+
+## True when `to_enemy` (their cell minus the party's cell) sits behind the party's facing.
+## A flank (dot == 0) is still a seen meeting. Same cell has no direction, so it is not an ambush.
+static func back_is_turned(facing_dir: Vector2i, to_enemy: Vector2i) -> bool:
+	if facing_dir == Vector2i.ZERO or to_enemy == Vector2i.ZERO:
+		return false
+	return facing_dir.x * to_enemy.x + facing_dir.y * to_enemy.y < 0
+
+
+## Copies the pack. Members with `can_surprise_player` are flagged only when this meeting is an ambush.
+## The flag is cleared on any other meeting, and the shared .tres is never tagged.
+static func apply_meeting_ambush(group: Array[Resource], ambush: bool) -> void:
+	for i: int in range(group.size()):
+		var entry: Resource = group[i]
+		if not is_instance_valid(entry):
+			continue
+		var marked: Resource = entry.duplicate(false)
+		if "model_scene" in entry and entry.get("model_scene") != null:
+			marked.set("model_scene", entry.get("model_scene"))
+		if "custom_material" in entry and entry.get("custom_material") != null:
+			marked.set("custom_material", entry.get("custom_material"))
+		var can_surprise: bool = "can_surprise_player" in marked and bool(marked.get("can_surprise_player"))
+		if ambush and can_surprise:
+			marked.set_meta(AMBUSH_META, true)
+		elif marked.has_meta(AMBUSH_META):
+			marked.remove_meta(AMBUSH_META)
+		group[i] = marked
+
+
+## True when this enemy caught the party (ambush meta) and is allowed to open (`can_surprise_player`).
+static func seizes_opening_initiative(enemy: Resource) -> bool:
+	if not is_instance_valid(enemy):
+		return false
+	if not enemy.has_meta(AMBUSH_META) or not bool(enemy.get_meta(AMBUSH_META)):
+		return false
+	if "can_surprise_player" in enemy and not bool(enemy.get("can_surprise_player")):
+		return false
+	return true
+
+
 ## Meter after one tick: + effective speed x tick_rate x delta, capped at max_meter.
 static func next_meter(meter: float, effective_speed: float, tick_rate: float, delta: float, max_meter: float) -> float:
 	return minf(meter + effective_speed * tick_rate * delta, max_meter)

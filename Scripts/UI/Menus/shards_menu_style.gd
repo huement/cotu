@@ -4,7 +4,7 @@ extends RefCounted
 ## Shared look for the in-game menus (HUD menu, placeholder screens).
 ## Black tiles, light-grey icons that light up in the accent colour on hover / focus.
 ## Icons are tinted through the Button icon colour overrides, so any of the
-## light-grey SVGs in res://ui/icons/ can be used as-is.
+## light-grey SVGs in res://ui/icons/menu/ can be used as-is.
 
 const COLOR_PANEL: Color = Color(0.035, 0.04, 0.05, 0.97)
 const COLOR_TILE: Color = Color(0.0, 0.0, 0.0, 0.92)

@@ -18,6 +18,7 @@ Start with repo-root **`AGENTS.md`**. Then open the page for your task:
 | [SKY_AND_DAYLIGHT.md](SKY_AND_DAYLIGHT.md) | Outdoor sky, day/night, CloudLayer vs stylized sky |
 | [WEATHER.md](WEATHER.md) | Thunderstorm / rain overlay, SignalBus triggers, rain+thunder audio |
 | [NINE_HUD.md](NINE_HUD.md) / [UI.md](UI.md) | HUD / UI |
+| [MOBILE_UI.md](MOBILE_UI.md) | Every touch-screen tweak (MobileHUD, tabbed character sheet), the MobileUI switch, phone preview flag |
 | [TILE_PIPELINE_README.md](TILE_PIPELINE_README.md) | Mesh libraries / tiles |
 | [AUDIO.md](AUDIO.md) | SFX checklist |
 | [STATUS_AUDIT.md](STATUS_AUDIT.md) | 2026-11 audit: what's broken / missing, prioritized |

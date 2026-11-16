@@ -40,7 +40,8 @@ Everything talks through **SignalBus**. Nothing outside CombatManager emits `com
 | Dungeon / cave enemies, ghosts, `BossEnemy` | `Scripts/Enemies/enemy.gd` (`WorldEnemy`) | Party bumps into its cell, or it walks next to the party (`_check_pursuit_range`, distance ≤ 1) |
 | Outdoor enemies | `Scripts/Enemies/world_enemy.gd` | Activation `Area3D` overlap or adjacency |
 | Bump fallback | `Scripts/Components/GridMovementComponent.gd` | A blocked step onto an enemy cell calls its `trigger_combat_encounter()` |
-| Ghost ambush | `Scripts/Enemies/GhostAmbushComponent.gd` | Ghost appears behind the party, then calls the parent `trigger_combat_encounter()` |
+| Ghost ambush | `Scripts/Enemies/GhostAmbushComponent.gd` | Inside a 15-tile haunt the ghost warns, then appears behind the party unless they turn ≥ 135°. Walking does not cancel it. The fight always opens as an ambush. |
+| Meeting ambush | `BattleFacing.party_is_facing_away` + `CombatMath.apply_meeting_ambush` | When a party meets an enemy that has `can_surprise_player`: back turned → that enemy acts first. Looking at them, or meeting on the flank, is a normal fight. Sampled before the party is turned to face the battle. |
 | Blob bosses / DungeonBoss | `Scripts/Enemies/BlobBossController.gd` | After its rise animation (`_start_combat_encounter`) |
 | Rushers, tentacles, lake boss | `RushEnemyController.gd`, `TentacleBossController.gd`, `TentacleEnemyController.gd`, `LakeBossTrigger.gd` | Their own scripted triggers |
 | Boss statue | `Scripts/Environment/BossStatue.gd` | Lore popup closes → fade, teleport to `fight_start`, boss rises |
@@ -167,7 +168,7 @@ scale    = EnemyData.model_scale (default 0.4 if zero)
 Then the model looks at the camera (flat), turns by `combat_yaw_offset_degrees` (180 by default, 0 for meshes that already face +Z), and `_push_back_from_camera()` pushes it away until no part of its mesh is closer than `min_camera_clearance` (1.8 m).
 
 Inspector knobs on EnemyVisualManager: `forward_distance`, `vertical_offset`, `min_camera_clearance`, `model_scale`, `formation_spacing` (1.8), `back_row_pull` (0.75).
-Per enemy (EnemyData / `Data/Enemies.csv`): `model_scale`, `combat_forward_distance`, `combat_yaw_offset_degrees`, `vertical_offset`.
+Per enemy (EnemyData / `Data/Enemies.csv`): `model_scale`, `combat_forward_distance`, `combat_yaw_offset_degrees`, `vertical_offset`. Ghosts use scale 1.15 and stand at 2.4 m. Battle height is pinned to `vertical_offset` -1.6 in `EnemyVisualManager` (plus the map's battle offset of -0.5) so the robe tip sits on the floor at the top of the idle bob.
 
 **Models sunk into the floor or lying down** usually mean the GLB isn't Y-up or has its origin in the middle. Wrap it in a small scene that rotates/raises it and point `model_scene` at that. Examples: `Scenes/Enemies/SlimeDroneModel.tscn`, `Scripts/Utilities/blobby_post_import.gd`.
 
@@ -208,6 +209,7 @@ Tests: `test_combatant.gd`.
 | `ability_damage` | Spells: × weakness (MAGIC, or LIFE for life spells) × (1 − magic resist); ignore DEF/rows/guard. Skills: × row × guard × weakness × (1 − element resist); ignore DEF. |
 | `ability_duration` | `duration` × spell `tier`, min 1 |
 | `next_meter` | `meter + speed × tick_rate × delta`, capped |
+| `opening_meter` | Battle start: `speed × 5`, capped. Ambush (`seizes_opening_initiative`) starts full |
 | `flee_chance` | `base + (party speed − enemy avg) × 0.05`, clamped 0.15–0.95 |
 | `average_speed` | Living members of one side |
 | `throw_hit_chance` / `throw_crit_chance` / `throw_damage` | Thrown items: DEX vs target speed (40–98%), crit DEX×1% (max 35%, ×1.5), half armour, rows ignored |

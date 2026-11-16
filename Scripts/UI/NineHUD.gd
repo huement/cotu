@@ -3,6 +3,10 @@ extends Control
 @export var cyan_rotation_speed: float = 0.8
 @export var blue_rotation_speed: float = -1.4
 @export var voice_bus_name: StringName = &"Voice"
+## Nine always appears centred right below this node (the minimap frame), whatever the screen shape.
+@export var follow_node_path: NodePath = ^"../MinimapAnchor/MinimapBackground"
+## Gap between the bottom of the minimap and the top of Nine, in canvas px.
+@export var follow_gap: float = 4.0
 
 @onready var ring_cyan: TextureRect = %RingCyan
 @onready var ring_blue: TextureRect = %RingBlue
@@ -13,9 +17,33 @@ var _is_speaking: bool = false
 
 func _ready() -> void:
 	hide() # Start hidden until Nine speaks
+	get_viewport().size_changed.connect(_snap_under_minimap)
 	await get_tree().process_frame
+	_snap_under_minimap()
 	_init_pivots()
 	_init_audio_analyzer()
+
+
+## Pins Nine under the minimap. Uses top-left anchors + the minimap's real on-screen rect, so it
+## never drifts when the viewport is wider/narrower than 1152x648 (phones, ultrawide).
+func _snap_under_minimap() -> void:
+	var target: Control = get_node_or_null(follow_node_path) as Control
+	if target == null or not target.is_inside_tree():
+		return
+	var parent_ctrl: Control = get_parent() as Control
+	var origin: Vector2 = parent_ctrl.get_global_rect().position if parent_ctrl != null else Vector2.ZERO
+	var map_rect: Rect2 = target.get_global_rect() # includes the minimap frame's scale
+	var my_size: Vector2 = size * scale
+	anchor_left = 0.0
+	anchor_top = 0.0
+	anchor_right = 0.0
+	anchor_bottom = 0.0
+	grow_horizontal = Control.GROW_DIRECTION_END
+	grow_vertical = Control.GROW_DIRECTION_END
+	position = Vector2(
+		map_rect.position.x + (map_rect.size.x - my_size.x) * 0.5,
+		map_rect.end.y + follow_gap
+	) - origin
 
 
 func _init_pivots() -> void:
@@ -35,6 +63,7 @@ func _init_audio_analyzer() -> void:
 
 ## Main trigger function: Call this to show the HUD and play Nine's dialogue
 func make_nine_talk(sound_file_name: String) -> void:
+	_snap_under_minimap()
 	show()
 	_is_speaking = true
 	

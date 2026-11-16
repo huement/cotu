@@ -57,12 +57,17 @@ resources/            CatCharacter, DungeonParty, breeds, professions, mesh libs
 Data/                 CSV sources + compiled .tres (Items, Enemies, Spells, Skills…)
 Scenes/               world.tscn, maps, UI, dungeons, caves, menus
 ui/                   Shared UI scenes / frames
+  icons/              ALL game icons, one subfolder per kind: items/, loot/, spells/, skills/, status/, menu/ (SVG)
 addons/               gut, game_menu_kit, pulselite_ui, settings_menu
 _documentation/       System docs (source of truth for agents)
 tests/                GUT unit tests (tests/combat/ = pure combat helpers)
 ```
 
 Ignore when searching unless asked: `.godot/`, `*.import`, `*.translation`, `addons/gut/` internals, `_backup*`.
+
+**Icons:** every icon lives under `res://ui/icons/<kind>/` (above). Never add icons next to data (`Data/...`) or
+under `assets/`. Point `icon_path` in CSVs / `.tres` there. `python3 icon_scanner.py` lists missing or broken
+icon references; new icons are generated and placed by the sibling `../icon_builder` project (`confirm.py`).
 
 ---
 
@@ -143,7 +148,10 @@ Targets in CSV / resources: `SINGLE_ENEMY | SINGLE_ALLY | ALL_ENEMY | ALL_ALLY |
 | Overworld links | `_documentation/OVERWORLD_TOPOLOGY.md` |
 | Sky / day-night / clouds | `_documentation/SKY_AND_DAYLIGHT.md` |
 | HUD layout | `_documentation/NINE_HUD.md`, `UI.md` |
+| Mobile / touch layouts, phone preview | `_documentation/MOBILE_UI.md` (keep it updated with every mobile tweak) |
 | Tile / mesh pipeline | `_documentation/TILE_PIPELINE_README.md` |
+| Boss villain cutscene (Malviathan) | `_documentation/BOSS_CUTSCENE.md` |
+| Enemy placement + stats per level | `_documentation/ENEMY_ROSTER.md` |
 | Known bugs / backlog | `_documentation/FIX.md`, `TODO.md` |
 
 **Narrative tasks only** (dialogue, lore text, boss story beats, naming characters/places): `_documentation/BOSSES.md`, `_extra/WORLD.md`.

@@ -19,6 +19,22 @@ const BLOB_ALBEDO: Texture2D = preload("res://resources/Enemies/blobby_Image_0.p
 ## Seconds into the attack clip when the hit lands.
 @export var attack_hit_time: float = 0.35
 
+## Glow colour on the model's edges (blob shader only).
+@export var rim_color: Color = Color(0.45, 0.95, 0.6, 1.0)
+## How much the skin ripples (blob shader only). 0 = solid.
+@export_range(0.0, 0.3, 0.005) var wobble_amount: float = 0.05
+
+@export_group("Arcanum Corruption")
+## Give the model the green Arcanum Shard energy (crawling veins, pulse, green rim). Blob shader only.
+@export var arcanum_glow: bool = false
+## Overall brightness of that energy.
+@export_range(0.0, 2.0, 0.05) var arcanum_strength: float = 1.0
+@export var arcanum_energy_color: Color = Color(0.25, 1.0, 0.3, 1.0)
+## Size of the veins (model units). Higher = more, thinner veins.
+@export_range(0.2, 6.0, 0.05) var arcanum_vein_scale: float = 1.4
+## How bright the veins are.
+@export_range(0.0, 8.0, 0.1) var arcanum_vein_glow: float = 2.0
+
 @export_group("Juice Tuning")
 @export var base_squash_duration: float = 0.8
 @export var hit_shake_intensity: float = 0.18
@@ -26,6 +42,8 @@ const BLOB_ALBEDO: Texture2D = preload("res://resources/Enemies/blobby_Image_0.p
 
 var _target_mesh_instances: Array[MeshInstance3D] = []
 var _shader_mat: ShaderMaterial
+## One copy of the shader per surface, for models whose mesh has several materials / textures.
+var _surface_mats: Array[ShaderMaterial] = []
 var _base_scale: Vector3 = Vector3.ONE
 var _active_tween: Tween
 var _shake_tween: Tween
@@ -45,11 +63,22 @@ func _init_shader_material() -> void:
 	_shader_mat = ShaderMaterial.new()
 	_shader_mat.shader = BLOB_SHADER
 	_shader_mat.set_shader_parameter("base_color", Color(1.0, 1.0, 1.0, 1.0))
-	_shader_mat.set_shader_parameter("rim_color", Color(0.45, 0.95, 0.6, 1.0))
+	_shader_mat.set_shader_parameter("rim_color", rim_color)
+	_shader_mat.set_shader_parameter("wobble_amount", wobble_amount)
 	_shader_mat.set_shader_parameter("charge_color", Color(1.0, 0.55, 0.1, 1.0))
 	_shader_mat.set_shader_parameter("hit_color", Color(1.0, 0.2, 0.2, 1.0))
 	_shader_mat.set_shader_parameter("albedo_texture", BLOB_ALBEDO)
 	_shader_mat.set_shader_parameter("use_texture", true)
+	_shader_mat.set_shader_parameter("arcanum_strength", arcanum_strength if arcanum_glow else 0.0)
+	_shader_mat.set_shader_parameter("energy_color", arcanum_energy_color)
+	_shader_mat.set_shader_parameter("vein_scale", arcanum_vein_scale)
+	_shader_mat.set_shader_parameter("vein_glow", arcanum_vein_glow)
+
+
+## Turns the Arcanum Shard energy on / off at runtime (e.g. from BlobBossController.arcanum_glow).
+func set_arcanum_glow(on: bool) -> void:
+	arcanum_glow = on
+	_set_param(&"arcanum_strength", arcanum_strength if on else 0.0)
 
 
 func apply_world_scale(world_scale: float) -> void:
@@ -62,11 +91,40 @@ func _collect_and_apply_meshes(current_node: Node) -> void:
 	if current_node is MeshInstance3D:
 		var mi: MeshInstance3D = current_node as MeshInstance3D
 		_target_mesh_instances.append(mi)
-		_capture_mesh_albedo(mi)
-		mi.material_override = _shader_mat
+		if mi.mesh != null and mi.mesh.get_surface_count() > 1:
+			_apply_per_surface(mi)
+		else:
+			_capture_mesh_albedo(mi)
+			mi.material_override = _shader_mat
 
 	for child: Node in current_node.get_children():
 		_collect_and_apply_meshes(child)
+
+
+## A mesh with several surfaces (e.g. Malviathan: flesh + eyes) gets its own shader copy per
+## surface, so every surface keeps its own texture / colour.
+func _apply_per_surface(mi: MeshInstance3D) -> void:
+	for surface: int in range(mi.mesh.get_surface_count()):
+		var mat: ShaderMaterial = _shader_mat.duplicate() as ShaderMaterial
+		var source: BaseMaterial3D = mi.get_active_material(surface) as BaseMaterial3D
+		if source != null:
+			if is_instance_valid(source.albedo_texture):
+				mat.set_shader_parameter("albedo_texture", source.albedo_texture)
+				mat.set_shader_parameter("use_texture", true)
+				mat.set_shader_parameter("base_color", source.albedo_color)
+			else:
+				mat.set_shader_parameter("use_texture", false)
+				mat.set_shader_parameter("base_color", source.albedo_color)
+		mi.set_surface_override_material(surface, mat)
+		_surface_mats.append(mat)
+
+
+## Sets a shader value on the shared material and on every per-surface copy.
+func _set_param(param: StringName, value: Variant) -> void:
+	if is_instance_valid(_shader_mat):
+		_shader_mat.set_shader_parameter(param, value)
+	for mat: ShaderMaterial in _surface_mats:
+		mat.set_shader_parameter(param, value)
 
 
 func _capture_mesh_albedo(mi: MeshInstance3D) -> void:
@@ -97,7 +155,7 @@ func play_idle() -> void:
 		return
 
 	if is_instance_valid(_shader_mat):
-		_shader_mat.set_shader_parameter("attack_charge", 0.0)
+		_set_param(&"attack_charge", 0.0)
 
 	_active_tween = create_tween().set_loops()
 	var squashed: Vector3 = Vector3(_base_scale.x * 1.12, _base_scale.y * 0.88, _base_scale.z * 1.12)
@@ -128,7 +186,7 @@ func play_attack_animation(target_callback: Callable = Callable()) -> void:
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(_shader_mat):
 		attack_tween.parallel().tween_method(
-			func(val: float) -> void: _shader_mat.set_shader_parameter("attack_charge", val),
+			func(val: float) -> void: _set_param(&"attack_charge", val),
 			0.0, 1.0, 0.4
 		)
 
@@ -153,7 +211,7 @@ func play_attack_animation(target_callback: Callable = Callable()) -> void:
 		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(_shader_mat):
 		attack_tween.parallel().tween_method(
-			func(val: float) -> void: _shader_mat.set_shader_parameter("attack_charge", val),
+			func(val: float) -> void: _set_param(&"attack_charge", val),
 			1.0, 0.0, 0.38
 		)
 
@@ -172,9 +230,9 @@ func play_hit_shake() -> void:
 		if is_instance_valid(_flash_tween) and _flash_tween.is_running():
 			_flash_tween.kill()
 		_flash_tween = create_tween()
-		_shader_mat.set_shader_parameter("hit_flash", 1.0)
+		_set_param(&"hit_flash", 1.0)
 		_flash_tween.tween_method(
-			func(val: float) -> void: _shader_mat.set_shader_parameter("hit_flash", val),
+			func(val: float) -> void: _set_param(&"hit_flash", val),
 			1.0, 0.0, hit_shake_duration
 		)
 

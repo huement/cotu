@@ -12,7 +12,8 @@ const GROUP_BLOB_BOSS: StringName = &"blob_boss"
 @export_group("Encounter Data")
 @export var base_data: EnemyData
 
-## Controls visual size and proportionally scales Max HP and Attack Damage
+## Multiplies Max HP and Attack Damage when scale_affects_stats is on.
+## Pulsing Sac and Slime Lord take their model size from EnemyData.model_scale (the CSV).
 @export_range(0.5, 5.0, 0.1) var boss_scale: float = 1.0:
 	set(val):
 		boss_scale = maxf(0.1, val)
@@ -21,9 +22,10 @@ const GROUP_BLOB_BOSS: StringName = &"blob_boss"
 
 @export_group("Level")
 ## Boss level. Every level above 1 scales all stats by the growth rates below.
-@export_range(1, 99, 1) var boss_level: int = 1:
+## 0 = use the enemy data's own level (base_level from Data/Enemies.csv).
+@export_range(0, 99, 1) var boss_level: int = 0:
 	set(val):
-		boss_level = maxi(1, val)
+		boss_level = maxi(0, val)
 		if is_node_ready():
 			_apply_scale_and_stats()
 
@@ -44,12 +46,13 @@ const GROUP_BLOB_BOSS: StringName = &"blob_boss"
 @export var minion_forward_offset: float = 0.0
 
 @export_group("Level Scaling")
-## Per-level stat growth (0.2 = +20% per level above 1).
-@export var hp_growth_per_level: float = 0.20
-@export var damage_growth_per_level: float = 0.12
-@export var defense_growth_per_level: float = 0.10
-@export var speed_growth_per_level: float = 0.03
-@export var reward_growth_per_level: float = 0.15
+## Per-level stat growth (0.2 = +20% per level above 1). Defaults are the game-wide enemy rates
+## (CombatMath.ENEMY_*_GROWTH) - only change them here for a boss that should grow differently.
+@export var hp_growth_per_level: float = CombatMath.ENEMY_HP_GROWTH
+@export var damage_growth_per_level: float = CombatMath.ENEMY_ATTACK_GROWTH
+@export var defense_growth_per_level: float = CombatMath.ENEMY_DEFENSE_GROWTH
+@export var speed_growth_per_level: float = CombatMath.ENEMY_SPEED_GROWTH
+@export var reward_growth_per_level: float = CombatMath.ENEMY_REWARD_GROWTH
 
 @export_group("Model Animation")
 ## Keep the model's own GLB animation looping the whole time (e.g. the Slime Lord's idle).
@@ -110,6 +113,16 @@ const GROUP_BLOB_BOSS: StringName = &"blob_boss"
 # ==============================================================================
 # RUNTIME STATE
 # ==============================================================================
+@export_group("Arcanum Corruption")
+## Give this boss the green Arcanum Shard energy (veins, pulse, green rim). Fine-tune it on the
+## VisualJuice child (Arcanum Corruption group).
+@export var arcanum_glow: bool = false
+
+@export_group("After Victory")
+## Villain whose cutscene plays once the loot screen of this fight is closed (Malviathan placed in
+## the level with trigger_on_area OFF). Empty = no cutscene. Same setup as the VeroWood Sea Monster.
+@export var post_battle_villain: MalviathanController
+
 @export_group("Boss Rewards")
 ## Spell Books / Skill Crystals added to the loot when this boss is beaten (shown on the victory screen).
 @export_range(0, 10) var reward_spell_books: int = 1
@@ -129,6 +142,8 @@ var _player_ref: Node3D = null
 var _minion_nodes: Array[Node3D] = []
 ## Index of the boss inside enemy_group (minions sit either side).
 var _boss_slot: int = 0
+## Won the fight; hidden and waiting for the loot screen to close before the villain cutscene.
+var _waiting_for_cutscene: bool = false
 
 ## Emitted right before the boss is removed after losing a battle.
 signal defeated
@@ -149,6 +164,8 @@ func _ready() -> void:
 
 	_apply_scale_and_stats()
 	_connect_signals()
+	if arcanum_glow and is_instance_valid(visual_juice):
+		visual_juice.set_arcanum_glow(true)
 	if loop_model_animation:
 		_start_model_animation_loop()
 
@@ -202,8 +219,31 @@ func emerge_at(world_pos: Vector3) -> void:
 	_trigger_emergence_sequence()
 
 
+## Pulsing Sac and Slime Lord fight as the world model, so the CSV model_scale is their size.
+## Other blob-controller bosses (Beast King) still size themselves with boss_scale.
+func _uses_data_model_scale() -> bool:
+	if not is_instance_valid(base_data):
+		return false
+	return base_data.enemy_id == "en_blob" or base_data.enemy_id == "en_slime_lord"
+
+
+func _visual_world_scale() -> float:
+	if _uses_data_model_scale() and base_data.model_scale.x > 0.0:
+		return base_data.model_scale.x
+	return boss_scale
+
+
+## The level this boss fights at: boss_level, or the data's base_level when boss_level is 0.
+func get_effective_level() -> int:
+	if boss_level > 0:
+		return boss_level
+	if is_instance_valid(base_data):
+		return maxi(1, base_data.base_level)
+	return 1
+
+
 func _apply_scale_and_stats() -> void:
-	var lvl: float = float(boss_level - 1)
+	var lvl: float = float(get_effective_level() - 1)
 	var stat_scale: float = boss_scale if scale_affects_stats else 1.0
 	var hp_mult: float = stat_scale * (1.0 + hp_growth_per_level * lvl)
 	var dmg_mult: float = stat_scale * (1.0 + damage_growth_per_level * lvl)
@@ -217,7 +257,7 @@ func _apply_scale_and_stats() -> void:
 	current_health = max_health
 
 	if is_instance_valid(visual_juice):
-		visual_juice.apply_world_scale(boss_scale)
+		visual_juice.apply_world_scale(_visual_world_scale())
 
 	_build_runtime_enemy_data()
 
@@ -228,12 +268,12 @@ func _build_runtime_enemy_data() -> void:
 		return
 
 	var boss_data: EnemyData = base_data.duplicate(true) as EnemyData
-	_apply_level_to_data(boss_data, boss_level)
+	_apply_level_to_data(boss_data, get_effective_level())
 	# Boss keeps its existing size-based HP/damage on top of level
 	boss_data.max_health = max_health
 	boss_data.current_health = max_health
 	boss_data.attack_damage = scaled_damage
-	boss_data.model_scale = base_data.model_scale * boss_scale
+	boss_data.model_scale = base_data.model_scale if _uses_data_model_scale() else base_data.model_scale * boss_scale
 	boss_data.combat_forward_distance = combat_view_distance
 	boss_data.combat_uses_world_node = true
 	_Formation.mark_boss(boss_data)
@@ -275,6 +315,7 @@ func _apply_level_to_data(d: EnemyData, level: int) -> void:
 	d.max_mana = roundi(float(d.max_mana) * (1.0 + hp_growth_per_level * 0.5 * lvl))
 	d.xp_value = roundi(float(d.xp_value) * (1.0 + reward_growth_per_level * lvl))
 	d.gold_value = roundi(float(d.gold_value) * (1.0 + reward_growth_per_level * lvl))
+	d.level_scaling_applied = true # CombatManager must not grow these stats a second time
 
 
 func _connect_signals() -> void:
@@ -286,6 +327,8 @@ func _connect_signals() -> void:
 			sb.combat_started.connect(_on_combat_started)
 		if not sb.combat_ended.is_connected(_on_combat_ended):
 			sb.combat_ended.connect(_on_combat_ended)
+		if not sb.popup_confirmed.is_connected(_on_popup_confirmed):
+			sb.popup_confirmed.connect(_on_popup_confirmed)
 
 	if is_instance_valid(activation_area):
 		if not activation_area.body_entered.is_connected(_on_area_body_entered):
@@ -610,10 +653,17 @@ func _on_combat_ended(victory: bool) -> void:
 
 	_is_in_active_combat = false
 
+	if victory and _has_post_battle_villain():
+		# Stay alive (hidden, party still locked) until the loot screen closes,
+		# then hand over to the villain cutscene - same flow as the VeroWood Sea Monster.
+		defeated.emit()
+		visible = false
+		_clear_minions()
+		_waiting_for_cutscene = true
+		return
+
 	# Unlock player movement when combat concludes
-	_resolve_player_ref()
-	if is_instance_valid(_player_ref) and _player_ref.has_method("set_movement_locked"):
-		_player_ref.call("set_movement_locked", false)
+	_unlock_player()
 
 	if victory:
 		defeated.emit()
@@ -623,7 +673,37 @@ func _on_combat_ended(victory: bool) -> void:
 		_is_triggered = false
 		_clear_minions()
 		if is_instance_valid(visual_juice):
-			visual_juice.apply_world_scale(boss_scale)
+			visual_juice.apply_world_scale(_visual_world_scale())
 		global_position = _home_position
 		global_position.y = _rest_y - rise_depth
 		visible = false
+
+
+# ==============================================================================
+# AFTER THE FIGHT: loot screen -> villain cutscene
+# ==============================================================================
+func _has_post_battle_villain() -> bool:
+	return is_instance_valid(post_battle_villain) and post_battle_villain.is_inside_tree()
+
+
+func _on_popup_confirmed(action_type: StringName, _extra_data: Dictionary) -> void:
+	if action_type != &"BATTLE_VICTORY" or not _waiting_for_cutscene:
+		return
+	_waiting_for_cutscene = false
+	_start_post_battle_cutscene()
+
+
+func _start_post_battle_cutscene() -> void:
+	if _has_post_battle_villain():
+		# The cutscene locks the party itself and unlocks it when it ends.
+		await post_battle_villain.start_cutscene()
+	else:
+		_unlock_player()
+	if is_inside_tree():
+		queue_free()
+
+
+func _unlock_player() -> void:
+	_resolve_player_ref()
+	if is_instance_valid(_player_ref) and _player_ref.has_method("set_movement_locked"):
+		_player_ref.call("set_movement_locked", false)

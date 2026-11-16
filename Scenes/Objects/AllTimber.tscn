@@ -24,14 +24,15 @@
 [ext_resource type="PackedScene" uid="uid://dfa2srknf7gqy" path="res://resources/tile_sets/nature/tree_fat_fall.glb" id="22_bx6nf"]
 [ext_resource type="PackedScene" uid="uid://4xtf7l3jfslc" path="res://resources/tile_sets/nature/tree_fat_darkh.glb" id="23_u50ve"]
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_5fhxv"]
-radius = 0.8
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_xrde2"]
+radius = 0.7
 
 [node name="AllTimber" type="Node3D"]
 script = ExtResource("1_jonf8")
 
 [node name="tree_blocks_fall" parent="." instance=ExtResource("2_xrde2")]
 transform = Transform3D(2.9, 0, 0, 0, 2.9, 0, 0, 0, 2.9, 0, 0, 0)
+visible = false
 
 [node name="tree_blocks" parent="." instance=ExtResource("3_iilg0")]
 transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
@@ -120,4 +121,4 @@ visible = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.91757846, 0)
-shape = SubResource("CylinderShape3D_5fhxv")
+shape = SubResource("CylinderShape3D_xrde2")

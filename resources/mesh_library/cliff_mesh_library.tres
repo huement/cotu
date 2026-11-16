@@ -1,4 +1,4 @@
-[gd_resource type="MeshLibrary" load_steps=39 format=4 uid="uid://cncj810ickx4v"]
+[gd_resource type="MeshLibrary" load_steps=45 format=4 uid="uid://cncj810ickx4v"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_faprt"]
 resource_name = "dirt"
@@ -76,8 +76,8 @@ data = {
 [sub_resource type="ImageTexture" id="ImageTexture_cqwn3"]
 image = SubResource("Image_ovp1q")
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_flrbp"]
-size = Vector3(2, 2, 2)
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rock0"]
+points = PackedVector3Array(-0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0.15, -0.55, -0.5, 0.2, -0.5, -0.5, 0.2, -0.3, -0.5, 0.35, -0.35, -0.5, 0.4, -0.3, -0.5, 0.4, -0.1, -0.5, 0.55, -0.15, -0.5, 0.6, -0.1, -0.5, 0.6, 0.1, -0.5, 0.75, 0.05, -0.5, 0.8, 0.1, -0.5, 0.8, 0.3, -0.5, 0.95, 0.25, -0.5, 1, 0.3, -0.5, 1, 0.5, -0.3333, 0, -0.4315, -0.3333, 0.15, -0.4815, -0.3333, 0.2, -0.4315, -0.3333, 0.2, -0.2315, -0.3333, 0.35, -0.2815, -0.3333, 0.4, -0.2315, -0.3333, 0.4, -0.0315, -0.3333, 0.55, -0.0815, -0.3333, 0.6, -0.0315, -0.3333, 0.6, 0.1685, -0.3333, 0.75, 0.1185, -0.3333, 0.8, 0.1685, -0.3333, 0.8, 0.3685, -0.3333, 0.95, 0.3185, -0.3333, 1, 0.3685, -0.2917, 0.15, -0.4986, -0.2917, 0.75, 0.1014, -0.25, 0.175, -0.4908, -0.25, 0.775, 0.1092, -0.2083, 0.15, -0.5329, -0.2083, 0.75, 0.0671, -0.1667, 0, -0.5, -0.1667, 0.15, -0.55, -0.1667, 0.2, -0.5, -0.1667, 0.2, -0.3, -0.1667, 0.35, -0.35, -0.1667, 0.4, -0.3, -0.1667, 0.4, -0.1, -0.1667, 0.55, -0.15, -0.1667, 0.6, -0.1, -0.1667, 0.6, 0.1, -0.1667, 0.75, 0.05, -0.1667, 0.8, 0.1, -0.1667, 0.8, 0.3, -0.1667, 0.95, 0.25, -0.1667, 1, 0.3, -0.125, 0.55, -0.1329, -0.0833, 0.575, -0.0908, -0.0417, 0.55, -0.0986, 0, 0, -0.4315, 0, 0.15, -0.4815, 0, 0.2, -0.4315, 0, 0.2, -0.2315, 0, 0.35, -0.2815, 0, 0.4, -0.2315, 0, 0.4, -0.0315, 0, 0.55, -0.0815, 0, 0.6, -0.0315, 0, 0.6, 0.1685, 0, 0.75, 0.1185, 0, 0.8, 0.1685, 0, 0.8, 0.3685, 0, 0.95, 0.3185, 0, 1, 0.3685, 0.1667, 0, -0.5, 0.1667, 0.15, -0.55, 0.1667, 0.2, -0.5, 0.1667, 0.2, -0.3, 0.1667, 0.35, -0.35, 0.1667, 0.4, -0.3, 0.1667, 0.4, -0.1, 0.1667, 0.55, -0.15, 0.1667, 0.6, -0.1, 0.1667, 0.6, 0.1, 0.1667, 0.75, 0.05, 0.1667, 0.8, 0.1, 0.1667, 0.8, 0.3, 0.1667, 0.95, 0.25, 0.1667, 1, 0.3, 0.2083, 0.95, 0.2671, 0.25, 0.975, 0.3092, 0.2917, 0.95, 0.3014, 0.3333, 0, -0.4315, 0.3333, 0.15, -0.4815, 0.3333, 0.2, -0.4315, 0.3333, 0.2, -0.2315, 0.3333, 0.35, -0.2815, 0.3333, 0.4, -0.2315, 0.3333, 0.4, -0.0315, 0.3333, 0.55, -0.0815, 0.3333, 0.6, -0.0315, 0.3333, 0.6, 0.1685, 0.3333, 0.75, 0.1185, 0.3333, 0.8, 0.1685, 0.3333, 0.8, 0.3685, 0.3333, 0.95, 0.3185, 0.3333, 1, 0.3685, 0.375, 0.35, -0.2986, 0.4167, 0.375, -0.2908, 0.4583, 0.35, -0.3329, 0.5, 0, -0.5, 0.5, 0, 0.5, 0.5, 0.15, -0.55, 0.5, 0.2, -0.5, 0.5, 0.2, -0.3, 0.5, 0.35, -0.35, 0.5, 0.4, -0.3, 0.5, 0.4, -0.1, 0.5, 0.55, -0.15, 0.5, 0.6, -0.1, 0.5, 0.6, 0.1, 0.5, 0.75, 0.05, 0.5, 0.8, 0.1, 0.5, 0.8, 0.3, 0.5, 0.95, 0.25, 0.5, 1, 0.3, 0.5, 1, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5gs3d"]
 resource_name = "dirt"
@@ -128,6 +128,9 @@ data = {
 [sub_resource type="ImageTexture" id="ImageTexture_fw7qj"]
 image = SubResource("Image_tejca")
 
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rock1"]
+points = PackedVector3Array(-0.5, 0, 0.3315, -0.5, 0, 0.5, -0.5, 1, 0.3315, -0.5, 1, 0.5, -0.3333, 0, 0.4, -0.3333, 1, 0.4, -0.1667, 0, 0.3315, -0.1667, 1, 0.3315, 0, 0, 0.4, 0, 1, 0.4, 0.1667, 0, 0.3315, 0.1667, 1, 0.3315, 0.3333, 0, 0.4, 0.3333, 1, 0.4, 0.5, 0, 0.3315, 0.5, 0, 0.5, 0.5, 1, 0.3315, 0.5, 1, 0.5)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ml87"]
 resource_name = "dirt"
 albedo_color = Color(0.9482425, 0.7443257, 0.6190008, 1)
@@ -177,6 +180,9 @@ data = {
 [sub_resource type="ImageTexture" id="ImageTexture_kdji2"]
 image = SubResource("Image_cqwn3")
 
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rock2"]
+points = PackedVector3Array(-0.5, 0, -0.6685, -0.5, 0, -0.5, -0.5, 1, -0.6685, -0.5, 1, -0.5, -0.3809, 0, -0.6191, -0.3809, 1, -0.6191, -0.3154, 0, -0.5, -0.2626, 0, -0.404, -0.2626, 1, -0.404, -0.0475, 0, -0.2858, -0.0475, 1, -0.2858, 0.0707, 0, -0.0707, 0.0707, 1, -0.0707, 0.2858, 0, 0.0475, 0.2858, 1, 0.0475, 0.404, 0, 0.2626, 0.404, 1, 0.2626, 0.5, 0, 0.3154, 0.5, 0, 0.5, 0.5, 1, 0.5, 0.6191, 0, 0.3809, 0.6191, 1, 0.3809, 0.6685, 0, 0.5, 0.6685, 1, 0.5)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_55hch"]
 resource_name = "dirt"
 albedo_color = Color(0.9482425, 0.7443257, 0.6190008, 1)
@@ -225,6 +231,9 @@ data = {
 
 [sub_resource type="ImageTexture" id="ImageTexture_y7gkt"]
 image = SubResource("Image_ej2d4")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rock3"]
+points = PackedVector3Array(-0.5, 0, 0.3315, -0.5, 0, 0.5, -0.5, 1, 0.3315, -0.5, 1, 0.5, -0.3736, 0, 0.3736, -0.3736, 1, 0.3736, -0.3315, 0, 0.5, -0.3315, 1, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wbyi3"]
 resource_name = "grass"
@@ -302,6 +311,9 @@ data = {
 [sub_resource type="ImageTexture" id="ImageTexture_0camm"]
 image = SubResource("Image_1houo")
 
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rock4"]
+points = PackedVector3Array(-0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 1, -0.5, -0.5, 1, 0.5, 0.5, 0, -0.5, 0.5, 0, 0.5, 0.5, 1, -0.5, 0.5, 1, 0.5)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tds4u"]
 resource_name = "dirt"
 albedo_color = Color(0.9482425, 0.7443257, 0.6190008, 1)
@@ -350,6 +362,9 @@ data = {
 
 [sub_resource type="ImageTexture" id="ImageTexture_iv5my"]
 image = SubResource("Image_fw7qj")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rock5"]
+points = PackedVector3Array(-0.5, 0, 0.0815, -0.5, 0, 0.5, -0.5, 1, 0.0815, -0.5, 1, 0.5, -0.3333, 0, 0.15, -0.3333, 1, 0.15, -0.1667, 0, 0.0815, -0.1667, 1, 0.0815, 0, 0, 0.15, 0, 1, 0.15, 0.1667, 0, 0.0815, 0.1667, 1, 0.0815, 0.3333, 0, 0.15, 0.3333, 1, 0.15, 0.5, 0, 0.0815, 0.5, 0, 0.5, 0.5, 1, 0.0815, 0.5, 1, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2eab6"]
 resource_name = "dirt"
@@ -400,12 +415,15 @@ data = {
 [sub_resource type="ImageTexture" id="ImageTexture_74fbu"]
 image = SubResource("Image_i2n1m")
 
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rock6"]
+points = PackedVector3Array(-0.5, 0, 0.0815, -0.5, 0, 0.5, -0.5, 1, 0.0815, -0.5, 1, 0.5, -0.1861, 0, 0.1861, -0.1861, 1, 0.1861, -0.0815, 0, 0.5, -0.0815, 1, 0.5)
+
 [resource]
 item/0/name = "cliff_steps_rock"
 item/0/mesh = SubResource("ArrayMesh_ovp1q")
 item/0/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/0/mesh_cast_shadow = 1
-item/0/shapes = [SubResource("BoxShape3D_flrbp"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)]
+item/0/shapes = [SubResource("ConvexPolygonShape3D_rock0"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 item/0/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/0/navigation_layers = 1
 item/0/preview = SubResource("ImageTexture_cqwn3")
@@ -413,7 +431,7 @@ item/1/name = "cliff_rock"
 item/1/mesh = SubResource("ArrayMesh_ej2d4")
 item/1/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/1/mesh_cast_shadow = 1
-item/1/shapes = [SubResource("BoxShape3D_flrbp"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)]
+item/1/shapes = [SubResource("ConvexPolygonShape3D_rock1"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 item/1/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/1/navigation_layers = 1
 item/1/preview = SubResource("ImageTexture_fw7qj")
@@ -421,7 +439,7 @@ item/2/name = "cliff_diagonal_rock"
 item/2/mesh = SubResource("ArrayMesh_i2n1m")
 item/2/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/2/mesh_cast_shadow = 1
-item/2/shapes = [SubResource("BoxShape3D_flrbp"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)]
+item/2/shapes = [SubResource("ConvexPolygonShape3D_rock2"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 item/2/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/2/navigation_layers = 1
 item/2/preview = SubResource("ImageTexture_kdji2")
@@ -429,7 +447,7 @@ item/3/name = "cliff_corner_rock"
 item/3/mesh = SubResource("ArrayMesh_0mpmq")
 item/3/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/3/mesh_cast_shadow = 1
-item/3/shapes = [SubResource("BoxShape3D_flrbp"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)]
+item/3/shapes = [SubResource("ConvexPolygonShape3D_rock3"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 item/3/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/3/navigation_layers = 1
 item/3/preview = SubResource("ImageTexture_y7gkt")
@@ -437,7 +455,7 @@ item/4/name = "cliff_block_rock"
 item/4/mesh = SubResource("ArrayMesh_aj318")
 item/4/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/4/mesh_cast_shadow = 1
-item/4/shapes = [SubResource("BoxShape3D_flrbp"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)]
+item/4/shapes = [SubResource("ConvexPolygonShape3D_rock4"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 item/4/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/4/navigation_layers = 1
 item/4/preview = SubResource("ImageTexture_0camm")
@@ -445,7 +463,7 @@ item/5/name = "cliff_large_rock"
 item/5/mesh = SubResource("ArrayMesh_c4ykm")
 item/5/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/5/mesh_cast_shadow = 1
-item/5/shapes = [SubResource("BoxShape3D_flrbp"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)]
+item/5/shapes = [SubResource("ConvexPolygonShape3D_rock5"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 item/5/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/5/navigation_layers = 1
 item/5/preview = SubResource("ImageTexture_iv5my")
@@ -453,7 +471,7 @@ item/6/name = "cliff_cornerLarge_rock"
 item/6/mesh = SubResource("ArrayMesh_e0lnw")
 item/6/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/6/mesh_cast_shadow = 1
-item/6/shapes = [SubResource("BoxShape3D_flrbp"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)]
+item/6/shapes = [SubResource("ConvexPolygonShape3D_rock6"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 item/6/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 item/6/navigation_layers = 1
 item/6/preview = SubResource("ImageTexture_74fbu")

@@ -26,7 +26,11 @@ static func compile_enemies() -> int:
 		printerr("EnemyCompiler Error: Failed to open CSV file at ", csv_path)
 		return 0
 
-	var _header: PackedStringArray = file.get_csv_line()
+	var header: PackedStringArray = file.get_csv_line()
+	for i: int in range(header.size()):
+		header[i] = header[i].strip_edges()
+	var col_magic_power: int = header.find("magic_power")
+	var col_pushback: int = header.find("combat_camera_pushback")
 	var count: int = 0
 
 	while not file.eof_reached():
@@ -85,6 +89,16 @@ static func compile_enemies() -> int:
 				enemy.hit_reaction = reaction_mode
 			else:
 				enemy.hit_reaction = reaction
+		# Optional columns (index 32, 33). 0 is a real value (sea monster yaw faces +Z).
+		if line.size() > 32 and not line[32].strip_edges().is_empty():
+			enemy.vertical_offset = float(line[32])
+		if line.size() > 33 and not line[33].strip_edges().is_empty():
+			enemy.combat_yaw_offset_degrees = float(line[33])
+		# Optional columns found by header name (empty = EnemyData default).
+		if col_magic_power >= 0 and line.size() > col_magic_power and not line[col_magic_power].strip_edges().is_empty():
+			enemy.magic_power = int(line[col_magic_power])
+		if col_pushback >= 0 and line.size() > col_pushback and not line[col_pushback].strip_edges().is_empty():
+			enemy.combat_camera_pushback = line[col_pushback].strip_edges().to_lower() == "true"
 
 		# Load 3D GLB mesh
 		if not enemy.model_path.is_empty() and ResourceLoader.exists(enemy.model_path):
@@ -95,8 +109,11 @@ static func compile_enemies() -> int:
 			enemy.custom_material = _create_or_load_material(enemy.texture_path, enemy.enemy_id)
 
 		var save_path: String = OUTPUT_DIR + enemy.enemy_id.to_pascal_case() + ".tres"
+		var old_uid: int = ResourceLoader.get_resource_uid(save_path) if ResourceLoader.exists(save_path) else ResourceUID.INVALID_ID
 		var err := ResourceSaver.save(enemy, save_path)
 		if err == OK:
+			if old_uid != ResourceUID.INVALID_ID:
+				ResourceSaver.set_uid(save_path, old_uid)
 			count += 1
 		else:
 			printerr("Failed to save Enemy resource for: ", enemy.enemy_name, " Error: ", err)
@@ -119,7 +136,7 @@ static func _create_or_load_material(tex_path: String, id_str: String) -> Standa
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 
 	ResourceSaver.save(mat, full_mat_path)
-	return mat
+	return load(full_mat_path) as StandardMaterial3D
 
 
 static func _ensure_directories_exist() -> void:

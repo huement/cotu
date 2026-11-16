@@ -4,7 +4,7 @@ extends CanvasLayer
 ## Exploration shard progress overlay. Opened from the HUD ShardMenuButton.
 ## Area rows come from ShardLedger.areas() (one row per area: collected / total) and are rebuilt
 ## every time the menu opens and whenever a shard is collected. Time is GameState.play_time_seconds.
-## Kills is still a placeholder (nothing counts kills yet).
+## Kills is GameState.enemies_killed (one per enemy that falls in combat, saved with the session).
 
 signal menu_opened
 signal menu_closed
@@ -13,7 +13,7 @@ const COLOR_BG: Color = Color(0.29, 0.29, 0.29, 1.0) # #4A4A4A
 const COLOR_MAGENTA: Color = Color(1.0, 0.267, 0.533, 1.0) # #FF4488
 const COLOR_WHITE: Color = Color(1.0, 1.0, 1.0, 1.0)
 const TITLE_FONT: FontFile = preload("res://ui/fonts/Nexa-Heavy.otf")
-const BACK_ICON: Texture2D = preload("res://ui/icons/arrow_left.svg")
+const BACK_ICON: Texture2D = preload("res://ui/icons/menu/arrow_left.svg")
 
 @onready var _root: Control = %Root as Control
 @onready var _content: Control = %Content as Control
@@ -21,6 +21,15 @@ const BACK_ICON: Texture2D = preload("res://ui/icons/arrow_left.svg")
 @onready var _time_value: Label = %TimeValue as Label
 @onready var _kills_value: Label = %KillsValue as Label
 @onready var _area_list: VBoxContainer = %AreaList as VBoxContainer
+@onready var _hud_frame: TextureRect = %HudFrame as TextureRect
+@onready var _scroll_inset: Control = get_node_or_null(^"Root/Content/HBox/ShardHud/ScrollInset") as Control
+
+## ScrollInset's offsets inside the *drawn* green frame (the frame keeps its aspect and is centred,
+## so on wide phones it is narrower than its box - the text must follow the art, not the box).
+const FRAME_INSET_LEFT: float = 27.0
+const FRAME_INSET_TOP: float = 10.0
+const FRAME_INSET_RIGHT: float = 18.0
+const FRAME_INSET_BOTTOM: float = 28.0
 
 var is_open: bool = false
 var _was_paused: bool = false
@@ -32,10 +41,10 @@ func _ready() -> void:
 	_style_labels()
 	_style_back_button()
 	_back_button.pressed.connect(close_menu)
+	if is_instance_valid(_hud_frame):
+		_hud_frame.resized.connect(_fit_text_to_frame)
 	SignalBus.shard_collected.connect(_on_shard_collected)
 	refresh()
-	# Placeholder stat — replace with a real kill counter later.
-	_kills_value.text = "999"
 	# Preview when this scene is run directly from the editor / CLI.
 	if get_tree().current_scene == self:
 		open_menu.call_deferred()
@@ -56,6 +65,7 @@ func open_menu() -> void:
 	get_tree().paused = true
 	refresh()
 	_root.show()
+	_fit_text_to_frame.call_deferred()
 	_play_ui_sound("button-press")
 	_animate_in()
 	_back_button.grab_focus.call_deferred()
@@ -95,6 +105,8 @@ func _style_labels() -> void:
 	title.add_theme_font_override("font", TITLE_FONT)
 	title.add_theme_font_size_override("font_size", 36)
 	title.add_theme_color_override("font_color", COLOR_WHITE)
+	# Wrap instead of forcing the panel wider than the frame on narrow frames.
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 
 func _apply_stat_label(label: Label) -> void:
@@ -147,11 +159,12 @@ func _outline_box(border: Color, width: int) -> StyleBoxFlat:
 	return style
 
 
-## Rebuilds the area rows and the play time from the live game data.
+## Rebuilds the area rows, play time, and kill total from the live game data.
 func refresh() -> void:
 	_populate_areas()
 	var minutes: int = int(GameState.play_time_seconds / 60.0)
 	_time_value.text = "%d:%02d" % [minutes / 60, minutes % 60]
+	_kills_value.text = str(GameState.enemies_killed)
 
 
 func _on_shard_collected(_shard_id: String, _area: String) -> void:
@@ -181,6 +194,24 @@ func _populate_areas() -> void:
 		row.add_child(name_label)
 		row.add_child(count_label)
 		_area_list.add_child(row)
+
+
+## Keeps the title + area rows inside the green frame art on any screen shape.
+func _fit_text_to_frame() -> void:
+	if not is_instance_valid(_hud_frame) or not is_instance_valid(_scroll_inset) or _hud_frame.texture == null:
+		return
+	var box: Vector2 = _hud_frame.size
+	var tex: Vector2 = _hud_frame.texture.get_size()
+	if box.x <= 0.0 or box.y <= 0.0 or tex.x <= 0.0 or tex.y <= 0.0:
+		return
+	# Same maths as STRETCH_KEEP_ASPECT_CENTERED.
+	var fit: float = minf(box.x / tex.x, box.y / tex.y)
+	var drawn: Vector2 = tex * fit
+	var pad: Vector2 = (box - drawn) * 0.5
+	_scroll_inset.offset_left = pad.x + FRAME_INSET_LEFT
+	_scroll_inset.offset_right = -pad.x - FRAME_INSET_RIGHT
+	_scroll_inset.offset_top = pad.y + FRAME_INSET_TOP
+	_scroll_inset.offset_bottom = -pad.y - FRAME_INSET_BOTTOM
 
 
 func _animate_in() -> void:

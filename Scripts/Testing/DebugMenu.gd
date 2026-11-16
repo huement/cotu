@@ -10,9 +10,10 @@ extends CanvasLayer
 ##   LEVEL UP   level up one party member (or everyone) through the real level-up path
 ##   PARTY      full heal + revive, +1000 gold, give any item, set the time of day, save now
 ##   WEATHER    roll in a thunderstorm, clear weather, force a lightning flash (outdoors only)
-##   DISPLAY    preview the touch-screen HUD (MobileHUD) on desktop
+##   DISPLAY    preview the touch-screen layouts on desktop (MobileHUD + tabbed character sheet)
 ##   BATTLE     Battle Test Arena (Scenes/Dungeons/BattleTestArena.tscn; any exit there returns you to
-##              where you were via MapTransition.set_return_point), end a running battle, Nine voice test
+##              where you were via MapTransition.set_return_point), end a running battle, Nine voice test,
+##              lake boss after 1 tentacle (TentacleEnemyController.debug_reveal_after_one_kill)
 ##
 ## Jumps use MapTransition.travel (same as a stone gate: swaps the map, places the party, autosaves).
 ## They need the game world (world.tscn) to be running - not available on the main menu or in battle.
@@ -44,8 +45,11 @@ const DUNGEON_FLOORS: Array[Array] = [
 	["Battle Test Arena", "res://Scenes/Dungeons/BattleTestArena.tscn"],
 	["Fero Shaw Dungeon · Floor 1", "res://Scenes/Dungeons/FeroShawDungeon_Upper.tscn"],
 	["Fero Shaw Dungeon · Floor 2 (boss)", "res://Scenes/Dungeons/FeroShawDungeon.tscn"],
-	["Gloom Reach Dungeon · Floor 1", "res://Scenes/Dungeons/DungeonLevel1_Upper.tscn"],
-	["Gloom Reach Dungeon · Floor 2 (boss)", "res://Scenes/Dungeons/DungeonLevel1.tscn"],
+	["Gloom Reach Dungeon · Floor 1", "res://Scenes/Dungeons/GloomReachDungeon_Upper.tscn"],
+	["Gloom Reach Dungeon · Floor 2", "res://Scenes/Dungeons/GloomReachDungeon_Middle.tscn"],
+	["Gloom Reach Dungeon · Floor 3 (boss)", "res://Scenes/Dungeons/GloomReachDungeon.tscn"],
+	["Old Dungeon Level 1 · Floor 1", "res://Scenes/Dungeons/DungeonLevel1_Upper.tscn"],
+	["Old Dungeon Level 1 · Floor 2 (boss)", "res://Scenes/Dungeons/DungeonLevel1.tscn"],
 	["Dungeon Level 2", "res://Scenes/Dungeons/DungeonLevel2.tscn"],
 	["Vero Wood Dungeon · Floor 1", "res://Scenes/Dungeons/VeroWoodDungeon_Upper.tscn"],
 	["Vero Wood Dungeon · Floor 2 (boss)", "res://Scenes/Dungeons/VeroWoodDungeon.tscn"],
@@ -68,6 +72,7 @@ var _status: Label
 var _was_paused: bool = false
 var _party_pick: OptionButton
 var _open_level_screen: CheckBox
+var _auto_spend: CheckBox
 var _item_pick: OptionButton
 var _item_qty: SpinBox
 var _mobile_toggle: CheckButton
@@ -254,12 +259,15 @@ func _on_level_up_pressed() -> void:
 	var picked: int = _party_pick.get_selected_id()
 	var slots: Array = _party_slots()
 	var leveled: Array[CatCharacter] = []
+	var spent: Dictionary = {} # cat -> ClassBuildGuide summary text
 	for i: int in slots.size():
 		var cat: CatCharacter = slots[i] as CatCharacter
 		if cat == null or (picked != ALL_PARTY and picked != i):
 			continue
 		if level_up_once(cat):
 			leveled.append(cat)
+			if _auto_spend.button_pressed:
+				spent[cat] = auto_spend_points(cat)
 			SignalBus.character_health_changed.emit(i, cat.current_hp)
 			SignalBus.character_mana_changed.emit(i, cat.current_energy, cat.max_energy)
 	if leveled.is_empty():
@@ -267,14 +275,25 @@ func _on_level_up_pressed() -> void:
 		return
 	var names: PackedStringArray = []
 	for cat: CatCharacter in leveled:
-		names.append("%s → Lv %d" % [cat.name, cat.level])
-	_set_status("Leveled up: " + ", ".join(names))
+		var line: String = "%s → Lv %d" % [cat.name, cat.level]
+		if not str(spent.get(cat, "")).is_empty():
+			line += " (%s)" % spent[cat]
+		names.append(line)
+	_set_status("Leveled up: " + "; ".join(names))
 	var keep: int = _party_pick.selected
 	_refresh_party()
 	_party_pick.select(keep)
 	if _open_level_screen.button_pressed and leveled.size() == 1:
 		close()
 		SignalBus.level_up_screen_requested.emit(leveled[0])
+
+
+## Rolls any pending level-up dice, then spends every point with the class build
+## (ClassBuildGuide: 1 into SPD, the rest by class weights; skills/spells lowest rank first).
+static func auto_spend_points(cat: CatCharacter) -> String:
+	while cat.pending_level_rolls > 0:
+		cat.apply_level_roll(randi_range(1, 6))
+	return ClassBuildGuide.describe(ClassBuildGuide.auto_spend(cat))
 
 
 ## One real level-up (the same path as earning the XP in battle): class auto gains, level points,
@@ -447,12 +466,23 @@ func _build() -> void:
 	_open_level_screen = CheckBox.new()
 	_open_level_screen.text = "Open level-up screen"
 	_open_level_screen.button_pressed = true
-	_open_level_screen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_open_level_screen.add_theme_font_override("font", ShardsMenuStyle.BODY_FONT)
 	_open_level_screen.add_theme_font_size_override("font_size", 12)
-	row.add_child(_open_level_screen)
+	var checks := VBoxContainer.new()
+	checks.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	checks.add_theme_constant_override("separation", 0)
+	row.add_child(checks)
+	checks.add_child(_open_level_screen)
+	_auto_spend = CheckBox.new()
+	_auto_spend.text = "Auto-spend points"
+	_auto_spend.tooltip_text = "Roll the bonus dice and spend stat / skill / spell points by class (always +1 SPD)."
+	_auto_spend.button_pressed = true
+	_auto_spend.add_theme_font_override("font", ShardsMenuStyle.BODY_FONT)
+	_auto_spend.add_theme_font_size_override("font_size", 12)
+	checks.add_child(_auto_spend)
 	var lvl: Button = CreationUI.small_button("LEVEL UP", CreationUI.GREEN)
 	lvl.custom_minimum_size = Vector2(120, 32)
+	lvl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	lvl.pressed.connect(_on_level_up_pressed)
 	row.add_child(lvl)
 
@@ -508,7 +538,7 @@ func _build() -> void:
 	# Display
 	col.add_child(_section_title("DISPLAY"))
 	_mobile_toggle = CheckButton.new()
-	_mobile_toggle.text = "Mobile HUD (touch layout + D-pad)"
+	_mobile_toggle.text = "Mobile UI (touch HUD + D-pad, tabbed character sheet)"
 	_mobile_toggle.add_theme_font_override("font", ShardsMenuStyle.BODY_FONT)
 	_mobile_toggle.add_theme_font_size_override("font_size", 12)
 	_mobile_toggle.toggled.connect(func(on: bool) -> void:
@@ -516,8 +546,9 @@ func _build() -> void:
 		if hud == null or hud.mobile_hud == null:
 			_set_status("Start the game world first.", true)
 			return
+		MobileUI.set_override(on) # the character sheet picks this up the next time it opens
 		hud.mobile_hud.set_enabled(on)
-		_set_status("Mobile HUD %s (mouse acts as a finger on the D-pad)." % ("on" if on else "off")))
+		_set_status("Mobile UI %s (mouse acts as a finger on the D-pad)." % ("on" if on else "off")))
 	col.add_child(_mobile_toggle)
 
 	# Battle (arena lives at Scenes/Dungeons/BattleTestArena.tscn)
@@ -535,6 +566,15 @@ func _build() -> void:
 	battle_box.add_child(fights)
 	fights.add_child(_tool_button("END BATTLE", CreationUI.RED, _end_battle))
 	fights.add_child(_tool_button("NINE VOICE TEST", CreationUI.GREY, _test_nine_voice))
+	var one_kill := CheckButton.new()
+	one_kill.text = "Lake boss rises after 1 tentacle (Vero Wood)"
+	one_kill.add_theme_font_override("font", ShardsMenuStyle.BODY_FONT)
+	one_kill.add_theme_font_size_override("font_size", 12)
+	one_kill.set_pressed_no_signal(TentacleEnemyController.debug_reveal_after_one_kill)
+	one_kill.toggled.connect(func(on: bool) -> void:
+		TentacleEnemyController.debug_reveal_after_one_kill = on
+		_set_status("Lake boss: rises after %s." % ("ONE tentacle" if on else "ALL tentacles")))
+	battle_box.add_child(one_kill)
 
 
 func _tool_button(text: String, accent: Color, action: Callable) -> Button:

@@ -327,6 +327,10 @@ func _position_enemy(enemy_node: Node3D, form_slot: int, e_data: Resource = null
 	var v_offset: float = vertical_offset
 	if is_instance_valid(e_data) and "vertical_offset" in e_data:
 		v_offset = float(e_data.get("vertical_offset"))
+	# Ghost@Idle drops the pelvis about 0.3 m, so a small sheet nudge vanishes into the bob.
+	# Pin the battle height: with the map's -0.5 this puts the hem on the floor at the top of the bob.
+	if is_instance_valid(e_data) and str(e_data.get("enemy_id")) == "en_ghost":
+		v_offset = -1.6
 	v_offset += _level_battle_offset
 
 	if not is_world_model:
@@ -360,7 +364,11 @@ func _position_enemy(enemy_node: Node3D, form_slot: int, e_data: Resource = null
 	if not is_zero_approx(yaw_offset_deg):
 		enemy_node.rotate_object_local(Vector3.UP, deg_to_rad(yaw_offset_deg))
 
-	_push_back_from_camera(enemy_node)
+	var allow_pushback: bool = true
+	if is_instance_valid(e_data) and "combat_camera_pushback" in e_data:
+		allow_pushback = bool(e_data.get("combat_camera_pushback"))
+	if allow_pushback:
+		_push_back_from_camera(enemy_node)
 
 	if enemy_id.is_empty():
 		return

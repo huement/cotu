@@ -15,8 +15,9 @@ Dungeons are built from room **parts** (hand-made scenes) joined by Kenney corri
 | `Scripts/Dungeon/DungeonFloorBuilder.gd` | Shared builder for two-floor dungeons (chests, ghosts, BossEnemy, crypt exit). |
 | `Scripts/Utilities/GenerateFeroShawDungeon.gd` | Two-floor Fero Shaw dungeon (EditorScript → File → Run). |
 | `Scripts/Utilities/GenerateVeroWoodDungeon.gd` | Two-floor Vero Wood dungeon (EditorScript → File → Run). |
+| `Scripts/Utilities/GenerateGloomReachDungeon.gd` | Three-floor Gloom Reach dungeon with a boss shard (EditorScript → File → Run). |
 | `resources/mesh_library/nav_blocker_mesh_library.tres` | Invisible "nav-blocker" tile used on WallMap to mark corridor walls. |
-| `Scenes/Dungeons/DungeonLevel1.tscn` | The first dungeon. Its entrance is the RockCave in GloomReach. |
+| `Scenes/Dungeons/DungeonLevel1.tscn` | The first dungeon (with `DungeonLevel1_Upper`). No longer linked from GloomReach; kept for reference and the debug menu. |
 
 ## Making a new level
 
@@ -32,6 +33,26 @@ Dungeons are built from room **parts** (hand-made scenes) joined by Kenney corri
 1. Copy `GenerateFeroShawDungeon.gd` or `GenerateVeroWoodDungeon.gd`, set floor names/seeds/enemies/boss, and a `Bosses.csv` row for reward/exit.
 2. Run the EditorScript with **File → Run** (or headless: `godot --path . --headless -s res://Scripts/Utilities/BuildVeroWoodDungeon.gd` for Vero).
 3. Point the overworld CryptHole at `*_Upper.tscn`.
+
+## Gloom Reach dungeon (3 floors)
+
+```
+GloomReach RockCave ──▶ GloomReachDungeon_Upper ──crypt hole──▶ GloomReachDungeon_Middle ──crypt hole──▶ GloomReachDungeon
+      ▲  (arrive: DungeonExitArrival)                                                           boss chamber + shard │
+      └──────────────────────────────── boss chamber north gate (after the boss) ──────────────────────────────────┘
+Each floor's entry stairs lead back UP (to GloomReach / the floor above's ExitArrival).
+```
+
+| Scene | Seed | Rooms | Enemy groups | Enemies (pack, multiplier) | Ghosts | Chests |
+|---|---|---|---|---|---|---|
+| `GloomReachDungeon_Upper` | 113 | 8 | 7 | Savage 2, Punk 2, **Hazard Cleaner 2 (level 5)**, Guard 2 | 1 | 3 |
+| `GloomReachDungeon_Middle` | 127 | 9 | 8 | Knight 2, Ronin 2, **Hazard Cleaner 2 (level 6)**, Shadow Assassin 1 | 2 | 3 |
+| `GloomReachDungeon` | 139 | 8 + boss | 7 | Ronin 2 ×1.1, Void Weaver 2, Heavy Servitor 2, Shadow Assassin 2, **Hazard Cleaner 2 (level 7)** | 2 | 3 |
+
+- **Boss:** **Void Weaver**, level 8 with `boss_multiplier` 2.2 (boss only; ~250 HP / 63 attack), flanked by two level-8 **Hazard Cleaners**. `Bosses.csv` row **13** (reward wall east, exit → GloomReach `DungeonExitArrival`).
+- **Shard:** the generator's `inject` step adds `ArcanumShard` (`shard_id = "gloomreach_dungeon"`) to the boss floor, pointed at the boss. It appears where the boss falls. `ShardLedger.CATALOG` lists it under area "Gloom Reach", so Gloom Reach counts **2** shards (Slime Lord + dungeon).
+- **Settings:** per enemy type `"level"` (placement level, 0 = sheet). On `boss_enemy`: `"level"` (boss + minions) and `"boss_multiplier"` (boss only → `BossEnemy.boss_stat_multiplier`).
+- **Rebuild:** `GenerateGloomReachDungeon.gd` → File → Run (or headless `BuildGloomReachDungeon.gd`). Re-running overwrites all three floors and re-adds the shard, so hand edits to those scenes are lost.
 
 ## How a level is put together
 
@@ -109,6 +130,10 @@ Scripts:
 - `Scripts/Singletons/LoreManager.gd` (autoload)
 - `Scripts/WorldData/LoreData.gd`
 
+## Ghosts
+
+Each floor places a couple of invisible haunts (`GhostAmbushComponent` on a `WorldEnemy`). The zone is a 15-tile diamond around the ghost's cell (`haunt_radius` in the generator, default `GhostAmbushComponent.DEFAULT_HAUNT_RADIUS`). About 1–2 seconds after the party is inside, the ghost warns them. They have roughly a second (less at higher `ghost_level`) to turn around. Stepping does not save them. If they don't turn, the ghost appears behind them and the fight starts in the battle room, with the ghost's turn meter already full so it acts first. One ghost strikes at a time. `stat_multiplier` still scales that floor's ghost; the sheet (`EnGhost.tres`) is a hard fight, so even ×0.6 is over 100 HP.
+
 ## Battle room (dungeon "battle mode")
 
 Dungeon corridors are too tight to fit a whole enemy pack, so dungeon fights don't happen where they start.
@@ -123,5 +148,4 @@ Dungeon corridors are too tight to fit a whole enemy pack, so dungeon fights don
 
 ## Not done yet
 
-- HornedSkull interaction.
-- A way out or down from the boss room to a next level.
+- A stair from the boss room down into another floor. The north gate already leaves the dungeon after the boss dies.

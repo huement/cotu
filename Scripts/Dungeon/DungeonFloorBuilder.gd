@@ -304,6 +304,7 @@ static func _build(cfg: Dictionary, layout: DungeonGenerator.Layout) -> Node3D:
 		enemy.position = Vector3(spots[next_spot].x, 0.0, spots[next_spot].y)
 		enemy.set("data", load(str(spec["data"])))
 		enemy.set("pack_size", int(spec.get("pack", 1)))
+		enemy.set("level", int(spec.get("level", 0))) # 0 = the data's own level
 		enemy.set("stat_multiplier", float(spec.get("multiplier", 1.0)))
 		enemy.set("model_scale", Vector3.ONE)
 		enemy.set("vertical_offset", ENEMY_VERTICAL_OFFSET)
@@ -327,6 +328,9 @@ static func _build_boss_enemy(boss_cfg: Dictionary, chamber: Node3D, room: Dunge
 	boss.set("minion_count", int(boss_cfg.get("minion_count", 2)))
 	boss.set("model_scale_multiplier", float(boss_cfg.get("model_scale_multiplier", 1.5)))
 	boss.set("stat_multiplier", float(boss_cfg.get("multiplier", 1.0)))
+	boss.set("level", int(boss_cfg.get("level", 0))) # 0 = the data's own level (boss and minions)
+	boss.set("boss_stat_multiplier", float(boss_cfg.get("boss_multiplier", 1.0))) # boss only, not minions
+	boss.set("boss_stat_multiplier", float(boss_cfg.get("boss_stat_multiplier", 1.0)))
 	boss.set("model_scale", Vector3.ONE)
 	boss.set("vertical_offset", ENEMY_VERTICAL_OFFSET)
 	boss.set("enemy_type", str(boss_cfg.get("type", "")))
@@ -370,7 +374,7 @@ static func _build_ghost(scene: PackedScene, ghost_cfg: Dictionary, cell: Vector
 	ambush.name = "GhostAmbushComponent"
 	ambush.set_script(load(GHOST_AMBUSH_SCRIPT))
 	ambush.set("ghost_level", int(ghost_cfg.get("level", 1)))
-	ambush.set("haunt_radius_tiles", int(ghost_cfg.get("haunt_radius", 3)))
+	ambush.set("haunt_radius_tiles", int(ghost_cfg.get("haunt_radius", GhostAmbushComponent.DEFAULT_HAUNT_RADIUS)))
 	ghost.add_child(ambush)
 	return ghost
 

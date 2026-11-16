@@ -2,15 +2,63 @@
 extends GutTest
 
 
-# --- enemy_level_damage_mult --------------------------------------------------
-func test_enemy_level_damage_bands() -> void:
-	assert_eq(CombatMath.enemy_level_damage_mult(1), 1.2)
-	assert_eq(CombatMath.enemy_level_damage_mult(3), 1.2)
-	assert_eq(CombatMath.enemy_level_damage_mult(4), 1.4)
-	assert_eq(CombatMath.enemy_level_damage_mult(6), 1.4)
-	assert_eq(CombatMath.enemy_level_damage_mult(7), 1.5)
-	assert_eq(CombatMath.enemy_level_damage_mult(99), 1.5)
-	assert_eq(CombatMath.enemy_level_damage_mult(0), 1.2) # clamped to band 1–3
+# --- enemy level growth -------------------------------------------------------
+func test_enemy_level_factor() -> void:
+	assert_almost_eq(CombatMath.enemy_level_factor(1, 0.2), 1.0, 0.0001)
+	assert_almost_eq(CombatMath.enemy_level_factor(0, 0.2), 1.0, 0.0001) # clamped to level 1
+	assert_almost_eq(CombatMath.enemy_level_factor(5, 0.2), 1.8, 0.0001)
+	assert_almost_eq(CombatMath.enemy_level_factor(11, 0.15), 2.5, 0.0001)
+
+
+func test_apply_enemy_level_scales_level_one_sheet() -> void:
+	var d := EnemyData.new()
+	d.base_level = 6
+	d.max_health = 100
+	d.current_health = 100
+	d.attack_damage = 20
+	d.defense = 10
+	d.speed = 10.0
+	d.xp_value = 100
+	d.gold_value = 50
+	CombatMath.apply_enemy_level(d)
+	assert_eq(d.max_health, 200)      # +20% x 5
+	assert_eq(d.current_health, 200)
+	assert_eq(d.attack_damage, 35)    # +15% x 5
+	assert_eq(d.defense, 15)          # +10% x 5
+	assert_almost_eq(d.speed, 12.0, 0.001) # +4% x 5
+	assert_eq(d.xp_value, 250)        # +30% x 5
+	assert_eq(d.gold_value, 125)
+	assert_true(d.level_scaling_applied)
+
+
+func test_apply_enemy_level_only_once() -> void:
+	var d := EnemyData.new()
+	d.base_level = 3
+	d.max_health = 100
+	d.current_health = 100
+	CombatMath.apply_enemy_level(d)
+	CombatMath.apply_enemy_level(d)
+	assert_eq(d.max_health, 140)
+
+
+func test_apply_enemy_level_one_is_unchanged() -> void:
+	var d := EnemyData.new()
+	d.base_level = 1
+	d.max_health = 55
+	d.current_health = 55
+	d.attack_damage = 12
+	CombatMath.apply_enemy_level(d)
+	assert_eq(d.max_health, 55)
+	assert_eq(d.attack_damage, 12)
+
+
+func test_apply_enemy_level_keeps_damage_fraction() -> void:
+	var d := EnemyData.new()
+	d.base_level = 6
+	d.max_health = 100
+	d.current_health = 50
+	CombatMath.apply_enemy_level(d)
+	assert_eq(d.current_health, 100) # half of 200
 
 
 # --- physical_damage ----------------------------------------------------------
@@ -185,6 +233,47 @@ func test_throw_beats_a_normal_attack() -> void:
 	var foe := CombatFixtures.enemy(0, 0, 10)
 	var melee: int = CombatMath.physical_damage(CombatFixtures.party(0, 28), foe, "BLADE", false, 1.5)
 	assert_gt(CombatMath.throw_damage(4, 14, foe, 1.5), melee)
+
+
+# --- opening initiative (ambush) ---------------------------------------------
+func test_opening_meter_is_speed_times_five_until_the_cap() -> void:
+	assert_eq(CombatMath.opening_meter(13.0, false, 100.0), 65.0)
+	assert_eq(CombatMath.opening_meter(20.0, false, 100.0), 100.0)
+	assert_eq(CombatMath.opening_meter(4.0, true, 100.0), 100.0)
+
+
+func test_back_is_turned_only_when_the_enemy_is_behind() -> void:
+	var north := Vector2i(0, -1)
+	assert_true(CombatMath.back_is_turned(north, Vector2i(0, 1))) # south, behind
+	assert_false(CombatMath.back_is_turned(north, Vector2i(0, -1))) # in front
+	assert_false(CombatMath.back_is_turned(north, Vector2i(1, 0))) # flank
+	assert_true(CombatMath.back_is_turned(north, Vector2i(1, 1))) # behind and aside
+	assert_false(CombatMath.back_is_turned(north, Vector2i.ZERO))
+
+
+func test_meeting_ambush_flags_only_surprisers_and_does_not_stick() -> void:
+	var wraith := EnemyData.new()
+	wraith.can_surprise_player = true
+	var slime := EnemyData.new()
+	slime.can_surprise_player = false
+	var group: Array[Resource] = [wraith, slime]
+	CombatMath.apply_meeting_ambush(group, true)
+	assert_true(CombatMath.seizes_opening_initiative(group[0]))
+	assert_false(CombatMath.seizes_opening_initiative(group[1]))
+	assert_false(wraith.has_meta(CombatMath.AMBUSH_META))
+	CombatMath.apply_meeting_ambush(group, false)
+	assert_false(CombatMath.seizes_opening_initiative(group[0]))
+
+
+func test_only_an_ambush_that_can_surprise_seizes_initiative() -> void:
+	var ghost := EnemyData.new()
+	ghost.can_surprise_player = true
+	assert_false(CombatMath.seizes_opening_initiative(ghost))
+	ghost.set_meta(CombatMath.AMBUSH_META, true)
+	assert_true(CombatMath.seizes_opening_initiative(ghost))
+	ghost.can_surprise_player = false
+	assert_false(CombatMath.seizes_opening_initiative(ghost))
+	assert_false(CombatMath.seizes_opening_initiative(null))
 
 
 func test_item_throw_helpers() -> void:

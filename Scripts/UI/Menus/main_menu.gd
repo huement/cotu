@@ -16,10 +16,15 @@ const HELP_SCREEN_SCENE: PackedScene = preload("res://Scenes/GameMenus/HelpScree
 var _overlay: Control = null
 
 
+const MENU_MUSIC: String = "res://Audio/UI/menu.mp3"
+
+
 func _ready() -> void:
 	super()
 	MenuKit.main_menu_scene = SessionFlow.MAIN_MENU_SCENE
 	_refresh_load_button()
+	if is_instance_valid(AudioManager):
+		AudioManager.play_bgm(MENU_MUSIC)
 
 
 ## Animated pixel-art space instead of the kit's style background (pause menus keep the kit's).

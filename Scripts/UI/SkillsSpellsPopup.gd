@@ -11,7 +11,6 @@ signal closed
 @onready var class_name_label: Label = %ClassNameLabel as Label
 @onready var close_button: Button = %CloseButton as Button
 
-@export var entry_scene: PackedScene = preload("res://Scenes/UI/SkillSpellPopupEntry.tscn")
 
 enum Mode {
 	SKILLS,
@@ -123,73 +122,25 @@ func _render_list() -> void:
 					_render_spell_row(item, char_class_name)
 
 
+## Rows use the shared AbilityRow; this list adds level / element / accuracy to the details line.
 func _render_spell_row(spell: SpellData, char_class_name: String) -> void:
-	var entry_node: Control = entry_scene.instantiate() as Control
-
-	var icon_rect := entry_node.get_node_or_null("%IconRect") as TextureRect
-	var name_label := entry_node.get_node_or_null("%NameLabel") as Label
-	var cost_label := entry_node.get_node_or_null("%CostLabel") as Label
-	var prereq_label := entry_node.get_node_or_null("%PrereqLabel") as Label
-	var elem_label := entry_node.get_node_or_null("%ElemLabel") as Label
-	var details_label := entry_node.get_node_or_null("%DetailsLabel") as Label
-
-	if icon_rect and spell.icon:
-		icon_rect.texture = spell.icon
-	if name_label:
-		name_label.text = spell.spell_name
-	if cost_label:
-		cost_label.text = str(spell.energy_cost)
-	if prereq_label:
-		prereq_label.text = "LVL %d" % spell.requirement
-	if elem_label:
-		var element_key: String = ItemData.ElementalBase.keys()[spell.element]
-		elem_label.text = element_key.capitalize()
-	if details_label:
-		details_label.text = spell.description
-
-	var is_allowed: bool = spell.is_class_allowed(char_class_name)
-	if not is_allowed:
-		entry_node.modulate = Color(0.5, 0.5, 0.5, 0.4)
-		if name_label:
-			name_label.text += " [LOCKED]"
-
-	_connect_entry_click(entry_node, spell)
-	list_container.add_child(entry_node)
+	var element_key: String = String(ItemData.ElementalBase.keys()[spell.element]).capitalize()
+	var details: String = "LVL %d · %s · %s" % [spell.requirement, element_key, AbilityRow.description_of(spell)]
+	var row: AbilityRow = AbilityRow.create(spell, { "details": details })
+	if not spell.is_class_allowed(char_class_name):
+		row.set_unavailable("Locked - not a %s spell" % char_class_name if not char_class_name.is_empty() else "Locked for this class")
+	_connect_entry_click(row, spell)
+	list_container.add_child(row)
 
 
 func _render_skill_row(skill: SkillData, char_class_name: String, char_race_name: String) -> void:
-	var entry_node: Control = entry_scene.instantiate() as Control
-
-	var icon_rect := entry_node.get_node_or_null("%IconRect") as TextureRect
-	var name_label := entry_node.get_node_or_null("%NameLabel") as Label
-	var cost_label := entry_node.get_node_or_null("%CostLabel") as Label
-	var prereq_label := entry_node.get_node_or_null("%PrereqLabel") as Label
-	var elem_label := entry_node.get_node_or_null("%ElemLabel") as Label
-	var details_label := entry_node.get_node_or_null("%DetailsLabel") as Label
-
-	if icon_rect and skill.icon:
-		icon_rect.texture = skill.icon
-	if name_label:
-		name_label.text = skill.skill_name
-	if cost_label:
-		cost_label.text = str(skill.energy_cost)
-	if prereq_label:
-		prereq_label.text = "%d%% ACC" % skill.accuracy
-	if elem_label:
-		elem_label.text = ItemData.EffectElement.keys()[skill.element] if "element" in skill else "NONE"
-	if details_label:
-		details_label.text = skill.description
-
-	var class_ok: bool = skill.is_class_allowed(char_class_name)
-	var race_ok: bool = skill.is_race_allowed(char_race_name)
-
-	if not (class_ok and race_ok):
-		entry_node.modulate = Color(0.5, 0.5, 0.5, 0.4)
-		if name_label:
-			name_label.text += " [RESTRICTED]"
-
-	_connect_entry_click(entry_node, skill)
-	list_container.add_child(entry_node)
+	var element_key: String = String(ItemData.EffectElement.keys()[skill.element]).capitalize() if "element" in skill else "None"
+	var details: String = "%d%% ACC · %s · %s" % [skill.accuracy, element_key, AbilityRow.description_of(skill)]
+	var row: AbilityRow = AbilityRow.create(skill, { "details": details })
+	if not (skill.is_class_allowed(char_class_name) and skill.is_race_allowed(char_race_name)):
+		row.set_unavailable("Restricted - wrong class or breed")
+	_connect_entry_click(row, skill)
+	list_container.add_child(row)
 
 
 func _connect_entry_click(entry_node: Control, data_resource: Resource) -> void:

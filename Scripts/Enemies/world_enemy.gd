@@ -236,6 +236,9 @@ func trigger_combat_encounter() -> void:
 
 	_is_in_active_combat = true
 
+	# Sampled before the party is turned to face the fight.
+	var caught_from_behind: bool = BattleFacing.party_is_facing_away(get_tree(), global_position)
+
 	# Dungeons: fade into the battle room. Elsewhere: turn the party to face this enemy first
 	# (battle models appear in front of the camera).
 	await BattleArena.prepare_party(get_tree(), global_position)
@@ -249,6 +252,10 @@ func trigger_combat_encounter() -> void:
 
 	if enemy_group.is_empty() and is_instance_valid(enemy_data):
 		enemy_group.append(enemy_data)
+
+	if caught_from_behind and is_instance_valid(GameLogger):
+		GameLogger.combat("Ambush! The party had its back to the enemy.")
+	CombatMath.apply_meeting_ambush(enemy_group, caught_from_behind)
 
 	var party_slots: Array = []
 	var gs: Node = get_node_or_null("/root/GameState")

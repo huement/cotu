@@ -116,16 +116,18 @@ func _empty_reason() -> String:
 	return "%s knows every spell available at their level." % character.name
 
 
+## Shared AbilityRow, coloured like the rest of this menu (ShardsMenuStyle).
 func _make_row(ability: Resource, blocked_reason: String) -> Button:
-	var b: Button = Button.new()
-	b.text = "%s    %s" % [AbilityInfo.display_name(ability), _short_meta(ability)]
-	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.custom_minimum_size = Vector2(0, 34)
-	ShardsMenuStyle.style_button(b, ShardsMenuStyle.COLOR_ACCENT, 14)
+	var details: String = AbilityRow.description_of(ability)
+	if ability is SpellData:
+		details = "Tier %d · %s" % [(ability as SpellData).tier, details]
+	var b: AbilityRow = AbilityRow.create(ability, {
+		"accent": ShardsMenuStyle.COLOR_ACCENT,
+		"background": ShardsMenuStyle.COLOR_TILE,
+		"details": details,
+	})
 	if not blocked_reason.is_empty():
-		b.text = "%s    — %s" % [AbilityInfo.display_name(ability), blocked_reason]
-		b.modulate = Color(1, 1, 1, 0.45)
+		b.set_unavailable(blocked_reason)
 		b.set_meta(&"blocked", blocked_reason)
 	b.focus_entered.connect(_select.bind(b))
 	b.mouse_entered.connect(_select.bind(b))
@@ -133,14 +135,6 @@ func _make_row(ability: Resource, blocked_reason: String) -> Button:
 	_rows[b] = ability
 	_list.add_child(b)
 	return b
-
-
-func _short_meta(ability: Resource) -> String:
-	if ability is SpellData:
-		var s := ability as SpellData
-		return "T%d · %d MP" % [s.tier, s.energy_cost]
-	var k := ability as SkillData
-	return "%d MP" % k.energy_cost if k.energy_cost > 0 else "passive"
 
 
 func _select(b: Button) -> void:

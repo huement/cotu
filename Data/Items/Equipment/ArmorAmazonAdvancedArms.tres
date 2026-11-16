@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://pkjre3mqoat6"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_3y3my"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_3y3my"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_civya"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_civya")
 item_id = "armor_amazon_advanced_arms"
 item_name = "Valkyrie EX Arms Armor"
 description = "Advanced heavy armor for the Amazon class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_3y3my")
 item_type = 2
 equipment_slot = 2

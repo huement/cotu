@@ -27,6 +27,7 @@ const CATALOG: Array[Dictionary] = [
 	{"id": "brokenbonemarsh_beast", "area": "Bone Marsh", "place": "Broken Bone Marsh", "guardian": "Beast King", "scene": "res://Scenes/BrokenBoneMarsh.tscn"},
 	{"id": "stonetrail_blob", "area": "Stone Trail", "place": "Stone Trail", "guardian": "Blob Monster", "scene": "res://Scenes/StoneTrail.tscn"},
 	{"id": "gloomreach_slimelord", "area": "Gloom Reach", "place": "Gloom Reach", "guardian": "Slime Lord", "scene": "res://Scenes/GloomReach.tscn"},
+	{"id": "gloomreach_dungeon", "area": "Gloom Reach", "place": "Gloom Reach Dungeon", "guardian": "Dungeon boss", "scene": "res://Scenes/Dungeons/GloomReachDungeon.tscn"},
 ]
 
 

@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://b1s5n2f02x8n7" path="res://Scripts/UI/GameOverScreen.gd" id="1_go"]
 [ext_resource type="Texture2D" uid="uid://bvyhbsg2nwlln" path="res://ui/GAME/game_over.png" id="2_art"]
 [ext_resource type="Shader" uid="uid://cskdjdk2k21ff" path="res://Shaders/crt_scanlines.gdshader" id="3_qdhg4"]
-[ext_resource type="Texture2D" path="res://ui/icons/database.svg" id="4_load"]
-[ext_resource type="Texture2D" path="res://ui/icons/arrow_left.svg" id="5_quit"]
+[ext_resource type="Texture2D" path="res://ui/icons/menu/database.svg" id="4_load"]
+[ext_resource type="Texture2D" path="res://ui/icons/menu/arrow_left.svg" id="5_quit"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5dykx"]
 shader = ExtResource("3_qdhg4")

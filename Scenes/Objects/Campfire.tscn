@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://fbpo5yssdocm"]
+[gd_scene load_steps=11 format=3 uid="uid://fbpo5yssdocm"]
 
 [ext_resource type="Script" uid="uid://barrwhhetpd66" path="res://Scripts/Components/TorchFlickerComponent.gd" id="1_rdsyc"]
 [ext_resource type="PackedScene" uid="uid://bp4kd3dl0ep5m" path="res://resources/tile_sets/nature/campfire_bricks.glb" id="2_rdsyc"]
+[ext_resource type="Script" path="res://Scripts/Environment/CampfireHeat.gd" id="3_heat"]
 
 [sub_resource type="Curve" id="Curve_2bomy"]
 _data = [Vector2(0, 0.20091736), 0.0, 0.0, 0, 0, Vector2(0.5061729, 1), 0.05250215, 0.05250215, 0, 0, Vector2(0.99506164, 0), 0.0, 0.0, 0, 0]
@@ -28,6 +29,13 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_52pco")
 size = Vector2(0.2, 0.2)
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_block"]
+radius = 0.7
+height = 1.2
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_heat"]
+radius = 2.4
+
 [node name="Campfire" type="Node3D"]
 script = ExtResource("1_rdsyc")
 
@@ -45,3 +53,20 @@ lifetime = 0.5
 fract_delta = false
 process_material = SubResource("ParticleProcessMaterial_gn6qy")
 draw_pass_1 = SubResource("QuadMesh_7grhn")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("CylinderShape3D_block")
+
+[node name="Heat" type="Node3D" parent="."]
+script = ExtResource("3_heat")
+
+[node name="TriggerArea" type="Area3D" parent="Heat"]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Heat/TriggerArea"]
+shape = SubResource("SphereShape3D_heat")

@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://c2347yj8ysvqt"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_dpka4"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_dpka4"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_gudv0"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_gudv0")
 item_id = "armor_psynic_regular_legs"
 item_name = "Mind-Silk Legs Garb"
 description = "Regular robe armor for the Psynic class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_dpka4")
 item_type = 2
 equipment_slot = 3

@@ -9,6 +9,7 @@ extends Control
 ## Skip: confirm / cancel / any mouse click or screen tap.
 
 const VIDEO_PATH: String = "res://assets/intro.ogv"
+const INTRO_MUSIC: String = "res://Audio/UI/intro.mp3"
 const FADE_OUT_SECONDS: float = 0.4
 ## Ignore skip presses for a moment so the click that pressed "Start" can't skip the video.
 const SKIP_GRACE_SECONDS: float = 0.5
@@ -27,7 +28,6 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if is_instance_valid(AudioManager):
-		AudioManager.stop_bgm()
 		AudioManager.stop_level_sound()
 
 	var backdrop := ColorRect.new()
@@ -57,6 +57,9 @@ func _ready() -> void:
 	_frame.add_child(_player)
 	_player.finished.connect(_on_video_finished)
 	_player.play()
+	if is_instance_valid(AudioManager):
+		# Same length as the movie. Plays once; skip / the end cuts it.
+		AudioManager.play_bgm(INTRO_MUSIC, false, false)
 	_fit_to_video()
 
 	_hint = Label.new()
@@ -116,10 +119,13 @@ func _leave(fade: bool) -> void:
 	if _leaving:
 		return
 	_leaving = true
+	if is_instance_valid(AudioManager):
+		AudioManager.stop_bgm()
 	if fade and is_instance_valid(_frame):
 		var tween: Tween = create_tween()
 		tween.tween_property(_frame, "modulate", Color.BLACK, FADE_OUT_SECONDS)
 		await tween.finished
 	if is_instance_valid(_player):
 		_player.stop()
-	MenuKit.change_scene(next_scene)
+	# The world takes a moment to load: show the loading screen instead of a black frame.
+	LoadingScreen.change_scene(get_tree(), next_scene)

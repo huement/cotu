@@ -3,7 +3,7 @@
 extends SceneTree
 
 ## Every outdoor map uses the pixel sky. Use pixel_sky_overcast.tres for gloomier maps.
-const PIXEL_SKY_MATERIAL: String = "res://resources/Environment/pixel_sky.tres"
+const PIXEL_SKY_MATERIAL: String = "res://resources/Environment/pixel_sky_cloudy.tres"
 
 ## Builds a compact starter forest clearing:
 ## - Grass floor courtyard

@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://c6dtup1b62g7v"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_swrpp"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_swrpp"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_gg43k"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_gg43k")
 item_id = "armor_shade_regular_head"
 item_name = "Shadow Head Armor"
 description = "Regular leather armor for the Shade class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_swrpp")
 item_type = 2
 equipment_slot = 7

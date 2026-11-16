@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dypk0msihrcsy"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/health.png" id="1_mk861"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/health.png" id="1_mk861"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_10u2h"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_10u2h")
 item_id = "pot_hp_full"
 item_name = "Health Potion (Full)"
 description = "FULL HP RESTORE"
-icon_path = "res://Data/Items/health.png"
+icon_path = "res://ui/icons/items/health.png"
 icon = ExtResource("1_mk861")
 item_type = 3
 credit_value = 500

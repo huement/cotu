@@ -5,16 +5,17 @@ Every outdoor map draws its sky with one shader, `Shaders/pixel_sky.gdshader`, a
 | File | Role |
 |---|---|
 | `Shaders/pixel_sky.gdshader` | The sky: gradient, sun, clouds, night space scene |
-| `resources/Environment/pixel_sky.tres` | Default material (clear day) |
+| `resources/Environment/pixel_sky.tres` | Clear-day material. No map uses it |
 | `resources/Environment/pixel_sky_overcast.tres` | Greyer, heavier-cloud material for gloomy maps |
-| `resources/Environment/pixel_sky_feroshaw.tres` | FeroShaw only: dark teal-to-jaundice day sky under heavy slate cloud |
+| `resources/Environment/pixel_sky_cloudy.tres` | Dark teal-to-jaundice day sky under heavy slate cloud. Night keeps those clouds and skips the starfield |
+| `resources/Environment/pixel_sky_cloudy_stars.tres` | Same cloudy day as `pixel_sky_cloudy.tres`. Night fades the clouds and shows the starfield |
 | `Scripts/Environment/day_night_cycle.gd` | Orbits sun/moon lights, lerps ambient, drives the sky shader |
 | `Shaders/space_pixel.gdshader` | The 2D menu background the night scene was ported from (menus only) |
 
 | Map | Material |
 |---|---|
-| VeroWood, StoneTrail | `pixel_sky.tres` |
-| FeroShaw | `pixel_sky_feroshaw.tres` (sick overcast day; night unchanged) |
+| VeroWood, FeroShaw | `pixel_sky_cloudy.tres` (sick overcast day; cloudy night, no stars) |
+| StoneTrail | `pixel_sky_cloudy_stars.tres` (same cloudy day; stars at night) |
 | GreenGrove, BrokenBoneMarsh, GloomReach, CastleHollow | `pixel_sky_overcast.tres` |
 | Dungeons / caves | No sky: flat dark `Environment` + depth fog, no `DayNightCycle` |
 
@@ -83,7 +84,7 @@ On the Compatibility renderer, `TIME` only exists inside `sky()`. Helper functio
 | stars | `giant_glow`, `star_brightness`, `star_twinkle`, `twinkle_speed` | Glow size, brightness, twinkle |
 | stars | `star_cool`, `star_warm`, `star_hot` | Star colours (defaults match the menu) |
 
-Changes to `pixel_sky.tres` affect VeroWood and StoneTrail; `pixel_sky_feroshaw.tres` affects FeroShaw only; changes to `pixel_sky_overcast.tres` affect GreenGrove, BrokenBoneMarsh, GloomReach and CastleHollow.
+Changes to `pixel_sky_cloudy.tres` affect VeroWood and FeroShaw. `pixel_sky_cloudy_stars.tres` is StoneTrail only. `pixel_sky.tres` is unused. Changes to `pixel_sky_overcast.tres` affect GreenGrove, BrokenBoneMarsh, GloomReach and CastleHollow.
 
 ---
 

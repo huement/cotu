@@ -685,14 +685,14 @@ func _rebuild_picks() -> void:
 	else:
 		_spell_header.text = "SPELLS  ·  CHOOSE %d" % spell_n
 	for s: SpellData in spell_choices:
-		_spell_list.add_child(_make_pick(s, "T%d · %d MP" % [s.tier, s.energy_cost]))
+		_spell_list.add_child(_make_pick(s, "Tier %d" % s.tier))
 	var free: Array[SkillData] = CharacterCreation.race_skills(_breed)
 	var skill_n: int = CharacterCreation.skill_pick_count(_breed, _prof)
 	_skill_header.text = "CLASS SKILLS  ·  CHOOSE %d" % skill_n if skill_n > 0 else "NO CLASS SKILLS AT LEVEL 1"
 	for s: SkillData in CharacterCreation.skill_choices(_breed, _prof):
 		if free.has(s):
 			continue
-		var meta: String = "%d MP" % s.energy_cost if s.energy_cost > 0 else String(SkillData.SkillType.keys()[s.skill_type]).capitalize()
+		var meta: String = "" if s.energy_cost > 0 else String(SkillData.SkillType.keys()[s.skill_type]).capitalize()
 		_skill_list.add_child(_make_pick(s, meta))
 	var names: PackedStringArray = []
 	for s: SkillData in free:
@@ -700,9 +700,18 @@ func _rebuild_picks() -> void:
 	_race_skill_label.text = "%s SKILL (FREE):  %s" % [_breed.breed_name.to_upper(), ", ".join(names)] if not names.is_empty() else ""
 
 
+## Shared AbilityRow (toggle) in the creator's colours. `meta` leads the details line.
 func _make_pick(ability: Resource, meta: String) -> Button:
-	var b: Button = CreationUI.list_button("%s   ·  %s" % [AbilityInfo.display_name(ability), meta], CreationUI.GREEN, 14)
-	b.custom_minimum_size = Vector2(0, 30)
+	var details: String = AbilityRow.description_of(ability)
+	if not meta.is_empty():
+		details = "%s · %s" % [meta, details]
+	var b: AbilityRow = AbilityRow.create(ability, {
+		"accent": CreationUI.GREEN,
+		"background": Color(0, 0, 0, 0.35),
+		"toggle": true,
+		"compact": true,
+		"details": details,
+	})
 	b.toggled.connect(_on_pick_toggled.bind(ability))
 	b.mouse_entered.connect(_show_ability_detail.bind(ability))
 	b.focus_entered.connect(_show_ability_detail.bind(ability))

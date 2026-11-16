@@ -132,9 +132,13 @@ static func build_party(slot_ids: Array) -> DungeonParty:
 	var party := DungeonParty.new()
 	for i: int in PARTY_SIZE:
 		var id: String = str(slot_ids[i]) if i < slot_ids.size() else ""
-		var cat: CatCharacter = load_character(id) if not id.is_empty() else null
-		if cat == null:
+		var source: CatCharacter = load_character(id) if not id.is_empty() else null
+		if source == null:
 			continue
+		# Detached copy: the loaded instance keeps its user://character_pool/ path, so saving it
+		# inside SaveGame would only write a link to the (unequipped) roster file and the party
+		# would reload naked. A duplicate has no path and is embedded in the save with its gear.
+		var cat: CatCharacter = source.duplicate(true) as CatCharacter
 		cat.roster_locked = true
 		cat.is_front_row = i < 3
 		cat.current_hp = cat.max_hp

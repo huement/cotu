@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://dfahunhj70ru5"]
 
-[ext_resource type="Texture2D" uid="uid://cfrxslk2hy1un" path="res://Data/Items/loot_icons/chip.png" id="1_jxpsu"]
+[ext_resource type="Texture2D" uid="uid://cfrxslk2hy1un" path="res://ui/icons/loot/chip.png" id="1_jxpsu"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_vwe3y"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_vwe3y")
 item_id = "gem_aether_chip"
 item_name = "Aether-Chip"
 description = "A shard of pure magic shaped into a standard processing unit."
-icon_path = "res://Data/Items/loot_icons/chip.png"
+icon_path = "res://ui/icons/loot/chip.png"
 icon = ExtResource("1_jxpsu")
 target_type = 4
 can_use_in_battle = false

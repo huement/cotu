@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bcnskhejmofgi"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_jn50p"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_jn50p"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_4l1g6"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_4l1g6")
 item_id = "armor_voidhand_advanced_feet"
 item_name = "Kinetic Mesh Feet Garb"
 description = "Advanced robe armor for the Voidhand class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_jn50p")
 item_type = 2
 equipment_slot = 4

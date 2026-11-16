@@ -26,6 +26,12 @@ const STAT_LABELS: Dictionary = {
 const COLOR_TEXT: Color = Color(0.0, 1.0, 0.784, 1.0)
 const COLOR_PENDING: Color = Color(1.0, 0.85, 0.25, 1.0)
 const COLOR_MUTED: Color = Color(0.45, 0.7, 0.65, 1.0)
+## Point counters in the header: each number sits in a colored square so unspent points stand out.
+const COLOR_STAT_POINTS: Color = Color("#20c6f8")
+const COLOR_SKILL_POINTS: Color = Color("#ff3366")
+const COLOR_SPELL_POINTS: Color = Color("#8400DD")
+## 24px white "?" fits a 36px square button (same height as CONFIRM / CANCEL).
+const HELP_ICON_PATH: String = "res://ui/icons/qm_24_white.png"
 
 @onready var overlay_panel: Control = %OverlayPanel as Control
 @onready var portrait_texture: TextureRect = %PortraitTexture as TextureRect
@@ -61,6 +67,15 @@ var _pending_skill_ranks: Dictionary = {} # ability_id -> true
 var _pending_spell_ranks: Dictionary = {} # ability_id -> true
 var _stat_row_nodes: Dictionary = {} # stat_key -> { value, pending, minus, plus }
 
+# Header point chips (replace the old one-line PointsLabel)
+var _point_chips: Dictionary = {} # "stat" / "skill" / "spell" -> { box: PanelContainer, value: Label }
+
+# "?" help button (bottom-right of the frame) + recommended-build popup
+var _help_button: Button
+var _help_popup: Control
+var _help_body: VBoxContainer
+var _recommend_button: Button
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -76,6 +91,9 @@ func _ready() -> void:
 
 	_build_stat_rows()
 	_build_dice_stage()
+	_build_points_row()
+	_build_help()
+	_build_recommend_button()
 
 	var sb: Node = SignalBus
 	if is_instance_valid(sb) and sb.has_signal(&"level_up_screen_requested"):
@@ -130,11 +148,14 @@ func open_for(character: Resource) -> void:
 	visible = true
 	if is_instance_valid(overlay_panel):
 		overlay_panel.visible = true
+	_hide_help()
 	if _character.pending_level_rolls > 0:
 		_play_level_rolls()
 	else:
 		_dice_stage.visible = false
 		main_vbox.modulate.a = 1.0
+		_help_button.visible = true
+		_refresh_recommend_button()
 
 
 # ------------------------------------------------------------------------------
@@ -142,6 +163,7 @@ func open_for(character: Resource) -> void:
 # ------------------------------------------------------------------------------
 func _play_level_rolls() -> void:
 	_is_rolling = true
+	_help_button.visible = false
 	var cat: CatCharacter = _character
 	main_vbox.modulate.a = 0.0
 	_dice_stage.visible = true
@@ -189,6 +211,8 @@ func _play_level_rolls() -> void:
 	swap.tween_property(main_vbox, "modulate:a", 1.0, 0.35)
 	await swap.finished
 	_is_rolling = false
+	_help_button.visible = true
+	_refresh_recommend_button()
 
 
 func _build_dice_stage() -> void:
@@ -233,6 +257,9 @@ func _make_stage_label(font_size: int, color: Color) -> Label:
 
 func close() -> void:
 	if _is_rolling:
+		return
+	if is_instance_valid(_help_popup) and _help_popup.visible:
+		_hide_help() # Esc closes the help popup first, not the whole screen
 		return
 	_character = null
 	_reset_draft()
@@ -356,6 +383,11 @@ func _rebuild_ability_rows() -> void:
 		for skill_res: Resource in _character.known_skills:
 			_add_ability_row(skill_res, true)
 
+	# No spell points this level -> no spell list at all (picking from it would do nothing).
+	if _character.unspent_spell_points <= 0:
+		_pending_spell_ranks.clear()
+		return
+
 	var spells_header: Label = Label.new()
 	spells_header.text = "SPELLS"
 	spells_header.add_theme_color_override("font_color", COLOR_MUTED)
@@ -474,13 +506,253 @@ func _remaining_spell_points() -> int:
 
 
 func _refresh_points_label() -> void:
-	if not is_instance_valid(points_label) or not is_instance_valid(_character):
+	if not is_instance_valid(_character):
 		return
-	points_label.text = "STAT POINTS: %d  |  SKILL POINTS: %d  |  SPELL POINTS: %d" % [
-		_remaining_stat_points(),
-		_remaining_skill_points(),
-		_remaining_spell_points(),
-	]
+	_set_chip("stat", _remaining_stat_points())
+	_set_chip("skill", _remaining_skill_points())
+	_set_chip("spell", _remaining_spell_points())
+
+
+func _set_chip(key: String, value: int) -> void:
+	var nodes: Dictionary = _point_chips.get(key, {})
+	if nodes.is_empty():
+		return
+	var value_lbl: Label = nodes["value"] as Label
+	var box: Control = nodes["box"] as Control
+	value_lbl.text = str(value)
+	# Zero = faded square, so the eye goes to whatever still has points.
+	box.modulate = Color(1, 1, 1, 1.0 if value > 0 else 0.35)
+
+
+# ------------------------------------------------------------------------------
+# Header point chips:  STAT POINTS [3]   SKILL POINTS [1]   SPELL POINTS [0]
+# ------------------------------------------------------------------------------
+func _build_points_row() -> void:
+	if not is_instance_valid(points_label):
+		return
+	points_label.visible = false
+	var row: HBoxContainer = HBoxContainer.new()
+	row.name = "PointsRow"
+	row.size_flags_horizontal = Control.SIZE_SHRINK_END
+	row.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_theme_constant_override("separation", 16)
+	var parent: Node = points_label.get_parent()
+	parent.add_child(row)
+	parent.move_child(row, points_label.get_index() + 1)
+	row.add_child(_make_point_chip("stat", "STAT POINTS", COLOR_STAT_POINTS))
+	row.add_child(_make_point_chip("skill", "SKILL POINTS", COLOR_SKILL_POINTS))
+	row.add_child(_make_point_chip("spell", "SPELL POINTS", COLOR_SPELL_POINTS))
+
+
+func _make_point_chip(key: String, caption: String, color: Color) -> Control:
+	var chip: HBoxContainer = HBoxContainer.new()
+	chip.add_theme_constant_override("separation", 6)
+
+	var name_lbl: Label = Label.new()
+	name_lbl.text = caption
+	name_lbl.add_theme_color_override("font_color", Color.WHITE)
+	name_lbl.add_theme_font_size_override("font_size", 13)
+	name_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	chip.add_child(name_lbl)
+
+	var box: PanelContainer = PanelContainer.new()
+	box.custom_minimum_size = Vector2(32, 32)
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(4)
+	style.content_margin_left = 6
+	style.content_margin_right = 6
+	box.add_theme_stylebox_override("panel", style)
+	chip.add_child(box)
+
+	var value_lbl: Label = Label.new()
+	value_lbl.text = "0"
+	value_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	value_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	value_lbl.add_theme_color_override("font_color", Color.WHITE)
+	value_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
+	value_lbl.add_theme_constant_override("outline_size", 4)
+	value_lbl.add_theme_font_size_override("font_size", 18)
+	box.add_child(value_lbl)
+
+	_point_chips[key] = { "box": box, "value": value_lbl }
+	return chip
+
+
+# ------------------------------------------------------------------------------
+# Help: "?" button -> recommended build for this class (ClassBuildGuide, the same table the
+# Debug Menu auto-leveler uses).
+# ------------------------------------------------------------------------------
+func _build_help() -> void:
+	# Corner layer over the frame so the button sits bottom-right without touching the footer layout.
+	var corner: Control = Control.new()
+	corner.name = "HelpCorner"
+	corner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_child(corner)
+
+	_help_button = Button.new()
+	_help_button.name = "HelpButton"
+	if ResourceLoader.exists(HELP_ICON_PATH):
+		_help_button.icon = load(HELP_ICON_PATH) as Texture2D
+	else:
+		_help_button.text = "?"
+	_help_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_help_button.tooltip_text = "Which stats matter for this class?"
+	_help_button.focus_mode = Control.FOCUS_NONE
+	_help_button.anchor_left = 1.0
+	_help_button.anchor_top = 1.0
+	_help_button.anchor_right = 1.0
+	_help_button.anchor_bottom = 1.0
+	# Same 36px height as CONFIRM / CANCEL, inside the frame's 18 / 16 px margins.
+	_help_button.offset_left = -54.0
+	_help_button.offset_top = -52.0
+	_help_button.offset_right = -18.0
+	_help_button.offset_bottom = -16.0
+	_help_button.pressed.connect(_show_help)
+	corner.add_child(_help_button)
+
+	_help_popup = Control.new()
+	_help_popup.name = "HelpPopup"
+	_help_popup.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_help_popup.mouse_filter = Control.MOUSE_FILTER_STOP
+	_help_popup.visible = false
+	overlay_panel.add_child(_help_popup)
+
+	var dim: ColorRect = ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0, 0, 0, 0.55)
+	dim.gui_input.connect(_on_help_dim_input)
+	_help_popup.add_child(dim)
+
+	var center: CenterContainer = CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_help_popup.add_child(center)
+
+	var panel: PanelContainer = PanelContainer.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.03137255, 0.0627451, 0.078431375, 0.98)
+	style.set_border_width_all(1)
+	style.border_color = COLOR_STAT_POINTS
+	style.set_content_margin_all(18)
+	panel.add_theme_stylebox_override("panel", style)
+	center.add_child(panel)
+
+	_help_body = VBoxContainer.new()
+	_help_body.custom_minimum_size = Vector2(440, 0)
+	_help_body.add_theme_constant_override("separation", 8)
+	panel.add_child(_help_body)
+
+
+func _show_help() -> void:
+	if not is_instance_valid(_character) or _is_rolling:
+		return
+	for child: Node in _help_body.get_children():
+		child.queue_free()
+
+	var build: Dictionary = ClassBuildGuide.build_for(_character)
+	var class_title: String = AbilityRules.class_name_of(_character)
+	if class_title.is_empty():
+		class_title = "Adventurer"
+
+	var title: Label = Label.new()
+	title.text = "RECOMMENDED BUILD: %s" % class_title.to_upper()
+	title.add_theme_color_override("font_color", Color.WHITE)
+	title.add_theme_font_size_override("font_size", 18)
+	_help_body.add_child(title)
+
+	var tip: Label = Label.new()
+	tip.text = str(build.get("tip", ""))
+	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tip.add_theme_color_override("font_color", COLOR_MUTED)
+	tip.add_theme_font_size_override("font_size", 13)
+	_help_body.add_child(tip)
+
+	var stats_title: Label = Label.new()
+	stats_title.text = "STAT PRIORITY"
+	stats_title.add_theme_color_override("font_color", COLOR_STAT_POINTS)
+	stats_title.add_theme_font_size_override("font_size", 13)
+	_help_body.add_child(stats_title)
+
+	var top_weight: int = 1
+	for entry: Dictionary in ClassBuildGuide.priorities(_character):
+		top_weight = maxi(top_weight, int(entry["weight"]))
+	for entry: Dictionary in ClassBuildGuide.priorities(_character):
+		_help_body.add_child(_make_priority_row(str(entry["stat"]), int(entry["weight"]), top_weight))
+
+	var speed_note: Label = Label.new()
+	speed_note.text = "Every level: put at least 1 point into SPD, whatever the class."
+	speed_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	speed_note.add_theme_color_override("font_color", COLOR_PENDING)
+	speed_note.add_theme_font_size_override("font_size", 13)
+	_help_body.add_child(speed_note)
+
+	var ability_note: Label = Label.new()
+	ability_note.text = "Skills and spells: raise your lowest-rank ones first so none fall behind."
+	ability_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ability_note.add_theme_color_override("font_color", COLOR_MUTED)
+	ability_note.add_theme_font_size_override("font_size", 13)
+	_help_body.add_child(ability_note)
+
+	var buttons: HBoxContainer = HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 16)
+	_help_body.add_child(buttons)
+	if _character.has_unspent_points():
+		var use: Button = Button.new()
+		use.text = "USE RECOMMENDED"
+		use.custom_minimum_size = Vector2(180, 36)
+		use.pressed.connect(_use_recommended_from_help)
+		buttons.add_child(use)
+	var ok: Button = Button.new()
+	ok.text = "GOT IT"
+	ok.custom_minimum_size = Vector2(140, 36)
+	ok.pressed.connect(_hide_help)
+	buttons.add_child(ok)
+
+	_help_popup.visible = true
+
+
+func _make_priority_row(stat: String, weight: int, top_weight: int) -> Control:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+
+	var name_lbl: Label = Label.new()
+	name_lbl.text = str(STAT_LABELS.get(stat, stat.to_upper()))
+	name_lbl.custom_minimum_size = Vector2(44, 0)
+	name_lbl.add_theme_color_override("font_color", Color.WHITE)
+	name_lbl.add_theme_font_size_override("font_size", 15)
+	row.add_child(name_lbl)
+
+	# Importance bar: one square per weight point, out of the class's top weight.
+	var bar: HBoxContainer = HBoxContainer.new()
+	bar.add_theme_constant_override("separation", 3)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bar.custom_minimum_size = Vector2(top_weight * 15, 12)
+	for i: int in range(top_weight):
+		var pip: ColorRect = ColorRect.new()
+		pip.custom_minimum_size = Vector2(12, 12)
+		pip.color = COLOR_STAT_POINTS if i < weight else Color(1, 1, 1, 0.1)
+		bar.add_child(pip)
+	row.add_child(bar)
+
+	var hint: Label = Label.new()
+	hint.text = str(ClassBuildGuide.STAT_HINTS.get(stat, ""))
+	hint.add_theme_color_override("font_color", COLOR_MUTED)
+	hint.add_theme_font_size_override("font_size", 13)
+	row.add_child(hint)
+	return row
+
+
+func _on_help_dim_input(event: InputEvent) -> void:
+	var mb: InputEventMouseButton = event as InputEventMouseButton
+	if mb != null and mb.pressed:
+		_hide_help()
+
+
+func _hide_help() -> void:
+	if is_instance_valid(_help_popup):
+		_help_popup.visible = false
 
 
 func _render_header() -> void:
@@ -538,6 +810,52 @@ func _on_confirm_pressed() -> void:
 		SignalBus.show_toast.emit("%s allocation confirmed." % _character.name, false)
 
 	close()
+
+
+# ------------------------------------------------------------------------------
+# RECOMMENDED: fill the draft with the class build (ClassBuildGuide). Nothing is applied until
+# CONFIRM, so the player can still move points around with +/- and the skill toggles.
+# ------------------------------------------------------------------------------
+func _build_recommend_button() -> void:
+	if not is_instance_valid(confirm_button):
+		return
+	_recommend_button = Button.new()
+	_recommend_button.name = "RecommendButton"
+	_recommend_button.text = "RECOMMENDED"
+	_recommend_button.tooltip_text = "Fill in the suggested points for this class (1 into SPD, the rest by class). You can still change them before confirming."
+	_recommend_button.custom_minimum_size = confirm_button.custom_minimum_size
+	_recommend_button.pressed.connect(_apply_recommended_draft)
+	var row: Node = confirm_button.get_parent()
+	row.add_child(_recommend_button)
+	row.move_child(_recommend_button, confirm_button.get_index())
+
+
+func _refresh_recommend_button() -> void:
+	if is_instance_valid(_recommend_button):
+		_recommend_button.disabled = not is_instance_valid(_character) or not _character.has_unspent_points()
+
+
+func _apply_recommended_draft() -> void:
+	if not is_instance_valid(_character) or _is_rolling:
+		return
+	_reset_draft()
+	var deltas: Dictionary = ClassBuildGuide.plan_stat_points(_character, _character.unspent_stat_points)
+	for key: Variant in deltas.keys():
+		if _pending_stats.has(str(key)):
+			_pending_stats[str(key)] = int(deltas[key])
+	# The screen allows +1 rank per ability per level-up, so keep each pick once.
+	for id: String in ClassBuildGuide.pick_lowest_ranks(_character, _character.unspent_skill_points, _character.known_skills, true):
+		_pending_skill_ranks[id] = true
+	for id: String in ClassBuildGuide.pick_lowest_ranks(_character, _character.unspent_spell_points, _character.known_spells, false):
+		_pending_spell_ranks[id] = true
+	_refresh_stat_rows()
+	_rebuild_ability_rows()
+	_refresh_points_label()
+
+
+func _use_recommended_from_help() -> void:
+	_apply_recommended_draft()
+	_hide_help()
 
 
 func _on_cancel_pressed() -> void:

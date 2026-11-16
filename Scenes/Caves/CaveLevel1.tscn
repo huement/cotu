@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bax2xr0mscsej"]
+[gd_scene load_steps=16 format=3 uid="uid://bax2xr0mscsej"]
 
 [ext_resource type="Script" uid="uid://p07sjcuqjhw7" path="res://Scripts/Environment/CaveLevel.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://cdwsksrp7getj" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_init"]
@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="10_0k7ju"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="11_hqsng"]
 [ext_resource type="Resource" uid="uid://bs77hhk6itw7l" path="res://Data/Items/Equipment/ElderStaff.tres" id="12_g2p8o"]
+[ext_resource type="Resource" uid="uid://dtllye1aoin33" path="res://Data/Enemies/EnGhost.tres" id="13_ghost"]
+[ext_resource type="Script" uid="uid://cdkuyybx3dwf0" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="14_ambush"]
 [ext_resource type="Script" uid="uid://co7xlukyxktxc" path="res://Scripts/Environment/EditorWorkLight.gd" id="99_editorworklight"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="99_leveltitle"]
 
@@ -143,3 +145,18 @@ enemy_type = "zombie"
 transform = Transform3D(-0.03695771, 0, 0.9993168, 0, 1, 0, -0.9993168, 0, -0.03695771, 7.167698, -0.24, 30.38663)
 guaranteed_items = Array[ExtResource("11_hqsng")]([ExtResource("12_g2p8o")])
 gold_amount = 300
+
+[node name="Ghosts" type="Node3D" parent="."]
+
+[node name="Ghost1" parent="Ghosts" instance=ExtResource("7_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 31)
+data = ExtResource("13_ghost")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.65
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost1"]
+script = ExtResource("14_ambush")
+haunt_radius_tiles = 15

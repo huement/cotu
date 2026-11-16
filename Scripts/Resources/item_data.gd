@@ -66,7 +66,13 @@ enum ElementalBase {
 @export var item_name: String = "New Item"
 @export_multiline var description: String = ""
 @export var icon_path: String = ""
-@export var icon: Texture2D
+## Falls back to loading `icon_path` when no texture was baked into the .tres
+## (most equipment/consumables only store the path), so UIs reading `item.icon` get the art.
+@export var icon: Texture2D:
+	get:
+		if icon == null and not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+			icon = load(icon_path) as Texture2D
+		return icon
 @export var item_type: ItemType = ItemType.MISC
 @export var target_type: TargetType = TargetType.SINGLE_PARTY_MEMBER
 @export var quantity: int = 1

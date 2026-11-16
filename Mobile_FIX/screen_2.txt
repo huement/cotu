@@ -1,0 +1,15 @@
++-------------------------------------+-------------------------------------------------------------+
+|  1 | MINI VITALS (Orange)           |  7 | INVENTORY GRID (Pink)                                  |
+|  [Portrait] NYX   HP 54/54 MP 11/11 |  Filter: [ ALL ]  [ GEAR ]  [ CONSUMABLES ]  (NEW filters)  |
++-------------------------------------+  +--------+  +--------+  +--------+  +--------+  +--------+ |
+|  2 | EQUIPPED GEAR (Green)          |  | [Icon] |  | [Icon] |  | [Icon] |  | [Icon] |  | [Icon] | |
+|  [ Body Armor ]    [ Arms Armor ]   |  |   x5   |  |   x5   |  |   x5   |  |   x7   |  |   x2   | |
+|  [ Legs Armor ]    [ Feet Armor ]   |  +--------+  +--------+  +--------+  +--------+  +--------+ |
+|  [ Left: EMPTY ]   [ Right: Sword ] |  +--------+  +--------+  +--------+  +--------+  +--------+ |
+|  [ Acc 1: EMPTY ]  [ Acc 2: EMPTY ] |  | [Icon] |  | [Icon] |  | [Icon] |  | [Icon] |  | [Icon] | |
+|                                     |  |   x2   |  |   x5   |  |   x1   |  |   x2   |  |   x1   | |
+|  (Updates live when you tap Equip   |  +--------+  +--------+  +--------+  +--------+  +--------+ |
+|   in the item action popup)         |  (5 large touch slots wide, vertically scrollable)          |
++-------------------------------------+-------------------------------------------------------------+
+| [ CLOSE ]   [ ▼ 1. NYX — LVL 1 SPARTAN ]        |  [ MAIN ]   [ *INVENTORY* ]   [ SKILLS/SPELLS ] |
++-------------------------------------------------+-------------------------------------------------+

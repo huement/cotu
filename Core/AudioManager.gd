@@ -22,6 +22,8 @@ var _is_in_combat: bool = false
 var _current_bgm_request: Variant = null
 ## resource_path of the track currently assigned to _bgm_player (for same-track checks after duplicate).
 var _current_bgm_path: String = ""
+## When false, the track plays once (the intro). Looping tracks restart when they finish.
+var _bgm_loop: bool = true
 
 var _is_left_foot: bool = true
 
@@ -87,15 +89,16 @@ func _initialize_audio_channels() -> void:
 	_bgm_player.bus = &"Music" if AudioServer.get_bus_index("Music") != -1 else &"Master"
 	add_child(_bgm_player)
 
-	# Auto-loop any track played on the BGM player
-	_bgm_player.finished.connect(_bgm_player.play)
+	# Looping tracks restart here. One-shot tracks (see play_bgm's loop flag) do not.
+	_bgm_player.finished.connect(_on_bgm_finished)
 
 
 # ==============================================================================
 # 0. BGM & AMBIENT MUSIC MANAGEMENT
 # ==============================================================================
 ## Plays a dedicated background music track from a file path or AudioStream.
-func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true) -> void:
+## [param loop] restarts the track when it ends. One-shot cues (the intro) pass false.
+func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true, loop: bool = true) -> void:
 	if update_saved_request:
 		_current_bgm_request = stream_or_file_name
 
@@ -135,16 +138,22 @@ func play_bgm(stream_or_file_name: Variant, update_saved_request: bool = true) -
 		var track_path: String = stream.resource_path
 		if track_path == _current_bgm_path and _bgm_player.is_playing():
 			return
-		# Own a looping copy so BGM doesn't mutate the cached import used elsewhere.
+		# Own a copy so looping doesn't mutate the cached import used elsewhere.
 		var play_stream: AudioStream = stream.duplicate() as AudioStream
 		if play_stream != null and "loop" in play_stream:
-			play_stream.set("loop", true)
+			play_stream.set("loop", loop)
 		else:
 			play_stream = stream
+		_bgm_loop = loop
 		_current_bgm_path = track_path
 		_bgm_player.stream = play_stream
 		_bgm_player.play()
 		GameLogger.combat("BGM playing successfully: %s" % track_path)
+
+
+func _on_bgm_finished() -> void:
+	if _bgm_loop and is_instance_valid(_bgm_player):
+		_bgm_player.play()
 
 
 ## Stops the currently playing background music.

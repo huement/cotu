@@ -10,6 +10,16 @@ const BAR_SOURCE_WIDTH: float = 660.0
 const BAR_SOURCE_HEIGHT: float = 25.0
 const BAR_HEIGHT: float = TOAST_WIDTH * (BAR_SOURCE_HEIGHT / BAR_SOURCE_WIDTH)
 
+## Touch layouts (MobileUI.is_wanted()): much bigger toasts, drawn with shapes only (no PNG bar),
+## pushed right of the battle frame and below the enemy header so they don't sit on top of it.
+const MOBILE_TOAST_WIDTH: float = 560.0
+const MOBILE_FONT_SIZE: int = 28
+const MOBILE_ACCENT_THICKNESS: int = 5
+const MOBILE_MARGIN_LEFT: float = 92.0
+const MOBILE_MARGIN_TOP: float = 78.0
+const MOBILE_AUTO_DISMISS_TIME: float = 3.2
+const DESKTOP_FONT_SIZE: int = 12
+
 @export var auto_dismiss_time: float = 2.5
 @export var margin_left: float = 14.0
 @export var margin_top: float = 10.0
@@ -54,9 +64,26 @@ func _on_show_toast(message: String, is_error: bool = false) -> void:
 	_spawn_toast(message, is_error)
 
 
+## Moves the stack and sets its width for the current layout (mobile can be toggled at runtime).
+func _place_container(mobile: bool) -> void:
+	var width: float = MOBILE_TOAST_WIDTH if mobile else TOAST_WIDTH
+	var left: float = margin_left
+	var top: float = margin_top
+	if mobile:
+		var insets: Dictionary = MobileUI.safe_insets(_toast_container)
+		left = MOBILE_MARGIN_LEFT + float(insets["left"])
+		top = MOBILE_MARGIN_TOP + float(insets["top"])
+	_toast_container.offset_left = left
+	_toast_container.offset_top = top
+	_toast_container.offset_right = left + width
+
+
 func _spawn_toast(message: String, is_error: bool) -> void:
 	if not is_instance_valid(_toast_container):
 		return
+	var mobile: bool = MobileUI.is_wanted()
+	_place_container(mobile)
+	var toast_width: float = MOBILE_TOAST_WIDTH if mobile else TOAST_WIDTH
 
 	var accent: Color = Color("#fd6644") if is_error else Color("#41ead4")
 	var text_color: Color = Color("#ff8f78") if is_error else Color("#9ef7ec")
@@ -64,7 +91,7 @@ func _spawn_toast(message: String, is_error: bool) -> void:
 	var root: VBoxContainer = VBoxContainer.new()
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_theme_constant_override("separation", 0)
-	root.custom_minimum_size = Vector2(TOAST_WIDTH, 0.0)
+	root.custom_minimum_size = Vector2(toast_width, 0.0)
 	root.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 
 	var bar: TextureRect = TextureRect.new()
@@ -77,7 +104,10 @@ func _spawn_toast(message: String, is_error: bool) -> void:
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if is_error:
 		bar.modulate = Color(1.0, 0.45, 0.38, 1.0)
-	root.add_child(bar)
+	if not mobile:
+		root.add_child(bar)
+	else:
+		bar.free()
 
 	var panel: PanelContainer = PanelContainer.new()
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -95,6 +125,17 @@ func _spawn_toast(message: String, is_error: bool) -> void:
 	style_box.content_margin_right = 8
 	style_box.content_margin_top = 4
 	style_box.content_margin_bottom = 5
+	if mobile:
+		# Thick accent stripe on top replaces the PNG bar; roomier padding for big text.
+		style_box.bg_color.a = 0.9
+		style_box.border_width_top = MOBILE_ACCENT_THICKNESS
+		style_box.border_width_left = 3
+		style_box.border_width_right = 0
+		style_box.border_width_bottom = 0
+		style_box.content_margin_left = 18
+		style_box.content_margin_right = 18
+		style_box.content_margin_top = 10
+		style_box.content_margin_bottom = 12
 	panel.add_theme_stylebox_override("panel", style_box)
 
 	var label: Label = Label.new()
@@ -103,9 +144,13 @@ func _spawn_toast(message: String, is_error: bool) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(TOAST_WIDTH - 16.0, 0.0)
+	label.custom_minimum_size = Vector2(toast_width - (36.0 if mobile else 16.0), 0.0)
 	label.add_theme_color_override("font_color", text_color)
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", MOBILE_FONT_SIZE if mobile else DESKTOP_FONT_SIZE)
+	if mobile:
+		# Dark outline so the text stays readable over bright battle VFX.
+		label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+		label.add_theme_constant_override("outline_size", 6)
 	panel.add_child(label)
 	root.add_child(panel)
 
@@ -114,6 +159,6 @@ func _spawn_toast(message: String, is_error: bool) -> void:
 	root.modulate.a = 0.0
 	var tween: Tween = create_tween()
 	tween.tween_property(root, "modulate:a", 1.0, 0.12)
-	tween.tween_interval(auto_dismiss_time)
+	tween.tween_interval(MOBILE_AUTO_DISMISS_TIME if mobile else auto_dismiss_time)
 	tween.tween_property(root, "modulate:a", 0.0, 0.28)
 	tween.tween_callback(root.queue_free)

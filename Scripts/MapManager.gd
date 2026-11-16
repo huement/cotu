@@ -15,6 +15,14 @@ var bridge_grid: GridMap = null
 ## test party (Data/default_save.tres) on "Default Map Scene". OFF: the game starts at the main
 ## menu like it does for a player. Ignored in exported builds - those always start at the menu.
 @export var dev_start_override: bool = false
+## PHONE PREVIEW switch. ON: running the project (in the editor) shows the game the way a phone
+## does - the window takes the shape below and every touch layout is on (MobileHUD with its
+## D-pad, tabbed character sheet; the mouse acts as a finger). OFF: normal desktop layout.
+## Ignored in exported builds. Details: _documentation/MOBILE_UI.md.
+@export var mobile_preview: bool = false
+## Shape of the phone-preview window. Only the proportions matter (the window keeps its height):
+## 1404 x 648 = 19.5:9 modern phone, 1296 x 648 = 18:9, 1152 x 648 = 16:9, 864 x 648 = 4:3 tablet.
+@export var mobile_preview_size: Vector2i = MobileUI.DEFAULT_PREVIEW_SIZE
 @export var ceiling_tile_scene: PackedScene = preload("res://Scenes/CeilingTile.tscn") 
 @export var ceiling_height: float = 2.0
 @export var default_bgm_track: String = "Environment/forest-creepy"
@@ -59,6 +67,8 @@ var _leaving_for_menu: bool = false
 ## Runs before any _ready() in the world (HUD, Player), so the party is in place when they start.
 func _enter_tree() -> void:
 	_leaving_for_menu = false
+	if mobile_preview and OS.has_feature("editor"):
+		MobileUI.start_phone_preview(get_window(), mobile_preview_size)
 	var dev_allowed: bool = dev_start_override and OS.has_feature("editor")
 	if GameState.session_active:
 		_use_dev_map = dev_allowed and GameState.dev_session

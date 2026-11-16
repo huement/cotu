@@ -3,12 +3,15 @@ shader_type canvas_item;
 /// Full-screen scare pulse (GhostScareFX). `intensity` 0 = untouched screen, 1 = full effect.
 /// duotone 0: invert + red/blue split + tinted vignette (ghost jump scare).
 /// duotone 1: the picture crushed to two colours - black shadows, `tint` highlights (red/black boss strobe).
+/// vignette_only 1: no invert / duotone - the centre stays readable and the edges sink into dark `tint`
+/// (sustained horror vignette, see GhostScareFX.start_red_vignette).
 
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
 uniform float intensity : hint_range(0.0, 1.0) = 0.0;
 uniform float split_amount : hint_range(0.0, 0.06) = 0.018;
 uniform vec4 tint : source_color = vec4(0.62, 0.08, 1.0, 1.0);
 uniform float duotone : hint_range(0.0, 1.0) = 0.0;
+uniform float vignette_only : hint_range(0.0, 1.0) = 0.0;
 
 void fragment() {
 	vec2 uv = SCREEN_UV;
@@ -29,5 +32,14 @@ void fragment() {
 	duo *= 1.0 - vignette * 0.85;
 	vec3 blood = mix(col, duo, intensity);
 
-	COLOR = vec4(mix(scare, blood, duotone), 1.0);
+	// Sustained dark-red horror vignette: keeps the centre readable, crushes the edges to dark crimson / black.
+	// The colour split only shows out at the edges, so text in the middle (the boss's dialog) stays sharp.
+	float edge_mask = smoothstep(0.18, 0.72, distance(uv, vec2(0.5))) * intensity;
+	vec3 dark_crimson = tint.rgb * 0.28;
+	vec3 vignette_src = mix(texture(screen_tex, uv).rgb, col, edge_mask);
+	vec3 vignette_col = mix(vignette_src, dark_crimson, edge_mask * 0.85);
+	vignette_col *= 1.0 - edge_mask * 0.65;
+
+	vec3 base_fx = mix(scare, blood, duotone);
+	COLOR = vec4(mix(base_fx, vignette_col, vignette_only), 1.0);
 }

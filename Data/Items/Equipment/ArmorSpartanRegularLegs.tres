@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bql5bf53f2bga"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_1r6yd"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_1r6yd"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_hvhhx"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_hvhhx")
 item_id = "armor_spartan_regular_legs"
 item_name = "Iron Legs Armor"
 description = "Regular heavy armor for the Spartan class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_1r6yd")
 item_type = 2
 equipment_slot = 3

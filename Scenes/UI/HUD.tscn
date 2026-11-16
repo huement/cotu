@@ -89,11 +89,15 @@ texture = ExtResource("3_khvou")
 
 [node name="EnemyInRange" type="ColorRect" parent="MainHUDLayout"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 866.0
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -286.0
 offset_top = 22.0
-offset_right = 876.0
+offset_right = -276.0
 offset_bottom = 31.0
+grow_horizontal = 0
 pivot_offset = Vector2(49, 5)
 mouse_filter = 2
 mouse_behavior_recursive = 1
@@ -352,11 +356,19 @@ texture = ExtResource("18_ako3u")
 
 [node name="NineHud" parent="." instance=ExtResource("19_ako3u")]
 unique_name_in_owner = true
-offset_left = -1138.0
-offset_top = -451.0
-offset_right = -942.0
-offset_bottom = -297.0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 19.0
+offset_top = 191.0
+offset_right = 215.0
+offset_bottom = 345.0
+grow_horizontal = 1
+grow_vertical = 1
 scale = Vector2(0.8, 0.8)
+size_flags_horizontal = 2
 
 [node name="CompassLabel" type="Label" parent="."]
 unique_name_in_owner = true
@@ -387,12 +399,17 @@ theme_override_font_sizes/font_size = 16
 text = "MORN"
 
 [node name="GoldControl" type="Control" parent="."]
+unique_name_in_owner = true
 layout_mode = 3
-anchors_preset = 0
-offset_left = 1113.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -39.0
 offset_top = 41.0
-offset_right = 1153.0
+offset_right = 1.0
 offset_bottom = 81.0
+grow_horizontal = 0
+size_flags_horizontal = 10
 
 [node name="GoldLabel" type="Label" parent="GoldControl"]
 unique_name_in_owner = true

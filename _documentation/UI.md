@@ -47,3 +47,9 @@ Attached: UniversalPopup (search, rest, items, item actions, loot, lore, confirm
 character sheet, battle action bar + enemy target buttons, battle skills/spells popup, skill/spell detail
 popup, level-up menu, shop. The main menu, in-game menu, save slots, roster and shard menu already had
 their own keyboard focus.
+
+---
+
+## Mobile / touch layouts
+
+See [MOBILE_UI.md](MOBILE_UI.md): the `MobileUI` switch, the phone preview flag on world.tscn, MobileHUD and the tabbed character sheet.

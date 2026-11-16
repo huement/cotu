@@ -19,9 +19,13 @@ extends CanvasLayer
 @onready var battle_hud: Control = %BattleHUD as Control
 @onready var action_bar_anchor: Control = %ActionBarAnchor as Control
 @onready var edge_flash: TextureRect = %EdgeFlash as TextureRect
+var _edge_pulse_tween: Tween = null
+## Edge flash + heavy breathing + Nine warning when a party member is nearly dead (Scripts/UI/LowHealthAlert.gd).
+var low_health_alert: LowHealthAlert = null
 @onready var enemy_in_range: ColorRect = %EnemyInRange as ColorRect
 @onready var time_label: Label = %DaytimeLabel
 @onready var gold_label: Label = %GoldLabel as Label
+@onready var gold_control: Control = %GoldControl as Control
 
 # Strongly-typed reference to the player grid-walker
 @onready var player: Node3D = get_node("../Player") as Node3D
@@ -57,6 +61,9 @@ var _game_menu_label_tween: Tween = null
 @onready var shard_menu_button_label: Label = %ShardMenuButtonLabel as Label
 var shard_menu: HudShardMenu = null
 var _shard_menu_label_tween: Tween = null
+
+## Centre of the %EnemyInRange bar, in px from the right screen edge (inside the top bar art).
+const ENEMY_IN_RANGE_CENTER_FROM_RIGHT: float = 282.0
 
 var _current_enemy_tier: int = 0
 var _proximity_step_count: int = 0
@@ -106,6 +113,9 @@ func _ready() -> void:
 	mobile_hud = MobileHUD.new()
 	mobile_hud.name = "MobileHUDController"
 	add_child(mobile_hud)
+	low_health_alert = LowHealthAlert.new()
+	low_health_alert.name = "LowHealthAlert"
+	add_child(low_health_alert)
 	mobile_hud.setup(self)
 
 	SignalBus.time_period_changed.connect(_on_time_period_changed)
@@ -229,6 +239,7 @@ func _connect_signal_bus() -> void:
 	_connect_signal_safe(sb, &"combat_ended", _on_combat_ended)
 	_connect_signal_safe(sb, &"battle_hud_recovery_requested", _on_battle_hud_recovery_requested)
 	_connect_signal_safe(sb, &"edge_flash_requested", _on_edge_flash_requested)
+	_connect_signal_safe(sb, &"edge_pulse_requested", _on_edge_pulse_requested)
 	_connect_signal_safe(sb, &"hazard_slash_requested", play_hazard_slash)
 	_connect_signal_safe(sb, &"enemy_proximity_changed", _on_enemy_proximity_changed)
 	# 🎯 Intercept popup action buttons (e.g. REST, SEARCH, LOOK)
@@ -285,7 +296,7 @@ func _cache_exploration_ui_nodes() -> void:
 		game_menu_anchor,
 		shard_menu_anchor,
 		time_label, # %DaytimeLabel — must not float over BattleHUD
-		gold_label, # %GoldLabel — exploration wallet readout
+		gold_control, # %GoldLabel — exploration wallet readout
 		enemy_in_range,
 	]
 	candidates.append_array(_extra_exploration_nodes)
@@ -488,20 +499,22 @@ func _update_enemy_in_range_indicator(tier: int) -> void:
 		return
 
 	var target_width: float = 10.0
-	var target_x: float = 865.0
 	var target_color := Color("46e689") # Green (#46e689)
 
 	match tier:
 		1: # Nearby (3 to 5 tiles)
 			target_width = 50.0
-			target_x = 845.0
 			target_color = Color("ffff53") # Yellow (#ffff53)
 		2: # Close (1 to 2 tiles)
 			target_width = 100.0
-			target_x = 820.0
 			target_color = Color("ff3366") # Red (#ff3366)
 
 	target_color.a = 0.4 # 40% Opacity
+
+	# The bar grows around a fixed centre inside the top bar, which hangs off the RIGHT screen
+	# edge. Measure from that edge so it stays put on wide (phone) screens.
+	var layout_width: float = main_hud_layout.size.x if is_instance_valid(main_hud_layout) else get_viewport().get_visible_rect().size.x
+	var target_x: float = layout_width - ENEMY_IN_RANGE_CENTER_FROM_RIGHT - target_width * 0.5
 
 	var tween: Tween = create_tween().set_parallel(true)
 	tween.tween_property(enemy_in_range, "size:x", target_width, 0.2) \
@@ -570,10 +583,38 @@ func _handle_proximity_edge_flash(tier: int) -> void:
 			_proximity_step_count = 0
 
 
+## Breathing edge glow (boss entrances): fades in and out on a loop until period <= 0.
+func _on_edge_pulse_requested(color: Color, period: float) -> void:
+	if not is_instance_valid(edge_flash):
+		return
+	if is_instance_valid(_edge_pulse_tween):
+		_edge_pulse_tween.kill()
+	_edge_pulse_tween = null
+	if period <= 0.0:
+		if edge_flash.visible:
+			var out: Tween = create_tween()
+			out.tween_property(edge_flash, "modulate:a", 0.0, 0.4)
+			out.tween_callback(edge_flash.hide)
+		return
+	var peak: float = color.a if color.a > 0.0 else 0.75
+	var base: Color = color
+	base.a = 0.0
+	edge_flash.modulate = base
+	edge_flash.show()
+	var half: float = maxf(0.1, period * 0.5)
+	_edge_pulse_tween = create_tween().set_loops()
+	_edge_pulse_tween.tween_property(edge_flash, "modulate:a", peak, half) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_edge_pulse_tween.tween_property(edge_flash, "modulate:a", 0.05, half) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
 ## Helper to cleanly animate the edge flash vignette without overlapping tweens
 func _trigger_edge_flash(color: Color, duration: float = 0.4, max_alpha: float = 0.8) -> void:
 	if not is_instance_valid(edge_flash):
 		return
+	if is_instance_valid(_edge_pulse_tween) and _edge_pulse_tween.is_running():
+		return # a boss entrance pulse owns the edge right now
 
 	var flash_color: Color = color
 	flash_color.a = max_alpha

@@ -27,6 +27,23 @@ const ACTION_ATTACK: StringName = &"ATTACK"
 @onready var edge_flash: Control = %EdgeFlash as Control if has_node("%EdgeFlash") else null
 @onready var slice_overlay: ColorRect = %SliceOverlay as ColorRect if has_node("%SliceOverlay") else null
 
+@onready var hud_background: TextureRect = get_node_or_null(^"HUDBackground") as TextureRect
+@onready var action_bar_background: TextureRect = get_node_or_null(^"ActionBarBackground") as TextureRect
+
+## Mobile art: the battle frame split into a left and a right edge piece + its own bottom bar.
+const MOBILE_FRAME_LEFT: Texture2D = preload("res://ui/MOBILE/battlehud_left.svg")
+const MOBILE_FRAME_RIGHT: Texture2D = preload("res://ui/MOBILE/battlehud_right.svg")
+const MOBILE_ACTION_BAR_BG: Texture2D = preload("res://ui/MOBILE/battlehud_bottom.svg")
+const FRAME_DESIGN_SIZE: Vector2 = Vector2(1154, 650) ## ui/BATTLE/hud-bg.png
+const FRAME_PIECE_DESIGN_SIZE: Vector2 = Vector2(71.93, 648.81) ## battlehud_left/right.svg viewBox
+const ACTION_BAR_BG_DESIGN_SIZE: Vector2 = Vector2(1066, 54)
+## Gap from the bottom of the screen to the bottom of the (scaled) action buttons.
+const ACTION_BAR_BOTTOM_GAP: float = 15.0
+
+var _frame_left: TextureRect = null
+var _frame_right: TextureRect = null
+var _desktop_action_bar_bg: Texture2D = null
+
 const WATER_ENEMY_IDS: Array[String] = ["en_lake_tentacle", "en_lake_monster"]
 const WATER_SLICE_SHADER: Shader = preload("res://Shaders/water_slice.gdshader")
 const TURN_INFO_SCROLL_SPEED: float = 28.0 ## pixels per second when TurnInfo overflows
@@ -89,10 +106,141 @@ func _ready() -> void:
 		if not elemental_vfx.animation_finished.is_connected(_on_vfx_animation_finished):
 			elemental_vfx.animation_finished.connect(_on_vfx_animation_finished)
 	_setup_slice_overlay()
+	_setup_responsive_layout()
 
 	if is_instance_valid(SignalBus):
 		if SignalBus.has_signal(&"screen_slice_requested") and not SignalBus.screen_slice_requested.is_connected(play_screen_slice):
 			SignalBus.screen_slice_requested.connect(play_screen_slice)
+
+
+# ==============================================================================
+# RESPONSIVE LAYOUT (everything anchored - no "x px from the left")
+# ==============================================================================
+## Frame, action-bar background and action buttons are anchored and re-laid out whenever the
+## screen size changes, the HUD is shown, or a button appears/disappears. On touch layouts
+## (MobileUI.is_wanted()) the one-piece frame is swapped for the left/right edge pieces so it
+## fits any phone width.
+func _setup_responsive_layout() -> void:
+	if is_instance_valid(action_bar_background):
+		_desktop_action_bar_bg = action_bar_background.texture
+	_frame_left = _make_frame_piece("MobileFrameLeft", MOBILE_FRAME_LEFT)
+	_frame_right = _make_frame_piece("MobileFrameRight", MOBILE_FRAME_RIGHT)
+	get_viewport().size_changed.connect(_apply_responsive_layout)
+	visibility_changed.connect(func() -> void:
+		if visible:
+			_apply_responsive_layout())
+	if is_instance_valid(action_bar):
+		action_bar.minimum_size_changed.connect(_layout_action_bar)
+	_apply_responsive_layout.call_deferred()
+
+
+func _make_frame_piece(piece_name: String, tex: Texture2D) -> TextureRect:
+	var t := TextureRect.new()
+	t.name = piece_name
+	t.texture = tex
+	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	t.stretch_mode = TextureRect.STRETCH_SCALE
+	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	t.hide()
+	add_child(t)
+	# Draw behind everything else, like HUDBackground.
+	var behind: int = hud_background.get_index() + 1 if is_instance_valid(hud_background) else 0
+	move_child(t, behind)
+	return t
+
+
+func _apply_responsive_layout() -> void:
+	if not is_inside_tree():
+		return
+	var mobile: bool = MobileUI.is_wanted()
+	var insets: Dictionary = MobileUI.safe_insets(self)
+	_layout_frame(mobile, insets)
+	_layout_action_bar_background(mobile)
+	_layout_action_bar()
+
+
+func _layout_frame(mobile: bool, insets: Dictionary) -> void:
+	if is_instance_valid(hud_background):
+		hud_background.visible = not mobile
+		# Desktop: one-piece frame centred on screen.
+		hud_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		hud_background.stretch_mode = TextureRect.STRETCH_SCALE
+		hud_background.set_anchors_preset(Control.PRESET_CENTER)
+		hud_background.offset_left = -FRAME_DESIGN_SIZE.x * 0.5
+		hud_background.offset_right = FRAME_DESIGN_SIZE.x * 0.5
+		hud_background.offset_top = -FRAME_DESIGN_SIZE.y * 0.5
+		hud_background.offset_bottom = FRAME_DESIGN_SIZE.y * 0.5
+	if not is_instance_valid(_frame_left) or not is_instance_valid(_frame_right):
+		return
+	_frame_left.visible = mobile
+	_frame_right.visible = mobile
+	if not mobile:
+		return
+	# Full height, width kept in proportion. Left piece hugs the left edge, right piece the right.
+	var h: float = size.y if size.y > 0.0 else get_viewport_rect().size.y
+	var w: float = h * FRAME_PIECE_DESIGN_SIZE.x / FRAME_PIECE_DESIGN_SIZE.y
+	var left_in: float = float(insets["left"])
+	var right_in: float = float(insets["right"])
+	_frame_left.anchor_left = 0.0
+	_frame_left.anchor_right = 0.0
+	_frame_left.anchor_top = 0.0
+	_frame_left.anchor_bottom = 1.0
+	_frame_left.offset_left = left_in
+	_frame_left.offset_right = left_in + w
+	_frame_left.offset_top = 0.0
+	_frame_left.offset_bottom = 0.0
+	_frame_right.anchor_left = 1.0
+	_frame_right.anchor_right = 1.0
+	_frame_right.anchor_top = 0.0
+	_frame_right.anchor_bottom = 1.0
+	_frame_right.offset_left = -right_in - w
+	_frame_right.offset_right = -right_in
+	_frame_right.offset_top = 0.0
+	_frame_right.offset_bottom = 0.0
+
+
+func _layout_action_bar_background(mobile: bool) -> void:
+	if not is_instance_valid(action_bar_background):
+		return
+	var tex: Texture2D = MOBILE_ACTION_BAR_BG if mobile else _desktop_action_bar_bg
+	if tex != null:
+		action_bar_background.texture = tex
+	action_bar_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	action_bar_background.stretch_mode = TextureRect.STRETCH_SCALE
+	# Bottom-centre, fixed design size.
+	action_bar_background.anchor_left = 0.5
+	action_bar_background.anchor_right = 0.5
+	action_bar_background.anchor_top = 1.0
+	action_bar_background.anchor_bottom = 1.0
+	action_bar_background.offset_left = -ACTION_BAR_BG_DESIGN_SIZE.x * 0.5
+	action_bar_background.offset_right = ACTION_BAR_BG_DESIGN_SIZE.x * 0.5
+	action_bar_background.offset_top = -ACTION_BAR_BG_DESIGN_SIZE.y
+	action_bar_background.offset_bottom = 0.0
+	action_bar_background.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	action_bar_background.grow_vertical = Control.GROW_DIRECTION_BEGIN
+
+
+## Centres the ATTACK / DEFEND / SPELLS / ... row on the bottom edge. The row is scaled, so it is
+## scaled around its bottom-centre and stays centred however many buttons are visible.
+func _layout_action_bar() -> void:
+	if not is_instance_valid(action_bar):
+		return
+	var bar_size: Vector2 = action_bar.get_combined_minimum_size()
+	if bar_size.x <= 0.0:
+		return
+	action_bar.anchor_left = 0.5
+	action_bar.anchor_right = 0.5
+	action_bar.anchor_top = 1.0
+	action_bar.anchor_bottom = 1.0
+	action_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	action_bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	if action_bar is BoxContainer:
+		(action_bar as BoxContainer).alignment = BoxContainer.ALIGNMENT_CENTER
+	action_bar.offset_left = -bar_size.x * 0.5
+	action_bar.offset_right = bar_size.x * 0.5
+	action_bar.offset_top = -bar_size.y - ACTION_BAR_BOTTOM_GAP
+	action_bar.offset_bottom = -ACTION_BAR_BOTTOM_GAP
+	action_bar.pivot_offset = Vector2(bar_size.x * 0.5, bar_size.y)
 
 
 # ==============================================================================
@@ -335,12 +483,17 @@ func _setup_target_button_container() -> void:
 	_target_button_container.name = "TargetButtonContainer"
 	_target_button_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	_target_button_container.add_theme_constant_override("separation", 12)
+	_target_button_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_target_button_container)
 
-	_target_button_container.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_target_button_container.offset_left = -250.0
-	_target_button_container.offset_top = -180.0
-	_target_button_container.offset_right = 250.0
+	# Full width, just above the action bar. 112px fits the 96px large bar buttons.
+	_target_button_container.anchor_left = 0.0
+	_target_button_container.anchor_right = 1.0
+	_target_button_container.anchor_top = 1.0
+	_target_button_container.anchor_bottom = 1.0
+	_target_button_container.offset_left = 16.0
+	_target_button_container.offset_right = -16.0
+	_target_button_container.offset_top = -242.0
 	_target_button_container.offset_bottom = -130.0
 	_target_button_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_target_button_container.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -512,15 +665,21 @@ func _start_target_selection(action_type: StringName, alive_indices: Array[int])
 
 	if is_instance_valid(_target_button_container):
 		for enemy_idx in alive_indices:
-			var btn := Button.new()
-			btn.text = "TARGET ENEMY %c" % (65 + enemy_idx)
-			btn.custom_minimum_size = Vector2(140, 36)
+			var btn := BarButton.new()
+			btn.palette = BarButton.Palette.ARC
+			btn.size_tier = BarButton.SizeTier.SMALL
+			btn.shape = BarButton.Shape.STRETCH
+			btn.icon_kind = BarButton.IconKind.NONE
+			btn.label_text = _target_button_label(enemy_idx)
 			btn.pressed.connect(_on_target_selected.bind(enemy_idx))
 			_target_button_container.add_child(btn)
 
-		var back_btn := Button.new()
-		back_btn.text = "BACK"
-		back_btn.custom_minimum_size = Vector2(90, 36)
+		var back_btn := BarButton.new()
+		back_btn.palette = BarButton.Palette.ARC
+		back_btn.size_tier = BarButton.SizeTier.SMALL
+		back_btn.shape = BarButton.Shape.SQUARE
+		back_btn.label_text = ""
+		back_btn.icon_kind = BarButton.IconKind.BACK
 		back_btn.pressed.connect(_cancel_target_selection)
 		_target_button_container.add_child(back_btn)
 
@@ -550,6 +709,26 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## Same slot letter as the info dropdown: the first enemy is always A, even
+## after someone else dies. "Scavenger Cyclops" in slot C stays "Scavenge... C".
+func _target_button_label(enemy_idx: int) -> String:
+	var label: String = _enemy_name_at(enemy_idx).left(8) + "..."
+	if _current_enemy_resources.size() <= 1:
+		return label
+	return "%s %c" % [label, 65 + enemy_idx]
+
+
+func _enemy_name_at(enemy_idx: int) -> String:
+	if enemy_idx < 0 or enemy_idx >= _current_enemy_resources.size():
+		return "Enemy"
+	var res: Resource = _current_enemy_resources[enemy_idx]
+	if is_instance_valid(res) and "enemy_name" in res and res.get("enemy_name") != null:
+		var enemy_name: String = str(res.get("enemy_name")).strip_edges()
+		if not enemy_name.is_empty():
+			return enemy_name
+	return "Enemy"
+
+
 func _on_target_selected(enemy_idx: int) -> void:
 	var current_slot: int = _active_slot_index
 	var action: StringName = _pending_target_action
@@ -560,6 +739,8 @@ func _on_target_selected(enemy_idx: int) -> void:
 func _clear_target_buttons() -> void:
 	if is_instance_valid(_target_button_container):
 		for child in _target_button_container.get_children():
+			if child is KeyboardModal:
+				continue
 			child.queue_free()
 		_target_button_container.hide()
 
@@ -867,7 +1048,7 @@ func on_combat_started(enemy_payload: Variant, player_party: Array, _enemy_facin
 
 		if is_instance_valid(res):
 			if "max_health" in res and res.get("max_health") != null:
-				hp = int(res.get("max_health"))
+				hp = CombatMath.enemy_max_health_at_level(res) # sheet HP grown to the enemy's level
 
 		_enemy_max_hps[e_id] = hp
 		_enemy_current_hps[e_id] = hp

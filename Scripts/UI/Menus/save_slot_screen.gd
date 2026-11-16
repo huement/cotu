@@ -2,7 +2,8 @@
 class_name SaveSlotScreen
 extends Control
 ## The list of save slots (GameState.SAVE_SLOT_COUNT of them), opened from the main menu.
-##   * Mode.LOAD (Load Game): pick a used slot to load it. DELETE (press twice) empties a slot.
+##   * Mode.LOAD (Load Game): press a used slot to select it, then CONFIRM to load it.
+##     DELETE (press twice) empties a slot.
 ##   * Mode.PICK_NEW (New Game when every slot is used): pick the slot the new game replaces
 ##     (press twice). Emits `slot_chosen`, then closes.
 ##   * Mode.SAVE (in-game menu > Save > Other Slot): pick any slot to save into. An empty slot or
@@ -29,6 +30,12 @@ var _status: Label = null
 var _back_button: Button = null
 ## Slot whose DELETE / REPLACE button was pressed once and now waits for the second press.
 var _armed_slot: int = 0
+## Mode.LOAD: the slot picked in the list (0 = none). CONFIRM loads it.
+var _selected_slot: int = 0
+## Mode.LOAD: the CONFIRM button (disabled until a slot is selected).
+var _confirm_button: Button = null
+## Mode.LOAD: each slot's main row button, to show which one is selected.
+var _slot_buttons: Dictionary = {}
 
 
 func _ready() -> void:
@@ -106,6 +113,12 @@ func _build() -> void:
 	_back_button = ShardsMenuStyle.make_row_button("BACK")
 	_back_button.pressed.connect(close)
 	footer.add_child(_back_button)
+	if mode == Mode.LOAD:
+		_confirm_button = ShardsMenuStyle.make_row_button("CONFIRM")
+		_confirm_button.custom_minimum_size = Vector2(160.0, 0.0)
+		_confirm_button.disabled = true
+		_confirm_button.pressed.connect(_on_confirm_pressed)
+		footer.add_child(_confirm_button)
 	_status = Label.new()
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -120,6 +133,7 @@ func _rebuild_rows() -> void:
 		child.queue_free()
 
 	var first_focus: Button = null
+	_slot_buttons.clear()
 	for slot: int in range(1, GameState.SAVE_SLOT_COUNT + 1):
 		var save: SaveGame = GameState.read_slot(slot)
 		var row := HBoxContainer.new()
@@ -141,7 +155,11 @@ func _rebuild_rows() -> void:
 		row.add_child(main)
 
 		if mode == Mode.LOAD:
-			main.pressed.connect(_on_load_pressed.bind(slot))
+			# Pressing a save only selects it (highlighted); CONFIRM loads it.
+			main.toggle_mode = true
+			main.button_pressed = slot == _selected_slot and save != null
+			main.pressed.connect(_on_slot_selected.bind(slot))
+			_slot_buttons[slot] = main
 			var delete := ShardsMenuStyle.make_row_button("SURE?" if _armed_slot == slot else "DELETE", null, ShardsMenuStyle.COLOR_DANGER)
 			delete.custom_minimum_size = Vector2(110.0, 64.0)
 			delete.disabled = save == null
@@ -158,14 +176,38 @@ func _rebuild_rows() -> void:
 		if first_focus == null and not main.disabled:
 			first_focus = main
 
+	if mode == Mode.LOAD:
+		# Drop a selection whose save is gone (deleted / damaged).
+		if not _slot_buttons.has(_selected_slot) or (_slot_buttons[_selected_slot] as Button).disabled:
+			_selected_slot = 0
+		_confirm_button.disabled = _selected_slot == 0
+		if _selected_slot != 0:
+			first_focus = _slot_buttons[_selected_slot]
+
 	(first_focus if first_focus != null else _back_button).grab_focus.call_deferred()
 
 
 # ==============================================================================
 # Actions
 # ==============================================================================
-func _on_load_pressed(slot: int) -> void:
+## Mode.LOAD: marks `slot` as the one CONFIRM will load (only one row stays highlighted).
+func _on_slot_selected(slot: int) -> void:
 	_play_click()
+	_selected_slot = slot
+	for other: int in _slot_buttons:
+		(_slot_buttons[other] as Button).set_pressed_no_signal(other == slot)
+	_confirm_button.disabled = false
+	_status.text = "Slot %d selected. Press CONFIRM to load it." % slot
+	# Keyboard / controller: the next press confirms.
+	_confirm_button.grab_focus()
+
+
+func _on_confirm_pressed() -> void:
+	if _selected_slot == 0:
+		return
+	_play_click()
+	var slot: int = _selected_slot
+	_confirm_button.disabled = true # no double loads while the loading screen comes up
 	if not SessionFlow.load_slot(get_tree(), slot):
 		_status.text = "Slot %d couldn't be loaded - the file is missing or damaged." % slot
 		_rebuild_rows()
@@ -179,6 +221,8 @@ func _on_delete_pressed(slot: int) -> void:
 	else:
 		GameState.delete_slot(slot)
 		_armed_slot = 0
+		if _selected_slot == slot:
+			_selected_slot = 0
 		_status.text = "Slot %d deleted." % slot
 	_rebuild_rows()
 

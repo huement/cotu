@@ -69,6 +69,8 @@ signal camera_shake_requested(trauma: float)
 signal elemental_vfx_requested(element: ItemData.ElementalBase)
 signal spell_vfx_requested(anim_name: String, element: ItemData.ElementalBase)
 signal edge_flash_requested(color: Color, duration: float)
+## Slow "breathing" edge glow that loops until stopped. period <= 0 stops it (fades out).
+signal edge_pulse_requested(color: Color, period: float)
 signal audio_effect_requested(effect_name: StringName)
 signal target_vfx_requested(enemy_id: String, vfx_frames: SpriteFrames, trauma_amount: float)
 signal screen_slice_requested()
@@ -84,6 +86,14 @@ signal throw_animation_finished
 
 ## Lore object scare: aura overlay + image flash (see LoreScareFX)
 signal lore_scare_requested(data: Dictionary)
+
+# --- Boss Cutscenes (Scripts/Cutscenes/BossVillainCutscene.gd) ---
+## A boss asks for its villain cutscene. `ending` is a BossCutsceneEnding: the boss's dialog and
+## what happens to the party afterwards (drain / forced fight / travel). null = cutscene only.
+signal boss_cutscene_requested(cutscene_id: String, anchor_position: Vector3, ending: Resource)
+## The cutscene tells the boss placed in the level to show itself (true) or vanish again (false).
+signal boss_cutscene_villain_visible(cutscene_id: String, shown: bool)
+signal boss_cutscene_finished(cutscene_id: String)
 
 # Logging / Displaying Messages
 signal log_message_emitted(formatted_text: String, color_hex_or_name: String)

@@ -166,12 +166,27 @@ func _on_combat_started(enemy_data_or_group: Variant, player_party: Array, _enem
 	if _check_battle_state():
 		return
 
+	var ambushers: Array[Combatant] = []
+	var already_full: Array[Combatant] = []
 	for c: Combatant in combatants:
-		c.meter = minf(MAX_TURN_METER, c.get_effective_speed() * 5.0)
+		var seized: bool = (not c.is_player) and CombatMath.seizes_opening_initiative(c.ref)
+		c.meter = CombatMath.opening_meter(c.get_effective_speed(), seized, MAX_TURN_METER)
 		SignalBus.turn_meter_updated.emit(c.id, c.meter / MAX_TURN_METER)
 		GameLogger.combat("%s ready: ATK %d  DEF %d  SPD %.0f  HP %d/%d  MRES %.0f%%" % [
 			c.name, c.get_effective_attack(), c.get_effective_defense(), c.get_effective_speed(),
 			c.current_hp, c.max_hp, c.get_resist(ItemData.EffectElement.MAGIC) * 100.0])
+		if c.meter < MAX_TURN_METER or c.current_hp <= 0:
+			continue
+		# A full opening meter never ticks (the tick skips anyone already at the cap), so queue it now.
+		if seized:
+			ambushers.append(c)
+		else:
+			already_full.append(c)
+	for c: Combatant in ambushers:
+		turn_queue.append(c)
+		GameLogger.combat("%s seizes the initiative!" % c.name)
+	for c: Combatant in already_full:
+		turn_queue.append(c)
 
 
 func _reset_battle_state() -> void:
@@ -300,8 +315,15 @@ func _apply_equipped_granted_statuses(c: Combatant, equipped: Array[Dictionary])
 
 
 func _build_enemy_combatant(raw_e_data: Resource, e_idx: int, pack_size: int) -> Combatant:
-	# Duplicate so combat mutations never touch the source .tres
+	# Duplicate so combat mutations never touch the source .tres.
+	# Resource.duplicate does not copy metadata, so an ambush flag has to be put back on the copy.
+	var seized_initiative: bool = CombatMath.seizes_opening_initiative(raw_e_data)
 	var e_data: Resource = raw_e_data.duplicate(true)
+	if seized_initiative:
+		e_data.set_meta(CombatMath.AMBUSH_META, true)
+	# Sheet stats are level-1 stats; grow them to this enemy's level (HP, attack, defense, speed,
+	# magic, mana, XP / gold). Blob bosses arrive already scaled and are skipped.
+	CombatMath.apply_enemy_level(e_data)
 
 	var e_speed: float = float(e_data.get("speed")) if "speed" in e_data else 10.0
 	var e_max_hp: int = int(e_data.get("max_health")) if "max_health" in e_data else (int(e_data.get("max_hp")) if "max_hp" in e_data else 90)
@@ -318,9 +340,7 @@ func _build_enemy_combatant(raw_e_data: Resource, e_idx: int, pack_size: int) ->
 	elif "strength" in e_data:
 		e_atk = int(e_data.get("strength"))
 	var e_def: int = int(e_data.get("defense")) if "defense" in e_data else 8
-	var e_level: int = int(e_data.get("base_level")) if "base_level" in e_data else 1
-	var level_mult: float = CombatMath.enemy_level_damage_mult(e_level)
-	e_atk = maxi(1, roundi(float(e_atk) * level_mult))
+	e_atk = maxi(1, e_atk)
 
 	var e_name: String = str(e_data.get("enemy_name")) if e_data.get("enemy_name") != null else "Enemy"
 	if pack_size > 1:
@@ -332,7 +352,7 @@ func _build_enemy_combatant(raw_e_data: Resource, e_idx: int, pack_size: int) ->
 	if "magic_resist" in e_data:
 		c.element_resists[ItemData.EffectElement.MAGIC] = float(e_data.get("magic_resist"))
 	var e_magic: int = int(e_data.get("magic_power")) if "magic_power" in e_data else 0
-	c.magic_power = maxi(0, roundi(float(e_magic) * level_mult))
+	c.magic_power = maxi(0, e_magic)
 	c.can_cast_spells = bool(e_data.get("can_cast_spells")) if "can_cast_spells" in e_data else false
 	if c.can_cast_spells:
 		c.spells = _resolve_enemy_spells(e_data)
@@ -499,9 +519,16 @@ func _on_player_action_selected(slot_index: int, action_type: StringName, target
 
 func _execute_physical_attack(attacker: Combatant, target_index: int, serial: int) -> void:
 	var attack_type: String = attacker.attack_type
+	# Nothing in either hand any more (flasks/arrows ran out, weapon removed) -> fists.
+	if attacker.is_player and not _has_weapon_equipped(attacker):
+		attack_type = "UNARMED"
+		attacker.attack_type = "UNARMED"
+	# Decide flask-throw vs bow BEFORE ammo is used: throwing the last flask unequips it.
+	var throws_flasks: bool = attacker.is_player and attack_type == "RANGED" and _throws_flasks(attacker)
 	if attacker.is_player and attack_type == "RANGED" and not _consume_ranged_ammo(attacker):
 		GameLogger.combat("%s has no ammo! Falling back to an unarmed attack." % attacker.name)
 		attack_type = "UNARMED"
+		throws_flasks = false
 
 	var target: Combatant = _pick_opponent(attacker, target_index)
 	if target == null:
@@ -509,9 +536,7 @@ func _execute_physical_attack(attacker: Combatant, target_index: int, serial: in
 
 	# 1. Start the swing / attack animation (flask throwers are RANGED but get the potion throw)
 	if attacker.is_player:
-		var swing_type: String = (
-			"POTION_THROW" if attack_type == "RANGED" and _throws_flasks(attacker) else attack_type
-		)
+		var swing_type: String = "POTION_THROW" if throws_flasks else attack_type
 		_emit_weapon_swing(attacker, swing_type)
 	else:
 		SignalBus.enemy_attack_started.emit(attacker.id)
@@ -1114,6 +1139,12 @@ func _is_guarding(target: Combatant) -> bool:
 	return target.is_player and guarding_characters.has(target.slot_index)
 
 
+## Smallest hit an enemy can land on a party member (see _apply_damage_to_combatant).
+const MIN_ENEMY_HIT_DAMAGE: int = 2
+## Chance that a floored hit does MIN_ENEMY_HIT_DAMAGE + 1 instead.
+const MIN_ENEMY_HIT_BONUS_CHANCE: float = 0.25
+
+
 ## hit_kind: BLADE / BASH / RANGED / MAGIC / UNARMED for weapon hits, "SPELL" for magic, "DOT" for ticks.
 func _apply_damage_to_combatant(target: Combatant, damage: int, attacker: Combatant = null, source: Resource = null, is_magic: bool = false, hit_kind: String = "") -> void:
 	if target == null or target.current_hp <= 0 or damage <= 0:
@@ -1127,6 +1158,12 @@ func _apply_damage_to_combatant(target: Combatant, damage: int, attacker: Combat
 	if final_damage <= 0:
 		_toast("%s's shield absorbed the hit!" % target.name, false)
 		return
+
+	# Enemy hits on the party always sting: a 1-damage hit becomes 2 (25% chance of 3).
+	# Damage-over-time ticks keep their own numbers.
+	if target.is_player and attacker != null and not attacker.is_player and hit_kind != "DOT" \
+			and final_damage < MIN_ENEMY_HIT_DAMAGE:
+		final_damage = MIN_ENEMY_HIT_DAMAGE + (1 if randf() < MIN_ENEMY_HIT_BONUS_CHANCE else 0)
 
 	target.current_hp = max(0, target.current_hp - final_damage)
 	_sync_hp_to_ref(target)
@@ -1174,6 +1211,7 @@ func _on_combatant_defeated(target: Combatant) -> void:
 	var death_msg: String = "☠️ %s HAS BEEN DEFEATED!" % target.name.to_upper()
 	GameLogger.combat(death_msg)
 	_toast(death_msg, false)
+	GameState.enemies_killed += 1
 	var e_type: String = ""
 	if is_instance_valid(target.ref):
 		if "enemy_type" in target.ref and not str(target.ref.get("enemy_type")).is_empty():
@@ -1207,7 +1245,21 @@ func _emit_throw_anim(anim_name: String) -> void:
 		SignalBus.weapon_swing_requested.emit(anim_name)
 
 
+## True when the party member holds anything in either hand.
+func _has_weapon_equipped(attacker: Combatant) -> bool:
+	if not is_instance_valid(attacker.ref) or not attacker.ref.has_method("get_equipped_item"):
+		return true # can't tell - keep whatever attack type they had
+	for hand: String in ["RIGHT_HAND", "LEFT_HAND"]:
+		if is_instance_valid(attacker.ref.call("get_equipped_item", hand)):
+			return true
+	return false
+
+
 func _emit_weapon_swing(attacker: Combatant, attack_type: String) -> void:
+	# Unarmed (or nothing in hand) always shows the fist, whatever they used to fight with.
+	if attack_type == "UNARMED" or (attacker.is_player and not _has_weapon_equipped(attacker)):
+		SignalBus.weapon_swing_requested.emit("unarmed_swing")
+		return
 	var weapon: Resource = _get_weapon_resource(attacker, attack_type)
 	if is_instance_valid(weapon) and "swing_anim" in weapon:
 		var custom: String = str(weapon.get("swing_anim")).strip_edges()

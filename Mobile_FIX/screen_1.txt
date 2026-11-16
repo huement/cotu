@@ -1,0 +1,18 @@
++-------------------------------------------------+-------------------------------------------------+
+|  1 | PLAYER INFO (Orange)                       |  5 | STAT POINTS (Yellow)                       |
+|  [Portrait]  NYX (Bengal)         LVL 1 SPARTAN |                                                 |
+|              XP: [========-------] 0 / 800      |    STATS                  FIGHT                 |
+|  HEALTH: 54 / 54        MANA: 11 / 11           |    STR: 16                ACC: 86%              |
+|  ATK TYPE: BLADE        [ FRONT ROW ] (Toggle)  |    INT: 5                 LH:  1d8              |
++-------------------------------------------------+    PIE: 6                 RH:  1d8 (+8)         |
+|  2 | EQUIPPED GEAR (Green) — LOAD OUT           |    VIT: 18                CRT: 7%               |
+|  [ Body Armor ]          [ Arms Armor ]         |    DEX: 10                DMG: +10 (+8)         |
+|  [ Legs Armor ]          [ Feet Armor ]         |    SPD: 8 (-5)            ARM: 50 (+50)         |
+|  [ Left Hand: EMPTY ]    [ Right Hand: Sword ]  |    PER: 3                                       |
+|  [ Accessory 1: EMPTY ]  [ Accessory 2: EMPTY ] |    KAR: 10                                      |
++-------------------------------------------------+                                                 |
+|  3 | STATUS EFFECTS (Blue)                      |    [ + ALLOCATE STAT POINTS ] (if unspent > 0)  |
+|  STATUS:  [ 🗡️ ]  (tap icon for effect info)    |                                                 |
++-------------------------------------------------+-------------------------------------------------+
+| [ CLOSE ]   [ ▼ 1. NYX — LVL 1 SPARTAN ]        |  [ *MAIN* ]   [ INVENTORY ]   [ SKILLS/SPELLS ] |
++-------------------------------------------------+-------------------------------------------------+

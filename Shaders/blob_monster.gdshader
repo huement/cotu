@@ -24,7 +24,45 @@ uniform vec4 hit_color : source_color = vec4(1.0, 0.15, 0.15, 1.0);
 uniform float attack_charge : hint_range(0.0, 1.0) = 0.0;
 uniform vec4 charge_color : source_color = vec4(1.0, 0.55, 0.1, 1.0);
 
+// --- Arcanum Corruption (optional) ---
+// The green energy of the Arcanum Shards (Shaders/arcanum_shard.gdshader): veins crawling over the
+// skin, a pulse, a flicker and a green rim. 0 = off (normal slime). Set from BlobBossJuice.
+group_uniforms arcanum;
+uniform float arcanum_strength : hint_range(0.0, 2.0) = 0.0;
+uniform vec3 energy_color : source_color = vec3(0.25, 1.0, 0.3);
+uniform vec3 hot_color : source_color = vec3(0.9, 1.0, 0.75);
+uniform vec3 arcanum_rim_color : source_color = vec3(0.45, 1.0, 0.35);
+uniform float vein_glow : hint_range(0.0, 8.0) = 2.0;
+uniform float vein_scale : hint_range(0.2, 6.0) = 1.4;
+uniform float vein_sharpness : hint_range(1.0, 16.0) = 7.0;
+uniform float flow_speed : hint_range(0.0, 4.0) = 0.6;
+uniform float pulse_speed : hint_range(0.0, 10.0) = 2.2;
+uniform float arcanum_rim_power : hint_range(0.5, 8.0) = 2.5;
+uniform float arcanum_rim_strength : hint_range(0.0, 6.0) = 1.2;
+group_uniforms;
+
+varying vec3 obj_pos;
+
+float arc_hash(vec3 p) {
+	p = fract(p * 0.3183099 + 0.1);
+	p *= 17.0;
+	return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float arc_noise(vec3 x) {
+	vec3 i = floor(x);
+	vec3 f = fract(x);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(
+		mix(mix(arc_hash(i), arc_hash(i + vec3(1.0, 0.0, 0.0)), f.x),
+			mix(arc_hash(i + vec3(0.0, 1.0, 0.0)), arc_hash(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+		mix(mix(arc_hash(i + vec3(0.0, 0.0, 1.0)), arc_hash(i + vec3(1.0, 0.0, 1.0)), f.x),
+			mix(arc_hash(i + vec3(0.0, 1.0, 1.0)), arc_hash(i + vec3(1.0, 1.0, 1.0)), f.x), f.y),
+		f.z);
+}
+
 void vertex() {
+	obj_pos = VERTEX;
 	// Living gelatinous wobble; expands and speeds up when charging an attack
 	float current_speed = wobble_speed * (1.0 + attack_charge * 1.5);
 	float wave = sin(TIME * current_speed + (VERTEX.x + VERTEX.y + VERTEX.z) * 3.5);
@@ -53,6 +91,22 @@ void fragment() {
 	// 4. Emissive Build-up (Rim base + Attack Charge + Hit Reaction)
 	vec3 emissive = rim_color.rgb * fresnel * 0.35;
 	emissive = mix(emissive, charge_color.rgb * 2.2, attack_charge);
+
+	// Arcanum corruption: same energy veins / pulse / rim as the shards
+	if (arcanum_strength > 0.0) {
+		vec3 p = obj_pos * vein_scale;
+		float n1 = arc_noise(p + vec3(0.0, -TIME * flow_speed, 0.0));
+		float n2 = arc_noise(p * 2.1 + vec3(TIME * flow_speed * 0.7, 0.0, TIME * 0.3));
+		float veins = pow(1.0 - abs(n1 * 2.0 - 1.0), vein_sharpness)
+			+ 0.5 * pow(1.0 - abs(n2 * 2.0 - 1.0), vein_sharpness + 2.0);
+		float pulse = 0.65 + 0.35 * sin(TIME * pulse_speed + obj_pos.y * 1.5);
+		float flicker = 0.85 + 0.15 * arc_noise(vec3(TIME * 9.0, 0.0, 0.0));
+		float arc_fresnel = pow(1.0 - clamp(abs(dot(normalize(NORMAL), normalize(VIEW))), 0.0, 1.0), arcanum_rim_power);
+		vec3 glow = energy_color * veins * vein_glow * pulse;
+		glow += hot_color * veins * veins * 0.6;
+		glow += arcanum_rim_color * arc_fresnel * arcanum_rim_strength;
+		emissive += glow * flicker * arcanum_strength * (1.0 - attack_charge * 0.5);
+	}
 
 	// Hit flash completely overrides surface and spikes brightness
 	ALBEDO = mix(ALBEDO, hit_color.rgb, hit_flash);

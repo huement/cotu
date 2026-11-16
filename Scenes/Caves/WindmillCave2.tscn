@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene load_steps=28 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Environment/CaveLevel.gd" id="1_i5vy6"]
 [ext_resource type="Script" path="res://Scripts/WorldSceneInitializerModule.gd" id="2_riqpj"]
@@ -24,6 +24,8 @@
 [ext_resource type="Resource" path="res://Data/Items/Consumables/PotRevive.tres" id="22_k60md"]
 [ext_resource type="Resource" path="res://Data/Items/Consumables/PotCatnip.tres" id="23_aan8w"]
 [ext_resource type="Resource" path="res://Data/Items/Equipment/ApprenticeBodyGarb.tres" id="24_0oruh"]
+[ext_resource type="Resource" uid="uid://dtllye1aoin33" path="res://Data/Enemies/EnGhost.tres" id="25_ghost"]
+[ext_resource type="Script" uid="uid://cdkuyybx3dwf0" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="26_ambush"]
 
 [sub_resource type="Environment" id="Environment_l7kis"]
 background_mode = 1
@@ -248,3 +250,31 @@ script = ExtResource("16_gc27x")
 guaranteed_items = Array[ExtResource("17_7qdah")]([ExtResource("24_0oruh"), ExtResource("22_k60md")])
 gold_amount = 120
 object_id = "windmill_cave_2_chest_6"
+
+[node name="Ghosts" type="Node3D" parent="."]
+
+[node name="Ghost1" parent="Ghosts" instance=ExtResource("9_rilrv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 0, 27)
+data = ExtResource("25_ghost")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.75
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost1"]
+script = ExtResource("26_ambush")
+haunt_radius_tiles = 15
+
+[node name="Ghost2" parent="Ghosts" instance=ExtResource("9_rilrv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51, 0, 55)
+data = ExtResource("25_ghost")
+pack_size = 1
+model_scale = Vector3(1, 1, 1)
+vertical_offset = -1.0
+enemy_type = "ghost"
+stat_multiplier = 0.75
+
+[node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost2"]
+script = ExtResource("26_ambush")
+haunt_radius_tiles = 15

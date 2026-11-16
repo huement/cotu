@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://swbgq4doywcc"]
 
-[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://Data/Items/armor.png" id="1_6dmkb"]
+[ext_resource type="Texture2D" uid="uid://qexy21benoma" path="res://ui/icons/items/armor.png" id="1_6dmkb"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="2_d0m6m"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_d0m6m")
 item_id = "armor_warden_advanced_arms"
 item_name = "Recon Arms Armor"
 description = "Advanced leather armor for the Warden class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_6dmkb")
 item_type = 2
 equipment_slot = 2

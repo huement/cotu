@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bqglfv42uu4sb"]
 
-[ext_resource type="Texture2D" path="res://Data/Items/armor.png" id="1_4nxmt"]
+[ext_resource type="Texture2D" path="res://ui/icons/items/armor.png" id="1_4nxmt"]
 [ext_resource type="Script" path="res://Scripts/Resources/item_data.gd" id="2_mnv2n"]
 
 [resource]
@@ -8,7 +8,7 @@ script = ExtResource("2_mnv2n")
 item_id = "armor_psynic_regular_head"
 item_name = "Mind-Silk Head Garb"
 description = "Regular robe armor for the Psynic class."
-icon_path = "res://Data/Items/armor.png"
+icon_path = "res://ui/icons/items/armor.png"
 icon = ExtResource("1_4nxmt")
 item_type = 2
 equipment_slot = 7

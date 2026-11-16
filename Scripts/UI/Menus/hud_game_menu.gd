@@ -14,12 +14,12 @@ const HELP_SCREEN_SCENE: PackedScene = preload("res://Scenes/GameMenus/HelpScree
 
 ## id, label, icon and whether it is a "danger" (red accent) action. Order = left to right.
 const MENU_ENTRIES: Array[Dictionary] = [
-	{"id": &"quit", "label": "QUIT", "icon": preload("res://ui/icons/stop_sign.svg"), "danger": true},
-	{"id": &"settings", "label": "SETTINGS", "icon": preload("res://ui/icons/cog.svg"), "danger": false},
-	{"id": &"save", "label": "SAVE GAME", "icon": preload("res://ui/icons/database.svg"), "danger": false},
-	{"id": &"party", "label": "PARTY", "icon": preload("res://ui/icons/chess_knight.svg"), "danger": false},
-	{"id": &"load", "label": "LOAD GAME", "icon": preload("res://ui/icons/book.svg"), "danger": false},
-	{"id": &"help", "label": "HELP", "icon": preload("res://ui/icons/feather.svg"), "danger": false},
+	{"id": &"quit", "label": "QUIT", "icon": preload("res://ui/icons/menu/stop_sign.svg"), "danger": true},
+	{"id": &"settings", "label": "SETTINGS", "icon": preload("res://ui/icons/menu/cog.svg"), "danger": false},
+	{"id": &"save", "label": "SAVE GAME", "icon": preload("res://ui/icons/menu/database.svg"), "danger": false},
+	{"id": &"party", "label": "PARTY", "icon": preload("res://ui/icons/menu/chess_knight.svg"), "danger": false},
+	{"id": &"load", "label": "LOAD GAME", "icon": preload("res://ui/icons/menu/book.svg"), "danger": false},
+	{"id": &"help", "label": "HELP", "icon": preload("res://ui/icons/menu/feather.svg"), "danger": false},
 ]
 
 @onready var _root: Control = %Root as Control

@@ -17,10 +17,12 @@ extends Node
 ## Art: ui/MOBILE/*.svg (normal + pressed_*). Sizes below are the SVG viewBox sizes, so the layout
 ## doesn't change if the SVGs are re-imported at a different svg/scale (use 2-3 for sharp phone screens).
 ##
-## Preview on desktop: debug menu (`) > MOBILE HUD, or Project Settings > shards/hud/force_mobile_hud.
+## Preview on desktop: world.tscn > MapManager > Mobile Preview, debug menu (`) > Mobile UI, or
+## Project Settings > shards/hud/force_mobile_hud. The on/off decision lives in MobileUI (shared
+## with the other touch layouts; all of them are listed in _documentation/MOBILE_UI.md).
 ## In a preview the mouse drives the D-pad (Input.emulate_touch_from_mouse).
 
-const FORCE_SETTING: String = "shards/hud/force_mobile_hud"
+const FORCE_SETTING: String = MobileUI.FORCE_SETTING
 const ART: String = "res://ui/MOBILE/"
 
 ## [action, normal svg, pressed svg, position, design size] - positions in px from the pad's top-left.
@@ -37,7 +39,10 @@ const WIRES_POS: Vector2 = Vector2(36, 100)
 const WIRES_SIZE: Vector2 = Vector2(179.89, 111)
 const DPAD_MARGIN: Vector2 = Vector2(12, 14)
 
-const PORTRAIT_CELL: Vector2 = Vector2(54, 62)
+const PORTRAIT_CELL: Vector2 = Vector2(54, 62) ## desktop portrait size
+## Touch layout makes the portraits and the SEARCH / REST / ITEMS toolbar bigger than on desktop.
+const PORTRAIT_SCALE: float = 1.3
+const TOOLBAR_SCALE: float = 1.25
 const PORTRAIT_GAP: Vector2 = Vector2(16, 12)
 const PANEL_MARGIN: Vector2 = Vector2(12, 8)
 const PANEL_TOP_SIZE: Vector2 = Vector2(197.83, 6.81)
@@ -61,11 +66,7 @@ var _old_emulate_touch: bool = false
 
 ## True on phones / tablets (and touch browsers), or when forced for a desktop preview.
 static func is_wanted() -> bool:
-	if OS.has_feature("mobile"):
-		return true
-	if OS.has_feature("web") and DisplayServer.is_touchscreen_available():
-		return true
-	return bool(ProjectSettings.get_setting(FORCE_SETTING, false))
+	return MobileUI.is_wanted()
 
 
 func setup(hud: DungeonHUD) -> void:
@@ -147,7 +148,7 @@ func _build() -> void:
 
 
 func _build_party_panel() -> void:
-	var grid_w: float = PORTRAIT_CELL.x * 3.0 + PORTRAIT_GAP.x * 2.0
+	var grid_w: float = PORTRAIT_CELL.x * PORTRAIT_SCALE * 3.0 + PORTRAIT_GAP.x * 2.0
 	var bar_w: float = grid_w + 16.0
 	var panel := VBoxContainer.new()
 	panel.name = "PartyPanel"
@@ -168,7 +169,7 @@ func _build_party_panel() -> void:
 	panel.add_child(bottom_row)
 	for i: int in 6:
 		var cell := Control.new()
-		cell.custom_minimum_size = PORTRAIT_CELL
+		cell.custom_minimum_size = PORTRAIT_CELL * PORTRAIT_SCALE
 		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_cells.append(cell)
 	# Front row (0-2) at the bottom, back row (3-5) on top.
@@ -254,12 +255,14 @@ func _move_portraits_in() -> void:
 	# Remember every home first (moving one shifts the others' indices).
 	for p: Control in _hud.portrait_slots:
 		if is_instance_valid(p):
-			_portrait_home.append({ "node": p, "parent": p.get_parent(), "index": p.get_index() })
+			_portrait_home.append({ "node": p, "parent": p.get_parent(), "index": p.get_index(), "scale": p.scale })
 	for i: int in mini(_hud.portrait_slots.size(), _cells.size()):
 		var p: Control = _hud.portrait_slots[i]
 		if is_instance_valid(p):
 			p.reparent(_cells[i], false)
 			p.position = Vector2.ZERO
+			p.pivot_offset = Vector2.ZERO
+			p.scale = Vector2.ONE * PORTRAIT_SCALE
 
 
 func _move_portraits_out() -> void:
@@ -269,6 +272,7 @@ func _move_portraits_out() -> void:
 		var parent: Node = home["parent"] as Node
 		if is_instance_valid(p) and is_instance_valid(parent):
 			p.reparent(parent, false)
+			p.scale = home.get("scale", Vector2.ONE) as Vector2
 			parent.move_child(p, mini(int(home["index"]), parent.get_child_count() - 1))
 	_portrait_home.clear()
 
@@ -282,11 +286,15 @@ func _move_actions_in() -> void:
 	var bar: Control = _action_toolbar()
 	if bar == null:
 		return
-	_actions_home = { "parent": bar.get_parent(), "index": bar.get_index(), "position": bar.position }
+	_actions_home = { "parent": bar.get_parent(), "index": bar.get_index(), "position": bar.position,
+		"scale": bar.scale, "pivot": bar.pivot_offset }
 	bar.reparent(_actions_anchor, false)
 	# Centre it on the anchor, sitting on the bottom edge. Same spacing as desktop.
 	var sz: Vector2 = bar.custom_minimum_size
 	bar.position = Vector2(-sz.x * 0.5, -sz.y - ACTION_BOTTOM_MARGIN)
+	# Grow around the bottom-centre so it stays centred and on the same bottom margin.
+	bar.pivot_offset = Vector2(sz.x * 0.5, sz.y)
+	bar.scale = Vector2.ONE * TOOLBAR_SCALE
 
 
 func _move_actions_out() -> void:
@@ -295,4 +303,6 @@ func _move_actions_out() -> void:
 		return
 	bar.reparent(_actions_home["parent"] as Node, false)
 	bar.position = _actions_home["position"] as Vector2
+	bar.scale = _actions_home.get("scale", Vector2.ONE) as Vector2
+	bar.pivot_offset = _actions_home.get("pivot", Vector2.ZERO) as Vector2
 	_actions_home.clear()

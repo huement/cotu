@@ -1,18 +1,19 @@
-[gd_scene load_steps=15 format=3 uid="uid://ddug86d1wuau7"]
+[gd_scene load_steps=17 format=3 uid="uid://ddug86d1wuau7"]
 
 [ext_resource type="PackedScene" uid="uid://dqkr2j65k83yc" path="res://Scenes/UI/HUD.tscn" id="1_e0ngr"]
 [ext_resource type="PackedScene" uid="uid://dhvb1rt0k3ohv" path="res://Scenes/Player.tscn" id="2_ikia7"]
 [ext_resource type="Script" uid="uid://cbry5h6ur7nue" path="res://Scripts/MapManager.gd" id="5_fo5ed"]
-[ext_resource type="PackedScene" uid="uid://cts8emds4lj1h" path="res://Scenes/GreenGrove.tscn" id="5_ikia7"]
+[ext_resource type="PackedScene" uid="uid://cwppjunkxqs84" path="res://Scenes/Dungeons/GloomReachDungeon.tscn" id="7_kn0ld"]
 [ext_resource type="Script" uid="uid://dtnit1pwpe0ox" path="res://Scripts/3D/EnemyVisualManager.gd" id="20_hmc15"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/LevelUpMenu.tscn" id="24_levelup"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/ShopMenu.tscn" id="24_shop"]
-[ext_resource type="PackedScene" path="res://Scenes/UI/GameOverScreen.tscn" id="25_gameover"]
+[ext_resource type="PackedScene" uid="uid://bjvuowhvd4oqk" path="res://Scenes/UI/GameOverScreen.tscn" id="25_gameover"]
 [ext_resource type="PackedScene" uid="uid://bipols0hgobk7" path="res://Scenes/UI/BattleAbilityPopup.tscn" id="26_dt0r1"]
 [ext_resource type="Script" uid="uid://dp2c6nndb40o5" path="res://Scripts/UI/toast_notification_manager.gd" id="29_o2rbt"]
-[ext_resource type="Script" path="res://Scripts/Environment/WeatherController.gd" id="30_weather"]
+[ext_resource type="Script" path="res://Scripts/Cutscenes/BossVillainCutscene.gd" id="30_bosscut"]
+[ext_resource type="Script" uid="uid://dfgrfalqcu26n" path="res://Scripts/Environment/WeatherController.gd" id="30_weather"]
 [ext_resource type="Script" uid="uid://cpqu3gt3tnhoj" path="res://Scripts/Environment/PixelRainOverlay.gd" id="31_rain"]
 
 [sub_resource type="Environment" id="Environment_3ua1v"]
@@ -53,7 +54,7 @@ script = ExtResource("30_weather")
 
 [node name="MapManager" type="Node3D" parent="."]
 script = ExtResource("5_fo5ed")
-default_map_scene = ExtResource("5_ikia7")
+default_map_scene = ExtResource("7_kn0ld")
 dev_start_override = true
 
 [node name="Popup" parent="." instance=ExtResource("22_pyn1s")]
@@ -73,3 +74,6 @@ script = ExtResource("29_o2rbt")
 environment = SubResource("Environment_3ua1v")
 
 [node name="GameOverScreen" parent="." instance=ExtResource("25_gameover")]
+
+[node name="BossVillainCutscene" type="Node" parent="."]
+script = ExtResource("30_bosscut")

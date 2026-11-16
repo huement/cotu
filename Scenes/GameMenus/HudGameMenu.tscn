@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/Menus/hud_game_menu.gd" id="1_menu"]
-[ext_resource type="Texture2D" path="res://ui/icons/square_cross.svg" id="2_close"]
+[ext_resource type="Texture2D" path="res://ui/icons/menu/square_cross.svg" id="2_close"]
 [ext_resource type="Texture2D" path="res://ui/HUD/main_menu_top.png" id="3_top"]
 
 [node name="HudGameMenu" type="CanvasLayer"]

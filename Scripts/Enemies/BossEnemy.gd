@@ -26,6 +26,8 @@ signal boss_defeated(boss: BossEnemy)
 
 ## Total number of minions accompanying the boss (e.g., 2 places 1 minion on each side)
 @export_range(0, 4) var minion_count: int = 2
+## Extra scale on the boss only, after `stat_multiplier`. Minions stay on `stat_multiplier`.
+@export_range(1.0, 3.0, 0.05) var boss_stat_multiplier: float = 1.0
 
 
 # ==============================================================================
@@ -112,6 +114,41 @@ func _mark_boss_in_group() -> void:
 			return
 	var mid: int = enemy_group.size() / 2
 	_Formation.mark_boss(enemy_group[mid])
+
+
+func _apply_stat_multiplier() -> void:
+	super._apply_stat_multiplier()
+	var boss_index: int = _boss_group_index()
+	if boss_index < 0:
+		return
+	if boss_stat_multiplier > 1.001:
+		var src: EnemyData = enemy_group[boss_index] as EnemyData
+		if src != null:
+			var m: float = boss_stat_multiplier
+			var defense_m: float = 1.0 + (m - 1.0) * 0.25
+			var scaled: EnemyData = src.duplicate(false) as EnemyData
+			scaled.max_health = maxi(1, roundi(float(src.max_health) * m))
+			scaled.current_health = scaled.max_health
+			scaled.attack_damage = maxi(1, roundi(float(src.attack_damage) * m))
+			scaled.defense = maxi(0, roundi(float(src.defense) * defense_m))
+			scaled.magic_power = roundi(float(src.magic_power) * m)
+			scaled.max_mana = roundi(float(src.max_mana) * m)
+			scaled.xp_value = maxi(1, roundi(float(src.xp_value) * m))
+			scaled.gold_value = roundi(float(src.gold_value) * m)
+			enemy_group[boss_index] = scaled
+	if is_instance_valid(enemy_group[boss_index]):
+		_Formation.mark_boss(enemy_group[boss_index])
+
+
+func _boss_group_index() -> int:
+	for i: int in enemy_group.size():
+		if _Formation.is_boss(enemy_group[i]):
+			return i
+	if enemy_group.is_empty():
+		return -1
+	if minion_count > 0:
+		return mini(minion_count / 2, enemy_group.size() - 1)
+	return 0
 
 
 # ==============================================================================

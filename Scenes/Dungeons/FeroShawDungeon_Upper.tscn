@@ -14,19 +14,19 @@
 [ext_resource type="PackedScene" uid="uid://lkr5mvu3lf2y" path="res://Scenes/Objects/Stairs.tscn" id="13_fuwcn"]
 [ext_resource type="PackedScene" uid="uid://cltube2ajn7vj" path="res://Scenes/Environment/CryptHole.tscn" id="15_wg4rp"]
 [ext_resource type="PackedScene" uid="uid://dbirlgdidvkiq" path="res://Scenes/Objects/chest.tscn" id="17_hx4r6"]
-[ext_resource type="Resource" path="res://Data/Items/Loot/TokenPartyGearBone.tres" id="19_ea3qp"]
+[ext_resource type="Resource" uid="uid://bi1fqworr70tf" path="res://Data/Items/Loot/TokenPartyGearBone.tres" id="19_ea3qp"]
 [ext_resource type="Script" uid="uid://xp5n4qmu4cr0" path="res://Scripts/Resources/item_data.gd" id="19_ra2m7"]
 [ext_resource type="Resource" uid="uid://bitt1s0menqci" path="res://Data/Items/Consumables/PotHp25.tres" id="20_whrha"]
 [ext_resource type="Resource" uid="uid://dc5dglw40smg6" path="res://Data/Items/Consumables/PotMana25.tres" id="21_06nci"]
 [ext_resource type="Resource" uid="uid://dxm74d7ewhg0f" path="res://Data/Items/Consumables/PotCatnip.tres" id="23_ldq2f"]
 [ext_resource type="Resource" uid="uid://hkuygmxotjkf" path="res://Data/Items/Consumables/PotRevive.tres" id="25_0fy7g"]
 [ext_resource type="PackedScene" uid="uid://0pd2daw71vxk" path="res://Scenes/Enemies/enemy.tscn" id="26_pkyex"]
-[ext_resource type="Resource" uid="uid://crdlpjkm4cmdo" path="res://Data/Enemies/EnGhost.tres" id="28_v2lhw"]
+[ext_resource type="Resource" uid="uid://dtllye1aoin33" path="res://Data/Enemies/EnGhost.tres" id="28_v2lhw"]
 [ext_resource type="Script" uid="uid://cdkuyybx3dwf0" path="res://Scripts/Enemies/GhostAmbushComponent.gd" id="29_jpofs"]
 [ext_resource type="Resource" uid="uid://bi1jysscfdfwt" path="res://Data/Enemies/EnSlimeDrone.tres" id="30_0bqxu"]
-[ext_resource type="Resource" uid="uid://hhtf5l1y3ew7" path="res://Data/Enemies/EnScavengerCyclops.tres" id="31_3iopb"]
+[ext_resource type="Resource" uid="uid://bt70evn3c3aef" path="res://Data/Enemies/EnScavengerCyclops.tres" id="31_3iopb"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnZombieCat.tres" id="32_n6rt4"]
-[ext_resource type="Resource" uid="uid://bnto3o8v1gspo" path="res://Data/Enemies/EnRageWraith.tres" id="33_80e1r"]
+[ext_resource type="Resource" uid="uid://dw31h77gy0ytl" path="res://Data/Enemies/EnRageWraith.tres" id="33_80e1r"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="34_leveltitle"]
 
 [sub_resource type="Environment" id="Environment_8o4s8"]
@@ -240,7 +240,7 @@ object_id = "feroshawdungeon_upper_chest_3"
 [node name="Ghosts" type="Node3D" parent="."]
 
 [node name="Ghost1" parent="Ghosts" instance=ExtResource("26_pkyex")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 0, -9)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.001251, 0, -14.434378)
 data = ExtResource("28_v2lhw")
 pack_size = 1
 model_scale = Vector3(1, 1, 1)
@@ -250,9 +250,10 @@ stat_multiplier = 0.6
 
 [node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost1"]
 script = ExtResource("29_jpofs")
+haunt_radius_tiles = 15
 
 [node name="Ghost2" parent="Ghosts" instance=ExtResource("26_pkyex")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 13)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.788403, 0, 8.260941)
 data = ExtResource("28_v2lhw")
 pack_size = 1
 model_scale = Vector3(1, 1, 1)
@@ -262,6 +263,7 @@ stat_multiplier = 0.6
 
 [node name="GhostAmbushComponent" type="Node" parent="Ghosts/Ghost2"]
 script = ExtResource("29_jpofs")
+haunt_radius_tiles = 15
 
 [node name="Enemies" type="Node3D" parent="."]
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3]
+[gd_scene load_steps=40 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Dungeon/DungeonLevel.gd" id="1_rp4mf"]
 [ext_resource type="Script" path="res://Scripts/Environment/EditorWorkLight.gd" id="2_v4qxe"]
@@ -17,6 +17,8 @@
 [ext_resource type="Script" path="res://Scripts/Enemies/BossEnemy.gd" id="15_onao8"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnScavengerCyclops.tres" id="16_c1b6a"]
 [ext_resource type="Resource" path="res://Data/Enemies/EnRageWraith.tres" id="17_kp8hh"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnHazardCleaner.tres" id="17_cleaner"]
+[ext_resource type="Resource" path="res://Data/Enemies/EnZombiePunk.tres" id="17_punk"]
 [ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor.glb" id="18_yd81d"]
 [ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-end.glb" id="19_y2new"]
 [ext_resource type="PackedScene" path="res://resources/tile_sets/dungeon/corridor-corner-square.glb" id="20_ag4x2"]
@@ -160,11 +162,12 @@ decor_chance = 1.0
 [node name="Boss" type="Node3D" parent="Rooms/BossChamber" instance=ExtResource("14_rtmk5")]
 script = ExtResource("15_onao8")
 default_facing = 3
-minion_data = ExtResource("16_c1b6a")
-data = ExtResource("17_kp8hh")
+minion_data = ExtResource("17_punk")
+data = ExtResource("17_cleaner")
 model_scale = Vector3(1, 1, 1)
 vertical_offset = -1.0
-stat_multiplier = 1.8
+stat_multiplier = 1.5
+boss_stat_multiplier = 2.0
 
 [node name="Corridors" type="Node3D" parent="."]
 

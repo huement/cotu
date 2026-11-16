@@ -21,6 +21,19 @@ const ABOUT_FACE_FADE_ALPHA: float = 0.55
 const DIRECTIONS: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
 
 
+## True when the enemy is behind the party's committed grid facing.
+## Call this BEFORE orient_party / the battle room, which turn the party to face the fight.
+static func party_is_facing_away(tree: SceneTree, enemy_world_pos: Vector3) -> bool:
+	if tree == null:
+		return false
+	var player: DungeonPlayer = tree.get_first_node_in_group(&"player") as DungeonPlayer
+	if not is_instance_valid(player) or not player.has_method("_get_movement_offset"):
+		return false
+	var facing: Vector2i = player.call("_get_movement_offset", Vector3.FORWARD) as Vector2i
+	var enemy_cell: Vector2i = player.call("_world_to_cell", enemy_world_pos) as Vector2i
+	return CombatMath.back_is_turned(facing, enemy_cell - player.current_grid_pos)
+
+
 ## Turns the party toward `enemy_world_pos` if it isn't already facing it. Returns once the turn is done.
 static func orient_party(tree: SceneTree, enemy_world_pos: Vector3) -> void:
 	if tree == null:

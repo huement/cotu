@@ -31,7 +31,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/MinotaurWorldEnemy.tscn" id="24_ql20s"]
 [ext_resource type="Script" uid="uid://464km5lxyytl" path="res://Scripts/Environment/night_enemy_spawner.gd" id="25_5whj4"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="26_leveltitle"]
-[ext_resource type="Material" path="res://resources/Environment/pixel_sky_feroshaw.tres" id="90_pixelsky"]
+[ext_resource type="Material" path="res://resources/Environment/pixel_sky_cloudy.tres" id="90_pixelsky"]
 
 [sub_resource type="Sky" id="Sky_lpcna"]
 sky_material = ExtResource("90_pixelsky")
@@ -404,10 +404,12 @@ transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -30.710857, 0, -93.1829
 object_id = "feroshaw_windmill"
 locked_message = "The windmill's door is chained shut, and its sails haven't turned in years. An old iron lock hangs from the chain... it looks like it's linked to something else nearby."
 target_scene = "res://Scenes/Caves/WindmillCave1.tscn"
+arrival_point_name = "SpawnPoint_Windmill"
 
 [node name="CryptHole" parent="EnvObjects" instance=ExtResource("12_sc1rt")]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 51.852734, -0.10062307, -40.203373)
 target_dungeon_scene = "res://Scenes/Dungeons/FeroShawDungeon_Upper.tscn"
+arrival_point_name = "SpawnPoint_Dungeon"
 prompt_text = "A heavy slab covers an old crypt beneath Fero Shaw. Move it and descend?"
 object_id = "feroshaw_crypthole"
 snap_to_floor_center = false
@@ -427,12 +429,13 @@ transform = Transform3D(-2.6, 0, -3.9258907e-07, 0, 2.6, 0, 3.9258907e-07, 0, -2
 script = ExtResource("16_o6h75")
 target_dungeon_scene = "uid://bwdxpphry601f"
 prompt_text = "Pass through the Gate into the VEROWOOD ?"
-required_level = 2
+required_level = 5
 
 [node name="StoneGate_GreenGrove" parent="EnvObjects" instance=ExtResource("15_ynv2v")]
 transform = Transform3D(0.055459723, 0, -1.9992309, 0, 2, 0, 1.9992309, 0, 0.055459723, 7.0478134, 0, 33.180702)
 script = ExtResource("16_o6h75")
 target_dungeon_scene = "res://Scenes/GreenGrove.tscn"
+arrival_point_name = "SpawnPoint_GreenGrove"
 prompt_text = "Slip back north into the quiet GREEN GROVE?"
 
 [node name="Quartermaster" type="Node3D" parent="EnvObjects"]
@@ -451,7 +454,6 @@ required_level = 3
 [node name="StoneGate3" parent="EnvObjects" instance=ExtResource("15_ynv2v")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -42.838867, 0, -179.31586)
 script = ExtResource("16_o6h75")
-target_dungeon_scene = ""
 prompt_text = "Exit Deep Woods for the LESSER WILDS ?"
 locked_message = "This area is not part of the current demo."
 locked_title = "Not In The Demo"
@@ -461,7 +463,9 @@ required_level = 10
 transform = Transform3D(2.3, 0, 0, 0, 2.3, 0, 0, 0, 2.3, -51.992897, 0, -5.0835824)
 script = ExtResource("16_o6h75")
 target_dungeon_scene = "res://Scenes/BrokenBoneMarsh.tscn"
+arrival_point_name = "SpawnPoint_BrokenBoneMarsh"
 prompt_text = "Wetlands ahead. Head to the BROKEN BONE MARSH?"
+required_level = 2
 
 [node name="GroundMist" type="CPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.78273, 0.4, 16.88937)

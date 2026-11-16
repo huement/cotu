@@ -1,4 +1,4 @@
-[gd_scene load_steps=436 format=3 uid="uid://ci4b8iodvo08n"]
+[gd_scene load_steps=435 format=3 uid="uid://ci4b8iodvo08n"]
 
 [ext_resource type="Texture2D" uid="uid://disnyq6mw504i" path="res://ui/BATTLE/hud-bg.png" id="1_hcak5"]
 [ext_resource type="Script" uid="uid://bc2b8vv78gqe4" path="res://Scripts/UI/BattleHUD.gd" id="1_rj0sa"]
@@ -19,7 +19,6 @@
 [ext_resource type="Texture2D" uid="uid://cpl5l6wc3l6q1" path="res://ui/BATTLE/cmd_run.png" id="12_s15b2"]
 [ext_resource type="Texture2D" uid="uid://dyek5vtk5dj0r" path="res://ui/BATTLE/cmd_auto.png" id="15_lrf55"]
 [ext_resource type="Texture2D" uid="uid://ce86bnnb85o43" path="res://ui/BATTLE/turn_hud_btm.png" id="18_rwnwi"]
-[ext_resource type="Script" uid="uid://dp2c6nndb40o5" path="res://Scripts/UI/toast_notification_manager.gd" id="19_cvbxj"]
 [ext_resource type="Texture2D" uid="uid://cso7ep1o2wmmd" path="res://ui/portrait.png" id="19_gjgbi"]
 [ext_resource type="Texture2D" uid="uid://ba0448i8mnrbe" path="res://ui/BATTLE/turn_hud_top.png" id="19_oqcyr"]
 [ext_resource type="Texture2D" uid="uid://bkvuvelngdcyn" path="res://ui/animations/air_60f_320px-sheet.png" id="20_vhms3"]
@@ -2892,9 +2891,19 @@ size_flags_vertical = 3
 script = ExtResource("1_rj0sa")
 
 [node name="HUDBackground" type="TextureRect" parent="."]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -577.0
+offset_top = -325.0
+offset_right = 577.0
+offset_bottom = 325.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("1_hcak5")
 
 [node name="ActionBarBackground" type="TextureRect" parent="."]
@@ -3062,12 +3071,21 @@ bar_height = 8.0
 
 [node name="ActionBar" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 375.0
-offset_top = 565.0
-offset_right = 822.0
-offset_bottom = 636.0
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -223.5
+offset_top = -86.0
+offset_right = 223.5
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
 scale = Vector2(0.95, 0.95)
+pivot_offset = Vector2(223.5, 71)
+alignment = 1
 theme_override_constants/separation = 4
 script = ExtResource("9_lrf55")
 
@@ -3164,9 +3182,6 @@ theme_override_colors/font_color = Color(0.8627451, 0.94509804, 0.9490196, 1)
 theme_override_fonts/font = ExtResource("4_tbwvx")
 theme_override_font_sizes/font_size = 18
 text = "CHARACTER NAME"
-
-[node name="ToastController" type="CanvasLayer" parent="."]
-script = ExtResource("19_cvbxj")
 
 [node name="GameMenuButton" type="TextureButton" parent="."]
 unique_name_in_owner = true

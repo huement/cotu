@@ -5,7 +5,7 @@ extends EditorScript
 ##
 ##   VeroWood CryptHole -> VeroWoodDungeon_Upper (SpawnPoint)
 ##       ... crypt hole at the far end -> VeroWoodDungeon (SpawnPoint)
-##       ... boss chamber: Rage Wraith + Cyclops minions ->
+##       ... boss chamber: Hazard Cleaner + two Corrupted Punks ->
 ##           north gate back up to VeroWood
 ##   Each floor's entry stairs lead back up (Upper -> VeroWood, boss floor -> Upper's ExitArrival).
 ##
@@ -37,12 +37,12 @@ const POT_CATNIP: String = "res://Data/Items/Consumables/PotCatnip.tres"
 const POT_GROUP25: String = "res://Data/Items/Consumables/PotGroupHp25.tres"
 const POT_GROUP50: String = "res://Data/Items/Consumables/PotGroupHp50.tres"
 
-## Ghosts: a touch tougher than Fero Shaw's soft haunt pack.
+## Ghosts: a touch tougher than Fero Shaw, and a little less time to turn around (level 2).
 const GHOST: Dictionary = {
 	"data": "res://Data/Enemies/EnGhost.tres",
 	"multiplier": 0.75,
 	"level": 2,
-	"haunt_radius": 3,
+	"haunt_radius": 15,
 }
 
 const UPPER: Dictionary = {
@@ -92,12 +92,13 @@ const LOWER: Dictionary = {
 	],
 	"has_boss": true,
 	"boss_id": BOSS_ID,
-	## Rage Wraith + two Cyclops.
+	## Hazard Cleaner + two Corrupted Punks. The cleaner is scaled again on top of the pack multiplier.
 	"boss_enemy": {
-		"data": "res://Data/Enemies/EnRageWraith.tres",
-		"minion_data": "res://Data/Enemies/EnScavengerCyclops.tres",
+		"data": "res://Data/Enemies/EnHazardCleaner.tres",
+		"minion_data": "res://Data/Enemies/EnZombiePunk.tres",
 		"minion_count": 2,
-		"multiplier": 1.8,
+		"multiplier": 1.5,
+		"boss_stat_multiplier": 2.0,
 		"model_scale_multiplier": 1.5,
 	},
 	"previous_scene": "res://Scenes/Dungeons/VeroWoodDungeon_Upper.tscn",

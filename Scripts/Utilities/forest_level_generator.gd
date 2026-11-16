@@ -3,7 +3,7 @@
 extends EditorScript
 
 ## Every outdoor map uses the pixel sky. Use pixel_sky_overcast.tres for gloomier maps.
-const PIXEL_SKY_MATERIAL: String = "res://resources/Environment/pixel_sky.tres"
+const PIXEL_SKY_MATERIAL: String = "res://resources/Environment/pixel_sky_cloudy.tres"
 
 func _run() -> void:
 	# --- CONFIGURATION (Edit these values before selecting File -> Run) ---

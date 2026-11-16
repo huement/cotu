@@ -5,7 +5,7 @@ extends EditorScript
 ##
 ##   FeroShaw CryptHole -> FeroShawDungeon_Upper (SpawnPoint)
 ##       ... crypt hole at the far end -> FeroShawDungeon (SpawnPoint)
-##       ... boss chamber: Azurian Drone boss + minions -> north gate back up to FeroShaw
+##       ... boss chamber: Corrupted Knight + two Corrupted Punks -> north gate back up to FeroShaw
 ##   Each floor's entry stairs lead back up (Upper -> FeroShaw, boss floor -> Upper's ExitArrival).
 ##
 ## Both floors have ghosts (GhostAmbushComponent jump scares), chests, and easy enemy packs.
@@ -35,12 +35,12 @@ const POT_REVIVE: String = "res://Data/Items/Consumables/PotRevive.tres"
 const POT_CATNIP: String = "res://Data/Items/Consumables/PotCatnip.tres"
 const POT_GROUP25: String = "res://Data/Items/Consumables/PotGroupHp25.tres"
 
-## Ghosts: soft (0.6 stats) and slow to strike (level 1 = 4 s to turn around) for dungeon one.
+## Ghosts: soft fight (0.6 stats) but a full haunt. Level 1 still strikes in about a second.
 const GHOST: Dictionary = {
 	"data": "res://Data/Enemies/EnGhost.tres",
 	"multiplier": 0.6,
 	"level": 1,
-	"haunt_radius": 3,
+	"haunt_radius": 15,
 }
 
 const UPPER: Dictionary = {
@@ -90,12 +90,13 @@ const LOWER: Dictionary = {
 	],
 	"has_boss": true,
 	"boss_id": BOSS_ID,
-	## The boss: an Azurian Drone (stronger than anything else here) flanked by two Cyclops.
+	## The boss: a Corrupted Knight, tougher than the floor packs, flanked by two Corrupted Punks.
 	"boss_enemy": {
-		"data": "res://Data/Enemies/EnAzurianDrone.tres",
-		"minion_data": "res://Data/Enemies/EnScavengerCyclops.tres",
+		"data": "res://Data/Enemies/EnZombieKnight.tres",
+		"minion_data": "res://Data/Enemies/EnZombiePunk.tres",
 		"minion_count": 2,
-		"multiplier": 1.8,
+		"multiplier": 1.5,
+		"boss_stat_multiplier": 1.6,
 		"model_scale_multiplier": 1.5,
 	},
 	"previous_scene": "res://Scenes/Dungeons/FeroShawDungeon_Upper.tscn",

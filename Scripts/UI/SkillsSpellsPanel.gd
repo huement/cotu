@@ -2,12 +2,17 @@
 extends VBoxContainer
 class_name SkillsSpellsPanel
 
+## Touch layout only: the selected row changed (null = nothing selected any more).
+signal ability_selected(ability: Resource)
+
+## Touch layout: how much bigger the rows are than on desktop.
+const TOUCH_ROW_SCALE: float = 1.5
+
 @onready var skills_button: Button = %SkillsButton as Button
 @onready var spells_button: Button = %SpellsButton as Button
 @onready var toolbar_container: HBoxContainer = %ToolbarContainer as HBoxContainer
 @onready var list_container: VBoxContainer = %ListContainer as VBoxContainer
 
-@export var entry_scene: PackedScene = preload("res://Scenes/UI/SkillSpellEntry.tscn")
 
 enum Mode {
 	SKILLS,
@@ -15,6 +20,15 @@ enum Mode {
 }
 var current_mode: Mode = Mode.SKILLS
 var current_cat: CatCharacter = null
+
+## Touch layout (phones, see CharacterSheetMobile): bigger rows, tapping a row SELECTS it
+## (ability_selected) instead of opening the detail popup, and the toolbar gets a
+## "show field-usable only" filter. Switch with set_touch_layout().
+var touch_layout: bool = false
+## Touch layout filter: list only abilities that can be used outside battle.
+var field_only: bool = false
+var selected_ability: Resource = null
+var _row_group: ButtonGroup = null
 
 
 func _ready() -> void:
@@ -29,6 +43,26 @@ func _ready() -> void:
 func display_character_abilities(cat: CatCharacter) -> void:
 	current_cat = cat
 	_render_list()
+
+
+func set_touch_layout(on: bool) -> void:
+	if touch_layout == on:
+		return
+	touch_layout = on
+	if not on:
+		field_only = false
+		selected_ability = null
+	_update_toolbar()
+	_render_list()
+
+
+## "" when `cat` can use `ability` from the menu (outside battle), else the reason in capitals.
+func field_use_blocker(ability: Resource, cat: CatCharacter) -> String:
+	if not _is_ability_available(ability, cat):
+		return "CLASS, BREED OR LEVEL RESTRICTED"
+	if not _is_field_usable(ability):
+		return "COMBAT ONLY"
+	return ""
 
 
 func _on_skills_tab_pressed() -> void:
@@ -66,6 +100,18 @@ func _update_toolbar() -> void:
 	for child in toolbar_container.get_children():
 		child.queue_free()
 
+	if touch_layout:
+		var filter_btn := _create_toolbar_button("SHOW: FIELD ONLY" if field_only else "SHOW: ALL", Color(1.0, 0.8, 0.18, 1.0))
+		filter_btn.pressed.connect(
+			func() -> void:
+				if is_instance_valid(AudioManager):
+					AudioManager.play_button_press()
+				field_only = not field_only
+				_update_toolbar()
+				_render_list(),
+		)
+		toolbar_container.add_child(filter_btn)
+
 	var btn_title: String = "[ ALL SKILLS ]" if current_mode == Mode.SKILLS else "[ ALL SPELLS ]"
 	var popup_key: StringName = &"ALL_SKILLS" if current_mode == Mode.SKILLS else &"ALL_SPELLS"
 
@@ -84,7 +130,7 @@ func _update_toolbar() -> void:
 func _create_toolbar_button(label_text: String, color_val: Color) -> Button:
 	var btn := Button.new()
 	btn.text = label_text
-	btn.custom_minimum_size = Vector2(0, 28)
+	btn.custom_minimum_size = Vector2(0, 42 if touch_layout else 28)
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.focus_mode = Control.FOCUS_NONE
 
@@ -100,7 +146,7 @@ func _create_toolbar_button(label_text: String, color_val: Color) -> Button:
 
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_color_override("font_color", color_val)
-	btn.add_theme_font_size_override("font_size", 11)
+	btn.add_theme_font_size_override("font_size", 16 if touch_layout else 11)
 	return btn
 
 
@@ -164,32 +210,33 @@ func _render_list() -> void:
 	for child in list_container.get_children():
 		child.queue_free()
 
+	_row_group = ButtonGroup.new()
+	var selection_listed: bool = false
+
 	if not is_instance_valid(current_cat):
 		_add_empty_message("NO CHARACTER SELECTED")
-		return
-
-	if current_mode == Mode.SKILLS:
-		var skills: Array = _get_cat_skills(current_cat)
-		if skills.is_empty():
-			_add_empty_message("NO KNOWN SKILLS")
-		else:
-			for item in skills:
-				if item is SkillData:
-					var is_avail: bool = _is_ability_available(item, current_cat)
-					var is_field: bool = _is_field_usable(item)
-					var sub_info: String = "Accuracy: %d%% | Cost: %d EN" % [item.accuracy, item.energy_cost]
-					_create_entry(item.skill_name, sub_info, item.icon if "icon" in item else null, item, is_avail, is_field)
 	else:
-		var spells: Array = _get_cat_spells(current_cat)
-		if spells.is_empty():
-			_add_empty_message("NO KNOWN SPELLS")
-		else:
-			for item in spells:
-				if item is SpellData:
-					var is_avail: bool = _is_ability_available(item, current_cat)
-					var is_field: bool = _is_field_usable(item)
-					var sub_info: String = "Cost: %d EN | %s" % [item.energy_cost, item.description]
-					_create_entry(item.spell_name, sub_info, item.icon if "icon" in item else null, item, is_avail, is_field)
+		var is_skills: bool = current_mode == Mode.SKILLS
+		var known: Array = _get_cat_skills(current_cat) if is_skills else _get_cat_spells(current_cat)
+		var kind: String = "SKILLS" if is_skills else "SPELLS"
+		var hidden_by_filter: int = 0
+		if known.is_empty():
+			_add_empty_message("NO KNOWN %s" % kind)
+		for item in known:
+			if not (item is SkillData if is_skills else item is SpellData):
+				continue
+			if field_only and not _is_field_usable(item):
+				hidden_by_filter += 1
+				continue
+			_add_row(item)
+			selection_listed = selection_listed or item == selected_ability
+		if hidden_by_filter > 0 and hidden_by_filter == known.size():
+			_add_empty_message("NO %s USABLE OUTSIDE BATTLE" % kind)
+
+	# The selected ability is no longer in the list (other tab, filter, other character).
+	if selected_ability != null and not selection_listed:
+		selected_ability = null
+		ability_selected.emit(null)
 
 
 func _get_cat_skills(cat: CatCharacter) -> Array:
@@ -208,67 +255,35 @@ func _get_cat_spells(cat: CatCharacter) -> Array:
 	return []
 
 
-func _create_entry(
-	title_text: String,
-	desc_text: String,
-	icon_tex: Texture2D,
-	data_resource: Resource,
-	is_available: bool = true,
-	is_field_usable: bool = false
-) -> void:
-	if not entry_scene:
-		return
-
-	var entry_node: Control = entry_scene.instantiate() as Control
-	entry_node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var name_label := entry_node.get_node_or_null("%NameLabel") as Label
-	if not name_label:
-		name_label = entry_node.get_node_or_null("MarginContainer/HBox/VBox/Name") as Label
-
-	var desc_label := entry_node.get_node_or_null("%DetailsLabel") as Label
-	if not desc_label:
-		desc_label = entry_node.get_node_or_null("MarginContainer/HBox/VBox/Desc") as Label
-
-	var icon_rect := entry_node.get_node_or_null("%IconRect") as TextureRect
-	if not icon_rect:
-		icon_rect = entry_node.get_node_or_null("MarginContainer/HBox/Icon") as TextureRect
-
-	var title_color: Color = Color(0.0, 1.0, 0.8) if is_field_usable else Color.WHITE
-	var desc_color: Color = Color(0.0, 0.85, 0.75, 0.8) if is_field_usable else Color(0.8, 0.8, 0.8, 0.8)
-
-	if name_label:
-		name_label.text = (title_text.to_upper() + " [RESTRICTED]") if not is_available else title_text.to_upper()
-		name_label.add_theme_color_override("font_color", title_color)
-
-	if desc_label:
-		desc_label.text = desc_text
-		desc_label.add_theme_color_override("font_color", desc_color)
-
-	if icon_rect and icon_tex:
-		icon_rect.texture = icon_tex
-
-	# Apply greyed-out visual modulation for unavailable abilities
-	if not is_available:
-		entry_node.modulate = Color(0.5, 0.5, 0.5, 0.6)
-
-	if entry_node is Button:
-		entry_node.pressed.connect(
-			func() -> void:
-				if is_instance_valid(AudioManager):
-					AudioManager.play_button_press()
-				if get_tree().root.has_node("SignalBus"):
-					var bus: Node = get_tree().root.get_node("SignalBus")
-					bus.popup_requested.emit(
-						&"ABILITY_INFO",
-						{
-							"resource": data_resource,
-							"character": current_cat,
-						},
-					),
-		)
-
-	list_container.add_child(entry_node)
+## One ability as the shared AbilityRow (same look as the battle HUD and every other ability list).
+## Abilities usable outside battle keep the teal title; battle-only ones are white.
+func _add_row(ability: Resource) -> void:
+	var options: Dictionary = { "context": AbilityRow.Context.MENU }
+	if not _is_field_usable(ability):
+		options["title_color"] = Color.WHITE
+	if touch_layout:
+		options["toggle"] = true
+		options["button_group"] = _row_group
+	var row: AbilityRow = AbilityRow.create(ability, options)
+	if not _is_ability_available(ability, current_cat):
+		row.set_unavailable("Restricted - class, breed or level requirement not met")
+	if touch_layout:
+		row.set_ui_scale(TOUCH_ROW_SCALE)
+		row.set_selected(ability == selected_ability)
+	row.pressed.connect(
+		func() -> void:
+			if is_instance_valid(AudioManager):
+				AudioManager.play_button_press()
+			if touch_layout:
+				# Details + casting are on the sheet itself (CharacterSheetMobile), no popup.
+				selected_ability = ability
+				ability_selected.emit(ability)
+				return
+			if get_tree().root.has_node("SignalBus"):
+				var bus: Node = get_tree().root.get_node("SignalBus")
+				bus.popup_requested.emit(&"ABILITY_INFO", { "resource": ability, "character": current_cat }),
+	)
+	list_container.add_child(row)
 
 
 func _add_empty_message(msg: String) -> void:
@@ -276,5 +291,5 @@ func _add_empty_message(msg: String) -> void:
 	lbl.text = msg
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_color_override("font_color", Color(0.4, 0.5, 0.6, 0.7))
-	lbl.add_theme_font_size_override("font_size", 12)
+	lbl.add_theme_font_size_override("font_size", 18 if touch_layout else 12)
 	list_container.add_child(lbl)

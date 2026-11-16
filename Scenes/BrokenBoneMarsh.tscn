@@ -9,11 +9,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/Objects/MarshTimber.tscn" id="5_ibfws"]
 [ext_resource type="Script" uid="uid://bwoxtqd5tcduh" path="res://Scripts/Enemies/MarshTreeAmbushSpawner.gd" id="5_stalker"]
 [ext_resource type="PackedScene" path="res://Scenes/Objects/BigStones.tscn" id="7_el5s5"]
-[ext_resource type="PackedScene" uid="uid://ekckcrvvkuqm" path="res://resources/OutdoorParts/low_poly_cloud.glb" id="7_ibfws"]
-[ext_resource type="PackedScene" uid="uid://bpn2rvnvip8cv" path="res://resources/OutdoorParts/low_poly_cloud-2.glb" id="8_dacpu"]
 [ext_resource type="PackedScene" uid="uid://dcml7jcxd2e5q" path="res://Scenes/Objects/Bones.tscn" id="8_mj1w0"]
-[ext_resource type="PackedScene" uid="uid://wlg457v4s706" path="res://resources/OutdoorParts/low_poly_cloud-3.glb" id="9_sywan"]
-[ext_resource type="PackedScene" uid="uid://bjfj4qtvjfvc2" path="res://resources/OutdoorParts/low_poly_cloud-4.glb" id="10_cuobu"]
 [ext_resource type="Script" uid="uid://c7mly1i66aig7" path="res://Scripts/Environment/day_night_cycle.gd" id="11_pamow"]
 [ext_resource type="PackedScene" uid="uid://buh6wg8d1ecdd" path="res://resources/OutdoorParts/moon.glb" id="12_fgxj0"]
 [ext_resource type="Script" uid="uid://l05eb00qic0y" path="res://Scripts/Environment/grass_scatter.gd" id="13_3tb6n"]
@@ -23,14 +19,14 @@
 [ext_resource type="Script" uid="uid://co4g3bvthj4xk" path="res://Scripts/Environment/StoneGate.gd" id="20_mj1w0"]
 [ext_resource type="PackedScene" uid="uid://cltube2ajn7vj" path="res://Scenes/Environment/CryptHole.tscn" id="21_mj1w0"]
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="23_sywan"]
+[ext_resource type="Shader" uid="uid://cfdeopc8skgfy" path="res://Shaders/arcanum_shard.gdshader" id="26_fgxj0"]
+[ext_resource type="Texture2D" uid="uid://bk2a038orhc24" path="res://resources/Lore/arcanum_shard_arcanum_texture.png" id="27_3tb6n"]
 [ext_resource type="Script" uid="uid://dnwt68hwp4n4f" path="res://Scripts/Triggers/BossAmbushTrigger.gd" id="90_bosstrig"]
+[ext_resource type="Material" uid="uid://bggklltd1x1f4" path="res://resources/Environment/pixel_sky_overcast.tres" id="90_pixelsky"]
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/BeastKing.tscn" id="91_beastking"]
 [ext_resource type="Script" uid="uid://464km5lxyytl" path="res://Scripts/Environment/night_enemy_spawner.gd" id="92_nightspawn"]
 [ext_resource type="PackedScene" path="res://Scenes/Enemies/BeastWorldEnemy.tscn" id="93_beastworld"]
-[ext_resource type="Material" path="res://resources/Environment/pixel_sky_overcast.tres" id="90_pixelsky"]
-[ext_resource type="PackedScene" path="res://Scenes/Objects/ArcanumShard.tscn" id="99_arcshard"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tg5oy"]
+[ext_resource type="PackedScene" uid="uid://c0chklqh4xdeq" path="res://Scenes/Objects/ArcanumShard.tscn" id="99_arcshard"]
 
 [sub_resource type="Sky" id="Sky_qymnt"]
 sky_material = ExtResource("90_pixelsky")
@@ -57,6 +53,29 @@ size = Vector2(6, 6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cuobu"]
 size = Vector3(9.493042, 1, 5.0509033)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mmi5d"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("26_fgxj0")
+shader_parameter/albedo_texture = ExtResource("27_3tb6n")
+shader_parameter/albedo_tint = Color(0.75, 0.8, 0.75, 1)
+shader_parameter/roughness = 0.35
+shader_parameter/metallic = 0.25
+shader_parameter/energy_color = Color(0.25, 1, 0.3, 1)
+shader_parameter/hot_color = Color(0.9, 1, 0.75, 1)
+shader_parameter/painted_glow = 2.5
+shader_parameter/vein_glow = 2.0
+shader_parameter/vein_scale = 1.4
+shader_parameter/vein_sharpness = 7.0
+shader_parameter/flow_speed = 0.6
+shader_parameter/pulse_speed = 2.2
+shader_parameter/rim_color = Color(0.45, 1, 0.35, 1)
+shader_parameter/rim_power = 2.5
+shader_parameter/rim_strength = 1.2
+shader_parameter/wobble = 0.03
+shader_parameter/surge = 0.0
+shader_parameter/surge_boost = 3.0
 
 [node name="BrokenBoneMarsh" type="Node3D"]
 
@@ -155,8 +174,8 @@ transform = Transform3D(0.19147816, 0, 1.3868438, 0, 1.4000001, 0, -1.3868438, 0
 tree_type = 5
 
 [node name="MarshTimber9" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(-1.3977565, 0, -0.07922383, 0, 1.4, 0, 0.07922383, 0, -1.3977565, 260.39148, 0, 31.297873)
-tree_type = 6
+transform = Transform3D(-1.3977565, 0, -0.07922383, 0, 1.4, 0, 0.07922383, 0, -1.3977565, 234.54768, 0, 52.389626)
+tree_type = 5
 
 [node name="MarshTimber23" parent="BigTimbers" instance=ExtResource("5_ibfws")]
 transform = Transform3D(0.4204984, 0, 1.3353579, 0, 1.4, 0, -1.3353579, 0, 0.4204984, 89.2222, 0, 31.297873)
@@ -167,7 +186,7 @@ transform = Transform3D(0.32404327, 0, -1.3619822, 0, 1.4, 0, 1.3619822, 0, 0.32
 tree_type = 6
 
 [node name="MarshTimber2" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(1.824998, 0, -0.81815815, 0, 2, 0, 0.81815815, 0, 1.824998, 142.023, 0, 61.799477)
+transform = Transform3D(1.824998, 0, -0.81815815, 0, 2, 0, 0.81815815, 0, 1.824998, 142.023, 0, 50.35948)
 tree_type = 2
 
 [node name="MarshTimber22" parent="BigTimbers" instance=ExtResource("5_ibfws")]
@@ -175,11 +194,11 @@ transform = Transform3D(-0.83849204, 0, -1.8157455, 0, 2, 0, 1.8157455, 0, -0.83
 tree_type = 2
 
 [node name="MarshTimber15" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(1.824998, 0, -0.81815815, 0, 2, 0, 0.81815815, 0, 1.824998, 142.023, 0, -3.1661606)
+transform = Transform3D(1.824998, 0, -0.81815815, 0, 2, 0, 0.81815815, 0, 1.824998, 142.023, 0, 6.1383505)
 tree_type = 1
 
 [node name="MarshTimber16" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(1.824998, 0, -0.81815815, 0, 2, 0, 0.81815815, 0, 1.824998, 124.00786, 0, -0.89476776)
+transform = Transform3D(1.824998, 0, -0.81815815, 0, 2, 0, 0.81815815, 0, 1.824998, 120.70938, 0, 13.857728)
 tree_type = 1
 
 [node name="MarshTimber17" parent="BigTimbers" instance=ExtResource("5_ibfws")]
@@ -187,7 +206,7 @@ transform = Transform3D(-1.3284619, 0, -2.6898303, 0, 3, 0, 2.6898303, 0, -1.328
 tree_type = 1
 
 [node name="MarshTimber24" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(-0.920077, 0, 2.8554258, 0, 3, 0, -2.8554258, 0, -0.920077, 260.52414, 0, 86.577614)
+transform = Transform3D(-0.84760517, -1.1670339, 2.630512, -0.3579204, 2.7636986, 1.1107931, -2.8554256, 0, -0.9200769, 214.96442, 0, 58.173508)
 tree_type = 1
 
 [node name="MarshTimber18" parent="BigTimbers" instance=ExtResource("5_ibfws")]
@@ -214,24 +233,24 @@ tree_type = 2
 transform = Transform3D(1.3160915, 0, 2.1255362, 0, 2.5, 0, -2.1255362, 0, 1.3160915, 186.22087, 0, 65.15235)
 tree_type = 2
 
+[node name="MarshTimber25" parent="BigTimbers" instance=ExtResource("5_ibfws")]
+transform = Transform3D(-2.3491874, 0, -0.85517323, 0, 2.5000002, 0, 0.85517323, 0, -2.3491874, 158.89856, 0, 72.18678)
+tree_type = 2
+
 [node name="MarshTimber5" parent="BigTimbers" instance=ExtResource("5_ibfws")]
 transform = Transform3D(-1.4062548, 0, -2.06699, 0, 2.5, 0, 2.06699, 0, -1.4062548, 263.09024, 0, 60.235863)
 tree_type = 3
 
 [node name="MarshTimber11" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(-1.4062548, 0, -2.06699, 0, 2.5, 0, 2.06699, 0, -1.4062548, 241.92752, -1.2619133, 35.66126)
-tree_type = 4
-
-[node name="MarshTimber12" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(-1.4062548, 0, -2.06699, 0, 2.5, 0, 2.06699, 0, -1.4062548, 241.92752, -1.2619133, 82.26074)
+transform = Transform3D(-1.1250038, 0, -1.653592, 0, 2, 0, 1.653592, 0, -1.1250038, 236.4174, -1.2619133, 29.263092)
 tree_type = 4
 
 [node name="MarshTimber13" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(-0.75055796, 0, 2.3846724, 0, 2.4999998, 0, -2.3846724, 0, -0.75055796, 250.33946, -1.2619133, 82.26074)
+transform = Transform3D(-0.39029002, 0, 1.2400297, 0, 1.3, 0, -1.2400297, 0, -0.39029002, 250.33946, -1.2619133, 46.737804)
 tree_type = 4
 
 [node name="MarshTimber14" parent="BigTimbers" instance=ExtResource("5_ibfws")]
-transform = Transform3D(-1.5939969, 0, -1.925922, -0.5712122, 2.387511, 0.47276598, 1.839264, 0.74147904, -1.522274, 267.8764, -1.2619133, 82.26074)
+transform = Transform3D(-1.5939969, 0, -1.925922, -0.5712122, 2.387511, 0.47276598, 1.839264, 0.74147904, -1.522274, 185.84793, -1.2619133, -17.937447)
 tree_type = 4
 
 [node name="Shrooms" type="Node3D" parent="."]
@@ -320,7 +339,7 @@ transform = Transform3D(6.924869, 0.60974467, -0.82121444, -0.4191413, 6.8182955
 stone_type = 2
 
 [node name="BigStones3" parent="Stones" instance=ExtResource("7_el5s5")]
-transform = Transform3D(2.019671, 0.70674825, 4.519008, 0.53986627, 4.8685865, -1.0027015, -4.5419683, 0.89295745, 1.8902783, 140.20894, -1.0822182, 73.27313)
+transform = Transform3D(2.019671, 0.70674825, 4.519008, 0.53986627, 4.8685865, -1.0027015, -4.5419683, 0.89295745, 1.8902783, 142.88394, -1.0822182, 58.50245)
 stone_type = 1
 
 [node name="Column" parent="Stones" instance=ExtResource("8_mj1w0")]
@@ -393,10 +412,10 @@ object_id = "brokenbonemarsh_gate_feroshaw"
 [node name="StoneGate2" parent="." instance=ExtResource("19_el5s5")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -66.34415, 2.063274, 60.909084)
 script = ExtResource("20_mj1w0")
-target_dungeon_scene = ""
-locked_title = "Not In The Demo"
+target_dungeon_scene = "uid://cts8emds4lj1h"
+prompt_text = "This area is not part of the current demo. Return To Start?"
 locked_message = "This area is not part of the current demo."
-prompt_text = "The road west leads to the town. Leave the Marsh?"
+locked_title = "Not In The Demo"
 object_id = "brokenbonemarsh_gate_town"
 
 [node name="CryptHole_W" parent="." instance=ExtResource("21_mj1w0")]
@@ -417,7 +436,6 @@ snap_to_floor_center = false
 [node name="LevelTitle" parent="." instance=ExtResource("23_sywan")]
 level_title = "Broken Bone
 Marsh"
-play_new_area_sound = true
 
 [node name="BossTrigger" type="Area3D" parent="."]
 unique_name_in_owner = true
@@ -450,3 +468,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.75, 0, 58.94)
 shard_id = "brokenbonemarsh_beast"
 level_name = "Broken Bone Marsh"
 boss = NodePath("../BeastKing")
+shard_material = SubResource("ShaderMaterial_mmi5d")

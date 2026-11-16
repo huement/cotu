@@ -14,6 +14,7 @@ signal weapon_impact
 @onready var staff_model: Node3D = $Pivot/StaffModel
 @onready var bow_model: Node3D = $Pivot/BowModel if has_node("Pivot/BowModel") else null
 @onready var potion_model: Node3D = $Pivot/PotionModel if has_node("Pivot/PotionModel") else null
+@onready var unarmed_model: Node3D = $Pivot/UnarmedModel if has_node("Pivot/UnarmedModel") else null
 @onready var explosion_sprite: Sprite3D = $ExplosionSprite if has_node("ExplosionSprite") else null
 
 func _ready() -> void:
@@ -44,6 +45,8 @@ func _hide_all_weapons() -> void:
 		bow_model.visible = false
 	if is_instance_valid(potion_model):
 		potion_model.visible = false
+	if is_instance_valid(unarmed_model):
+		unarmed_model.visible = false
 	if is_instance_valid(explosion_sprite):
 		explosion_sprite.visible = false
 
@@ -90,6 +93,9 @@ func play_swing(anim_name: String = "sword_swing") -> void:
 			"potion_throw":
 				if is_instance_valid(potion_model):
 					potion_model.visible = true
+			"unarmed_swing":
+				if is_instance_valid(unarmed_model):
+					unarmed_model.visible = true
 			_:
 				if is_instance_valid(sword_model):
 					sword_model.visible = true

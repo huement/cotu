@@ -36,11 +36,17 @@ const DOWNED_PORTRAIT_PATH: String = "res://ui/portrait-down.png"
 
 var _current_character: CatCharacter = null
 var _current_slot_index: int = -1
+## Touch-screen layout (tabs instead of everything at once). See CharacterSheetMobile.
+var mobile_layout: CharacterSheetMobile = null
 
 
 func _ready() -> void:
 	if overlay_panel:
 		overlay_panel.visible = false
+	mobile_layout = CharacterSheetMobile.new()
+	mobile_layout.name = "MobileLayout"
+	add_child(mobile_layout)
+	mobile_layout.setup(self)
 
 	if get_tree().root.has_node("SignalBus"):
 		var bus: Node = get_tree().root.get_node("SignalBus")
@@ -77,6 +83,16 @@ func _ready() -> void:
 
 
 func _on_portrait_clicked(slot_index: int) -> void:
+	# Battle portraits share this signal (ally targeting). Gear stays locked until the fight is over.
+	if GameState.current_mode == GameState.Mode.BATTLE or GameState.is_battle_in_progress():
+		return
+	if not GameState.current_party or slot_index >= GameState.current_party.slots.size():
+		return
+
+	var character: CatCharacter = GameState.current_party.slots[slot_index] as CatCharacter
+	if not is_instance_valid(character):
+		return
+
 	GameState.current_mode = GameState.Mode.MANAGEMENT
 	_current_slot_index = slot_index
 	if is_instance_valid(AudioManager):
@@ -85,15 +101,28 @@ func _on_portrait_clicked(slot_index: int) -> void:
 	if "active_character_index" in GameState:
 		GameState.active_character_index = slot_index
 
-	if not GameState.current_party or slot_index >= GameState.current_party.slots.size():
-		return
+	# Phones get the tabbed layout; a sheet that was closed starts on its MAIN tab.
+	mobile_layout.sync(not overlay_panel.visible)
+	_render_character_sheet(character)
+	overlay_panel.visible = true
 
+
+## Re-draws the sheet for the character it is showing (e.g. after a field cast).
+func refresh() -> void:
+	if is_instance_valid(_current_character):
+		_render_character_sheet(_current_character)
+
+
+## Switches the open sheet to the party member in `slot_index` (mobile character picker).
+func show_slot(slot_index: int) -> void:
+	if not GameState.current_party or slot_index < 0 or slot_index >= GameState.current_party.slots.size():
+		return
 	var character: CatCharacter = GameState.current_party.slots[slot_index] as CatCharacter
 	if not is_instance_valid(character):
 		return
-
+	if is_instance_valid(AudioManager):
+		AudioManager.play_ui_sound("button-press")
 	_render_character_sheet(character)
-	overlay_panel.visible = true
 
 
 func _render_character_sheet(character: CatCharacter) -> void:
@@ -188,6 +217,7 @@ func _render_character_sheet(character: CatCharacter) -> void:
 
 	_update_spend_points_button(character)
 	_update_status_effects_display(character)
+	mobile_layout.refresh(character)
 
 
 func _update_spend_points_button(character: CatCharacter) -> void:

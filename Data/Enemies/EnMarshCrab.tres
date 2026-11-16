@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://di74m5dj1bk4s"]
 
-[ext_resource type="PackedScene" path="res://resources/Enemies/crab_monster_-_animated.glb" id="1_wolxy"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_eujgi"]
+[ext_resource type="PackedScene" uid="uid://5d5kt1tuycks" path="res://resources/Enemies/crab_monster_-_animated.glb" id="1_wolxy"]
+[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_eujgi"]
 
 [resource]
 script = ExtResource("2_eujgi")
@@ -10,19 +10,22 @@ enemy_type = "crab"
 enemy_name = "Marsh Crab"
 model_path = "res://resources/Enemies/crab_monster_-_animated.glb"
 model_scene = ExtResource("1_wolxy")
-model_scale = Vector3(0.65, 0.65, 0.65)
+model_scale = Vector3(1, 1, 1)
 combat_forward_distance = 3.2
+base_level = 4
 scale_with_player = false
-max_health = 22
-current_health = 22
-attack_damage = 6
-initiative_speed = 9
+max_health = 26
+current_health = 26
+attack_damage = 15
+defense = 6
+speed = 8.9
+initiative_speed = 14
 weakness_element = 5
 attack_element = 2
 min_group_size = 2
 max_group_size = 4
 movement_speed = 0.6
 aggro_range_tiles = 2
-xp_value = 15
-gold_value = 6
+xp_value = 8
+gold_value = 3
 drops_loot = false

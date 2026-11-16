@@ -4,7 +4,15 @@ extends Node3D
 
 ## TEST ONLY. true = boss appears after the first tentacle pack is killed.
 ## Set back to false for the real game (all lake tentacles must die).
-const DEBUG_REVEAL_BOSS_AFTER_ONE_KILL: bool = true
+## TESTING ONLY: the lake boss rises after ONE tentacle instead of all of them.
+## Toggled from the Debug Menu (` key > BATTLE). Ignored in release builds - see reveal_after_one_kill().
+static var debug_reveal_after_one_kill: bool = false
+
+
+## True only in editor / debug builds AND when the Debug Menu toggle is on. An exported release build
+## always answers false, so players always have to clear every tentacle.
+static func reveal_after_one_kill() -> bool:
+	return OS.is_debug_build() and debug_reveal_after_one_kill
 
 @export var data: EnemyData:
 	get:
@@ -202,7 +210,7 @@ func _reveal_boss_if_last_tentacle(tree: SceneTree) -> void:
 	if not is_instance_valid(tree):
 		return
 
-	if not DEBUG_REVEAL_BOSS_AFTER_ONE_KILL:
+	if not reveal_after_one_kill():
 		for node: Node in tree.get_nodes_in_group(&"lake_tentacles"):
 			if is_instance_valid(node) and not node.is_queued_for_deletion():
 				return
