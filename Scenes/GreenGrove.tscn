@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cts8emds4lj1h"]
+[gd_scene load_steps=28 format=3 uid="uid://cts8emds4lj1h"]
 
 [ext_resource type="MeshLibrary" uid="uid://w6j6ksydupt" path="res://resources/mesh_library/knature_mesh_library.tres" id="1_u2be4"]
 [ext_resource type="MeshLibrary" uid="uid://314njkh1wc56" path="res://resources/mesh_library/forestwall_mesh_library.tres" id="2_bgb78"]
@@ -16,6 +16,10 @@
 [ext_resource type="PackedScene" uid="uid://ccfv6aub5jas4" path="res://Scenes/UI/LevelTitleTrigger.tscn" id="20_m081q"]
 [ext_resource type="Script" uid="uid://b44ueltiggy42" path="res://Scripts/Environment/return_visit_enemy_spawner.gd" id="23_6wabc"]
 [ext_resource type="PackedScene" uid="uid://d24vqh5un81gu" path="res://Scenes/Enemies/SlimeDroneWorldEnemy.tscn" id="24_rx45y"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/CorruptedPilotWorldEnemy.tscn" id="27_pilot"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/GhostPixelWorldEnemy.tscn" id="28_ghost"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/MinotaurPixelWorldEnemy.tscn" id="29_minotaur"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/AzurianPixelWorldEnemy.tscn" id="30_azurian"]
 [ext_resource type="Script" uid="uid://ctyy4md0lu267" path="res://Scripts/Triggers/NineVoiceTrigger.gd" id="26_nine"]
 [ext_resource type="Material" uid="uid://bggklltd1x1f4" path="res://resources/Environment/pixel_sky_overcast.tres" id="90_pixelsky"]
 
@@ -234,6 +238,20 @@ shape = SubResource("BoxShape3D_nine_intro")
 [node name="LevelTitle" parent="." instance=ExtResource("20_m081q")]
 level_title = "Green
 Grove"
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="CorruptedPilot" parent="Enemies" instance=ExtResource("27_pilot")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+
+[node name="GhostPixel" parent="Enemies" instance=ExtResource("28_ghost")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -8)
+
+[node name="MinotaurPixel" parent="Enemies" instance=ExtResource("29_minotaur")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -8)
+
+[node name="AzurianPixel" parent="Enemies" instance=ExtResource("30_azurian")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12)
 
 [node name="ReturnVisitEnemySpawner" type="Node3D" parent="." node_paths=PackedStringArray("floor_map", "wall_maps", "spawn_point")]
 script = ExtResource("23_6wabc")

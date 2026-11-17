@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://dqkr2j65k83yc" path="res://Scenes/UI/HUD.tscn" id="1_e0ngr"]
 [ext_resource type="PackedScene" uid="uid://dhvb1rt0k3ohv" path="res://Scenes/Player.tscn" id="2_ikia7"]
 [ext_resource type="Script" uid="uid://cbry5h6ur7nue" path="res://Scripts/MapManager.gd" id="5_fo5ed"]
-[ext_resource type="PackedScene" uid="uid://cwppjunkxqs84" path="res://Scenes/Dungeons/GloomReachDungeon.tscn" id="7_kn0ld"]
+[ext_resource type="PackedScene" uid="uid://cts8emds4lj1h" path="res://Scenes/GreenGrove.tscn" id="7_kn0ld"]
 [ext_resource type="Script" uid="uid://dtnit1pwpe0ox" path="res://Scripts/3D/EnemyVisualManager.gd" id="20_hmc15"]
 [ext_resource type="PackedScene" uid="uid://gt84ebbsoeyg" path="res://Scenes/Popup.tscn" id="22_pyn1s"]
 [ext_resource type="PackedScene" uid="uid://b3w7x0f6y2w7x" path="res://Scenes/UI/CharacterSheetMenu.tscn" id="23_no8kt"]
