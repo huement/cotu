@@ -2,21 +2,21 @@
 
 [ext_resource type="Script" path="res://Scripts/Enemies/world_enemy.gd" id="1_script"]
 [ext_resource type="Resource" path="res://Data/Enemies/MinotaurBase.tres" id="2_data"]
-[ext_resource type="PackedScene" path="res://Scenes/Enemies/MinotaurModel.tscn" id="3_mesh"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/minotaur_pixel.glb" id="3_mesh"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_enemy"]
-height = 3.0
-radius = 2.4
+height = 2.4
+radius = 0.7
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_blocker"]
-size = Vector3(1.8, 2.4, 1.8)
+size = Vector3(0.9, 2.4, 0.9)
 
 [node name="MinotaurWorldEnemy" type="Node3D" groups=["world_enemies"]]
 script = ExtResource("1_script")
 enemy_data = ExtResource("2_data")
 enemy_type = "minotaur"
-model_scale = Vector3(0.28, 0.28, 0.28)
-encounter_radius = 5.5
+model_scale = Vector3(0.9, 0.9, 0.9)
+encounter_radius = 2.8
 is_night_only = true
 
 [node name="Model" parent="." instance=ExtResource("3_mesh")]

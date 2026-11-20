@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/corruptodon_pixel.glb" id="1_mesh"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_zombie_saber"
+enemy_type = "zombie"
+enemy_name = "Corruptodon"
+model_path = "res://resources/Enemies/generated/corruptodon_pixel.glb"
+model_scene = ExtResource("1_mesh")
+model_scale = Vector3(1.45, 1.45, 1.45)
+combat_forward_distance = 2.6
+vertical_offset = -0.85
+combat_yaw_offset_degrees = 180.0
+hit_reaction = "AUTO"
+base_level = 5
+max_health = 55
+current_health = 55
+attack_damage = 15
+defense = 2
+speed = 12.1
+initiative_speed = 11
+attack_element = 2
+equipped_item_id = "pot_mana_vial"
+occurs_in_groups = false
+min_group_size = 1
+max_group_size = 1
+movement_speed = 1.3
+aggro_range_tiles = 4
+xp_value = 104
+gold_value = 56
+drops_loot = false

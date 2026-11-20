@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/cyclops_pixel.glb" id="1_mesh"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_scavenger_cyclops"
+enemy_type = "cyclops"
+enemy_name = "Scavenger Cyclops"
+model_path = "res://resources/Enemies/generated/cyclops_pixel.glb"
+model_scene = ExtResource("1_mesh")
+model_scale = Vector3(1.35, 1.35, 1.35)
+combat_forward_distance = 3.0
+vertical_offset = -0.85
+combat_yaw_offset_degrees = 180.0
+hit_reaction = "AUTO"
+base_level = 1
+max_health = 64
+current_health = 64
+attack_damage = 10
+defense = 7
+speed = 10.0
+initiative_speed = 10
+weakness_element = 5
+occurs_in_groups = false
+min_group_size = 1
+max_group_size = 1
+movement_speed = 1.4
+aggro_range_tiles = 3
+xp_value = 86
+gold_value = 16
+drops_loot = true

@@ -21,7 +21,6 @@ current_health = 45
 attack_damage = 15
 defense = 4
 speed = 11.7
-initiative_speed = 12
 weakness_element = 2
 attack_element = 1
 equipped_item_id = "pot_mana_vial"

@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/corrupted_pixel.glb" id="1_mesh"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_zombie_cat"
+enemy_type = "zombie"
+enemy_name = "Corrupted"
+model_path = "res://resources/Enemies/generated/corrupted_pixel.glb"
+model_scene = ExtResource("1_mesh")
+model_scale = Vector3(1.5, 1.5, 1.5)
+combat_forward_distance = 2.4
+vertical_offset = -0.85
+combat_yaw_offset_degrees = 180.0
+hit_reaction = "AUTO"
+base_level = 2
+max_health = 49
+current_health = 49
+attack_damage = 13
+defense = 5
+speed = 9.6
+initiative_speed = 9
+weakness_element = 2
+occurs_in_groups = false
+min_group_size = 1
+max_group_size = 1
+movement_speed = 1.0
+aggro_range_tiles = 4
+can_be_surprised = true
+xp_value = 91
+gold_value = 25
+drops_loot = true

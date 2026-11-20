@@ -1,15 +1,15 @@
 [gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://88e45r3hqxfl"]
 
-[ext_resource type="PackedScene" uid="uid://cvp5tl7sdodgi" path="res://resources/Enemies/beast.glb" id="1_model"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/beast.glb" id="1_vsoxm"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_u07li"]
 
 [resource]
-script = ExtResource("2_script")
+script = ExtResource("2_u07li")
 enemy_id = "en_beast_king"
 enemy_type = "beast"
 enemy_name = "Beast King"
 model_path = "res://resources/Enemies/beast.glb"
-model_scene = ExtResource("1_model")
+model_scene = ExtResource("1_vsoxm")
 model_scale = Vector3(2.5, 2.5, 2.5)
 combat_forward_distance = 5.0
 base_level = 7

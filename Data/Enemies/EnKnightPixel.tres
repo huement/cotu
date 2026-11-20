@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/knight_pixel.glb" id="1_mesh"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_zombie_knight"
+enemy_type = "zombie"
+enemy_name = "Corrupted Knight"
+model_path = "res://resources/Enemies/generated/knight_pixel.glb"
+model_scene = ExtResource("1_mesh")
+model_scale = Vector3(1.5, 1.5, 1.5)
+combat_forward_distance = 2.6
+vertical_offset = -0.85
+combat_yaw_offset_degrees = 180.0
+hit_reaction = "AUTO"
+base_level = 4
+max_health = 59
+current_health = 59
+attack_damage = 24
+defense = 12
+speed = 10.7
+initiative_speed = 12
+attack_element = 2
+equipped_weapon_id = "weap_plasma_katana"
+occurs_in_groups = false
+min_group_size = 1
+max_group_size = 1
+movement_speed = 1.4
+aggro_range_tiles = 6
+can_be_surprised = false
+xp_value = 137
+gold_value = 211
+drops_loot = true

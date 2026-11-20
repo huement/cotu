@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://di74m5dj1bk4s"]
 
-[ext_resource type="PackedScene" uid="uid://5d5kt1tuycks" path="res://resources/Enemies/crab_monster_-_animated.glb" id="1_wolxy"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_eujgi"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/crab_monster_-_animated.glb" id="1_wolxy"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_eujgi"]
 
 [resource]
 script = ExtResource("2_eujgi")

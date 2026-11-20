@@ -11,7 +11,6 @@ enemy_name = "Pulsing Sac"
 model_path = "res://resources/Enemies/blobby.glb"
 model_scene = ExtResource("1_uf1iu")
 model_scale = Vector3(3, 3, 3)
-base_level = 1
 max_health = 60
 current_health = 60
 attack_damage = 12

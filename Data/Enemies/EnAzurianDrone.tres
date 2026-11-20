@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://o4m038yxd20g"]
 
-[ext_resource type="Material" uid="uid://dpv0j8fnlkhdv" path="res://resources/Enemies/Kenny/Materials/en_azurian_drone_mat.tres" id="1_4hlk2"]
-[ext_resource type="PackedScene" uid="uid://cvxowlotjrwjk" path="res://resources/Enemies/Kenny/character-b.glb" id="2_7id4h"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_n5028"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_azurian_drone_mat.tres" id="1_4hlk2"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-b.glb" id="2_7id4h"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_n5028"]
 
 [resource]
 script = ExtResource("3_n5028")

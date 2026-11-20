@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/savage_pixel.glb" id="1_mesh"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_zombie_savage"
+enemy_type = "zombie"
+enemy_name = "Savage Corrupted"
+model_path = "res://resources/Enemies/generated/savage_pixel.glb"
+model_scene = ExtResource("1_mesh")
+model_scale = Vector3(1.5, 1.5, 1.5)
+combat_forward_distance = 2.4
+vertical_offset = -0.85
+combat_yaw_offset_degrees = 180.0
+hit_reaction = "AUTO"
+base_level = 3
+max_health = 57
+current_health = 57
+attack_damage = 17
+defense = 8
+speed = 10.2
+initiative_speed = 10
+attack_element = 2
+occurs_in_groups = false
+min_group_size = 1
+max_group_size = 1
+movement_speed = 1.4
+aggro_range_tiles = 6
+xp_value = 94
+gold_value = 0
+drops_loot = true

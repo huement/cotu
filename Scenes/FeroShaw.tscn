@@ -501,7 +501,7 @@ script = ExtResource("22_f8edq")
 floor_map = NodePath("../FloorMap")
 grass_mesh = ExtResource("23_ql20s")
 valid_floor_item_ids = Array[int]([1, 46])
-tufts_per_tile = 3
+tufts_per_tile = 12
 
 [node name="Enemies" type="Node3D" parent="."]
 
