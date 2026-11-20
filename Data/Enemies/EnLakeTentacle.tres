@@ -1,16 +1,18 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://ctct8cxtmvu8y"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://ctct8cxtmvu8y"]
 
-[ext_resource type="PackedScene" uid="uid://cmftm1fl21nh0" path="res://resources/Enemies/tentacle.glb" id="1_model"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_lake_tentacle_mat.tres" id="1_m2ltp"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/tentacle.glb" id="2_npp2b"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_4jpp4"]
 
 [resource]
-script = ExtResource("2_script")
+script = ExtResource("3_4jpp4")
 enemy_id = "en_lake_tentacle"
 enemy_type = "creature"
 enemy_name = "Lurking Tentacle"
 model_path = "res://resources/Enemies/tentacle.glb"
 texture_path = "res://resources/Enemies/tentacle_tentacle.png"
-model_scene = ExtResource("1_model")
+model_scene = ExtResource("2_npp2b")
+custom_material = ExtResource("1_m2ltp")
 model_scale = Vector3(0.3, 0.3, 0.3)
 base_level = 3
 max_health = 51

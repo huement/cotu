@@ -21,7 +21,6 @@ current_health = 64
 attack_damage = 18
 defense = 5
 speed = 12.5
-initiative_speed = 12
 weakness_element = 4
 attack_element = 0
 equipped_weapon_id = "weap_arcane_staff"

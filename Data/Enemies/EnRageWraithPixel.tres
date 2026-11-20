@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/rage_wraith_pixel.glb" id="1_mesh"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+enemy_id = "en_rage_wraith"
+enemy_type = "ghost"
+enemy_name = "Rage Wraith"
+model_path = "res://resources/Enemies/generated/rage_wraith_pixel.glb"
+model_scene = ExtResource("1_mesh")
+model_scale = Vector3(1.5, 1.5, 1.5)
+combat_forward_distance = 2.4
+vertical_offset = -0.85
+combat_yaw_offset_degrees = 180.0
+hit_reaction = "AUTO"
+base_level = 2
+max_health = 58
+current_health = 58
+attack_damage = 13
+defense = 5
+speed = 12.5
+initiative_speed = 12
+attack_element = 1
+can_cast_spells = true
+spell_ids = Array[String](["sp_plasma_dart"])
+max_mana = 91
+occurs_in_groups = false
+min_group_size = 1
+max_group_size = 1
+movement_speed = 1.4
+aggro_range_tiles = 6
+can_surprise_player = true
+can_be_surprised = false
+xp_value = 108
+gold_value = 8
+drops_loot = true

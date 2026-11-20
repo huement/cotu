@@ -516,7 +516,7 @@ func _add_grass(root: Node3D, floor_map: GridMap) -> void:
 		grass.set("floor_map", floor_map)
 		if ResourceLoader.exists("res://resources/meshes/grass_tuft.tres"):
 			grass.set("grass_mesh", load("res://resources/meshes/grass_tuft.tres"))
-		grass.set("tufts_per_tile", 3)
+		grass.set("tufts_per_tile", 12)
 	root.add_child(grass)
 	if grass.get_script() != null:
 		var grass_ids: Array[int] = [1, 46]

@@ -226,7 +226,7 @@ script = ExtResource("14_io4p2")
 floor_map = NodePath("../FloorMap")
 grass_mesh = ExtResource("15_q2udt")
 valid_floor_item_ids = Array[int]([1, 46])
-tufts_per_tile = 3
+tufts_per_tile = 12
 
 [node name="StoneGate" parent="." instance=ExtResource("17_orusf")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -32.340565, 0, -2.9686875)

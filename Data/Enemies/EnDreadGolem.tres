@@ -29,4 +29,3 @@ aggro_range_tiles = 6
 can_be_surprised = false
 xp_value = 94
 gold_value = 53
-max_mana = 0

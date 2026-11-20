@@ -1,19 +1,16 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3 uid="uid://bpd3qp6ued54v"]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://bpd3qp6ued54v"]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_marsh_stalker_mat.tres" id="1_tous0"]
-[ext_resource type="PackedScene" uid="uid://bi0m4yncpfaqr" path="res://resources/Enemies/Kenny/character-g.glb" id="2_dqwwl"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_q7jsm"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/marsh_stalker_pixel.glb" id="1_tauo1"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_tous0"]
 
 [resource]
-script = ExtResource("3_q7jsm")
+script = ExtResource("2_tous0")
 enemy_id = "en_marsh_stalker"
 enemy_name = "Marsh Stalker"
-model_path = "res://resources/Enemies/Kenny/character-g.glb"
-texture_path = "res://resources/Enemies/Kenny/texture-g.png"
-model_scene = ExtResource("2_dqwwl")
-custom_material = ExtResource("1_tous0")
-model_scale = Vector3(1, 1, 1)
-hit_reaction = "holding-both-shoot"
+model_path = "res://resources/Enemies/generated/marsh_stalker_pixel.glb"
+model_scene = ExtResource("1_tauo1")
+model_scale = Vector3(1.5, 1.5, 1.5)
+combat_forward_distance = 2.4
 base_level = 4
 max_health = 47
 current_health = 47

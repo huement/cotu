@@ -185,7 +185,7 @@ func _create_forest_level(scene_name: String, include_chests: bool, include_mino
 		if ResourceLoader.exists("res://resources/meshes/grass_tuft.tres"):
 			grass_scatter.set("grass_mesh", load("res://resources/meshes/grass_tuft.tres"))
 		grass_scatter.set("valid_floor_item_ids", [1, 46])
-		grass_scatter.set("tufts_per_tile", 3)
+		grass_scatter.set("tufts_per_tile", 12)
 	root.add_child(grass_scatter)
 
 	# 11. Optional Treasure

@@ -1,18 +1,17 @@
 [gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://bd26cxwugr8yw"]
 
-[ext_resource type="PackedScene" uid="uid://ducdapohkcbxi" path="res://resources/Enemies/sea_monster.glb" id="1_model"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/sea_monster.glb" id="1_jrg1y"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_kexud"]
 
 [resource]
-script = ExtResource("2_script")
+script = ExtResource("2_kexud")
 enemy_id = "en_lake_monster"
-enemy_type = "lakemonster"
+enemy_type = "creature"
 enemy_name = "Sea Monster"
 model_path = "res://resources/Enemies/sea_monster.glb"
-model_scene = ExtResource("1_model")
-model_scale = Vector3(0.03, 0.03, 0.03)
-combat_forward_distance = 5.5
-vertical_offset = -1.1
+model_scene = ExtResource("1_jrg1y")
+model_scale = Vector3(0.024, 0.024, 0.024)
+combat_forward_distance = 5.0
 combat_yaw_offset_degrees = 0.0
 combat_camera_pushback = false
 base_level = 5

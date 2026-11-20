@@ -48,19 +48,21 @@ func _normalize_collision_scale() -> void:
 		shape_node.shape = unique_shape
 
 func _update_visibility() -> void:
-	var tree_nodes: Dictionary = {
-		TreeType.TALL_DARK: get_node_or_null("tree_tall_dark"),
-		TreeType.PLATEAU_DARK: get_node_or_null("tree_plateau_dark"),
-		TreeType.PINE_TALL: get_node_or_null("tree_pine_tall"),
-		TreeType.PINE_ROUND: get_node_or_null("tree_pine_round"),
-		TreeType.PINE_GROUND: get_node_or_null("tree_pine_ground"),
-		TreeType.OAK_FALL: get_node_or_null("tree_oak_fall"),
-		TreeType.OAK_DARK: get_node_or_null("tree_oak_dark"),
-		TreeType.DETAILED_DARK: get_node_or_null("tree_detailed_dark"),
-		TreeType.CONE: get_node_or_null("tree_cone")
+	# The old nine Kenney shapes collapse onto three pixel meshes. The enum
+	# values stay so maps that already picked a tree_type do not move.
+	var mesh_for_type: Dictionary = {
+		TreeType.TALL_DARK: "tree_pine",
+		TreeType.PINE_TALL: "tree_pine",
+		TreeType.DETAILED_DARK: "tree_pine",
+		TreeType.CONE: "tree_pine",
+		TreeType.PLATEAU_DARK: "tree_oak",
+		TreeType.PINE_ROUND: "tree_oak",
+		TreeType.OAK_FALL: "tree_oak",
+		TreeType.OAK_DARK: "tree_oak",
+		TreeType.PINE_GROUND: "tree_bush",
 	}
-
-	for type_key: TreeType in tree_nodes:
-		var node: Node3D = tree_nodes[type_key]
+	var shown: String = str(mesh_for_type.get(tree_type, "tree_pine"))
+	for node_name: String in ["tree_pine", "tree_oak", "tree_bush"]:
+		var node: Node3D = get_node_or_null(node_name) as Node3D
 		if node:
-			node.visible = (type_key == tree_type)
+			node.visible = node.name == shown

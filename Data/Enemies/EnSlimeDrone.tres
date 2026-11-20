@@ -27,6 +27,3 @@ aggro_range_tiles = 1
 xp_value = 36
 gold_value = 5
 drops_loot = false
-base_level = 1
-speed = 10.0
-max_mana = 0

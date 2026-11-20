@@ -1,20 +1,17 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_enraged_azurian_mat.tres" id="1_mat"]
-[ext_resource type="PackedScene" uid="uid://cvxowlotjrwjk" path="res://resources/Enemies/Kenny/character-b.glb" id="2_f7ekc"]
-[ext_resource type="Script" uid="uid://cidbs10ca08v4" path="res://Scripts/Resources/EnemyData.gd" id="3_u8b7w"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/azurian_pixel.glb" id="1_uw8id"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_i1qkt"]
 
 [resource]
-script = ExtResource("3_u8b7w")
+script = ExtResource("2_i1qkt")
 enemy_id = "en_enraged_azurian"
 enemy_type = "azurian"
 enemy_name = "Enraged Azurian"
-model_path = "res://resources/Enemies/Kenny/character-b.glb"
-texture_path = "res://resources/Enemies/Kenny/texture-b.png"
-model_scene = ExtResource("2_f7ekc")
-custom_material = ExtResource("1_mat")
-model_scale = Vector3(0.8, 0.8, 0.8)
-combat_forward_distance = 2.5
+model_path = "res://resources/Enemies/generated/azurian_pixel.glb"
+model_scene = ExtResource("1_uw8id")
+model_scale = Vector3(1.5, 1.5, 1.5)
+combat_forward_distance = 2.4
 max_health = 55
 current_health = 55
 attack_damage = 23
@@ -29,5 +26,3 @@ can_surprise_player = true
 xp_value = 125
 gold_value = 65
 drops_loot = false
-base_level = 1
-max_mana = 0

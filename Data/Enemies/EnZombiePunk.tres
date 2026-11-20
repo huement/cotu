@@ -1,26 +1,22 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
-[ext_resource type="Material" path="res://resources/Enemies/Kenny/Materials/en_zombie_punk_mat.tres" id="1_b1bn0"]
-[ext_resource type="PackedScene" path="res://resources/Enemies/Kenny/character-g.glb" id="2_38ltp"]
-[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="3_stqss"]
+[ext_resource type="PackedScene" path="res://resources/Enemies/generated/punk_pixel.glb" id="1_papoy"]
+[ext_resource type="Script" path="res://Scripts/Resources/EnemyData.gd" id="2_b1bn0"]
 
 [resource]
-script = ExtResource("3_stqss")
+script = ExtResource("2_b1bn0")
 enemy_id = "en_zombie_punk"
 enemy_name = "Corrupted Punk"
-model_path = "res://resources/Enemies/Kenny/character-g.glb"
-texture_path = "res://resources/Enemies/Kenny/texture-g.png"
-model_scene = ExtResource("2_38ltp")
-custom_material = ExtResource("1_b1bn0")
-model_scale = Vector3(1, 1, 1)
-hit_reaction = "holding-both-shoot"
+model_path = "res://resources/Enemies/generated/punk_pixel.glb"
+model_scene = ExtResource("1_papoy")
+model_scale = Vector3(1.5, 1.5, 1.5)
+combat_forward_distance = 2.4
 base_level = 4
 max_health = 47
 current_health = 47
 attack_damage = 19
 defense = 12
 speed = 10.7
-initiative_speed = 12
 attack_element = 2
 equipped_weapon_id = "weap_plasma_katana"
 max_group_size = 4
@@ -29,4 +25,3 @@ aggro_range_tiles = 6
 can_be_surprised = false
 xp_value = 105
 gold_value = 105
-max_mana = 0
